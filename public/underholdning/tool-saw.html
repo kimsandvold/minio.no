@@ -1,0 +1,1611 @@
+<!DOCTYPE html>
+<html lang="nb">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Minio Underholdning - Sag Rytme</title>
+    <meta name="description" content="Sag planker i perfekt rytme! Treff kuttelinjene for combo-bonus og vinn 10% rabattkode fra Minio."/>
+    <meta name="keywords" content="Minio, spill, sag, rytme, timing, Lillehammer, håndverk, rabattkode"/>
+    <meta name="author" content="Minio"/>
+    <meta name="robots" content="index, follow"/>
+    <link rel="canonical" href="https://www.minio.no/underholdning/tool-saw.html"/>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+    <link rel="apple-touch-icon" href="/favicon.ico"/>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E4J774CTXF"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-E4J774CTXF');
+    </script>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://www.minio.no/underholdning/tool-saw.html"/>
+    <meta property="og:title" content="Sag Rytme – Minio Underholdning"/>
+    <meta property="og:description" content="Sag planker i perfekt rytme! Treff kuttelinjene og vinn 10% rabattkode!"/>
+    <meta property="og:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:image:alt" content="Sag Rytme - Minio spill"/>
+    <meta property="og:site_name" content="Minio"/>
+    <meta property="og:locale" content="nb_NO"/>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Sag Rytme – Klarer du å slå meg?"/>
+    <meta name="twitter:description" content="Sag planker i perfekt rytme! Test deg selv!"/>
+    <meta name="twitter:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
+
+    <style>
+        :root {
+            --dark-bg: #202020;
+            --darker-bg: #1a1a1a;
+            --text-light: #f9f9f9;
+            --accent: #1da1f2;
+            --success: #4caf50;
+            --error: #e53935;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0a0a12;
+            color: var(--text-light);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Animated starfield background */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at bottom, #1a1a2e 0%, #0a0a12 100%);
+        }
+
+        .stars::before,
+        .stars::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-repeat: repeat;
+        }
+
+        .stars::before {
+            background-image:
+                radial-gradient(1px 1px at 25px 30px, white, transparent),
+                radial-gradient(1px 1px at 50px 120px, white, transparent),
+                radial-gradient(1px 1px at 100px 40px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1.5px 1.5px at 150px 80px, white, transparent),
+                radial-gradient(1px 1px at 200px 150px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1.5px 1.5px at 250px 60px, white, transparent),
+                radial-gradient(1px 1px at 300px 180px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 350px 20px, white, transparent),
+                radial-gradient(1.5px 1.5px at 400px 100px, rgba(255,255,255,0.9), transparent),
+                radial-gradient(1px 1px at 450px 140px, white, transparent);
+            background-size: 500px 200px;
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        .stars::after {
+            background-image:
+                radial-gradient(1px 1px at 75px 50px, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1.5px 1.5px at 125px 90px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 175px 130px, rgba(255,255,255,0.4), transparent),
+                radial-gradient(1px 1px at 225px 170px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1.5px 1.5px at 275px 30px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 325px 70px, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1px 1px at 375px 110px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1.5px 1.5px at 425px 160px, rgba(255,255,255,0.6), transparent);
+            background-size: 450px 200px;
+            animation: twinkle 6s ease-in-out infinite reverse;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Logo */
+        .logo {
+            margin-bottom: 1.5rem;
+        }
+
+        .logo img {
+            height: 50px;
+            width: auto;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .home-link {
+            margin-top: 2rem;
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: rgba(47, 47, 47, 0.8);
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.2s;
+        }
+
+        .home-link:hover,
+        .home-link:active {
+            background: #1da1f2;
+            border-color: #1da1f2;
+        }
+
+        .high-score-display {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .high-score-display span {
+            color: #ffd700;
+            font-weight: 700;
+        }
+
+        /* Unified Header - combines navigation and game stats */
+        .unified-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0.75rem;
+            background: var(--darker-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            height: 56px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .header-home {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(47, 47, 47, 0.8);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .header-home:hover,
+        .header-home:active {
+            background: rgba(29, 161, 242, 0.3);
+        }
+
+        .game-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .game-nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            background: rgba(47, 47, 47, 0.6);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .game-nav-item:hover {
+            background: rgba(29, 161, 242, 0.2);
+        }
+
+        .game-nav-item.active {
+            border-color: var(--accent);
+            background: rgba(29, 161, 242, 0.15);
+        }
+
+        .header-center {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-stats {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-stats.visible {
+            display: flex;
+        }
+
+        .header-stat {
+            text-align: center;
+            min-width: 45px;
+        }
+
+        .header-stat-value {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-light);
+            line-height: 1;
+        }
+
+        .header-stat-label {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.3px;
+        }
+
+        .header-lives {
+            display: flex;
+            gap: 0.15rem;
+        }
+
+        .header-life {
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .header-life.lost {
+            opacity: 0.2;
+            transform: scale(0.7);
+        }
+
+
+        @media (max-width: 480px) {
+            .unified-header {
+                padding: 0.4rem 0.5rem;
+                height: 50px;
+            }
+
+            .header-home {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+
+            .game-nav-item {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9rem;
+            }
+
+            .header-stat {
+                min-width: 38px;
+            }
+
+            .header-stat-value {
+                font-size: 0.95rem;
+            }
+
+            .header-stat-label {
+                font-size: 0.5rem;
+            }
+
+            .header-life {
+                font-size: 0.75rem;
+            }
+
+        }
+
+        @media (max-width: 360px) {
+            .game-nav {
+                gap: 0.2rem;
+            }
+
+            .game-nav-item {
+                width: 26px;
+                height: 26px;
+                font-size: 0.8rem;
+            }
+
+            .header-stats {
+                gap: 0.5rem;
+            }
+
+            .header-stat {
+                min-width: 32px;
+            }
+
+            .header-stat-value {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Game container */
+        .game-container {
+            width: 100%;
+            max-width: 420px;
+            height: calc(100% - 56px);
+            max-height: 700px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            margin: 0 auto;
+            margin-top: 56px;
+            z-index: 1;
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                height: calc(100% - 50px);
+                margin-top: 50px;
+                max-height: none;
+            }
+        }
+
+        /* Combo display */
+        .combo-display {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            transition: all 0.2s;
+            z-index: 100;
+        }
+
+        .combo-display.pulse {
+            transform: translateX(-50%) scale(1.3);
+        }
+
+        @media (max-width: 480px) {
+            .combo-display {
+                top: 62px;
+                font-size: 1.3rem;
+            }
+        }
+
+        /* Game area */
+        .game-area {
+            flex: 1;
+            background: linear-gradient(180deg, #2d1f1a 0%, #1a1210 100%);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Saw blade */
+        .saw-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+
+        .saw-blade {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #888 0%, #555 40%, #333 60%, #666 80%, #444 100%);
+            border-radius: 50%;
+            position: relative;
+            box-shadow:
+                0 0 20px rgba(0, 0, 0, 0.5),
+                inset 0 0 20px rgba(255, 255, 255, 0.1);
+            animation: spin 0.5s linear infinite;
+        }
+
+        .saw-blade::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            background: radial-gradient(circle, #222 0%, #111 100%);
+            border-radius: 50%;
+            border: 3px solid #444;
+        }
+
+        .saw-blade::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-conic-gradient(
+                from 0deg,
+                transparent 0deg 10deg,
+                rgba(200, 200, 200, 0.3) 10deg 20deg
+            );
+            border-radius: 50%;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .saw-blade.cutting {
+            animation: spin 0.1s linear infinite;
+            filter: brightness(1.2);
+        }
+
+        /* Cut line indicator */
+        .cut-zone {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 5;
+        }
+
+        .cut-zone::before,
+        .cut-zone::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+        }
+
+        .cut-zone::before {
+            top: 10px;
+            border-top: 10px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .cut-zone::after {
+            bottom: 10px;
+            border-bottom: 10px solid rgba(255, 255, 255, 0.3);
+        }
+
+        /* Wood plank */
+        .plank-container {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            height: 60px;
+            display: flex;
+            align-items: center;
+        }
+
+        .plank {
+            height: 100%;
+            background: linear-gradient(90deg,
+                #c4a574 0%, #d4b584 10%, #c4a574 20%,
+                #b89564 30%, #c4a574 40%, #d4b584 50%,
+                #c4a574 60%, #b89564 70%, #c4a574 80%,
+                #d4b584 90%, #c4a574 100%
+            );
+            background-size: 100px 100%;
+            border-radius: 4px;
+            position: relative;
+            box-shadow:
+                0 4px 8px rgba(0, 0, 0, 0.3),
+                inset 0 2px 4px rgba(255, 255, 255, 0.2),
+                inset 0 -2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .plank::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                transparent 20px,
+                rgba(139, 90, 43, 0.1) 20px,
+                rgba(139, 90, 43, 0.1) 22px
+            );
+            border-radius: 4px;
+        }
+
+        /* Cut lines on plank */
+        .cut-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg,
+                #ff4444 0%,
+                #ff6666 50%,
+                #ff4444 100%
+            );
+            box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
+            z-index: 2;
+        }
+
+        .cut-line::before {
+            content: '▼';
+            position: absolute;
+            top: -18px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+            color: #ff4444;
+        }
+
+        /* Feedback text */
+        .feedback {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: 800;
+            opacity: 0;
+            pointer-events: none;
+            text-shadow: 0 0 20px currentColor;
+            z-index: 100;
+        }
+
+        .feedback.show {
+            animation: feedbackPop 0.6s ease-out forwards;
+        }
+
+        .feedback.perfect {
+            color: #ffd700;
+        }
+
+        .feedback.good {
+            color: #4caf50;
+        }
+
+        .feedback.ok {
+            color: #2196f3;
+        }
+
+        .feedback.miss {
+            color: #f44336;
+        }
+
+        @keyframes feedbackPop {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.5);
+            }
+            20% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -70%) scale(1);
+            }
+        }
+
+        /* Sawdust particles */
+        .sawdust {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: #d4b584;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Tap zone */
+        .tap-zone {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(180deg, transparent 0%, rgba(29, 161, 242, 0.1) 100%);
+        }
+
+        .tap-button {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #ff6b35 0%, #d4380d 100%);
+            border: 4px solid #8B4513;
+            color: #fff;
+            font-size: 1.3rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow:
+                0 8px 25px rgba(255, 107, 53, 0.4),
+                inset 0 2px 10px rgba(255, 255, 255, 0.2),
+                0 0 0 3px rgba(139, 69, 19, 0.3);
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .tap-button:active,
+        .tap-button:focus {
+            transform: scale(0.92);
+            box-shadow:
+                0 4px 15px rgba(255, 107, 53, 0.4),
+                inset 0 2px 10px rgba(255, 255, 255, 0.2);
+            outline: none;
+        }
+
+        .tap-button.flash {
+            background: linear-gradient(145deg, #4caf50 0%, #2e7d32 100%);
+            border-color: #1b5e20;
+        }
+
+        /* Desktop hover */
+        @media (hover: hover) {
+            .tap-button:hover {
+                transform: scale(1.05);
+                box-shadow:
+                    0 12px 35px rgba(255, 107, 53, 0.5),
+                    inset 0 2px 10px rgba(255, 255, 255, 0.2),
+                    0 0 0 3px rgba(139, 69, 19, 0.3);
+            }
+        }
+
+        /* Mobile: larger tap area */
+        @media (max-width: 480px) {
+            .tap-button {
+                width: 110px;
+                height: 110px;
+                font-size: 1.4rem;
+            }
+        }
+
+        .spacebar-hint {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.4);
+            white-space: nowrap;
+        }
+
+        /* Speed indicator */
+        .speed-bar {
+            position: absolute;
+            bottom: 130px;
+            left: 1rem;
+            right: 1rem;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .speed-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4caf50, #ffc107, #f44336);
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+
+        /* Screens */
+        .screen {
+            position: fixed;
+            top: 56px;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 56px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            z-index: 1;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 480px) {
+            .screen {
+                top: 50px;
+                height: calc(100% - 50px);
+                padding: 1rem;
+                justify-content: flex-start;
+                padding-top: 1.5rem;
+            }
+        }
+
+        .screen.hidden {
+            display: none;
+        }
+
+        .screen-subtitle {
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .reward-teaser {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.1) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            max-width: 320px;
+        }
+
+        .reward-teaser-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .reward-teaser-text {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .reward-teaser-text strong {
+            color: #ffd700;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            max-width: 320px;
+            width: 100%;
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .instruction-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .instruction-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(29, 161, 242, 0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .instruction-text {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            line-height: 1.4;
+        }
+
+        .instruction-text strong {
+            color: var(--accent);
+        }
+
+        /* Hide keyboard hint on touch devices */
+        .desktop-only {
+            display: flex;
+        }
+
+        @media (hover: none) and (pointer: coarse) {
+            .desktop-only {
+                display: none;
+            }
+        }
+
+        .btn {
+            padding: 1rem 3rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1da1f2 0%, #0d8ecf 100%);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(29, 161, 242, 0.4);
+        }
+
+        .btn-primary:hover, .btn-primary:active {
+            transform: scale(1.05);
+            box-shadow: 0 6px 30px rgba(29, 161, 242, 0.5);
+        }
+
+        /* Game over screen */
+        .final-score {
+            font-size: 4rem;
+            font-weight: 800;
+            color: #ffd700;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            margin: 0.5rem 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+            width: 100%;
+            max-width: 320px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #1da1f2;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+            margin-top: 0.3rem;
+        }
+
+        .high-score-badge {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: #000;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            animation: pulse 1s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        /* Discount reveal */
+        .discount-reveal {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(56, 142, 60, 0.2) 100%);
+            border: 2px solid #4caf50;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: center;
+            max-width: 320px;
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(76, 175, 80, 0.3); }
+            50% { box-shadow: 0 0 40px rgba(76, 175, 80, 0.5); }
+        }
+
+        .discount-reveal h3 {
+            color: #4caf50;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .discount-code {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            font-family: monospace;
+            letter-spacing: 3px;
+            margin: 0.5rem 0;
+            display: inline-block;
+        }
+
+        .discount-desc {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Screen shake */
+        .shake {
+            animation: shake 0.3s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Responsive */
+        @media (max-height: 600px) {
+            .game-header {
+                padding: 0.5rem 1rem;
+            }
+            .tap-button {
+                width: 80px;
+                height: 80px;
+                font-size: 1.2rem;
+            }
+            .tap-zone {
+                height: 100px;
+            }
+            .speed-bar {
+                bottom: 110px;
+            }
+            .saw-blade {
+                width: 60px;
+                height: 60px;
+            }
+            .plank-container {
+                height: 50px;
+            }
+            .plank {
+                height: 100%;
+            }
+        }
+
+        @media (max-height: 500px) {
+            .game-header {
+                padding: 0.25rem 0.75rem;
+            }
+            .game-header .logo img {
+                height: 18px;
+            }
+            .tap-button {
+                width: 70px;
+                height: 70px;
+                font-size: 1.1rem;
+            }
+            .tap-zone {
+                height: 85px;
+            }
+            .speed-bar {
+                bottom: 95px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated background -->
+    <div class="stars-container">
+        <div class="stars"></div>
+    </div>
+
+    <!-- Start Screen -->
+    <div class="screen" id="start-screen">
+        <div class="logo">
+            <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+        </div>
+
+        <h1>Sag Rytme</h1>
+        <p class="screen-subtitle">Sag planker i perfekt rytme!</p>
+
+        <div class="reward-teaser">
+            <div class="reward-teaser-icon">🎁</div>
+            <div class="reward-teaser-text">
+                Nå <strong>5000 poeng</strong> og få en <strong>10% rabattkode</strong> på varmepumpehus!
+            </div>
+        </div>
+
+        <div class="instructions">
+            <div class="instruction-item">
+                <div class="instruction-icon">🪵</div>
+                <div class="instruction-text">Planker glir forbi sagbladet</div>
+            </div>
+            <div class="instruction-item">
+                <div class="instruction-icon">🎯</div>
+                <div class="instruction-text">Trykk når kuttelinjen treffer sagbladet</div>
+            </div>
+            <div class="instruction-item">
+                <div class="instruction-icon">⚡</div>
+                <div class="instruction-text">Perfekt timing = combo bonus!</div>
+            </div>
+            <div class="instruction-item">
+                <div class="instruction-icon">💀</div>
+                <div class="instruction-text">Miss 3 kutt og spillet er over</div>
+            </div>
+            <div class="instruction-item desktop-only">
+                <div class="instruction-icon">⌨️</div>
+                <div class="instruction-text">Bruk <strong>mellomrom</strong> for å sage!</div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="startGame()">▶ Start</button>
+
+        <div class="high-score-display" id="highScoreDisplay">
+            Rekord: <span id="highScoreValue">0</span>
+        </div>
+
+        <a href="/" class="home-link">← Tilbake til minio.no</a>
+    </div>
+
+    <!-- Game Screen -->
+    <div class="game-container" id="game-container" style="display: none;">
+        <div class="combo-display" id="combo-display" style="display: none;">1x</div>
+
+        <div class="game-area" id="game-area">
+            <div class="cut-zone"></div>
+
+            <div class="saw-container">
+                <div class="saw-blade" id="saw-blade"></div>
+            </div>
+
+            <div class="plank-container" id="plank-container">
+                <!-- Planks generated by JS -->
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+
+            <div class="speed-bar">
+                <div class="speed-fill" id="speed-fill" style="width: 20%;"></div>
+            </div>
+
+            <div class="tap-zone">
+                <button class="tap-button" id="tap-button" ontouchstart="handleTap(event)" onmousedown="handleTap(event)">
+                    SAG!
+                </button>
+                <div class="spacebar-hint desktop-only">eller trykk mellomrom</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div class="screen hidden" id="gameover-screen">
+        <div class="logo">
+            <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+        </div>
+
+        <h1>Spillet er over!</h1>
+
+        <div id="high-score-badge" class="high-score-badge" style="display: none;">
+            🏆 Ny rekord!
+        </div>
+
+        <div class="final-score" id="final-score">0</div>
+
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="stat-cuts">0</div>
+                <div class="stat-label">Kutt</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-perfect">0</div>
+                <div class="stat-label">Perfekt</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="stat-max-combo">0</div>
+                <div class="stat-label">Maks combo</div>
+            </div>
+        </div>
+
+        <div id="discount-container"></div>
+
+        <button class="btn btn-primary" onclick="restartGame()">▶ Spill igjen</button>
+
+        <a href="/" class="home-link">← Tilbake til minio.no</a>
+    </div>
+
+    <!-- Unified Header -->
+    <header class="unified-header" id="unified-header">
+        <div class="header-left">
+            <a href="index.html" class="header-home" onclick="return confirmLeave(this)" title="Tilbake">🏠</a>
+            <nav class="game-nav">
+                <a href="tool-quiz.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøy Quiz">🌍</a>
+                <a href="tool-game.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Finn Verktøyet">🔨</a>
+                <a href="tool-nails.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Spiker'n">🪵</a>
+                <a href="tool-saw.html" class="game-nav-item active" title="Sag Rytme">🪚</a>
+                <a href="tool-maze.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøyjakt">👷</a>
+            </nav>
+        </div>
+        <div class="header-stats" id="header-stats">
+            <div class="header-lives" id="header-lives">
+                <span class="header-life">❤️</span>
+                <span class="header-life">❤️</span>
+                <span class="header-life">❤️</span>
+            </div>
+            <div class="header-stat">
+                <div class="header-stat-value" id="score-display">0</div>
+                <div class="header-stat-label">Poeng</div>
+            </div>
+            <div class="header-stat">
+                <div class="header-stat-value" id="level-display">1</div>
+                <div class="header-stat-label">Nivå</div>
+            </div>
+        </div>
+    </header>
+
+    <script>
+        // Game state
+        let score = 0;
+        let combo = 0;
+        let maxCombo = 0;
+        let lives = 3;
+        let level = 1;
+        let totalCuts = 0;
+        let perfectCuts = 0;
+        let isPlaying = false;
+        let plankSpeed = 2; // pixels per frame
+        let gameLoopId = null;
+        let highScore = parseInt(localStorage.getItem('sawRhythmHighScore')) || 0;
+
+        // Show high score on start screen
+        document.getElementById('highScoreValue').textContent = highScore;
+
+        // DOM elements
+        const gameContainer = document.getElementById('game-container');
+        const startScreen = document.getElementById('start-screen');
+        const gameoverScreen = document.getElementById('gameover-screen');
+        const gameArea = document.getElementById('game-area');
+        const plankContainer = document.getElementById('plank-container');
+        const scoreDisplay = document.getElementById('score-display');
+        const comboDisplay = document.getElementById('combo-display');
+        const headerStats = document.getElementById('header-stats');
+        const headerLives = document.getElementById('header-lives');
+        const levelDisplay = document.getElementById('level-display');
+        const speedFill = document.getElementById('speed-fill');
+        const feedback = document.getElementById('feedback');
+        const sawBlade = document.getElementById('saw-blade');
+        const tapButton = document.getElementById('tap-button');
+
+        // Plank state
+        let currentPlank = null;
+        let plankX = 0;
+        let cutLines = [];
+        let nextCutIndex = 0;
+
+        // Prevent zoom on double tap
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) e.preventDefault();
+        }, { passive: false });
+
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) e.preventDefault();
+            lastTouchEnd = now;
+        }, { passive: false });
+
+        // Keyboard support for desktop
+        document.addEventListener('keydown', function(e) {
+            if (e.code === 'Space' || e.key === ' ') {
+                e.preventDefault();
+                if (isPlaying) {
+                    handleTap(e);
+                } else if (!startScreen.classList.contains('hidden')) {
+                    startGame();
+                } else if (!gameoverScreen.classList.contains('hidden')) {
+                    restartGame();
+                }
+            }
+        });
+
+        function startGame() {
+            // Reset state
+            score = 0;
+            combo = 0;
+            maxCombo = 0;
+            lives = 3;
+            level = 1;
+            totalCuts = 0;
+            perfectCuts = 0;
+            plankSpeed = 2;
+            nextCutIndex = 0;
+
+            // Update UI
+            scoreDisplay.textContent = '0';
+            comboDisplay.style.display = 'none';
+            comboDisplay.textContent = '1x';
+            levelDisplay.textContent = '1';
+            speedFill.style.width = '20%';
+            updateLivesDisplay();
+
+            // Show header stats
+            headerStats.classList.add('visible');
+
+            // Switch screens
+            startScreen.classList.add('hidden');
+            gameoverScreen.classList.add('hidden');
+            gameContainer.style.display = 'flex';
+
+            // Start game
+            isPlaying = true;
+            spawnPlank();
+            gameLoop();
+        }
+
+        function spawnPlank() {
+            // Clear old plank
+            plankContainer.innerHTML = '';
+            cutLines = [];
+            nextCutIndex = 0;
+
+            // Create plank element
+            const plank = document.createElement('div');
+            plank.className = 'plank';
+
+            // Plank width based on level (longer planks = more cuts)
+            const numCuts = Math.min(2 + Math.floor(level / 2), 6);
+            const plankWidth = 150 + (numCuts * 80);
+            plank.style.width = plankWidth + 'px';
+
+            // Add cut lines
+            const spacing = plankWidth / (numCuts + 1);
+            for (let i = 1; i <= numCuts; i++) {
+                const cutLine = document.createElement('div');
+                cutLine.className = 'cut-line';
+                cutLine.style.left = (i * spacing) + 'px';
+                plank.appendChild(cutLine);
+                cutLines.push(i * spacing);
+            }
+
+            plankContainer.appendChild(plank);
+            currentPlank = plank;
+
+            // Start position (off screen right)
+            const areaWidth = gameArea.offsetWidth;
+            plankX = areaWidth + 50;
+            plankContainer.style.left = plankX + 'px';
+        }
+
+        function gameLoop() {
+            if (!isPlaying) return;
+
+            // Move plank
+            plankX -= plankSpeed;
+            plankContainer.style.left = plankX + 'px';
+
+            // Check if plank is off screen
+            const areaWidth = gameArea.offsetWidth;
+            const plankWidth = currentPlank.offsetWidth;
+
+            if (plankX + plankWidth < -50) {
+                // Missed remaining cuts
+                const missedCuts = cutLines.length - nextCutIndex;
+                for (let i = 0; i < missedCuts; i++) {
+                    handleMiss();
+                    if (!isPlaying) return;
+                }
+
+                if (isPlaying) {
+                    levelUp();
+                    spawnPlank();
+                }
+            }
+
+            // Check for auto-miss (cut line passed center)
+            const centerX = areaWidth / 2;
+            while (nextCutIndex < cutLines.length) {
+                const cutLineX = plankX + cutLines[nextCutIndex];
+                if (cutLineX < centerX - 50) {
+                    // This cut line passed without being hit
+                    handleMiss();
+                    nextCutIndex++;
+                    if (!isPlaying) return;
+                } else {
+                    break;
+                }
+            }
+
+            gameLoopId = requestAnimationFrame(gameLoop);
+        }
+
+        function handleTap(e) {
+            e.preventDefault();
+            if (!isPlaying) return;
+
+            // Visual feedback
+            tapButton.classList.add('flash');
+            setTimeout(() => tapButton.classList.remove('flash'), 100);
+
+            // Check if there's a cut line near center
+            const areaWidth = gameArea.offsetWidth;
+            const centerX = areaWidth / 2;
+
+            if (nextCutIndex >= cutLines.length) {
+                // No more cuts on this plank - bad tap
+                handleBadTap();
+                return;
+            }
+
+            const cutLineX = plankX + cutLines[nextCutIndex];
+            const distance = Math.abs(cutLineX - centerX);
+
+            if (distance < 15) {
+                // Perfect!
+                handleCut('perfect', 100);
+            } else if (distance < 30) {
+                // Good
+                handleCut('good', 50);
+            } else if (distance < 50) {
+                // OK
+                handleCut('ok', 25);
+            } else {
+                // Too early or wrong timing
+                handleBadTap();
+            }
+        }
+
+        function handleCut(type, points) {
+            nextCutIndex++;
+            totalCuts++;
+
+            // Combo
+            combo++;
+            if (combo > maxCombo) maxCombo = combo;
+
+            // Score with combo multiplier
+            const multiplier = Math.min(combo, 10);
+            const earnedPoints = points * multiplier;
+            score += earnedPoints;
+            scoreDisplay.textContent = score;
+
+            // Update combo display
+            if (combo > 1) {
+                comboDisplay.style.display = 'block';
+                comboDisplay.textContent = combo + 'x';
+                comboDisplay.classList.add('pulse');
+                setTimeout(() => comboDisplay.classList.remove('pulse'), 200);
+            }
+
+            // Visual feedback
+            showFeedback(type, earnedPoints);
+            sawBlade.classList.add('cutting');
+            setTimeout(() => sawBlade.classList.remove('cutting'), 150);
+            createSawdust();
+
+            if (type === 'perfect') {
+                perfectCuts++;
+            }
+
+            // Check level up (all cuts done)
+            if (nextCutIndex >= cutLines.length) {
+                setTimeout(() => {
+                    if (isPlaying) {
+                        levelUp();
+                        spawnPlank();
+                    }
+                }, 300);
+            }
+        }
+
+        function handleMiss() {
+            combo = 0;
+            comboDisplay.style.display = 'none';
+            lives--;
+            updateLivesDisplay();
+
+            showFeedback('miss', 0);
+            gameArea.classList.add('shake');
+            setTimeout(() => gameArea.classList.remove('shake'), 300);
+
+            if (lives <= 0) {
+                endGame();
+            }
+        }
+
+        function handleBadTap() {
+            // Penalty for tapping at wrong time
+            combo = 0;
+            comboDisplay.style.display = 'none';
+            showFeedback('miss', 0);
+        }
+
+        function showFeedback(type, points) {
+            const texts = {
+                'perfect': 'PERFEKT! +' + points,
+                'good': 'BRA! +' + points,
+                'ok': 'OK +' + points,
+                'miss': 'MISS!'
+            };
+
+            feedback.textContent = texts[type];
+            feedback.className = 'feedback ' + type;
+
+            // Trigger animation
+            void feedback.offsetWidth;
+            feedback.classList.add('show');
+
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 600);
+        }
+
+        function createSawdust() {
+            const centerX = gameArea.offsetWidth / 2;
+            const centerY = gameArea.offsetHeight / 2;
+
+            for (let i = 0; i < 12; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'sawdust';
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+
+                const angle = (Math.random() * Math.PI) - Math.PI / 2; // Upward spread
+                const velocity = 3 + Math.random() * 5;
+                const vx = Math.cos(angle) * velocity;
+                const vy = Math.sin(angle) * velocity - 2;
+
+                gameArea.appendChild(particle);
+
+                let x = 0, y = 0, opacity = 1;
+                const animate = () => {
+                    x += vx;
+                    y += vy + 0.5; // gravity
+                    opacity -= 0.03;
+
+                    particle.style.transform = `translate(${x}px, ${y}px)`;
+                    particle.style.opacity = opacity;
+
+                    if (opacity > 0) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        particle.remove();
+                    }
+                };
+                requestAnimationFrame(animate);
+            }
+        }
+
+        function updateLivesDisplay() {
+            const hearts = headerLives.querySelectorAll('.header-life');
+            hearts.forEach((heart, index) => {
+                if (index >= lives) {
+                    heart.classList.add('lost');
+                } else {
+                    heart.classList.remove('lost');
+                }
+            });
+        }
+
+        function levelUp() {
+            level++;
+            levelDisplay.textContent = level;
+
+            // Increase speed
+            plankSpeed = Math.min(2 + (level * 0.3), 8);
+            const speedPercent = Math.min(20 + (level * 10), 100);
+            speedFill.style.width = speedPercent + '%';
+        }
+
+        function endGame() {
+            isPlaying = false;
+            cancelAnimationFrame(gameLoopId);
+
+            // Check high score
+            const isNewHighScore = score > highScore;
+            if (isNewHighScore) {
+                highScore = score;
+                localStorage.setItem('sawRhythmHighScore', highScore);
+            }
+
+            // Update game over screen
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('stat-cuts').textContent = totalCuts;
+            document.getElementById('stat-perfect').textContent = perfectCuts;
+            document.getElementById('stat-max-combo').textContent = maxCombo + 'x';
+
+            document.getElementById('high-score-badge').style.display = isNewHighScore ? 'block' : 'none';
+
+            // Check for discount (5000+ points)
+            const discountContainer = document.getElementById('discount-container');
+            if (score >= 5000) {
+                discountContainer.innerHTML = `
+                    <div class="discount-reveal">
+                        <h3>🎉 Gratulerer!</h3>
+                        <p class="discount-desc">Du låste opp en rabattkode:</p>
+                        <div class="discount-code">VPH10</div>
+                        <p class="discount-desc">10% rabatt på varmepumpehus!</p>
+                    </div>
+                `;
+            } else {
+                const pointsNeeded = 5000 - score;
+                discountContainer.innerHTML = `
+                    <div class="reward-teaser" style="margin: 1rem 0;">
+                        <div class="reward-teaser-text">
+                            Du trenger <strong>${pointsNeeded} poeng til</strong> for å låse opp rabattkoden!
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Hide header stats and show screen
+            headerStats.classList.remove('visible');
+            gameContainer.style.display = 'none';
+            gameoverScreen.classList.remove('hidden');
+        }
+
+        function restartGame() {
+            startGame();
+        }
+
+        // Confirm before leaving during gameplay
+        function confirmLeave(link) {
+            if (isPlaying) {
+                return confirm('Du er midt i et spill. Er du sikker på at du vil forlate?');
+            }
+            return true;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="nb">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>Minio Underholdning - Verktøyjakt</title>
+    <meta name="description" content="Samle verktøy i labyrinten mens du unngår sinte kunder! Et Pac-Man-inspirert spill fra Minio. Vinn 10% rabattkode!"/>
+    <meta name="keywords" content="Minio, spill, labyrint, Pac-Man, Lillehammer, håndverk, rabattkode"/>
+    <meta name="author" content="Minio"/>
+    <meta name="robots" content="index, follow"/>
+    <link rel="canonical" href="https://www.minio.no/underholdning/tool-maze.html"/>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+    <link rel="apple-touch-icon" href="/favicon.ico"/>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E4J774CTXF"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-E4J774CTXF');
+    </script>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://www.minio.no/underholdning/tool-maze.html"/>
+    <meta property="og:title" content="Verktøyjakt – Minio Underholdning"/>
+    <meta property="og:description" content="Samle verktøy i labyrinten og unngå sinte kunder! Vinn 10% rabattkode!"/>
+    <meta property="og:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:image:alt" content="Verktøyjakt - Minio spill"/>
+    <meta property="og:site_name" content="Minio"/>
+    <meta property="og:locale" content="nb_NO"/>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Verktøyjakt – Klarer du å unngå kundene?"/>
+    <meta name="twitter:description" content="Samle verktøy i labyrinten! Test deg selv!"/>
+    <meta name="twitter:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
+
+    <style>
+        :root {
+            --dark-bg: #0a0a12;
+            --darker-bg: #12121a;
+            --card-bg: rgba(20, 20, 35, 0.8);
+            --text-light: #f9f9f9;
+            --text-muted: rgba(255, 255, 255, 0.6);
+            --accent: #1da1f2;
+            --accent-glow: rgba(29, 161, 242, 0.4);
+            --success: #4caf50;
+            --error: #e53935;
+            --wall-color: #4a4a6a;
+            --path-color: #1e1e2e;
+            --grid-size: 19;
+            --cell-size: 18px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: transparent;
+            color: var(--text-light);
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html {
+            background: #0a0a12;
+        }
+
+        .logo {
+            margin-bottom: 1.5rem;
+        }
+
+        .logo img {
+            height: 50px;
+            width: auto;
+            filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            color: #fff;
+            background: linear-gradient(135deg, #fff 0%, #1da1f2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .home-link {
+            margin-top: 2rem;
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: rgba(47, 47, 47, 0.8);
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.2s;
+        }
+
+        .home-link:hover,
+        .home-link:active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .high-score-display {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.5);
+        }
+
+        .high-score-display span {
+            color: #ffd700;
+            font-weight: 700;
+        }
+
+        /* Animated starfield background */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at bottom, #1a1a2e 0%, #0a0a12 100%);
+        }
+
+        .stars::before,
+        .stars::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-repeat: repeat;
+        }
+
+        .stars::before {
+            background-image:
+                radial-gradient(1px 1px at 25px 30px, white, transparent),
+                radial-gradient(1px 1px at 50px 120px, white, transparent),
+                radial-gradient(1px 1px at 100px 40px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1.5px 1.5px at 150px 80px, white, transparent),
+                radial-gradient(1px 1px at 200px 150px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1.5px 1.5px at 250px 60px, white, transparent),
+                radial-gradient(1px 1px at 300px 180px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 350px 20px, white, transparent),
+                radial-gradient(1.5px 1.5px at 400px 100px, rgba(255,255,255,0.9), transparent),
+                radial-gradient(1px 1px at 450px 140px, white, transparent);
+            background-size: 500px 200px;
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        .stars::after {
+            background-image:
+                radial-gradient(1px 1px at 75px 50px, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1.5px 1.5px at 125px 90px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 175px 130px, rgba(255,255,255,0.4), transparent),
+                radial-gradient(1px 1px at 225px 170px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1.5px 1.5px at 275px 30px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 325px 70px, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1px 1px at 375px 110px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1.5px 1.5px at 425px 160px, rgba(255,255,255,0.6), transparent);
+            background-size: 450px 200px;
+            animation: twinkle 6s ease-in-out infinite reverse;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Screens */
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            z-index: 1;
+            overflow-y: auto;
+        }
+
+        .screen.hidden,
+        .hidden {
+            display: none !important;
+        }
+
+        .screen-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .reward-teaser {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.1) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            max-width: 300px;
+            font-size: 0.9rem;
+        }
+
+        .reward-teaser strong {
+            color: #ffd700;
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            max-width: 300px;
+            width: 100%;
+        }
+
+        .instruction-item {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.6rem;
+            font-size: 0.85rem;
+        }
+
+        .instruction-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .instruction-icon {
+            font-size: 1.2rem;
+            width: 28px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 0.9rem 2.5rem;
+            font-size: 1.1rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1da1f2 0%, #0d8ecf 100%);
+            color: #fff;
+            box-shadow: 0 4px 20px rgba(29, 161, 242, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        /* Game wrapper */
+        .game-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: transparent;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .game-header {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--darker-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-logo img {
+            height: 24px;
+            width: auto;
+        }
+
+        .stats {
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-value.score {
+            color: var(--success);
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            opacity: 0.5;
+        }
+
+        /* Game canvas area */
+        .game-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            min-height: 0;
+            padding: 4px;
+        }
+
+        .maze-container {
+            position: relative;
+        }
+
+        .maze {
+            display: grid;
+            gap: 0;
+            background: var(--path-color);
+            border: 2px solid var(--wall-color);
+            border-radius: 4px;
+        }
+
+        .cell {
+            width: var(--cell-size);
+            height: var(--cell-size);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .cell.wall {
+            background: var(--wall-color);
+        }
+
+        .cell.path {
+            background: var(--path-color);
+        }
+
+        /* Game entities */
+        .entity {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: var(--cell-size);
+            height: var(--cell-size);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            font-size: calc(var(--cell-size) * 0.75);
+            line-height: 1;
+            will-change: transform;
+            transition: transform 0.13s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        .player {
+            z-index: 20;
+            animation: playerPulse 1s ease-in-out infinite;
+        }
+
+        @keyframes playerPulse {
+            0%, 100% { box-shadow: 0 0 8px 4px rgba(29, 161, 242, 0.5); }
+            50% { box-shadow: 0 0 16px 8px rgba(29, 161, 242, 0.8); }
+        }
+
+        .player.powered {
+            animation: playerPowerPulse 0.3s ease-in-out infinite;
+        }
+
+        @keyframes playerPowerPulse {
+            0%, 100% { box-shadow: 0 0 10px 5px rgba(255, 215, 0, 0.6); }
+            50% { box-shadow: 0 0 20px 10px rgba(255, 215, 0, 1); }
+        }
+
+        .enemy {
+            z-index: 15;
+        }
+
+        .enemy.scared {
+            opacity: 0.5;
+            transform: scale(0.8);
+        }
+
+        .collectible {
+            font-size: calc(var(--cell-size) * 0.5);
+        }
+
+        .power-up {
+            font-size: calc(var(--cell-size) * 0.65);
+            animation: itemPulse 0.6s ease-in-out infinite;
+        }
+
+        @keyframes itemPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+        }
+
+        /* Touch joystick control */
+        .joystick-container {
+            padding: 0.8rem;
+            background: var(--darker-bg);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .joystick {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #2a2a4c 0%, #1a1a3c 100%);
+            border: 2px solid rgba(255,255,255,0.1);
+            touch-action: none;
+        }
+
+        .joystick-knob {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(145deg, #4a4a7c 0%, #3a3a6c 100%);
+            border: 2px solid rgba(255,255,255,0.2);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.05s ease-out;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .joystick-knob.active {
+            background: linear-gradient(145deg, #5a5a8c 0%, #4a4a7c 100%);
+            box-shadow: 0 0 20px rgba(29, 161, 242, 0.4);
+        }
+
+        .joystick-hint {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        /* Level complete */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .overlay h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+            color: #ffd700;
+        }
+
+        .overlay p {
+            color: rgba(255,255,255,0.7);
+        }
+
+        /* Game over */
+        .final-score {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: #ffd700;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            margin: 0.5rem 0;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .stat-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 0.8rem 1.2rem;
+            text-align: center;
+        }
+
+        .stat-box .value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #1da1f2;
+        }
+
+        .stat-box .label {
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-transform: uppercase;
+        }
+
+        .high-score-badge {
+            background: linear-gradient(135deg, #ffd700 0%, #ff8c00 100%);
+            color: #000;
+            padding: 0.4rem 1.2rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+        }
+
+        .discount-reveal {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(56, 142, 60, 0.2) 100%);
+            border: 2px solid #4caf50;
+            border-radius: 12px;
+            padding: 1rem;
+            margin: 1rem 0;
+            text-align: center;
+            max-width: 280px;
+        }
+
+        .discount-reveal h3 {
+            color: #4caf50;
+            font-size: 1rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .discount-code {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0.4rem 1rem;
+            border-radius: 6px;
+            font-family: monospace;
+            letter-spacing: 2px;
+            margin: 0.4rem 0;
+            display: inline-block;
+        }
+
+        .discount-desc {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Unified Header */
+        .unified-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0.75rem;
+            background: var(--darker-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            height: 56px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .header-home {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(47, 47, 47, 0.8);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .header-home:hover,
+        .header-home:active {
+            background: rgba(29, 161, 242, 0.3);
+        }
+
+        .game-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .game-nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            background: rgba(47, 47, 47, 0.6);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .game-nav-item:hover {
+            background: rgba(29, 161, 242, 0.2);
+        }
+
+        .game-nav-item.active {
+            border-color: var(--accent);
+            background: rgba(29, 161, 242, 0.15);
+        }
+
+        .header-stats {
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-stats.visible {
+            display: flex;
+        }
+
+        .header-stat {
+            text-align: center;
+            min-width: 40px;
+        }
+
+        .header-stat-value {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-light);
+            line-height: 1;
+        }
+
+        .header-stat-value.score {
+            color: var(--success);
+        }
+
+        .header-stat-label {
+            font-size: 0.5rem;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.3px;
+        }
+
+
+        /* Screen positioning to account for header */
+        .screen {
+            top: 56px !important;
+            height: calc(100% - 56px) !important;
+        }
+
+        .game-wrapper {
+            padding-top: 56px;
+        }
+
+        @media (max-width: 480px) {
+            .unified-header {
+                padding: 0.4rem 0.5rem;
+                height: 50px;
+            }
+
+            .header-home {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+
+            .game-nav-item {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9rem;
+            }
+
+            .header-stat {
+                min-width: 35px;
+            }
+
+            .header-stat-value {
+                font-size: 0.9rem;
+            }
+
+            .header-stat-label {
+                font-size: 0.45rem;
+            }
+
+            .screen {
+                top: 50px !important;
+                height: calc(100% - 50px) !important;
+            }
+
+            .game-wrapper {
+                padding-top: 50px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .game-nav {
+                gap: 0.2rem;
+            }
+
+            .game-nav-item {
+                width: 26px;
+                height: 26px;
+                font-size: 0.8rem;
+            }
+
+            .header-stats {
+                gap: 0.5rem;
+            }
+
+            .header-stat {
+                min-width: 30px;
+            }
+
+            .header-stat-value {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* Responsive - Full width on mobile */
+        @media (max-width: 500px) {
+            :root {
+                --cell-size: calc((100vw - 12px) / 19);
+            }
+
+            .game-area {
+                padding: 2px;
+            }
+
+            .maze {
+                border-width: 1px;
+            }
+
+            .joystick {
+                width: 100px;
+                height: 100px;
+            }
+
+            .joystick-knob {
+                width: 44px;
+                height: 44px;
+            }
+
+            .joystick-container {
+                padding: 0.5rem;
+            }
+
+            .game-header {
+                padding: 0.5rem 0.75rem;
+            }
+
+            .header-logo img {
+                height: 20px;
+            }
+
+            .stat-value {
+                font-size: 1rem;
+            }
+
+            .stats {
+                gap: 0.75rem;
+            }
+        }
+
+        @media (max-height: 650px) {
+            .joystick {
+                width: 90px;
+                height: 90px;
+            }
+
+            .joystick-knob {
+                width: 40px;
+                height: 40px;
+            }
+
+            .joystick-container {
+                padding: 0.4rem;
+            }
+
+            .joystick-hint {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Animated background -->
+    <div class="stars-container">
+        <div class="stars"></div>
+    </div>
+
+    <!-- Start Screen -->
+    <div class="screen" id="startScreen">
+        <div class="logo">
+            <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+        </div>
+
+        <h1>Verktøyjakt</h1>
+        <p class="screen-subtitle">Samle verktøy – unngå sinte kunder!</p>
+
+        <div class="reward-teaser">
+            🎁 Nå <strong>nivå 8</strong> og få en <strong>10% rabattkode</strong>!
+        </div>
+
+        <div class="instructions">
+            <div class="instruction-item">
+                <span class="instruction-icon">👷</span>
+                <span>Styr snekkeren med D-pad eller swipe</span>
+            </div>
+            <div class="instruction-item">
+                <span class="instruction-icon">🔧</span>
+                <span>Samle alle verktøyene for å gå videre</span>
+            </div>
+            <div class="instruction-item">
+                <span class="instruction-icon">🧰</span>
+                <span>Verktøykasse = superkraft!</span>
+            </div>
+            <div class="instruction-item">
+                <span class="instruction-icon">😠</span>
+                <span>Blir du tatt av en kunde er det GAME OVER!</span>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="startGame()">▶ Start</button>
+
+        <div class="high-score-display">
+            Rekord: <span id="highScoreValue">0</span>
+        </div>
+
+        <a href="/" class="home-link">← Tilbake til minio.no</a>
+    </div>
+
+    <!-- Game Screen -->
+    <div class="game-wrapper hidden" id="gameWrapper">
+        <div class="game-area" id="gameArea">
+            <div class="maze-container" id="mazeContainer">
+                <div class="maze" id="maze"></div>
+            </div>
+        </div>
+
+        <div class="joystick-container">
+            <div>
+                <div class="joystick" id="joystick">
+                    <div class="joystick-knob" id="joystickKnob"></div>
+                </div>
+                <div class="joystick-hint">Dra for å bevege</div>
+            </div>
+        </div>
+
+        <div class="overlay" id="levelOverlay">
+            <h2>🎉 Nivå fullført!</h2>
+            <p>Neste nivå starter...</p>
+        </div>
+    </div>
+
+    <!-- Game Over Screen -->
+    <div class="screen hidden" id="gameoverScreen">
+        <div class="logo">
+            <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+        </div>
+
+        <h1>Du ble tatt!</h1>
+
+        <div id="highScoreBadge" class="high-score-badge" style="display: none;">
+            🏆 Ny rekord!
+        </div>
+
+        <div class="final-score" id="finalScore">0</div>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <div class="value" id="statTools">0</div>
+                <div class="label">Verktøy</div>
+            </div>
+            <div class="stat-box">
+                <div class="value" id="statLevel">1</div>
+                <div class="label">Nivå</div>
+            </div>
+        </div>
+
+        <div id="discountContainer"></div>
+
+        <button class="btn btn-primary" onclick="startGame()">▶ Prøv igjen</button>
+
+        <a href="/" class="home-link">← Tilbake til minio.no</a>
+    </div>
+
+    <!-- Unified Header -->
+    <header class="unified-header" id="unified-header">
+        <div class="header-left">
+            <a href="index.html" class="header-home" onclick="return confirmLeave(this)" title="Tilbake">🏠</a>
+            <nav class="game-nav">
+                <a href="tool-quiz.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøy Quiz">🌍</a>
+                <a href="tool-game.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Finn Verktøyet">🔨</a>
+                <a href="tool-nails.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Spiker'n">🪵</a>
+                <a href="tool-saw.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Sag Rytme">🪚</a>
+                <a href="tool-maze.html" class="game-nav-item active" title="Verktøyjakt">👷</a>
+            </nav>
+        </div>
+        <div class="header-stats" id="header-stats">
+            <div class="header-stat">
+                <div class="header-stat-value score" id="headerScore">0</div>
+                <div class="header-stat-label">Poeng</div>
+            </div>
+            <div class="header-stat">
+                <div class="header-stat-value" id="headerLevel">1</div>
+                <div class="header-stat-label">Nivå</div>
+            </div>
+            <div class="header-stat">
+                <div class="header-stat-value" id="headerToolsLeft">0</div>
+                <div class="header-stat-label">Igjen</div>
+            </div>
+        </div>
+    </header>
+
+    <script>
+        // Constants
+        const GRID_SIZE = 19;
+        const TOOLS = ['🔧', '🔨', '🪛', '🔩', '⚙️', '🪚'];
+        const ENEMIES = ['😡', '👹', '👺', '😈'];
+        const PLAYER = '👷';
+        const POWER_UP = '🧰';
+        const WALL = 1;
+        const PATH = 0;
+
+        // Game state
+        let score = 0;
+        let level = 1;
+        let totalTools = 0;
+        let isPlaying = false;
+        let isPowered = false;
+        let powerTimer = null;
+        let moveRepeatId = null;
+        let enemyInterval = null;
+        let highScore = 0;
+
+        // Game objects
+        let maze = [];
+        let player = { x: 1, y: 1 };
+        let enemies = [];
+        let tools = [];
+        let powerUps = [];
+        let cellSize = 18;
+
+        // DOM elements (initialized after DOM ready)
+        let startScreen, gameWrapper, gameoverScreen, mazeElement, mazeContainer;
+        let scoreDisplay, levelDisplay, toolsLeftDisplay, levelOverlay, headerStats;
+
+        // Initialize DOM references
+        function initDOM() {
+            startScreen = document.getElementById('startScreen');
+            gameWrapper = document.getElementById('gameWrapper');
+            gameoverScreen = document.getElementById('gameoverScreen');
+            mazeElement = document.getElementById('maze');
+            mazeContainer = document.getElementById('mazeContainer');
+            headerStats = document.getElementById('header-stats');
+            scoreDisplay = document.getElementById('headerScore');
+            levelDisplay = document.getElementById('headerLevel');
+            toolsLeftDisplay = document.getElementById('headerToolsLeft');
+            levelOverlay = document.getElementById('levelOverlay');
+
+            // Load high score from storage
+            try {
+                highScore = parseInt(localStorage.getItem('toolMazeHighScore')) || 0;
+            } catch (e) {
+                highScore = 0;
+            }
+
+            // Show high score on start screen
+            const highScoreEl = document.getElementById('highScoreValue');
+            if (highScoreEl) {
+                highScoreEl.textContent = highScore;
+            }
+        }
+
+        // Run initialization when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initDOM);
+        } else {
+            initDOM();
+        }
+
+        // Generate maze using iterative backtracking (mobile-safe)
+        function generateMaze() {
+            // Initialize with all walls
+            maze = [];
+            for (let y = 0; y < GRID_SIZE; y++) {
+                maze[y] = [];
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    maze[y][x] = WALL;
+                }
+            }
+
+            // Iterative backtracking using a stack (avoids recursion issues on mobile)
+            const stack = [{ x: 1, y: 1 }];
+            maze[1][1] = PATH;
+
+            while (stack.length > 0) {
+                const current = stack[stack.length - 1];
+                const { x, y } = current;
+
+                const directions = [
+                    { dx: 0, dy: -2 },
+                    { dx: 0, dy: 2 },
+                    { dx: -2, dy: 0 },
+                    { dx: 2, dy: 0 }
+                ];
+                shuffle(directions);
+
+                let found = false;
+                for (const dir of directions) {
+                    const nx = x + dir.dx;
+                    const ny = y + dir.dy;
+
+                    if (nx > 0 && nx < GRID_SIZE - 1 && ny > 0 && ny < GRID_SIZE - 1 && maze[ny][nx] === WALL) {
+                        maze[y + dir.dy / 2][x + dir.dx / 2] = PATH;
+                        maze[ny][nx] = PATH;
+                        stack.push({ x: nx, y: ny });
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    stack.pop();
+                }
+            }
+
+            // Add extra paths to make it more open
+            const extraPaths = Math.floor(GRID_SIZE * GRID_SIZE * 0.1);
+            for (let i = 0; i < extraPaths; i++) {
+                const x = 2 + Math.floor(Math.random() * (GRID_SIZE - 4));
+                const y = 2 + Math.floor(Math.random() * (GRID_SIZE - 4));
+                if (maze[y][x] === WALL) {
+                    let adjacentPaths = 0;
+                    if (maze[y - 1] && maze[y - 1][x] === PATH) adjacentPaths++;
+                    if (maze[y + 1] && maze[y + 1][x] === PATH) adjacentPaths++;
+                    if (maze[y][x - 1] === PATH) adjacentPaths++;
+                    if (maze[y][x + 1] === PATH) adjacentPaths++;
+                    if (adjacentPaths >= 2) {
+                        maze[y][x] = PATH;
+                    }
+                }
+            }
+
+            return maze;
+        }
+
+        // Pac-Man style continuous movement
+        let currentDirection = { dx: 0, dy: 0 };
+        let nextDirection = { dx: 0, dy: 0 };
+        let moveLoopId = null;
+
+        function setDirection(dx, dy) {
+            nextDirection = { dx, dy };
+            // Start moving if not already
+            if (!moveLoopId && isPlaying) {
+                startMoveLoop();
+            }
+        }
+
+        function startMoveLoop() {
+            if (moveLoopId) return;
+            moveLoopId = setInterval(() => {
+                if (!isPlaying) {
+                    stopMoveLoop();
+                    return;
+                }
+
+                // Try next direction first
+                if (nextDirection.dx !== 0 || nextDirection.dy !== 0) {
+                    if (canMove(player.x + nextDirection.dx, player.y + nextDirection.dy)) {
+                        currentDirection = { ...nextDirection };
+                    }
+                }
+
+                // Move in current direction
+                if (currentDirection.dx !== 0 || currentDirection.dy !== 0) {
+                    const newX = player.x + currentDirection.dx;
+                    const newY = player.y + currentDirection.dy;
+                    if (canMove(newX, newY)) {
+                        player.x = newX;
+                        player.y = newY;
+                        updateEntityPositions();
+                        checkCollisions();
+                    }
+                }
+            }, 140);
+        }
+
+        function stopMoveLoop() {
+            if (moveLoopId) {
+                clearInterval(moveLoopId);
+                moveLoopId = null;
+            }
+            currentDirection = { dx: 0, dy: 0 };
+            nextDirection = { dx: 0, dy: 0 };
+        }
+
+        // Joystick controls
+        let joystickInitialized = false;
+        function setupJoystick() {
+            if (joystickInitialized) return;
+            joystickInitialized = true;
+
+            const joystick = document.getElementById('joystick');
+            const knob = document.getElementById('joystickKnob');
+            const maxDistance = 35;
+            let isDragging = false;
+            let centerX, centerY;
+
+            function getCenter() {
+                const rect = joystick.getBoundingClientRect();
+                centerX = rect.left + rect.width / 2;
+                centerY = rect.top + rect.height / 2;
+            }
+
+            function handleMove(clientX, clientY) {
+                if (!isDragging || !isPlaying) return;
+
+                const dx = clientX - centerX;
+                const dy = clientY - centerY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+
+                // Limit knob movement
+                const limitedDist = Math.min(distance, maxDistance);
+                const angle = Math.atan2(dy, dx);
+                const knobX = Math.cos(angle) * limitedDist;
+                const knobY = Math.sin(angle) * limitedDist;
+
+                knob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
+
+                // Set direction based on angle (only if moved enough)
+                if (distance > 15) {
+                    // Convert angle to 4-way direction
+                    const deg = angle * 180 / Math.PI;
+                    if (deg >= -45 && deg < 45) {
+                        setDirection(1, 0); // Right
+                    } else if (deg >= 45 && deg < 135) {
+                        setDirection(0, 1); // Down
+                    } else if (deg >= -135 && deg < -45) {
+                        setDirection(0, -1); // Up
+                    } else {
+                        setDirection(-1, 0); // Left
+                    }
+                }
+            }
+
+            function handleEnd() {
+                isDragging = false;
+                knob.style.transform = 'translate(-50%, -50%)';
+                knob.classList.remove('active');
+            }
+
+            // Touch events
+            joystick.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isDragging = true;
+                knob.classList.add('active');
+                getCenter();
+                handleMove(e.touches[0].clientX, e.touches[0].clientY);
+            }, { passive: false });
+
+            document.addEventListener('touchmove', (e) => {
+                if (isDragging) {
+                    e.preventDefault();
+                    handleMove(e.touches[0].clientX, e.touches[0].clientY);
+                }
+            }, { passive: false });
+
+            document.addEventListener('touchend', handleEnd);
+
+            // Mouse events (for desktop testing)
+            joystick.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                knob.classList.add('active');
+                getCenter();
+                handleMove(e.clientX, e.clientY);
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (isDragging) {
+                    handleMove(e.clientX, e.clientY);
+                }
+            });
+
+            document.addEventListener('mouseup', handleEnd);
+        }
+
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (!isPlaying) return;
+            switch (e.key) {
+                case 'ArrowUp': case 'w': setDirection(0, -1); break;
+                case 'ArrowDown': case 's': setDirection(0, 1); break;
+                case 'ArrowLeft': case 'a': setDirection(-1, 0); break;
+                case 'ArrowRight': case 'd': setDirection(1, 0); break;
+            }
+        });
+
+        function startGame() {
+            // Ensure DOM is initialized
+            if (!startScreen) initDOM();
+
+            score = 0;
+            level = 1;
+            totalTools = 0;
+            isPlaying = true;
+            isPowered = false;
+
+            updateUI();
+            if (startScreen) startScreen.classList.add('hidden');
+            if (gameoverScreen) gameoverScreen.classList.add('hidden');
+            if (gameWrapper) gameWrapper.classList.remove('hidden');
+            if (headerStats) headerStats.classList.add('visible');
+
+            initLevel();
+            setupJoystick();
+        }
+
+        function initLevel() {
+            // Ensure DOM is ready
+            if (!mazeElement) initDOM();
+
+            stopMoveLoop();
+            if (enemyInterval) clearInterval(enemyInterval);
+            if (powerTimer) clearTimeout(powerTimer);
+            isPowered = false;
+
+            // Generate new maze first
+            generateMaze();
+
+            // Render maze
+            renderMaze();
+
+            // Calculate cell size based on viewport (more reliable than reading DOM)
+            const vw = window.innerWidth;
+            if (vw <= 500) {
+                cellSize = (vw - 12) / GRID_SIZE;
+            } else {
+                // Try to read from rendered cell, fallback to 18
+                const firstCell = mazeElement ? mazeElement.querySelector('.cell') : null;
+                cellSize = firstCell ? firstCell.offsetWidth : 18;
+            }
+
+            // Ensure cellSize is valid
+            if (!cellSize || cellSize <= 0 || isNaN(cellSize)) {
+                cellSize = 18;
+            }
+
+            // Find all path cells
+            const paths = [];
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    if (maze[y][x] === PATH && !(x === 1 && y === 1)) {
+                        paths.push({ x, y });
+                    }
+                }
+            }
+            shuffle(paths);
+
+            // Reset player position
+            player = { x: 1, y: 1 };
+
+            // Place tools (more tools each level)
+            tools = [];
+            const toolCount = Math.min(10 + level * 2, Math.floor(paths.length * 0.25));
+            for (let i = 0; i < toolCount && i < paths.length; i++) {
+                tools.push({
+                    x: paths[i].x,
+                    y: paths[i].y,
+                    type: TOOLS[Math.floor(Math.random() * TOOLS.length)]
+                });
+            }
+
+            // Place power-ups on valid path cells (not used by tools)
+            powerUps = [];
+            const powerCount = 1 + Math.floor(level / 4);
+
+            // Get positions from paths array that aren't used by tools
+            const usedPositions = new Set(tools.map(t => `${t.x},${t.y}`));
+            usedPositions.add('1,1'); // Player start
+
+            const availableForPowerUps = [];
+            for (let y = 1; y < GRID_SIZE - 1; y++) {
+                for (let x = 1; x < GRID_SIZE - 1; x++) {
+                    if (maze[y][x] === PATH && !usedPositions.has(`${x},${y}`)) {
+                        availableForPowerUps.push({ x, y });
+                    }
+                }
+            }
+            shuffle(availableForPowerUps);
+
+            for (let i = 0; i < powerCount && i < availableForPowerUps.length; i++) {
+                powerUps.push(availableForPowerUps[i]);
+            }
+
+            // Place enemies in far corners
+            enemies = [];
+            const enemyCount = Math.min(1 + Math.floor(level / 2), 3);
+            const corners = [
+                { x: GRID_SIZE - 2, y: 1 },
+                { x: 1, y: GRID_SIZE - 2 },
+                { x: GRID_SIZE - 2, y: GRID_SIZE - 2 }
+            ];
+
+            for (let i = 0; i < enemyCount; i++) {
+                // Find nearest path to corner
+                let pos = corners[i];
+                if (maze[pos.y][pos.x] !== PATH) {
+                    // Find closest path
+                    for (let r = 1; r < 5; r++) {
+                        for (let dy = -r; dy <= r; dy++) {
+                            for (let dx = -r; dx <= r; dx++) {
+                                const ny = pos.y + dy;
+                                const nx = pos.x + dx;
+                                if (ny > 0 && ny < GRID_SIZE - 1 && nx > 0 && nx < GRID_SIZE - 1 && maze[ny][nx] === PATH) {
+                                    pos = { x: nx, y: ny };
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                enemies.push({
+                    x: pos.x,
+                    y: pos.y,
+                    type: ENEMIES[i % ENEMIES.length]
+                });
+            }
+
+            if (toolsLeftDisplay) toolsLeftDisplay.textContent = tools.length;
+            renderEntities();
+
+            // Start enemy movement (angry and fast!)
+            const enemySpeed = Math.max(300 - level * 20, 160);
+            enemyInterval = setInterval(moveEnemies, enemySpeed);
+        }
+
+        function renderMaze() {
+            if (!mazeElement) return;
+
+            mazeElement.innerHTML = '';
+            mazeElement.style.gridTemplateColumns = `repeat(${GRID_SIZE}, var(--cell-size))`;
+
+            for (let y = 0; y < GRID_SIZE; y++) {
+                for (let x = 0; x < GRID_SIZE; x++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell ' + (maze[y][x] === WALL ? 'wall' : 'path');
+                    mazeElement.appendChild(cell);
+                }
+            }
+        }
+
+        function renderEntities() {
+            if (!mazeContainer) return;
+
+            // Remove old entities
+            mazeContainer.querySelectorAll('.entity').forEach(e => e.remove());
+
+            // Tools
+            tools.forEach((tool, i) => {
+                const el = document.createElement('div');
+                el.className = 'entity collectible';
+                el.id = 'tool-' + i;
+                el.textContent = tool.type;
+                el.style.transform = `translate(${tool.x * cellSize}px, ${tool.y * cellSize}px)`;
+                mazeContainer.appendChild(el);
+            });
+
+            // Power-ups (using left/top positioning to avoid animation conflict)
+            powerUps.forEach((pu, i) => {
+                // Skip invalid positions - must be on a path cell inside the maze
+                if (!pu || typeof pu.x !== 'number' || typeof pu.y !== 'number') return;
+                if (pu.x < 1 || pu.y < 1 || pu.x >= GRID_SIZE - 1 || pu.y >= GRID_SIZE - 1) return;
+                if (!maze[pu.y] || maze[pu.y][pu.x] !== PATH) return;
+                if (!cellSize || cellSize <= 0) return;
+
+                const el = document.createElement('div');
+                el.className = 'entity power-up';
+                el.id = 'power-' + i;
+                el.textContent = POWER_UP;
+                // Use left/top instead of transform (animation overrides transform)
+                el.style.left = (pu.x * cellSize) + 'px';
+                el.style.top = (pu.y * cellSize) + 'px';
+                mazeContainer.appendChild(el);
+            });
+
+            // Enemies
+            enemies.forEach((enemy, i) => {
+                const el = document.createElement('div');
+                el.className = 'entity enemy' + (isPowered ? ' scared' : '');
+                el.id = 'enemy-' + i;
+                el.textContent = enemy.type;
+                el.style.transform = `translate(${enemy.x * cellSize}px, ${enemy.y * cellSize}px)`;
+                mazeContainer.appendChild(el);
+            });
+
+            // Player
+            const playerEl = document.createElement('div');
+            playerEl.className = 'entity player' + (isPowered ? ' powered' : '');
+            playerEl.id = 'player';
+            playerEl.textContent = PLAYER;
+            playerEl.style.transform = `translate(${player.x * cellSize}px, ${player.y * cellSize}px)`;
+            mazeContainer.appendChild(playerEl);
+        }
+
+        function updateEntityPositions() {
+            const playerEl = document.getElementById('player');
+            if (playerEl) {
+                playerEl.style.transform = `translate(${player.x * cellSize}px, ${player.y * cellSize}px)`;
+                playerEl.className = 'entity player' + (isPowered ? ' powered' : '');
+            }
+
+            enemies.forEach((enemy, i) => {
+                const el = document.getElementById('enemy-' + i);
+                if (el) {
+                    el.style.transform = `translate(${enemy.x * cellSize}px, ${enemy.y * cellSize}px)`;
+                    el.className = 'entity enemy' + (isPowered ? ' scared' : '');
+                }
+            });
+        }
+
+        function canMove(x, y) {
+            if (x < 0 || x >= GRID_SIZE || y < 0 || y >= GRID_SIZE) return false;
+            return maze[y][x] !== WALL;
+        }
+
+        function checkCollisions() {
+            // Tool pickup
+            const toolIdx = tools.findIndex(t => t.x === player.x && t.y === player.y);
+            if (toolIdx !== -1) {
+                const el = document.getElementById('tool-' + toolIdx);
+                if (el) el.remove();
+                tools.splice(toolIdx, 1);
+                score += 10 * level;
+                totalTools++;
+                updateUI();
+                toolsLeftDisplay.textContent = tools.length;
+
+                // Re-render to fix IDs
+                renderEntities();
+
+                if (tools.length === 0) {
+                    levelComplete();
+                    return;
+                }
+            }
+
+            // Power-up pickup
+            const powerIdx = powerUps.findIndex(p => p.x === player.x && p.y === player.y);
+            if (powerIdx !== -1) {
+                const el = document.getElementById('power-' + powerIdx);
+                if (el) el.remove();
+                powerUps.splice(powerIdx, 1);
+                activatePower();
+                renderEntities();
+            }
+
+            // Enemy collision
+            checkEnemyCollision();
+        }
+
+        function checkEnemyCollision() {
+            const hitEnemy = enemies.findIndex(e => e.x === player.x && e.y === player.y);
+            if (hitEnemy !== -1) {
+                if (isPowered) {
+                    // Eat enemy
+                    const el = document.getElementById('enemy-' + hitEnemy);
+                    if (el) el.remove();
+                    enemies.splice(hitEnemy, 1);
+                    score += 50 * level;
+                    updateUI();
+                    renderEntities();
+                } else {
+                    // Game over!
+                    gameOver();
+                }
+            }
+        }
+
+        function activatePower() {
+            isPowered = true;
+            const p = document.getElementById('player');
+            if (p) p.classList.add('powered');
+
+            if (powerTimer) clearTimeout(powerTimer);
+            powerTimer = setTimeout(() => {
+                isPowered = false;
+                const p = document.getElementById('player');
+                if (p) p.classList.remove('powered');
+                updateEntityPositions();
+            }, 6000);
+
+            updateEntityPositions();
+        }
+
+        function moveEnemies() {
+            if (!isPlaying) return;
+
+            enemies.forEach(enemy => {
+                const dx = player.x - enemy.x;
+                const dy = player.y - enemy.y;
+
+                let moves = [];
+
+                if (isPowered) {
+                    // Flee from player (scared!)
+                    if (dx > 0 && canMove(enemy.x - 1, enemy.y)) moves.push({ x: -1, y: 0, priority: 2 });
+                    if (dx < 0 && canMove(enemy.x + 1, enemy.y)) moves.push({ x: 1, y: 0, priority: 2 });
+                    if (dy > 0 && canMove(enemy.x, enemy.y - 1)) moves.push({ x: 0, y: -1, priority: 2 });
+                    if (dy < 0 && canMove(enemy.x, enemy.y + 1)) moves.push({ x: 0, y: 1, priority: 2 });
+                } else {
+                    // ANGRY chase - always go directly towards player!
+                    if (Math.abs(dx) >= Math.abs(dy)) {
+                        // Horizontal priority
+                        if (dx > 0 && canMove(enemy.x + 1, enemy.y)) moves.push({ x: 1, y: 0, priority: 3 });
+                        else if (dx < 0 && canMove(enemy.x - 1, enemy.y)) moves.push({ x: -1, y: 0, priority: 3 });
+                        // Vertical secondary
+                        if (dy > 0 && canMove(enemy.x, enemy.y + 1)) moves.push({ x: 0, y: 1, priority: 2 });
+                        else if (dy < 0 && canMove(enemy.x, enemy.y - 1)) moves.push({ x: 0, y: -1, priority: 2 });
+                    } else {
+                        // Vertical priority
+                        if (dy > 0 && canMove(enemy.x, enemy.y + 1)) moves.push({ x: 0, y: 1, priority: 3 });
+                        else if (dy < 0 && canMove(enemy.x, enemy.y - 1)) moves.push({ x: 0, y: -1, priority: 3 });
+                        // Horizontal secondary
+                        if (dx > 0 && canMove(enemy.x + 1, enemy.y)) moves.push({ x: 1, y: 0, priority: 2 });
+                        else if (dx < 0 && canMove(enemy.x - 1, enemy.y)) moves.push({ x: -1, y: 0, priority: 2 });
+                    }
+                }
+
+                // Only add random moves if completely stuck (no good chase moves)
+                if (moves.length === 0) {
+                    [[1, 0], [-1, 0], [0, 1], [0, -1]].forEach(([mx, my]) => {
+                        if (canMove(enemy.x + mx, enemy.y + my)) {
+                            moves.push({ x: mx, y: my, priority: 0 });
+                        }
+                    });
+                }
+
+                if (moves.length > 0) {
+                    // Pick the highest priority move (most direct path to player)
+                    moves.sort((a, b) => b.priority - a.priority);
+                    const move = moves[0];
+                    enemy.x += move.x;
+                    enemy.y += move.y;
+                }
+            });
+
+            updateEntityPositions();
+            checkEnemyCollision();
+        }
+
+        function levelComplete() {
+            isPlaying = false;
+            stopMoveLoop();
+            score += 100 * level;
+            level++;
+            updateUI();
+
+            if (levelOverlay) levelOverlay.classList.add('show');
+
+            setTimeout(() => {
+                if (levelOverlay) levelOverlay.classList.remove('show');
+                isPlaying = true;
+                initLevel();
+            }, 1500);
+        }
+
+        function gameOver() {
+            isPlaying = false;
+            stopMoveLoop();
+            if (enemyInterval) clearInterval(enemyInterval);
+            if (powerTimer) clearTimeout(powerTimer);
+
+            const isNewHigh = score > highScore;
+            if (isNewHigh) {
+                highScore = score;
+                try {
+                    localStorage.setItem('toolMazeHighScore', highScore);
+                } catch (e) {}
+            }
+
+            const finalScoreEl = document.getElementById('finalScore');
+            const statToolsEl = document.getElementById('statTools');
+            const statLevelEl = document.getElementById('statLevel');
+            const highScoreBadgeEl = document.getElementById('highScoreBadge');
+
+            if (finalScoreEl) finalScoreEl.textContent = score;
+            if (statToolsEl) statToolsEl.textContent = totalTools;
+            if (statLevelEl) statLevelEl.textContent = level;
+            if (highScoreBadgeEl) highScoreBadgeEl.style.display = isNewHigh ? 'block' : 'none';
+
+            // Discount check (level 8+)
+            const dc = document.getElementById('discountContainer');
+            if (dc) {
+                if (level >= 8) {
+                    dc.innerHTML = `
+                        <div class="discount-reveal">
+                            <h3>🎉 Gratulerer!</h3>
+                            <p class="discount-desc">Du låste opp rabattkode:</p>
+                            <div class="discount-code">VPH10</div>
+                            <p class="discount-desc">10% på varmepumpehus!</p>
+                        </div>`;
+                } else {
+                    dc.innerHTML = `
+                        <div class="reward-teaser" style="margin:1rem 0">
+                            ${8 - level} nivå${8 - level > 1 ? 'er' : ''} til rabattkode!
+                        </div>`;
+                }
+            }
+
+            if (gameWrapper) gameWrapper.classList.add('hidden');
+            if (headerStats) headerStats.classList.remove('visible');
+            if (gameoverScreen) gameoverScreen.classList.remove('hidden');
+        }
+
+        function updateUI() {
+            if (scoreDisplay) scoreDisplay.textContent = score;
+            if (levelDisplay) levelDisplay.textContent = level;
+        }
+
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+        }
+
+        // Confirm before leaving during gameplay
+        function confirmLeave(link) {
+            if (isPlaying) {
+                return confirm('Du er midt i et spill. Er du sikker på at du vil forlate?');
+            }
+            return true;
+        }
+    </script>
+</body>
+
+</html>

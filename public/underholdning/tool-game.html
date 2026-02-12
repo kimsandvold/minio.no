@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="nb">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+    <title>Minio Underholdning - Finn Verktøyet</title>
+    <meta name="description" content="Hvor raskt kan du finne riktig verktøy? Test reaksjonsevnen din i dette morsomme spillet fra Minio. Vinn 10% rabattkode!"/>
+    <meta name="keywords" content="Minio, spill, verktøy, reaksjonsspill, Lillehammer, håndverk, rabattkode"/>
+    <meta name="author" content="Minio"/>
+    <meta name="robots" content="index, follow"/>
+    <link rel="canonical" href="https://www.minio.no/underholdning/tool-game.html"/>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+    <link rel="apple-touch-icon" href="/favicon.ico"/>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E4J774CTXF"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-E4J774CTXF');
+    </script>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://www.minio.no/underholdning/tool-game.html"/>
+    <meta property="og:title" content="Finn Verktøyet – Minio Underholdning"/>
+    <meta property="og:description" content="Hvor raskt kan du finne riktig verktøy? Test reaksjonsevnen din og vinn 10% rabattkode!"/>
+    <meta property="og:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:image:alt" content="Finn Verktøyet - Minio spill"/>
+    <meta property="og:site_name" content="Minio"/>
+    <meta property="og:locale" content="nb_NO"/>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Finn Verktøyet – Klarer du å slå meg?"/>
+    <meta name="twitter:description" content="Hvor raskt kan du finne riktig verktøy? Test deg selv!"/>
+    <meta name="twitter:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
+
+    <style>
+        :root {
+            --dark-bg: #202020;
+            --darker-bg: #1a1a1a;
+            --light-bg: #f4f4f4;
+            --text-light: #f9f9f9;
+            --text-dark: #202020;
+            --link-bg: #2f2f2f;
+            --accent: #1da1f2;
+            --accent-hover: #0d8ddb;
+            --success: #4caf50;
+            --error: #e53935;
+            --warning: #ff9800;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #0a0a12;
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Animated starfield background */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at bottom, #1a1a2e 0%, #0a0a12 100%);
+        }
+
+        .stars::before,
+        .stars::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-repeat: repeat;
+        }
+
+        .stars::before {
+            background-image:
+                radial-gradient(1px 1px at 25px 30px, white, transparent),
+                radial-gradient(1px 1px at 50px 120px, white, transparent),
+                radial-gradient(1px 1px at 100px 40px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1.5px 1.5px at 150px 80px, white, transparent),
+                radial-gradient(1px 1px at 200px 150px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1.5px 1.5px at 250px 60px, white, transparent),
+                radial-gradient(1px 1px at 300px 180px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 350px 20px, white, transparent),
+                radial-gradient(1.5px 1.5px at 400px 100px, rgba(255,255,255,0.9), transparent),
+                radial-gradient(1px 1px at 450px 140px, white, transparent);
+            background-size: 500px 200px;
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        .stars::after {
+            background-image:
+                radial-gradient(1px 1px at 75px 50px, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1.5px 1.5px at 125px 90px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 175px 130px, rgba(255,255,255,0.4), transparent),
+                radial-gradient(1px 1px at 225px 170px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1.5px 1.5px at 275px 30px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 325px 70px, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1px 1px at 375px 110px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1.5px 1.5px at 425px 160px, rgba(255,255,255,0.6), transparent);
+            background-size: 450px 200px;
+            animation: twinkle 6s ease-in-out infinite reverse;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Screens */
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .screen.hidden {
+            display: none;
+        }
+
+        /* Start Screen */
+        .start-screen {
+        }
+
+        .logo {
+            margin-bottom: 1.5rem;
+        }
+
+        .logo img {
+            height: 50px;
+            width: auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .description {
+            max-width: 320px;
+            line-height: 1.6;
+            opacity: 0.7;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .tool-preview {
+            display: flex;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .preview-tool {
+            width: 50px;
+            height: 50px;
+            background: var(--link-bg);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+
+        .start-btn {
+            padding: 1rem 2.5rem;
+            background: var(--accent);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .start-btn:active {
+            transform: scale(0.96);
+            background: var(--accent-hover);
+        }
+
+        .home-link {
+            margin-top: 2rem;
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--link-bg);
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.2s;
+        }
+
+        .home-link:hover,
+        .home-link:active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* Game Screen */
+        .game-screen {
+            padding: 0;
+            justify-content: flex-start;
+        }
+
+        /* Header */
+        .game-header {
+            width: 100%;
+            background: var(--darker-bg);
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-logo img {
+            height: 24px;
+            width: auto;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1.25rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-value.score {
+            color: var(--success);
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            opacity: 0.5;
+            text-transform: uppercase;
+        }
+
+        /* Target area */
+        .target-area {
+            width: 100%;
+            padding: 1.25rem;
+            background: var(--darker-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .target-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.5;
+            margin-bottom: 0.5rem;
+        }
+
+        .target-display {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+        }
+
+        .target-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--accent);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 20px rgba(29, 161, 242, 0.3);
+        }
+
+        .target-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        /* Game grid */
+        .grid-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            width: 100%;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            max-width: 340px;
+            width: 100%;
+        }
+
+        .hole {
+            aspect-ratio: 1;
+            background: var(--darker-bg);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hole::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(255,255,255,0.03) 0%, transparent 70%);
+        }
+
+        .hole.empty {
+            opacity: 0.5;
+        }
+
+        .hole.has-tool {
+            background: var(--link-bg);
+            border-color: rgba(255,255,255,0.1);
+            transform: scale(1.02);
+        }
+
+        .hole.correct {
+            animation: correct 0.4s ease;
+            border-color: var(--success);
+            background: rgba(76, 175, 80, 0.2);
+        }
+
+        .hole.wrong {
+            animation: wrong 0.4s ease;
+            border-color: var(--error);
+            background: rgba(229, 57, 53, 0.2);
+        }
+
+        @keyframes correct {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes wrong {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        .tool-icon {
+            font-size: 2.5rem;
+            transition: all 0.2s;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hole.empty .tool-icon {
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        .hole.has-tool .tool-icon {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Lives */
+        .lives-container {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: var(--darker-bg);
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .life {
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .life.lost {
+            opacity: 0.2;
+            transform: scale(0.8);
+        }
+
+        /* End Screen */
+        .end-screen {
+            background: linear-gradient(180deg, #151515 0%, #1a1a1a 50%, #151515 100%);
+        }
+
+        .result-card {
+            background: linear-gradient(145deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
+            border-radius: 24px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            max-width: 340px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.5), 0 0 0 2px rgba(29, 161, 242, 0.3);
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--accent) 0%, #0d8ddb 50%, var(--accent) 100%);
+            border-radius: 26px;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .result-header img {
+            height: 28px;
+        }
+
+        .result-header span {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 1px;
+        }
+
+        .result-emoji {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-label {
+            font-size: 0.75rem;
+            opacity: 0.5;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-score {
+            font-size: 4.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .result-stat {
+            text-align: center;
+        }
+
+        .result-stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+
+        .result-stat-label {
+            font-size: 0.7rem;
+            opacity: 0.5;
+            text-transform: uppercase;
+        }
+
+        .result-message {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-subtitle {
+            font-size: 1rem;
+            opacity: 0.6;
+            margin-bottom: 1rem;
+        }
+
+        .result-url {
+            font-size: 0.85rem;
+            color: var(--accent);
+            opacity: 0.8;
+        }
+
+        .screenshot-hint {
+            margin-top: 1.25rem;
+            padding: 0.6rem 1rem;
+            background: rgba(29, 161, 242, 0.1);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--accent);
+        }
+
+        .share-section {
+            margin-top: 1.5rem;
+            width: 100%;
+            max-width: 340px;
+        }
+
+        .share-title {
+            font-size: 0.85rem;
+            opacity: 0.5;
+            margin-bottom: 0.75rem;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: center;
+        }
+
+        .share-btn {
+            padding: 0.7rem 1rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .share-btn.facebook {
+            background: #1877f2;
+            color: white;
+        }
+
+        .share-btn.copy {
+            background: var(--link-bg);
+            color: white;
+        }
+
+        .share-btn:active {
+            transform: scale(0.96);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.25rem;
+        }
+
+        .action-btn {
+            padding: 0.85rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            border: none;
+        }
+
+        .action-btn.primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .action-btn.secondary {
+            background: var(--link-bg);
+            color: white;
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Countdown overlay */
+        .countdown-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .countdown-overlay.visible {
+            display: flex;
+        }
+
+        .countdown-number {
+            font-size: 8rem;
+            font-weight: 800;
+            color: var(--accent);
+            animation: countPulse 0.5s ease;
+        }
+
+        @keyframes countPulse {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Points popup */
+        .points-popup {
+            position: fixed;
+            font-size: 1.5rem;
+            font-weight: 700;
+            pointer-events: none;
+            z-index: 50;
+            animation: pointsFade 0.8s ease forwards;
+        }
+
+        .points-popup.positive {
+            color: var(--success);
+        }
+
+        .points-popup.negative {
+            color: var(--error);
+        }
+
+        @keyframes pointsFade {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-40px) scale(1.2); }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            font-weight: 500;
+            z-index: 200;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* Reward teaser */
+        .reward-teaser {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(29, 161, 242, 0.2) 100%);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            padding: 0.6rem 1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            max-width: 300px;
+        }
+
+        .reward-teaser strong {
+            color: var(--success);
+        }
+
+        /* Discount code reveal */
+        .discount-reveal {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.1) 100%);
+            border: 2px solid var(--success);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .discount-reveal.hidden {
+            display: none;
+        }
+
+        .discount-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .discount-code {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--success);
+            background: var(--darker-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            letter-spacing: 2px;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .discount-code:active {
+            transform: scale(0.95);
+        }
+
+        .discount-hint {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            margin-top: 0.5rem;
+        }
+
+        /* Mobile adjustments */
+        @media (max-height: 700px) {
+            .target-area {
+                padding: 0.75rem;
+            }
+
+            .target-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.6rem;
+            }
+
+            .target-name {
+                font-size: 1.2rem;
+            }
+
+            .game-grid {
+                gap: 8px;
+            }
+
+            .hole {
+                border-radius: 16px;
+            }
+
+            .tool-icon {
+                font-size: 2rem;
+            }
+        }
+
+        @media (max-height: 600px) {
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            .description {
+                display: none;
+            }
+
+            .preview-tool {
+                width: 40px;
+                height: 40px;
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Animated background -->
+<div class="stars-container">
+    <div class="stars"></div>
+</div>
+
+<!-- Start Screen -->
+<div class="screen start-screen" id="startScreen">
+    <div class="logo">
+        <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+    </div>
+    <h1>Finn Verktøyet!</h1>
+    <p class="subtitle">Reaksjonsspill</p>
+
+    <p class="description">
+        Trykk på riktig verktøy så fort du kan! Feil verktøy koster deg et liv. Hvor mange poeng klarer du?
+    </p>
+
+    <div class="reward-teaser">
+        🎁 Nå <strong>3500 poeng</strong> og lås opp en <strong>10% rabattkode</strong>!
+    </div>
+
+    <div class="tool-preview">
+        <div class="preview-tool">🔨</div>
+        <div class="preview-tool">🔧</div>
+        <div class="preview-tool">🪛</div>
+        <div class="preview-tool">🪚</div>
+        <div class="preview-tool">📏</div>
+    </div>
+
+    <button class="start-btn" id="startBtn">▶ Start spill</button>
+
+    <a href="/" class="home-link">← Tilbake til minio.no</a>
+</div>
+
+<!-- Game Screen -->
+<div class="screen game-screen hidden" id="gameScreen">
+    <div class="target-area">
+        <div class="target-label">Finn denne:</div>
+        <div class="target-display">
+            <div class="target-icon" id="targetIcon">🔨</div>
+            <div class="target-name" id="targetName">Hammer</div>
+        </div>
+    </div>
+
+    <div class="grid-container">
+        <div class="game-grid" id="gameGrid">
+            <div class="hole empty" data-index="0"><span class="tool-icon"></span></div>
+            <div class="hole empty" data-index="1"><span class="tool-icon"></span></div>
+            <div class="hole empty" data-index="2"><span class="tool-icon"></span></div>
+            <div class="hole empty" data-index="3"><span class="tool-icon"></span></div>
+            <div class="hole empty" data-index="4"><span class="tool-icon"></span></div>
+            <div class="hole empty" data-index="5"><span class="tool-icon"></span></div>
+            <div class="hole empty" data-index="6"><span class="tool-icon"></span></div>
+            <div class="hole empty" data-index="7"><span class="tool-icon"></span></div>
+            <div class="hole empty" data-index="8"><span class="tool-icon"></span></div>
+        </div>
+    </div>
+
+    <div class="lives-container" id="livesContainer">
+        <span class="life">❤️</span>
+        <span class="life">❤️</span>
+        <span class="life">❤️</span>
+    </div>
+</div>
+
+<!-- Countdown Overlay -->
+<div class="countdown-overlay" id="countdownOverlay">
+    <div class="countdown-number" id="countdownNumber">3</div>
+</div>
+
+<!-- End Screen -->
+<div class="screen end-screen hidden" id="endScreen">
+    <div class="result-card">
+        <div class="result-header">
+            <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+            <span>FINN VERKTØYET</span>
+        </div>
+        <div class="result-emoji" id="resultEmoji">🔨</div>
+        <div class="result-label">Poengsum</div>
+        <div class="result-score" id="finalScore">0</div>
+        <div class="result-stats">
+            <div class="result-stat">
+                <div class="result-stat-value" id="finalCorrect">0</div>
+                <div class="result-stat-label">Riktige</div>
+            </div>
+            <div class="result-stat">
+                <div class="result-stat-value" id="finalWrong">0</div>
+                <div class="result-stat-label">Feil</div>
+            </div>
+        </div>
+        <div class="result-message" id="resultMessage">Bra jobbet!</div>
+        <div class="result-subtitle">Klarer du å slå meg?</div>
+        <div class="result-url">minio.no/underholdning/tool-game.html</div>
+
+        <div class="discount-reveal hidden" id="discountReveal">
+            <div class="discount-label">🎉 Du låste opp en rabattkode!</div>
+            <div class="discount-code" id="discountCode" onclick="copyDiscountCode()">VPH10</div>
+            <div class="discount-hint">Trykk for å kopiere • Gjelder 10% rabatt</div>
+        </div>
+    </div>
+
+    <div class="screenshot-hint">📷 Ta screenshot og del!</div>
+
+    <div class="share-section">
+        <div class="share-title">Del resultatet</div>
+        <div class="share-buttons">
+            <button class="share-btn facebook" id="shareFacebook">Facebook</button>
+            <button class="share-btn copy" id="copyResult">Kopier</button>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button class="action-btn primary" id="playAgainBtn">↺ Spill igjen</button>
+        <a href="/" class="action-btn secondary">Minio.no</a>
+    </div>
+</div>
+
+<!-- Unified Header -->
+<style>
+    .unified-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 5000;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.5rem 0.75rem;
+        background: var(--darker-bg);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        height: 56px;
+    }
+
+    .header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .header-home {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        background: rgba(47, 47, 47, 0.8);
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--text-light);
+        font-size: 1rem;
+        transition: all 0.2s;
+    }
+
+    .header-home:hover,
+    .header-home:active {
+        background: rgba(29, 161, 242, 0.3);
+    }
+
+    .game-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .game-nav-item {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        background: rgba(47, 47, 47, 0.6);
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--text-light);
+        font-size: 1rem;
+        transition: all 0.2s;
+        border: 2px solid transparent;
+    }
+
+    .game-nav-item:hover {
+        background: rgba(29, 161, 242, 0.2);
+    }
+
+    .game-nav-item.active {
+        border-color: var(--accent);
+        background: rgba(29, 161, 242, 0.15);
+    }
+
+    .header-stats {
+        display: none;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .header-stats.visible {
+        display: flex;
+    }
+
+    .header-stat {
+        text-align: center;
+        min-width: 45px;
+    }
+
+    .header-stat-value {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--text-light);
+        line-height: 1;
+    }
+
+    .header-stat-value.score {
+        color: var(--success);
+    }
+
+    .header-stat-label {
+        font-size: 0.55rem;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.5);
+        letter-spacing: 0.3px;
+    }
+
+
+    /* Screen positioning to account for header */
+    .screen {
+        top: 56px !important;
+        height: calc(100% - 56px) !important;
+    }
+
+    @media (max-width: 480px) {
+        .unified-header {
+            padding: 0.4rem 0.5rem;
+            height: 50px;
+        }
+
+        .header-home {
+            width: 32px;
+            height: 32px;
+            font-size: 0.9rem;
+        }
+
+        .game-nav-item {
+            width: 30px;
+            height: 30px;
+            font-size: 0.9rem;
+        }
+
+        .header-stat {
+            min-width: 38px;
+        }
+
+        .header-stat-value {
+            font-size: 0.95rem;
+        }
+
+        .header-stat-label {
+            font-size: 0.5rem;
+        }
+
+        .screen {
+            top: 50px !important;
+            height: calc(100% - 50px) !important;
+        }
+    }
+
+    @media (max-width: 360px) {
+        .game-nav {
+            gap: 0.2rem;
+        }
+
+        .game-nav-item {
+            width: 26px;
+            height: 26px;
+            font-size: 0.8rem;
+        }
+
+        .header-stats {
+            gap: 0.5rem;
+        }
+
+        .header-stat {
+            min-width: 32px;
+        }
+
+        .header-stat-value {
+            font-size: 0.85rem;
+        }
+    }
+</style>
+
+<header class="unified-header" id="unified-header">
+    <div class="header-left">
+        <a href="index.html" class="header-home" onclick="return confirmLeave(this)" title="Tilbake">🏠</a>
+        <nav class="game-nav">
+            <a href="tool-quiz.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøy Quiz">🌍</a>
+            <a href="tool-game.html" class="game-nav-item active" title="Finn Verktøyet">🔨</a>
+            <a href="tool-nails.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Spiker'n">🪵</a>
+            <a href="tool-saw.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Sag Rytme">🪚</a>
+            <a href="tool-maze.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøyjakt">👷</a>
+        </nav>
+    </div>
+    <div class="header-stats" id="header-stats">
+        <div class="header-stat">
+            <div class="header-stat-value score" id="headerScore">0</div>
+            <div class="header-stat-label">Poeng</div>
+        </div>
+        <div class="header-stat">
+            <div class="header-stat-value" id="headerTime">30</div>
+            <div class="header-stat-label">Sekunder</div>
+        </div>
+    </div>
+</header>
+
+<script>
+    // Tools data
+    const TOOLS = [
+        { icon: '🔨', name: 'Hammer' },
+        { icon: '🔧', name: 'Skiftenøkkel' },
+        { icon: '🪛', name: 'Skrutrekker' },
+        { icon: '🪚', name: 'Sag' },
+        { icon: '📏', name: 'Linjal' },
+        { icon: '⚙️', name: 'Tannhjul' },
+        { icon: '🔩', name: 'Bolt' },
+        { icon: '🪓', name: 'Øks' }
+    ];
+
+    // Game config
+    const GAME_DURATION = 30;
+    const INITIAL_TOOL_DURATION = 2000;
+    const MIN_TOOL_DURATION = 800;
+    const POINTS_CORRECT = 100;
+    const POINTS_WRONG = -50;
+    const STARTING_LIVES = 3;
+
+    // Game state
+    let score = 0;
+    let timeLeft = GAME_DURATION;
+    let lives = STARTING_LIVES;
+    let correctCount = 0;
+    let wrongCount = 0;
+    let targetTool = null;
+    let gameTimer = null;
+    let toolTimer = null;
+    let isPlaying = false;
+    let toolDuration = INITIAL_TOOL_DURATION;
+
+    // DOM elements
+    const startScreen = document.getElementById('startScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const endScreen = document.getElementById('endScreen');
+    const countdownOverlay = document.getElementById('countdownOverlay');
+    const countdownNumber = document.getElementById('countdownNumber');
+    const headerStats = document.getElementById('header-stats');
+    const scoreDisplay = document.getElementById('headerScore');
+    const timeDisplay = document.getElementById('headerTime');
+    const targetIcon = document.getElementById('targetIcon');
+    const targetName = document.getElementById('targetName');
+    const gameGrid = document.getElementById('gameGrid');
+    const livesContainer = document.getElementById('livesContainer');
+    const holes = document.querySelectorAll('.hole');
+
+    // Shuffle array
+    function shuffle(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // Get random items from array
+    function getRandomItems(array, count) {
+        return shuffle(array).slice(0, count);
+    }
+
+    // Set new target
+    function setNewTarget() {
+        targetTool = TOOLS[Math.floor(Math.random() * TOOLS.length)];
+        targetIcon.textContent = targetTool.icon;
+        targetName.textContent = targetTool.name;
+    }
+
+    // Populate grid with tools
+    function populateGrid() {
+        // Clear all holes
+        holes.forEach(hole => {
+            hole.classList.remove('has-tool', 'correct', 'wrong');
+            hole.classList.add('empty');
+            hole.querySelector('.tool-icon').textContent = '';
+            hole.dataset.tool = '';
+        });
+
+        // Decide how many tools to show (3-6)
+        const toolCount = 3 + Math.floor(Math.random() * 4);
+
+        // Get random positions
+        const positions = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8]).slice(0, toolCount);
+
+        // Make sure target tool is included
+        const toolsToShow = getRandomItems(TOOLS.filter(t => t !== targetTool), toolCount - 1);
+        toolsToShow.push(targetTool);
+        shuffle(toolsToShow);
+
+        // Place tools
+        positions.forEach((pos, i) => {
+            const hole = holes[pos];
+            const tool = toolsToShow[i];
+            hole.classList.remove('empty');
+            hole.classList.add('has-tool');
+            hole.querySelector('.tool-icon').textContent = tool.icon;
+            hole.dataset.tool = tool.name;
+        });
+
+        // Set timer to refresh grid
+        if (toolTimer) clearTimeout(toolTimer);
+        toolTimer = setTimeout(() => {
+            if (isPlaying) {
+                populateGrid();
+            }
+        }, toolDuration);
+    }
+
+    // Handle hole click
+    function handleHoleClick(e) {
+        if (!isPlaying) return;
+
+        const hole = e.currentTarget;
+        if (hole.classList.contains('empty')) return;
+
+        const toolName = hole.dataset.tool;
+        const rect = hole.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+
+        if (toolName === targetTool.name) {
+            // Correct!
+            score += POINTS_CORRECT;
+            correctCount++;
+            hole.classList.add('correct');
+            showPointsPopup(x, y, '+' + POINTS_CORRECT, true);
+
+            // Speed up slightly
+            toolDuration = Math.max(MIN_TOOL_DURATION, toolDuration - 30);
+
+            // New target and refresh grid
+            setTimeout(() => {
+                setNewTarget();
+                populateGrid();
+            }, 300);
+        } else {
+            // Wrong!
+            score = Math.max(0, score + POINTS_WRONG);
+            wrongCount++;
+            lives--;
+            hole.classList.add('wrong');
+            showPointsPopup(x, y, POINTS_WRONG, false);
+            updateLives();
+
+            if (lives <= 0) {
+                endGame();
+            }
+        }
+
+        updateScore();
+    }
+
+    // Show points popup
+    function showPointsPopup(x, y, points, isPositive) {
+        const popup = document.createElement('div');
+        popup.className = 'points-popup ' + (isPositive ? 'positive' : 'negative');
+        popup.textContent = points;
+        popup.style.left = x + 'px';
+        popup.style.top = y + 'px';
+        document.body.appendChild(popup);
+
+        setTimeout(() => popup.remove(), 800);
+    }
+
+    // Update score display
+    function updateScore() {
+        scoreDisplay.textContent = score;
+    }
+
+    // Update lives display
+    function updateLives() {
+        const lifeElements = livesContainer.querySelectorAll('.life');
+        lifeElements.forEach((life, i) => {
+            if (i >= lives) {
+                life.classList.add('lost');
+            } else {
+                life.classList.remove('lost');
+            }
+        });
+    }
+
+    // Start countdown
+    function startCountdown() {
+        startScreen.classList.add('hidden');
+        gameScreen.classList.remove('hidden');
+        headerStats.classList.add('visible');
+        countdownOverlay.classList.add('visible');
+
+        let count = 3;
+        countdownNumber.textContent = count;
+
+        const countInterval = setInterval(() => {
+            count--;
+            if (count > 0) {
+                countdownNumber.textContent = count;
+                countdownNumber.style.animation = 'none';
+                void countdownNumber.offsetWidth;
+                countdownNumber.style.animation = 'countPulse 0.5s ease';
+            } else {
+                clearInterval(countInterval);
+                countdownNumber.textContent = 'GO!';
+                countdownNumber.style.animation = 'none';
+                void countdownNumber.offsetWidth;
+                countdownNumber.style.animation = 'countPulse 0.5s ease';
+
+                setTimeout(() => {
+                    countdownOverlay.classList.remove('visible');
+                    startGame();
+                }, 500);
+            }
+        }, 800);
+    }
+
+    // Start game
+    function startGame() {
+        // Reset state
+        score = 0;
+        timeLeft = GAME_DURATION;
+        lives = STARTING_LIVES;
+        correctCount = 0;
+        wrongCount = 0;
+        toolDuration = INITIAL_TOOL_DURATION;
+        isPlaying = true;
+
+        // Reset UI
+        updateScore();
+        updateLives();
+        timeDisplay.textContent = timeLeft;
+
+        // Set target and populate
+        setNewTarget();
+        populateGrid();
+
+        // Start timer
+        gameTimer = setInterval(() => {
+            timeLeft--;
+            timeDisplay.textContent = timeLeft;
+
+            if (timeLeft <= 0) {
+                endGame();
+            }
+        }, 1000);
+    }
+
+    // End game
+    function endGame() {
+        isPlaying = false;
+        if (gameTimer) clearInterval(gameTimer);
+        if (toolTimer) clearTimeout(toolTimer);
+
+        setTimeout(() => {
+            showEndScreen();
+        }, 500);
+    }
+
+    // Show end screen
+    function showEndScreen() {
+        gameScreen.classList.add('hidden');
+        headerStats.classList.remove('visible');
+        endScreen.classList.remove('hidden');
+
+        document.getElementById('finalScore').textContent = score;
+        document.getElementById('finalCorrect').textContent = correctCount;
+        document.getElementById('finalWrong').textContent = wrongCount;
+
+        // Check for discount code unlock (3500+ points)
+        const discountReveal = document.getElementById('discountReveal');
+        if (score >= 3500) {
+            discountReveal.classList.remove('hidden');
+        } else {
+            discountReveal.classList.add('hidden');
+        }
+
+        let emoji, message;
+        if (score >= 3000) {
+            emoji = '🏆';
+            message = 'Mesterlig!';
+        } else if (score >= 2500) {
+            emoji = '🌟';
+            message = 'Imponerende!';
+        } else if (score >= 1000) {
+            emoji = '👏';
+            message = 'Veldig bra!';
+        } else if (score >= 500) {
+            emoji = '👍';
+            message = 'Bra jobbet!';
+        } else {
+            emoji = '💪';
+            message = 'Prøv igjen!';
+        }
+
+        document.getElementById('resultEmoji').textContent = emoji;
+        document.getElementById('resultMessage').textContent = message;
+    }
+
+    // Copy discount code
+    function copyDiscountCode() {
+        const code = document.getElementById('discountCode').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            showNotification('Rabattkode kopiert: ' + code);
+        }).catch(() => {
+            showNotification('Kode: ' + code);
+        });
+    }
+
+    // Share functions
+    function getShareText() {
+        return `Jeg fikk ${score} poeng i Finn Verktøyet! 🔨 ${correctCount} riktige. Klarer du å slå meg? minio.no/underholdning/tool-game.html`;
+    }
+
+    document.getElementById('shareFacebook').addEventListener('click', () => {
+        const url = encodeURIComponent('https://minio.no/underholdning/tool-game.html');
+        const text = encodeURIComponent(getShareText());
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank');
+    });
+
+    document.getElementById('copyResult').addEventListener('click', () => {
+        const text = getShareText();
+        navigator.clipboard.writeText(text).then(() => {
+            showNotification('Kopiert!');
+        }).catch(() => {
+            // Fallback
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showNotification('Kopiert!');
+        });
+    });
+
+    function showNotification(message) {
+        const existing = document.querySelector('.notification');
+        if (existing) existing.remove();
+
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 300);
+        }, 2000);
+    }
+
+    // Event listeners
+    document.getElementById('startBtn').addEventListener('click', startCountdown);
+    document.getElementById('playAgainBtn').addEventListener('click', () => {
+        endScreen.classList.add('hidden');
+        startCountdown();
+    });
+
+    holes.forEach(hole => {
+        hole.addEventListener('click', handleHoleClick);
+    });
+
+    // Prevent double-tap zoom
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            e.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, { passive: false });
+
+    // Confirm before leaving during gameplay
+    function confirmLeave(link) {
+        if (isPlaying) {
+            return confirm('Du er midt i et spill. Er du sikker på at du vil forlate?');
+        }
+        return true;
+    }
+</script>
+
+</body>
+</html>

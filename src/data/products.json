@@ -1,0 +1,124 @@
+[
+  {
+    "id": "varmepumpehus",
+    "slug": "varmepumpehus",
+    "title": "Skreddersydd varmepumpehus",
+    "shortDescription": "Et skreddersydd varmepumpehus beskytter varmepumpen din mot vær, vind og mekaniske skader. Det forlenger levetiden, reduserer støy og gjør uteområdet penere.",
+    "price": "Pris fra 6990,-",
+    "regularPrice": "Ordinær pris fra 7990,-",
+    "images": [
+      { "src": "/images/products/minio_vps.webp", "alt": "Elegant varmepumpehus i hvitmalt tre som beskytter varmepumpe" },
+      { "src": "/images/products/minio_vph1.webp", "alt": "Varmepumpehus montert på husvegg med ventilasjonsspalter" },
+      { "src": "/images/products/minio_vph2.webp", "alt": "Detaljert varmepumpehus i naturlig tre som matcher husets stil" }
+    ],
+    "detailsHtml": "<h3>Skreddersydd varmepumpehus</h3><p>Gi varmepumpen din den beskyttelsen den fortjener med et solid og stilrent <strong>varmepumpehus laget på bestilling</strong>. Vi tilpasser huset etter dine mål, fargeønsker og omgivelser – slik at det både <strong>beskytter og forskjønner</strong>.</p><h4>Hvorfor velge et varmepumpehus?</h4><ul><li>Skjermer mot <strong>regn, snø, is og vind</strong></li><li>Forhindrer løv, smuss og rusk i å tette ventilene</li><li>Beskytter mot <strong>mekanisk skade</strong> fra hagearbeid og lek</li><li><strong>Reduserer støy</strong> og forbedrer inntrykket av uteområdet</li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – perfekt for deg som vil sette ditt eget preg</li><li><strong>Grunnet</strong> – klart for maling i din farge</li><li><strong>Beiset eller malt</strong> – ferdig monteringsklar og tilpasset hjemmet ditt</li></ul><p><strong>Ta kontakt i dag</strong> for å få et tilbud på ditt spesialtilpassede varmepumpehus!</p>",
+    "category": "primary",
+    "showOnFrontPage": true,
+    "isFeatured": true,
+    "hasPromoRibbon": false,
+    "hasConfigurator": true,
+    "basePrice": 6990
+  },
+  {
+    "id": "soppelbod",
+    "slug": "soppelboder",
+    "title": "Skreddersydd søppelbod",
+    "shortDescription": "Hold søppeldunkene ryddig og skjult med en solid søppelbod tilpasset dine mål. Praktisk, pen og holdbar.",
+    "price": "Pris fra 7 900,-",
+    "images": [
+      { "src": "/images/products/garbage_house_1.webp", "alt": "Søppelbod i tre som skjuler avfallsbeholdere" },
+      { "src": "/images/products/garbage_house_2.webp", "alt": "Søppelbod med åpen front for enkel tilgang til dunker" }
+    ],
+    "detailsHtml": "<h3>Skreddersydd søppelbod</h3><p>Hold søppeldunkene ryddig gjemt bort med en <strong>solid og stilren søppelbod laget på bestilling</strong>. Vi tilpasser boden etter antall dunker, ønskede mål og fargevalg.</p><h4>Hvorfor velge en søppelbod?</h4><ul><li>Skjuler søppeldunker og gir et <strong>ryddigere uteområde</strong></li><li>Beskytter mot <strong>vær, vind og dyr</strong></li><li><strong>Hindrer at lokk blåser av</strong> i dårlig vær – dunkene står trygt og beskyttet</li><li>Tilgang fra baksiden gjør det <strong>mindre fristende for andre</strong> å kaste hundebæsjposer eller annet søppel i dunkene dine</li><li>Tilpasses antall dunker og <strong>tilgjengelig plass</strong></li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for deg som vil male eller beise selv</li><li><strong>Grunnet</strong> – klart til å males i ønsket farge</li><li><strong>Beiset eller malt</strong> – ferdig levert og klar til bruk</li></ul><p><strong>Ta kontakt i dag</strong> for et uforpliktende tilbud på en søppelbod tilpasset ditt hjem!</p>",
+    "category": "secondary",
+    "showOnFrontPage": true,
+    "isFeatured": false,
+    "hasPromoRibbon": false,
+    "hasConfigurator": true,
+    "basePrice": 7900
+  },
+  {
+    "id": "vedskjul",
+    "slug": "vedskjul",
+    "title": "Skreddersydd vedskjul",
+    "shortDescription": "Oppbevar veden tørt og tilgjengelig med et solid vedskjul laget på bestilling. Tilpasset dine mål for optimal lufting og beskyttelse.",
+    "price": "Pris fra 13 900,-",
+    "images": [
+      { "src": "/images/products/fire_wood_shed_1.webp", "alt": "Vedskjul i tre med stablede vedkubber" }
+    ],
+    "detailsHtml": "<h3>Skreddersydd vedskjul</h3><p>Hold veden tørr og lett tilgjengelig med et <strong>solid og stilrent vedskjul laget på bestilling</strong>. Vi tilpasser skjulet etter antall seksjoner, ønskede mål og fargevalg.</p><h4>Hvorfor velge et vedskjul?</h4><ul><li>Beskytter veden mot <strong>regn, snø og fukt</strong></li><li>God ventilasjon sørger for at veden <strong>tørker naturlig</strong></li><li>Gir et <strong>ryddigere og penere uteområde</strong></li><li>Åpen front for <strong>enkel tilgang</strong> til veden hele året</li><li>Tilpasses antall seksjoner og <strong>tilgjengelig plass</strong></li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for deg som vil male eller beise selv</li><li><strong>Grunnet</strong> – klart til å males i ønsket farge</li><li><strong>Beiset eller malt</strong> – ferdig levert og klar til bruk</li></ul><p><strong>Ta kontakt i dag</strong> for et uforpliktende tilbud på et vedskjul tilpasset ditt hjem!</p>",
+    "category": "secondary",
+    "showOnFrontPage": true,
+    "isFeatured": false,
+    "hasPromoRibbon": false,
+    "hasConfigurator": true,
+    "basePrice": 13900
+  },
+  {
+    "id": "postkassestativ",
+    "slug": "postkassestativer",
+    "title": "Skreddersydd postkassestativ",
+    "shortDescription": "Gi postkassen din et stilrent og solid stativ laget på bestilling. Tilpasset dine mål og stil for et gjennomført inntrykk ved innkjørselen.",
+    "price": "Pris fra 7 490,-",
+    "images": [
+      { "src": "/images/products/mail_box_stand_1.webp", "alt": "Postkassestativ i tre med moderne design" },
+      { "src": "/images/products/mail_box_2.webp", "alt": "Postkassestativ med grønne postkasser og pakkehyller" },
+      { "src": "/images/products/mail_box_3.webp", "alt": "Postkassestativ sett forfra med belysning" }
+    ],
+    "detailsHtml": "<h3>Skreddersydd postkassestativ</h3><p>Gi innkjørselen et <strong>gjennomført og stilrent uttrykk</strong> med et postkassestativ laget på bestilling. Vi tilpasser stativet etter din postkasse, ønskede mål og design.</p><h4>Hvorfor velge et skreddersydd postkassestativ?</h4><ul><li>Tilpasset <strong>din postkasse og plassering</strong></li><li>Gir et <strong>ryddig og profesjonelt inntrykk</strong></li><li>Solid konstruksjon som <strong>tåler norsk vær</strong></li><li>Kan kombineres med <strong>husnummer eller belysning</strong></li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for deg som vil sette ditt eget preg</li><li><strong>Grunnet</strong> – klart til å males i ønsket farge</li><li><strong>Beiset eller malt</strong> – ferdig levert og klar til bruk</li></ul><p><strong>Ta kontakt i dag</strong> for et uforpliktende tilbud!</p>",
+    "category": "secondary",
+    "showOnFrontPage": false,
+    "isFeatured": false,
+    "hasPromoRibbon": false,
+    "hasConfigurator": true,
+    "basePrice": 7490
+  },
+  {
+    "id": "robotklippergarasje",
+    "slug": "robotklippergarasje",
+    "title": "Skreddersydd robotklippergarasje",
+    "shortDescription": "Gi robotklipperen din et trygt og stilrent hjem med en garasje laget på bestilling. Optimal beskyttelse og flott design.",
+    "price": "Pris fra 4900,-",
+    "images": [
+      { "src": "/images/products/minio_rkg2.webp", "alt": "Moderne robotklippergarasje i svart som beskytter robotgressklipper" }
+    ],
+    "detailsHtml": "<h3>Skreddersydd robotklippergarasje</h3><p>Gi robotklipperen din et trygt og stilrent hjem med en <strong>garasje laget på bestilling</strong>. Vi tilpasser garasjen etter dine mål, fargeønsker og omgivelser – for å gi både <strong>optimal beskyttelse og et flott visuelt uttrykk</strong>.</p><h4>Hvorfor bruke en robotklippergarasje?</h4><ul><li>Skjermer mot <strong>regn, hagl, snø og sol</strong> – forlenger levetiden på klipperen</li><li>Beskytter mot <strong>løv, rusk og smuss</strong> som kan samle seg i ladestasjonen</li><li>Hindrer <strong>mekaniske skader</strong> fra fallende greiner, leker eller uhell</li><li>Gir hagen et <strong>ryddigere og mer gjennomført uttrykk</strong></li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for deg som vil gi den din personlige touch</li><li><strong>Grunnet</strong> – klart til å males i ønsket farge</li><li><strong>Beiset eller malt</strong> – ferdig levert, klart til bruk</li></ul><p><strong>Ta kontakt i dag</strong> for å bestille din unike robotklippergarasje – funksjonell, solid og flott å se på!</p>",
+    "category": "secondary",
+    "showOnFrontPage": true,
+    "isFeatured": false,
+    "hasPromoRibbon": false,
+    "hasConfigurator": false
+  },
+  {
+    "id": "levegg",
+    "slug": "levegger",
+    "title": "Moderne levegg i impregnert treverk",
+    "shortDescription": "Skap privatliv og stil på terrassen med en skreddersydd levegg i trykkimpregnert tre. Moderne design med lang holdbarhet.",
+    "price": "Pris fra 3900,-",
+    "images": [
+      { "src": "/images/products/minio_levegg_variant.webp", "alt": "Moderne levegg med vertikale trespiler som gir privatliv på terrasse" }
+    ],
+    "detailsHtml": "<h3>Moderne levegg i impregnert treverk</h3><p>Skap privatliv og stil på terrassen med en <strong>skreddersydd levegg</strong> i trykkimpregnert tre. Perfekt for uteplasser som trenger både <strong>skjerming og et moderne uttrykk</strong>.</p><h4>Fordeler med vår levegg med spiler:</h4><ul><li>Gir <strong>skjerming</strong> mot innsyn og vind uten å blokkere lyset helt</li><li>Moderne og <strong>estetisk design</strong> – passer til de fleste hjem</li><li>Trykkimpregnert tre for <strong>lang holdbarhet og lite vedlikehold</strong></li><li>Kan monteres frittstående eller som del av rekkverk</li></ul><h4>Tilgjengelige størrelser og priser:</h4><ul><li><strong>90 x 150 cm</strong> – Fra kr 3900,-</li><li><strong>120 x 150 cm</strong> – Fra kr 4400,-</li><li><strong>180 x 180 cm</strong> – Fra kr 4900,-</li></ul><p><strong>Kontakt oss i dag</strong> for en levegg som kombinerer funksjon og stil – perfekt tilpasset dine mål og ønsker!</p>",
+    "category": "secondary",
+    "showOnFrontPage": true,
+    "isFeatured": false,
+    "hasPromoRibbon": false,
+    "hasConfigurator": false
+  },
+  {
+    "id": "plantekasse",
+    "slug": "plantekasser",
+    "title": "Skreddersydd plantekasse",
+    "shortDescription": "Dyrk blomster, urter eller grønnsaker i en solid plantekasse laget på bestilling. Tilpasset dine mål for terrasse, balkong eller hage.",
+    "price": "Pris fra 6 900,-",
+    "images": [
+      { "src": "/images/products/plantekasser_1.webp", "alt": "Plantekasse i tre med blomster og grønne planter" }
+    ],
+    "detailsHtml": "<h3>Skreddersydd plantekasse</h3><p>Dyrk blomster, urter eller grønnsaker i en <strong>solid og pen plantekasse laget på bestilling</strong>. Vi tilpasser kassen etter dine mål og ønsker – perfekt for terrassen, balkongen eller hagen.</p><h4>Hvorfor velge en skreddersydd plantekasse?</h4><ul><li>Tilpasset <strong>nøyaktig den plassen du har</strong></li><li>Solid konstruksjon i <strong>holdbart treverk</strong></li><li>Perfekt for <strong>urter, blomster eller grønnsaker</strong></li><li>Løfter uteområdet med et <strong>naturlig og varmt uttrykk</strong></li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for et naturlig uttrykk</li><li><strong>Grunnet</strong> – klart til å males i ønsket farge</li><li><strong>Beiset eller malt</strong> – ferdig levert og klar til bruk</li></ul><p><strong>Ta kontakt i dag</strong> for et uforpliktende tilbud!</p>",
+    "category": "secondary",
+    "showOnFrontPage": false,
+    "isFeatured": false,
+    "hasPromoRibbon": false,
+    "hasConfigurator": false
+  }
+]

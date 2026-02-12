@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="nb">
+
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+    <title>Minio Underholdning - Spiker'n</title>
+    <meta name="description" content="Slå spikeren i planken med perfekt timing! Et avhengighetsskapende reaksjonsspill fra Minio. Vinn 10% rabattkode!"/>
+    <meta name="keywords" content="Minio, spill, spiker, timing, Lillehammer, håndverk, rabattkode"/>
+    <meta name="author" content="Minio"/>
+    <meta name="robots" content="index, follow"/>
+    <link rel="canonical" href="https://www.minio.no/underholdning/tool-nails.html"/>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
+    <link rel="apple-touch-icon" href="/favicon.ico"/>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E4J774CTXF"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-E4J774CTXF');
+    </script>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:url" content="https://www.minio.no/underholdning/tool-nails.html"/>
+    <meta property="og:title" content="Spiker'n – Minio Underholdning"/>
+    <meta property="og:description" content="Slå spikeren i planken med perfekt timing! Vinn 10% rabattkode!"/>
+    <meta property="og:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
+    <meta property="og:image:width" content="1200"/>
+    <meta property="og:image:height" content="630"/>
+    <meta property="og:image:alt" content="Spiker'n - Minio spill"/>
+    <meta property="og:site_name" content="Minio"/>
+    <meta property="og:locale" content="nb_NO"/>
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Spiker'n – Klarer du å slå meg?"/>
+    <meta name="twitter:description" content="Slå spikeren i planken med perfekt timing! Test deg selv!"/>
+    <meta name="twitter:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
+
+    <style>
+        :root {
+            --dark-bg: #202020;
+            --darker-bg: #1a1a1a;
+            --light-bg: #f4f4f4;
+            --text-light: #f9f9f9;
+            --text-dark: #202020;
+            --link-bg: #2f2f2f;
+            --accent: #1da1f2;
+            --accent-hover: #0d8ddb;
+            --success: #4caf50;
+            --error: #e53935;
+            --warning: #ff9800;
+            --wood: #8B4513;
+            --wood-light: #A0522D;
+            --wood-dark: #5D2E0C;
+            --nail: #888;
+            --nail-light: #aaa;
+            --perfect: #FFD700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: #0a0a12;
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow: hidden;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Animated starfield background */
+        .stars-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(ellipse at bottom, #1a1a2e 0%, #0a0a12 100%);
+        }
+
+        .stars::before,
+        .stars::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-repeat: repeat;
+        }
+
+        .stars::before {
+            background-image:
+                radial-gradient(1px 1px at 25px 30px, white, transparent),
+                radial-gradient(1px 1px at 50px 120px, white, transparent),
+                radial-gradient(1px 1px at 100px 40px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1.5px 1.5px at 150px 80px, white, transparent),
+                radial-gradient(1px 1px at 200px 150px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1.5px 1.5px at 250px 60px, white, transparent),
+                radial-gradient(1px 1px at 300px 180px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 350px 20px, white, transparent),
+                radial-gradient(1.5px 1.5px at 400px 100px, rgba(255,255,255,0.9), transparent),
+                radial-gradient(1px 1px at 450px 140px, white, transparent);
+            background-size: 500px 200px;
+            animation: twinkle 4s ease-in-out infinite;
+        }
+
+        .stars::after {
+            background-image:
+                radial-gradient(1px 1px at 75px 50px, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1.5px 1.5px at 125px 90px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 175px 130px, rgba(255,255,255,0.4), transparent),
+                radial-gradient(1px 1px at 225px 170px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1.5px 1.5px at 275px 30px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1px 1px at 325px 70px, rgba(255,255,255,0.5), transparent),
+                radial-gradient(1px 1px at 375px 110px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1.5px 1.5px at 425px 160px, rgba(255,255,255,0.6), transparent);
+            background-size: 450px 200px;
+            animation: twinkle 6s ease-in-out infinite reverse;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            text-align: center;
+            z-index: 1;
+        }
+
+        .screen.hidden {
+            display: none;
+        }
+
+        /* Start Screen */
+        .logo {
+            margin-bottom: 1.5rem;
+        }
+
+        .logo img {
+            height: 50px;
+            width: auto;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            font-size: 1rem;
+            opacity: 0.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .description {
+            max-width: 300px;
+            line-height: 1.6;
+            opacity: 0.7;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .nail-preview {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+        }
+
+        .start-btn {
+            padding: 1rem 2.5rem;
+            background: var(--accent);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .start-btn:active {
+            transform: scale(0.96);
+            background: var(--accent-hover);
+        }
+
+        .high-score-display {
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            opacity: 0.5;
+        }
+
+        .high-score-display span {
+            color: var(--perfect);
+            font-weight: 700;
+        }
+
+        .home-link {
+            margin-top: 2rem;
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: var(--link-bg);
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: all 0.2s;
+        }
+
+        .home-link:hover,
+        .home-link:active {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* Game Screen */
+        .game-screen {
+            padding: 0;
+            justify-content: flex-start;
+        }
+
+        .game-header {
+            width: 100%;
+            padding: 0.75rem 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--darker-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .game-header .logo img {
+            height: 24px;
+            margin-bottom: 0;
+        }
+
+        .stats {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-value.score {
+            color: var(--success);
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            opacity: 0.5;
+            text-transform: uppercase;
+        }
+
+        /* Game Area */
+        .game-area {
+            flex: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 1rem;
+        }
+
+        /* Power meter */
+        .power-meter-container {
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 2rem;
+        }
+
+        .power-meter-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            opacity: 0.5;
+            margin-bottom: 0.5rem;
+        }
+
+        .power-meter {
+            width: 100%;
+            height: 24px;
+            background: var(--darker-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid rgba(255,255,255,0.1);
+        }
+
+        .power-meter-zones {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+        }
+
+        .zone {
+            height: 100%;
+        }
+
+        .zone.bad-left {
+            width: 35%;
+            background: linear-gradient(90deg, var(--error) 0%, var(--warning) 100%);
+        }
+
+        .zone.good {
+            width: 20%;
+            background: var(--success);
+        }
+
+        .zone.perfect {
+            width: 10%;
+            background: var(--perfect);
+        }
+
+        .zone.good2 {
+            width: 20%;
+            background: var(--success);
+        }
+
+        .zone.bad-right {
+            width: 15%;
+            background: linear-gradient(90deg, var(--warning) 0%, var(--error) 100%);
+        }
+
+        .power-indicator {
+            position: absolute;
+            top: -4px;
+            bottom: -4px;
+            width: 6px;
+            background: white;
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.8);
+            transition: left 0.016s linear;
+            z-index: 10;
+        }
+
+        /* Nail and plank */
+        .nail-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            margin-top: 1.5rem;
+        }
+
+        .nail-container {
+            position: relative;
+            width: 220px;
+            height: 140px;
+        }
+
+        .nail {
+            width: 8px;
+            height: 70px;
+            background: linear-gradient(90deg, #666 0%, #aaa 50%, #666 100%);
+            border-radius: 2px 2px 1px 1px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            transition: height 0.1s ease-out, top 0.1s ease-out;
+            z-index: 2;
+        }
+
+        .nail::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 8px solid #555;
+        }
+
+        .nail-head {
+            width: 24px;
+            height: 10px;
+            background: linear-gradient(180deg, #bbb 0%, #888 100%);
+            border-radius: 3px;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            transition: top 0.1s ease-out;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        }
+
+        .nail-head.hit {
+            animation: nailHit 0.15s ease-out;
+        }
+
+        @keyframes nailHit {
+            0% { transform: translateX(-50%) scale(1); }
+            50% { transform: translateX(-50%) scale(1.3); box-shadow: 0 0 20px rgba(255,255,255,0.5); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+
+        .plank {
+            width: 220px;
+            height: 60px;
+            background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 40%, var(--wood-dark) 100%);
+            border-radius: 6px;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .plank::before {
+            content: '';
+            position: absolute;
+            top: 12px;
+            left: 15px;
+            right: 15px;
+            height: 3px;
+            background: rgba(0,0,0,0.15);
+            border-radius: 2px;
+        }
+
+        .plank::after {
+            content: '';
+            position: absolute;
+            bottom: 15px;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 2px;
+        }
+
+        .impact-flash {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .impact-flash.show {
+            animation: impactFlash 0.2s ease-out;
+        }
+
+        @keyframes impactFlash {
+            0% { background: rgba(255,255,255,0.8); transform: translateX(-50%) scale(0.5); opacity: 1; }
+            100% { background: transparent; transform: translateX(-50%) scale(2); opacity: 0; }
+        }
+
+        /* Reward teaser */
+        .reward-teaser {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(29, 161, 242, 0.2) 100%);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            padding: 0.6rem 1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            max-width: 280px;
+        }
+
+        .reward-teaser strong {
+            color: var(--success);
+        }
+
+        /* Discount code reveal */
+        .discount-reveal {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.1) 100%);
+            border: 2px solid var(--success);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+
+        .discount-reveal.hidden {
+            display: none;
+        }
+
+        .discount-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.7;
+            margin-bottom: 0.5rem;
+        }
+
+        .discount-code {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--success);
+            background: var(--darker-bg);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-family: monospace;
+            letter-spacing: 2px;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .discount-code:active {
+            transform: scale(0.95);
+        }
+
+        .discount-hint {
+            font-size: 0.7rem;
+            opacity: 0.6;
+            margin-top: 0.5rem;
+        }
+
+        /* Feedback */
+        .hit-feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: 800;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 20;
+        }
+
+        .hit-feedback.show {
+            animation: feedbackPop 0.6s ease-out forwards;
+        }
+
+        .hit-feedback.perfect {
+            color: var(--perfect);
+        }
+
+        .hit-feedback.good {
+            color: var(--success);
+        }
+
+        .hit-feedback.ok {
+            color: var(--warning);
+        }
+
+        .hit-feedback.miss {
+            color: var(--error);
+        }
+
+        @keyframes feedbackPop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -80%) scale(1); }
+        }
+
+        /* Tap instruction */
+        .tap-instruction {
+            margin-top: 2rem;
+            font-size: 1rem;
+            opacity: 0.6;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Combo display */
+        .combo-display {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            text-align: right;
+        }
+
+        .combo-count {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--perfect);
+            opacity: 0;
+            transition: all 0.2s;
+        }
+
+        .combo-count.show {
+            opacity: 1;
+        }
+
+        .combo-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.5;
+        }
+
+        /* Nails counter */
+        .nails-display {
+            display: flex;
+            gap: 4px;
+            margin-top: 1.5rem;
+        }
+
+        .nail-icon {
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .nail-icon.used {
+            opacity: 0.2;
+            transform: scale(0.8);
+        }
+
+        /* End Screen */
+        .end-screen {
+            background: linear-gradient(180deg, #151515 0%, #1a1a1a 50%, #151515 100%);
+        }
+
+        .result-card {
+            background: linear-gradient(145deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
+            border-radius: 24px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            max-width: 340px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.5), 0 0 0 2px rgba(29, 161, 242, 0.3);
+        }
+
+        .result-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--accent) 0%, #0d8ddb 50%, var(--accent) 100%);
+            border-radius: 26px;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .result-header img {
+            height: 28px;
+        }
+
+        .result-header span {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 1px;
+        }
+
+        .result-emoji {
+            font-size: 3.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-label {
+            font-size: 0.75rem;
+            opacity: 0.5;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .result-score {
+            font-size: 4.5rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1rem 0;
+            padding: 1rem 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .result-stat {
+            text-align: center;
+        }
+
+        .result-stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .result-stat-value.perfects {
+            color: var(--perfect);
+        }
+
+        .result-stat-value.combo {
+            color: var(--accent);
+        }
+
+        .result-stat-label {
+            font-size: 0.65rem;
+            opacity: 0.5;
+            text-transform: uppercase;
+        }
+
+        .new-record {
+            background: var(--perfect);
+            color: var(--text-dark);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+            animation: recordPulse 1s infinite;
+        }
+
+        @keyframes recordPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .result-message {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-subtitle {
+            font-size: 0.95rem;
+            opacity: 0.6;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 0.85rem 1.5rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            border: none;
+        }
+
+        .action-btn.primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .action-btn.secondary {
+            background: var(--link-bg);
+            color: white;
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Unified Header */
+        .unified-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.5rem 0.75rem;
+            background: var(--darker-bg);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            height: 56px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .header-home {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(47, 47, 47, 0.8);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .header-home:hover,
+        .header-home:active {
+            background: rgba(29, 161, 242, 0.3);
+        }
+
+        .game-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .game-nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            background: rgba(47, 47, 47, 0.6);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .game-nav-item:hover {
+            background: rgba(29, 161, 242, 0.2);
+        }
+
+        .game-nav-item.active {
+            border-color: var(--accent);
+            background: rgba(29, 161, 242, 0.15);
+        }
+
+        .header-stats {
+            display: none;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-stats.visible {
+            display: flex;
+        }
+
+        .header-stat {
+            text-align: center;
+            min-width: 45px;
+        }
+
+        .header-stat-value {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text-light);
+            line-height: 1;
+        }
+
+        .header-stat-value.score {
+            color: var(--success);
+        }
+
+        .header-stat-label {
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 0.3px;
+        }
+
+
+        /* Screen positioning to account for header */
+        .screen {
+            top: 56px !important;
+            height: calc(100% - 56px) !important;
+        }
+
+        @media (max-width: 480px) {
+            .unified-header {
+                padding: 0.4rem 0.5rem;
+                height: 50px;
+            }
+
+            .header-home {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+
+            .game-nav-item {
+                width: 30px;
+                height: 30px;
+                font-size: 0.9rem;
+            }
+
+            .header-stat {
+                min-width: 38px;
+            }
+
+            .header-stat-value {
+                font-size: 0.95rem;
+            }
+
+            .header-stat-label {
+                font-size: 0.5rem;
+            }
+
+            .screen {
+                top: 50px !important;
+                height: calc(100% - 50px) !important;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .game-nav {
+                gap: 0.2rem;
+            }
+
+            .game-nav-item {
+                width: 26px;
+                height: 26px;
+                font-size: 0.8rem;
+            }
+
+            .header-stats {
+                gap: 0.5rem;
+            }
+
+            .header-stat {
+                min-width: 32px;
+            }
+
+            .header-stat-value {
+                font-size: 0.85rem;
+            }
+        }
+
+        /* Mobile adjustments */
+        @media (max-height: 700px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .nail-preview {
+                font-size: 3rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .description {
+                margin-bottom: 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Animated background -->
+<div class="stars-container">
+    <div class="stars"></div>
+</div>
+
+<!-- Start Screen -->
+<div class="screen start-screen" id="startScreen">
+    <div class="logo">
+        <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+    </div>
+    <h1>Spiker'n!</h1>
+    <p class="subtitle">Timing er alt</p>
+
+    <p class="description">
+        Se på måleren øverst. Trykk på skjermen når den hvite markøren er i <strong style="color: var(--success);">grønn</strong> eller <strong style="color: var(--perfect);">gul</strong> sone!
+    </p>
+
+    <div class="reward-teaser">
+        🎁 Nå <strong>nivå 10</strong> og lås opp en <strong>10% rabattkode</strong>!
+    </div>
+
+    <div class="nail-preview">🪵🔨</div>
+
+    <button class="start-btn" id="startBtn">▶ Start</button>
+
+    <div class="high-score-display" id="highScoreDisplay">
+        Rekord: <span id="highScoreValue">0</span>
+    </div>
+
+    <a href="/" class="home-link">← Tilbake til minio.no</a>
+</div>
+
+<!-- Game Screen -->
+<div class="screen game-screen hidden" id="gameScreen">
+    <div class="game-area" id="gameArea">
+        <div class="combo-display" id="comboDisplay" style="display: none;">
+            <div class="combo-count" id="comboCount">2x</div>
+            <div class="combo-label">Combo</div>
+        </div>
+
+        <div class="power-meter-container">
+            <div class="power-meter-label">👆 Trykk når markøren er i grønn/gul!</div>
+            <div class="power-meter">
+                <div class="power-meter-zones">
+                    <div class="zone bad-left"></div>
+                    <div class="zone good"></div>
+                    <div class="zone perfect"></div>
+                    <div class="zone good2"></div>
+                    <div class="zone bad-right"></div>
+                </div>
+                <div class="power-indicator" id="powerIndicator"></div>
+            </div>
+        </div>
+
+        <div class="nail-area">
+            <div class="nail-container">
+                <div class="impact-flash" id="impactFlash"></div>
+                <div class="nail-head" id="nailHead"></div>
+                <div class="nail" id="nail"></div>
+                <div class="plank"></div>
+            </div>
+            <div class="hit-feedback" id="hitFeedback">PERFEKT!</div>
+        </div>
+
+        <div class="nails-display" id="nailsDisplay"></div>
+
+        <div class="tap-instruction">👆 Trykk hvor som helst!</div>
+    </div>
+</div>
+
+<!-- End Screen -->
+<div class="screen end-screen hidden" id="endScreen">
+    <div class="result-card">
+        <div class="result-header">
+            <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+            <span>SPIKER'N</span>
+        </div>
+        <div class="new-record hidden" id="newRecord">NY REKORD!</div>
+        <div class="result-emoji" id="resultEmoji">🔨</div>
+        <div class="result-label">Poengsum</div>
+        <div class="result-score" id="finalScore">0</div>
+        <div class="result-stats">
+            <div class="result-stat">
+                <div class="result-stat-value perfects" id="finalPerfects">0</div>
+                <div class="result-stat-label">Perfekte</div>
+            </div>
+            <div class="result-stat">
+                <div class="result-stat-value combo" id="finalCombo">0</div>
+                <div class="result-stat-label">Beste combo</div>
+            </div>
+            <div class="result-stat">
+                <div class="result-stat-value" id="finalLevel">1</div>
+                <div class="result-stat-label">Nivå</div>
+            </div>
+        </div>
+        <div class="result-message" id="resultMessage">Bra jobbet!</div>
+        <div class="result-subtitle">Klarer du bedre?</div>
+
+        <div class="discount-reveal hidden" id="discountReveal">
+            <div class="discount-label">🎉 Du låste opp en rabattkode!</div>
+            <div class="discount-code" id="discountCode" onclick="copyDiscountCode()">VPH10</div>
+            <div class="discount-hint">Trykk for å kopiere • Gjelder 10% rabatt</div>
+        </div>
+    </div>
+
+    <div class="action-buttons">
+        <button class="action-btn primary" id="playAgainBtn">↺ Spill igjen</button>
+        <a href="index.html" class="action-btn secondary">Meny</a>
+    </div>
+</div>
+
+<!-- Top Navigation -->
+<header class="unified-header" id="unified-header">
+    <div class="header-left">
+        <a href="index.html" class="header-home" onclick="return confirmLeave(this)" title="Tilbake">🏠</a>
+        <nav class="game-nav">
+            <a href="tool-quiz.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøy Quiz">🌍</a>
+            <a href="tool-game.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Finn Verktøyet">🔨</a>
+            <a href="tool-nails.html" class="game-nav-item active" title="Spiker'n">🪵</a>
+            <a href="tool-saw.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Sag Rytme">🪚</a>
+            <a href="tool-maze.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøyjakt">👷</a>
+        </nav>
+    </div>
+    <div class="header-stats" id="header-stats">
+        <div class="header-stat">
+            <div class="header-stat-value score" id="headerScore">0</div>
+            <div class="header-stat-label">Poeng</div>
+        </div>
+        <div class="header-stat">
+            <div class="header-stat-value" id="headerLevel">1</div>
+            <div class="header-stat-label">Nivå</div>
+        </div>
+    </div>
+</header>
+
+<script>
+    // Game config
+    const TOTAL_NAILS = 10;
+    const BASE_SPEED = 2500; // ms for full sweep
+    const MIN_SPEED = 800;
+    const SPEED_DECREASE = 150; // per level
+
+    const POINTS = {
+        perfect: 150,
+        good: 100,
+        ok: 50,
+        miss: 0
+    };
+
+    const ZONES = {
+        perfectStart: 45,
+        perfectEnd: 55,
+        goodStart: 35,
+        goodEnd: 65
+    };
+
+    // Game state
+    let score = 0;
+    let level = 1;
+    let nailsLeft = TOTAL_NAILS;
+    let combo = 0;
+    let bestCombo = 0;
+    let perfects = 0;
+    let indicatorPosition = 0;
+    let direction = 1;
+    let speed = BASE_SPEED;
+    let animationId = null;
+    let lastTime = 0;
+    let isPlaying = false;
+    let nailDepth = 0;
+    let highScore = parseInt(localStorage.getItem('spikern_highscore') || '0');
+
+    // DOM elements
+    const startScreen = document.getElementById('startScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const endScreen = document.getElementById('endScreen');
+    const powerIndicator = document.getElementById('powerIndicator');
+    const nail = document.getElementById('nail');
+    const nailHead = document.getElementById('nailHead');
+    const impactFlash = document.getElementById('impactFlash');
+    const hitFeedback = document.getElementById('hitFeedback');
+    const headerStats = document.getElementById('header-stats');
+    const scoreDisplay = document.getElementById('headerScore');
+    const levelDisplay = document.getElementById('headerLevel');
+    const comboCount = document.getElementById('comboCount');
+    const nailsDisplay = document.getElementById('nailsDisplay');
+    const gameArea = document.getElementById('gameArea');
+    const highScoreValue = document.getElementById('highScoreValue');
+
+    // Initialize
+    highScoreValue.textContent = highScore;
+
+    // Update indicator position
+    function updateIndicator(timestamp) {
+        if (!isPlaying) return;
+
+        if (!lastTime) lastTime = timestamp;
+        const delta = timestamp - lastTime;
+        lastTime = timestamp;
+
+        // Calculate movement
+        const moveAmount = (delta / speed) * 100 * 2; // *2 because it goes back and forth
+        indicatorPosition += moveAmount * direction;
+
+        // Bounce at edges
+        if (indicatorPosition >= 100) {
+            indicatorPosition = 100;
+            direction = -1;
+        } else if (indicatorPosition <= 0) {
+            indicatorPosition = 0;
+            direction = 1;
+        }
+
+        powerIndicator.style.left = `calc(${indicatorPosition}% - 3px)`;
+
+        animationId = requestAnimationFrame(updateIndicator);
+    }
+
+    // Handle tap/click
+    function handleTap() {
+        if (!isPlaying) return;
+
+        // Determine hit quality
+        let hitType, points, feedbackText;
+
+        if (indicatorPosition >= ZONES.perfectStart && indicatorPosition <= ZONES.perfectEnd) {
+            hitType = 'perfect';
+            points = POINTS.perfect;
+            feedbackText = 'PERFEKT!';
+            perfects++;
+            combo++;
+            nailDepth += 30;
+        } else if (indicatorPosition >= ZONES.goodStart && indicatorPosition <= ZONES.goodEnd) {
+            hitType = 'good';
+            points = POINTS.good;
+            feedbackText = 'BRA!';
+            combo++;
+            nailDepth += 20;
+        } else if (indicatorPosition >= 20 && indicatorPosition <= 80) {
+            hitType = 'ok';
+            points = POINTS.ok;
+            feedbackText = 'OK';
+            combo = 0;
+            nailDepth += 10;
+        } else {
+            hitType = 'miss';
+            points = POINTS.miss;
+            feedbackText = 'MISS!';
+            combo = 0;
+            nailDepth += 3;
+        }
+
+        // Update best combo
+        if (combo > bestCombo) bestCombo = combo;
+
+        // Combo bonus
+        const comboBonus = combo > 1 ? Math.floor(points * (combo - 1) * 0.1) : 0;
+        const totalPoints = points + comboBonus;
+
+        score += totalPoints;
+        scoreDisplay.textContent = score;
+
+        // Update combo display
+        const comboDisplay = document.getElementById('comboDisplay');
+        if (combo > 1) {
+            comboCount.textContent = combo + 'x';
+            comboDisplay.style.display = 'block';
+        } else {
+            comboDisplay.style.display = 'none';
+        }
+
+        // Animate impact
+        nailHead.classList.add('hit');
+        impactFlash.classList.add('show');
+        setTimeout(() => {
+            nailHead.classList.remove('hit');
+            impactFlash.classList.remove('show');
+        }, 150);
+
+        // Show feedback
+        hitFeedback.textContent = feedbackText + (comboBonus > 0 ? ` +${comboBonus}` : '');
+        hitFeedback.className = 'hit-feedback ' + hitType + ' show';
+        setTimeout(() => hitFeedback.classList.remove('show'), 600);
+
+        // Update nail visual
+        const maxDepth = 60;
+        const currentDepth = Math.min(nailDepth, maxDepth);
+        const nailHeight = Math.max(10, 70 - currentDepth);
+        nail.style.height = nailHeight + 'px';
+        nail.style.top = currentDepth + 'px';
+        nailHead.style.top = currentDepth + 'px';
+        impactFlash.style.top = currentDepth + 'px';
+
+        // Use up a nail
+        nailsLeft--;
+        updateNailsDisplay();
+
+        // Check if nail is fully in or out of nails
+        if (nailDepth >= 60 || nailsLeft <= 0) {
+            nextNail();
+        }
+    }
+
+    // Next nail
+    function nextNail() {
+        level++;
+        levelDisplay.textContent = level;
+
+        // Increase speed
+        speed = Math.max(MIN_SPEED, BASE_SPEED - (level - 1) * SPEED_DECREASE);
+
+        // Reset nail
+        nailDepth = 0;
+        nail.style.height = '70px';
+        nail.style.top = '0px';
+        nailHead.style.top = '0px';
+
+        // Reset nails left
+        nailsLeft = TOTAL_NAILS;
+        updateNailsDisplay();
+
+        // Check if game should continue (endless until miss streak or player quits)
+        // For now, game continues until 3 consecutive misses
+        // Actually let's just make it: game ends when you miss 3 nails total
+        // Simpler: let's track "bent nails" - if you miss too much on one nail, it bends and you lose
+        // Even simpler: Just level up, game gets faster, play until you mess up
+
+        // Actually, let's make it endless - you just keep going until...
+        // Let's add: if you get 3 misses in a row, game over
+        // Track in combo: if combo resets 3 times in one nail, game over
+    }
+
+    // Update nails display
+    function updateNailsDisplay() {
+        nailsDisplay.innerHTML = '';
+        for (let i = 0; i < TOTAL_NAILS; i++) {
+            const nailIcon = document.createElement('span');
+            nailIcon.className = 'nail-icon' + (i >= nailsLeft ? ' used' : '');
+            nailIcon.textContent = '📍';
+            nailsDisplay.appendChild(nailIcon);
+        }
+    }
+
+    // Start game
+    function startGame() {
+        score = 0;
+        level = 1;
+        nailsLeft = TOTAL_NAILS;
+        combo = 0;
+        bestCombo = 0;
+        perfects = 0;
+        nailDepth = 0;
+        speed = BASE_SPEED;
+        indicatorPosition = 0;
+        direction = 1;
+        lastTime = 0;
+        isPlaying = true;
+
+        scoreDisplay.textContent = '0';
+        levelDisplay.textContent = '1';
+        comboCount.classList.remove('show');
+
+        // Reset nail visual
+        nail.style.height = '60px';
+        nail.style.top = '0px';
+        nailHead.style.top = '0px';
+
+        updateNailsDisplay();
+
+        startScreen.classList.add('hidden');
+        endScreen.classList.add('hidden');
+        gameScreen.classList.remove('hidden');
+        headerStats.classList.add('visible');
+
+        animationId = requestAnimationFrame(updateIndicator);
+    }
+
+    // End game
+    function endGame() {
+        isPlaying = false;
+        if (animationId) {
+            cancelAnimationFrame(animationId);
+        }
+
+        // Check high score
+        const isNewRecord = score > highScore;
+        if (isNewRecord) {
+            highScore = score;
+            localStorage.setItem('spikern_highscore', highScore.toString());
+            highScoreValue.textContent = highScore;
+        }
+
+        // Show end screen
+        gameScreen.classList.add('hidden');
+        headerStats.classList.remove('visible');
+        endScreen.classList.remove('hidden');
+
+        document.getElementById('finalScore').textContent = score;
+        document.getElementById('finalPerfects').textContent = perfects;
+        document.getElementById('finalCombo').textContent = bestCombo;
+        document.getElementById('finalLevel').textContent = level;
+
+        // Check for discount code unlock (level 10+)
+        const discountReveal = document.getElementById('discountReveal');
+        if (level >= 10) {
+            discountReveal.classList.remove('hidden');
+        } else {
+            discountReveal.classList.add('hidden');
+        }
+
+        const newRecord = document.getElementById('newRecord');
+        if (isNewRecord) {
+            newRecord.classList.remove('hidden');
+        } else {
+            newRecord.classList.add('hidden');
+        }
+
+        // Result message
+        let emoji, message;
+        if (score >= 5000) {
+            emoji = '🏆';
+            message = 'Mesterlig!';
+        } else if (score >= 3000) {
+            emoji = '⭐';
+            message = 'Fantastisk!';
+        } else if (score >= 2000) {
+            emoji = '🔨';
+            message = 'Solid jobbet!';
+        } else if (score >= 500) {
+            emoji = '👍';
+            message = 'Bra start!';
+        } else {
+            emoji = '💪';
+            message = 'Øvelse gjør mester!';
+        }
+
+        document.getElementById('resultEmoji').textContent = emoji;
+        document.getElementById('resultMessage').textContent = message;
+    }
+
+    // Track misses for game over
+    let consecutiveMisses = 0;
+    const originalHandleTap = handleTap;
+
+    // Override handleTap to track misses
+    function handleTapWithGameOver() {
+        if (!isPlaying) return;
+
+        const wasCombo = combo;
+
+        // Get hit type before calling original
+        let hitType;
+        if (indicatorPosition >= ZONES.perfectStart && indicatorPosition <= ZONES.perfectEnd) {
+            hitType = 'perfect';
+        } else if (indicatorPosition >= ZONES.goodStart && indicatorPosition <= ZONES.goodEnd) {
+            hitType = 'good';
+        } else if (indicatorPosition >= 20 && indicatorPosition <= 80) {
+            hitType = 'ok';
+        } else {
+            hitType = 'miss';
+        }
+
+        // Call original logic
+        originalHandleTap.call(this);
+
+        // Track consecutive misses
+        if (hitType === 'miss') {
+            consecutiveMisses++;
+            if (consecutiveMisses >= 3) {
+                endGame();
+            }
+        } else {
+            consecutiveMisses = 0;
+        }
+    }
+
+    // Event listeners
+    document.getElementById('startBtn').addEventListener('click', () => {
+        consecutiveMisses = 0;
+        startGame();
+    });
+
+    document.getElementById('playAgainBtn').addEventListener('click', () => {
+        consecutiveMisses = 0;
+        startGame();
+    });
+
+    gameArea.addEventListener('click', handleTapWithGameOver);
+    gameArea.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleTapWithGameOver();
+    }, { passive: false });
+
+    // Prevent double-tap zoom
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+        const now = Date.now();
+        if (now - lastTouchEnd <= 300) {
+            e.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, { passive: false });
+
+    // Copy discount code
+    function copyDiscountCode() {
+        const code = document.getElementById('discountCode').textContent;
+        navigator.clipboard.writeText(code).then(() => {
+            showNotification('Rabattkode kopiert: ' + code);
+        }).catch(() => {
+            showNotification('Kode: ' + code);
+        });
+    }
+
+    // Show notification
+    function showNotification(message) {
+        const existing = document.querySelector('.notification');
+        if (existing) existing.remove();
+
+        const notification = document.createElement('div');
+        notification.className = 'notification';
+        notification.textContent = message;
+        notification.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--success);color:white;padding:1rem 1.5rem;border-radius:10px;font-weight:500;z-index:200;';
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 300);
+        }, 2000);
+    }
+
+    // Confirm before leaving during gameplay
+    function confirmLeave(link) {
+        if (isPlaying) {
+            return confirm('Du er midt i et spill. Er du sikker på at du vil forlate?');
+        }
+        return true;
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Minio Logo Concepts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1a1a1a;
+      background: #f4f4f4;
+    }
+
+    .header {
+      text-align: center;
+      padding: 3rem 2rem 2rem;
+    }
+
+    .header h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 0.95rem;
+    }
+
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .section h2 {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .section .subtitle {
+      color: #666;
+      font-size: 0.85rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 700px) {
+      .row { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      border-radius: 12px;
+      padding: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 160px;
+    }
+
+    .card img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    .card-light {
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+    }
+
+    .card-dark {
+      background: #1a1a1a;
+    }
+
+    .card-navbar {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(6px);
+    }
+
+    .card-label {
+      font-size: 0.75rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #999;
+      margin-bottom: 0.5rem;
+    }
+
+    .card-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .icon-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 700px) {
+      .icon-row { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .icon-card {
+      border-radius: 12px;
+      padding: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      aspect-ratio: 1;
+    }
+
+    .icon-card img {
+      width: 56px;
+      height: auto;
+    }
+
+    .divider {
+      max-width: 1100px;
+      margin: 1rem auto;
+      border: none;
+      border-top: 1px solid #ddd;
+    }
+
+    /* Inline SVG icons for comparison */
+    .inline-icon-a {
+      width: 56px;
+      height: 60px;
+    }
+
+    .inline-icon-b {
+      width: 60px;
+      height: 52px;
+    }
+
+    .comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 700px) {
+      .comparison { grid-template-columns: 1fr; }
+    }
+
+    .comparison .card {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .comparison .card-title {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card-dark .card-title {
+      color: rgba(255,255,255,0.6);
+    }
+
+    .card-light .card-title {
+      color: #999;
+    }
+
+    .navbar-sim {
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .navbar-bar {
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(6px);
+      padding: 0.5rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .navbar-bar img {
+      height: 40px;
+      width: auto;
+    }
+
+    .navbar-links {
+      display: flex;
+      gap: 1.2rem;
+    }
+
+    .navbar-links span {
+      color: #f9f9f9;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .navbar-hero {
+      background: url('/images/hero/forside_1.webp') center/cover;
+      height: 200px;
+      position: relative;
+    }
+
+    .navbar-hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(0,0,0,0.4), rgba(0,0,0,0.3));
+    }
+
+    .notes {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .notes h3 {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .notes ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .notes li {
+      padding: 0.5rem 0;
+      font-size: 0.9rem;
+      color: #444;
+      border-bottom: 1px solid #eee;
+    }
+
+    .notes li strong {
+      color: #1a1a1a;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Minio Logo Concepts</h1>
+    <p>Two directions for a new logo mark, replacing the shield/chevron with something more connected to the craft.</p>
+  </div>
+
+  <!-- CONCEPT A -->
+  <div class="section">
+    <h2>Concept A — Building Outline</h2>
+    <p class="subtitle">The M is formed by the double-gable roofline of a workshop/building silhouette. Architectural, structural, references the products Minio builds. Sharp miter joins suggest precision craftsmanship.</p>
+
+    <div class="row">
+      <div class="card-wrapper">
+        <div class="card-label">Light background</div>
+        <div class="card card-light">
+          <img src="/images/branding/minio_concept_a_dark.svg" alt="Concept A dark" style="max-height: 60px;">
+        </div>
+      </div>
+      <div class="card-wrapper">
+        <div class="card-label">Dark background</div>
+        <div class="card card-dark">
+          <img src="/images/branding/minio_concept_a_white.svg" alt="Concept A white" style="max-height: 60px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CONCEPT B -->
+  <div class="section">
+    <h2>Concept B — M Peaks + Foundation</h2>
+    <p class="subtitle">A pure M letterform built from two connected roof peaks, grounded by a thin foundation line. Softer with rounded joins. More abstract and minimal — the building reference is implied rather than literal.</p>
+
+    <div class="row">
+      <div class="card-wrapper">
+        <div class="card-label">Light background</div>
+        <div class="card card-light">
+          <img src="/images/branding/minio_concept_b_dark.svg" alt="Concept B dark" style="max-height: 60px;">
+        </div>
+      </div>
+      <div class="card-wrapper">
+        <div class="card-label">Dark background</div>
+        <div class="card card-dark">
+          <img src="/images/branding/minio_concept_b_white.svg" alt="Concept B white" style="max-height: 60px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ICONS STANDALONE -->
+  <div class="section">
+    <h2>Icon Marks — Standalone</h2>
+    <p class="subtitle">How the marks work as standalone icons (favicon, social avatar, product stamp).</p>
+
+    <div class="icon-row">
+      <div class="card-wrapper">
+        <div class="card-label">A — Light</div>
+        <div class="icon-card card-light">
+          <img src="/images/branding/minio_concept_icon_a.svg" alt="Icon A">
+        </div>
+      </div>
+      <div class="card-wrapper">
+        <div class="card-label">A — Dark</div>
+        <div class="icon-card card-dark">
+          <svg viewBox="0 0 64 68" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:56px">
+            <path d="M 4,62 L 4,38 L 18,10 L 32,38 L 46,10 L 60,38 L 60,62 Z" fill="none" stroke="#f9f9f9" stroke-width="4" stroke-linejoin="miter" stroke-linecap="square"/>
+          </svg>
+        </div>
+      </div>
+      <div class="card-wrapper">
+        <div class="card-label">B — Light</div>
+        <div class="icon-card card-light">
+          <img src="/images/branding/minio_concept_icon_b.svg" alt="Icon B">
+        </div>
+      </div>
+      <div class="card-wrapper">
+        <div class="card-label">B — Dark</div>
+        <div class="icon-card card-dark">
+          <svg viewBox="0 0 68 60" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:60px">
+            <path d="M 4,44 L 19,8 L 34,44 L 49,8 L 64,44" fill="none" stroke="#f9f9f9" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+            <line x1="1" y1="52" x2="67" y2="52" stroke="#f9f9f9" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- NAVBAR SIMULATION -->
+  <div class="section">
+    <h2>In Context — Navbar</h2>
+    <p class="subtitle">How each concept looks in the navigation bar at 40px height.</p>
+
+    <div class="card-label">Concept A in navbar</div>
+    <div class="navbar-sim" style="margin-bottom: 1.5rem;">
+      <div class="navbar-bar">
+        <img src="/images/branding/minio_concept_a_white.svg" alt="Concept A navbar" style="height: 36px;">
+        <div class="navbar-links">
+          <span>Produkter</span>
+          <span>Slik jobber vi</span>
+          <span>Kontakt</span>
+        </div>
+      </div>
+      <div class="navbar-hero"></div>
+    </div>
+
+    <div class="card-label">Concept B in navbar</div>
+    <div class="navbar-sim" style="margin-bottom: 1.5rem;">
+      <div class="navbar-bar">
+        <img src="/images/branding/minio_concept_b_white.svg" alt="Concept B navbar" style="height: 36px;">
+        <div class="navbar-links">
+          <span>Produkter</span>
+          <span>Slik jobber vi</span>
+          <span>Kontakt</span>
+        </div>
+      </div>
+      <div class="navbar-hero"></div>
+    </div>
+
+    <div class="card-label">Current logo (for comparison)</div>
+    <div class="navbar-sim">
+      <div class="navbar-bar">
+        <img src="/images/branding/minio_white_rect_transparent.webp" alt="Current logo" style="height: 40px;">
+        <div class="navbar-links">
+          <span>Produkter</span>
+          <span>Slik jobber vi</span>
+          <span>Kontakt</span>
+        </div>
+      </div>
+      <div class="navbar-hero"></div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- SIDE BY SIDE COMPARISON -->
+  <div class="section">
+    <h2>Side-by-Side Comparison</h2>
+    <p class="subtitle">Current logo vs. both new concepts.</p>
+
+    <div class="comparison">
+      <div class="card-wrapper">
+        <div class="card-label">Current</div>
+        <div class="card card-dark" style="min-height: 140px;">
+          <img src="/images/branding/minio_white_rect_transparent.webp" alt="Current" style="max-height: 50px;">
+        </div>
+      </div>
+      <div class="card-wrapper">
+        <div class="card-label">Concept A — Building</div>
+        <div class="card card-dark" style="min-height: 140px;">
+          <img src="/images/branding/minio_concept_a_white.svg" alt="Concept A" style="max-height: 50px;">
+        </div>
+      </div>
+      <div class="card-wrapper">
+        <div class="card-label">Concept B — Peaks</div>
+        <div class="card card-dark" style="min-height: 140px;">
+          <img src="/images/branding/minio_concept_b_white.svg" alt="Concept B" style="max-height: 50px;">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- DESIGN NOTES -->
+  <div class="notes">
+    <h3>Design Notes</h3>
+    <ul>
+      <li><strong>Concept A (Building):</strong> The M is the double-gable roofline of a workshop. Sharp miter joins = precision. The walls ground it architecturally. References the structures Minio builds (pump houses, sheds). Works well as a favicon and product stamp. Can be laser-engraved.</li>
+      <li><strong>Concept B (Peaks):</strong> A more abstract, Scandinavian-minimal approach. The M is pure geometry — two roof peaks. The foundation line adds weight without enclosing it. Rounded joins feel warmer and more approachable. Lighter and more versatile.</li>
+      <li><strong>Font:</strong> Both use "minio" in lowercase Inter Bold with tight letter-spacing. Lowercase feels approachable and modern. The tagline "Fra idé til håndverk." in Inter Regular.</li>
+      <li><strong>Color:</strong> Monochrome (black/white) as the current brand. Lets product photography be the color. A warm accent like <span style="display:inline-block;width:14px;height:14px;background:#C4956A;border-radius:3px;vertical-align:middle;margin:0 4px;"></span> #C4956A (muted cedar) could work as an optional secondary tone.</li>
+      <li><strong>Next steps:</strong> Convert chosen text to outlined paths for production use. Refine the "o" in minio as a subtle tree-ring cross-section. Generate favicon .ico from the chosen icon mark.</li>
+    </ul>
+  </div>
+
+</body>
+</html>
