@@ -319,6 +319,43 @@ const LoginPopoverWrapper = styled.div`
   position: relative;
 `
 
+const MobileAuth = styled.div`
+  display: none;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    margin-top: auto;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+`
+
+const MobileUserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: ${({ theme }) => theme.colors.textLight};
+  font-size: 1rem;
+`
+
+const MobileLogoutBtn = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  background: none;
+  border: none;
+  color: ${({ theme }) => theme.colors.textLight};
+  font-size: 1rem;
+  font-family: ${({ theme }) => theme.fonts.body};
+  cursor: pointer;
+  padding: 0.5rem 0;
+  opacity: 0.6;
+`
+
 const Hamburger = styled.button<{ $open: boolean }>`
   display: none;
   flex-direction: column;
@@ -416,6 +453,22 @@ export default function Navbar() {
                 </IconLink>
               )
             })}
+            <MobileAuth>
+              {isAuthenticated ? (
+                <>
+                  <MobileUserInfo>
+                    {user?.picture && <UserAvatar src={user.picture} alt="" />}
+                    <span>Hei, {firstName}</span>
+                  </MobileUserInfo>
+                  <MobileLogoutBtn onClick={() => { logout(); closeMenu() }}>
+                    <Icon name="faSignOutAlt" />
+                    Logg ut
+                  </MobileLogoutBtn>
+                </>
+              ) : (
+                <GoogleLoginButton />
+              )}
+            </MobileAuth>
           </MenuLinks>
 
           <RightControls>
