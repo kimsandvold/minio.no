@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { useLocation, Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { navLinks } from '../../data/navigation'
@@ -235,7 +235,15 @@ const BasketCount = styled.span`
   font-weight: 700;
 `
 
-const UserPill = styled.div`
+const UserMenuWrapper = styled.div`
+  position: relative;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    display: none;
+  }
+`
+
+const UserPill = styled.button`
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -245,9 +253,13 @@ const UserPill = styled.div`
   color: ${({ theme }) => theme.colors.textLight};
   font-size: 0.85rem;
   font-weight: 500;
+  border: none;
+  cursor: pointer;
+  font-family: ${({ theme }) => theme.fonts.body};
+  transition: background 0.2s ease;
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    display: none;
+  &:hover {
+    background: rgba(255, 255, 255, 0.15);
   }
 `
 
@@ -258,19 +270,58 @@ const UserAvatar = styled.img`
   object-fit: cover;
 `
 
-const LogoutBtn = styled.button`
-  background: none;
-  border: none;
-  color: ${({ theme }) => theme.colors.textLight};
-  cursor: pointer;
-  padding: 0.2rem;
-  font-size: 0.85rem;
-  transition: color ${({ theme }) => theme.transitions.default};
+const ChevronIcon = styled.span<{ $open: boolean }>`
+  font-size: 0.65rem;
+  transition: transform 0.2s ease;
+  transform: rotate(${({ $open }) => ($open ? '180deg' : '0')});
+  opacity: 0.6;
+`
+
+const UserDropdown = styled.div`
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem;
+  background: ${({ theme }) => theme.colors.white};
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  overflow: hidden;
+  z-index: ${({ theme }) => theme.zIndex.nav + 5};
+`
+
+const DropdownLink = styled(Link)`
   display: flex;
   align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: ${({ theme }) => theme.colors.textDark};
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: background 0.15s ease;
 
   &:hover {
-    color: ${({ theme }) => theme.colors.error};
+    background: #f5f5f5;
+  }
+`
+
+const DropdownBtn = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  background: none;
+  border: none;
+  border-top: 1px solid #eee;
+  color: ${({ theme }) => theme.colors.error};
+  font-size: 0.9rem;
+  font-family: ${({ theme }) => theme.fonts.body};
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #f5f5f5;
   }
 `
 
@@ -405,8 +456,10 @@ const Backdrop = styled.div<{ $open: boolean }>`
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
+  const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement>(null)
   const { totalItems } = useBasketContext()
-  const { user, logout, isAuthenticated } = useAuthContext()
+  const { user, logout, isAuthenticated, isAdmin } = useAuthContext()
   const location = useLocation()
   const isHome = location.pathname === '/'
 
@@ -416,6 +469,20 @@ export default function Navbar() {
   useEffect(() => {
     if (isAuthenticated) setLoginOpen(false)
   }, [isAuthenticated])
+
+  useEffect(() => {
+    setUserMenuOpen(false)
+  }, [location])
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false)
+      }
+    }
+    if (userMenuOpen) document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [userMenuOpen])
 
   const navHref = (hash: string) => isHome ? hash : `/${hash}`
 
@@ -453,6 +520,16 @@ export default function Navbar() {
                 </IconLink>
               )
             })}
+            {isAuthenticated && (
+              <IconRouterLink to="/mine-bestillinger" aria-label="Mine bestillinger" onClick={closeMenu}>
+                <Icon name="faClipboardList" />
+              </IconRouterLink>
+            )}
+            {isAdmin && (
+              <IconRouterLink to="/admin/bestillinger" aria-label="Admin" onClick={closeMenu}>
+                <Icon name="faUserShield" />
+              </IconRouterLink>
+            )}
             <MobileAuth>
               {isAuthenticated ? (
                 <>
@@ -484,13 +561,30 @@ export default function Navbar() {
               {totalItems > 0 && <BasketCount>{totalItems}</BasketCount>}
             </BasketLink>
             {isAuthenticated ? (
-              <UserPill>
-                {user?.picture && <UserAvatar src={user.picture} alt="" />}
-                <span>Hei, {firstName}</span>
-                <LogoutBtn onClick={logout} aria-label="Logg ut">
-                  <Icon name="faSignOutAlt" />
-                </LogoutBtn>
-              </UserPill>
+              <UserMenuWrapper ref={userMenuRef}>
+                <UserPill onClick={() => setUserMenuOpen(!userMenuOpen)}>
+                  {user?.picture && <UserAvatar src={user.picture} alt="" />}
+                  <span>Hei, {firstName}</span>
+                  <ChevronIcon $open={userMenuOpen}>
+                    <Icon name="faChevronDown" />
+                  </ChevronIcon>
+                </UserPill>
+                {userMenuOpen && (
+                  <UserDropdown>
+                    <DropdownLink to="/mine-bestillinger" onClick={() => setUserMenuOpen(false)}>
+                      <Icon name="faClipboardList" /> Mine bestillinger
+                    </DropdownLink>
+                    {isAdmin && (
+                      <DropdownLink to="/admin/bestillinger" onClick={() => setUserMenuOpen(false)}>
+                        <Icon name="faUserShield" /> Admin
+                      </DropdownLink>
+                    )}
+                    <DropdownBtn onClick={() => { logout(); setUserMenuOpen(false) }}>
+                      <Icon name="faSignOutAlt" /> Logg ut
+                    </DropdownBtn>
+                  </UserDropdown>
+                )}
+              </UserMenuWrapper>
             ) : (
               <LoginPopoverWrapper>
                 <LoginLink onClick={() => setLoginOpen(!loginOpen)}>

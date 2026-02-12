@@ -4,6 +4,8 @@ import Icon from '../Icon'
 import { useBasketContext } from '../../../context/BasketContext'
 import { useAuthContext } from '../../../context/AuthContext'
 import { formatPrice, parsePrice, formatSum } from '../../../utils/formatPrice'
+import { createOrder } from '../../../services/orderService'
+import { subscribeToNewsletter } from '../../../services/newsletterService'
 
 const Body = styled.div`
   flex: 1;
@@ -106,7 +108,7 @@ interface CheckoutViewProps {
 
 export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
   const { items, notes, clearBasket } = useBasketContext()
-  const { user } = useAuthContext()
+  const { user, firebaseUser } = useAuthContext()
   const [name, setName] = useState(user?.name ?? '')
   const [email, setEmail] = useState(user?.email ?? '')
   const [phone, setPhone] = useState('')
@@ -143,14 +145,32 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
     e.preventDefault()
     setSubmitting(true)
 
-    const formData = new FormData()
-    formData.append('name', name)
-    formData.append('email', email)
-    formData.append('phone', phone)
-    formData.append('subject', 'Ny forespørsel fra handlekurv')
-    formData.append('message', formatBasketForEmail())
-
     try {
+      // 1. Save order to Firestore (don't block checkout if it fails)
+      if (firebaseUser) {
+        createOrder({
+          userId: firebaseUser.uid,
+          userEmail: firebaseUser.email ?? '',
+          userName: firebaseUser.displayName ?? '',
+          customerName: name,
+          customerEmail: email,
+          customerPhone: phone,
+          items,
+          notes,
+          totalSum,
+        }).catch(() => {
+          // Firestore save failed (e.g. rules not configured) — checkout still proceeds
+        })
+      }
+
+      // 2. Send email via Formspree (keep existing flow)
+      const formData = new FormData()
+      formData.append('name', name)
+      formData.append('email', email)
+      formData.append('phone', phone)
+      formData.append('subject', 'Ny forespørsel fra handlekurv')
+      formData.append('message', formatBasketForEmail())
+
       const response = await fetch(FORMSPREE_ENDPOINT, {
         method: 'POST',
         body: formData,
@@ -158,6 +178,9 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
       })
 
       if (response.ok) {
+        // 3. Auto-subscribe to newsletter (best-effort)
+        subscribeToNewsletter(email)
+
         clearBasket()
         onSuccess()
       } else {

@@ -1,12 +1,16 @@
 import { createContext, useContext, type ReactNode } from 'react'
 import { useAuth } from '../hooks/useAuth'
+import type { User } from 'firebase/auth'
 import type { GoogleUser } from '../types/auth'
 
 interface AuthContextType {
   user: GoogleUser | null
-  login: (user: GoogleUser) => void
-  logout: () => void
+  firebaseUser: User | null
+  login: () => Promise<void>
+  logout: () => Promise<void>
   isAuthenticated: boolean
+  isAdmin: boolean
+  loading: boolean
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)

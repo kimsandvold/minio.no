@@ -1,19 +1,40 @@
-import { useCallback } from 'react'
-import { useLocalStorage } from './useLocalStorage'
-import type { GoogleUser } from '../types/auth'
+import { useState, useEffect, useCallback } from 'react'
+import { onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth'
+import { auth, googleProvider } from '../lib/firebase'
+
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL ?? ''
 
 export function useAuth() {
-  const [user, setUser] = useLocalStorage<GoogleUser | null>('minio_user', null)
+  const [firebaseUser, setFirebaseUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  const login = useCallback((googleUser: GoogleUser) => {
-    setUser(googleUser)
-  }, [setUser])
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setFirebaseUser(user)
+      setLoading(false)
+    })
+    return unsubscribe
+  }, [])
 
-  const logout = useCallback(() => {
-    setUser(null)
-  }, [setUser])
+  const login = useCallback(async () => {
+    await signInWithPopup(auth, googleProvider)
+  }, [])
 
-  const isAuthenticated = user !== null
+  const logout = useCallback(async () => {
+    await signOut(auth)
+  }, [])
 
-  return { user, login, logout, isAuthenticated }
+  const isAuthenticated = firebaseUser !== null
+  const isAdmin = firebaseUser?.email === ADMIN_EMAIL
+
+  const user = firebaseUser
+    ? {
+        email: firebaseUser.email ?? '',
+        name: firebaseUser.displayName ?? '',
+        picture: firebaseUser.photoURL ?? undefined,
+        sub: firebaseUser.uid,
+      }
+    : null
+
+  return { user, firebaseUser, login, logout, isAuthenticated, isAdmin, loading }
 }

@@ -3,12 +3,10 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 import theme from './styles/theme'
 import GlobalStyles from './styles/GlobalStyles'
-import { GoogleOAuthProvider } from '@react-oauth/google'
 import { ModalProvider } from './context/ModalContext'
 import { AuthProvider } from './context/AuthContext'
 import { BasketProvider } from './context/BasketContext'
 
-const GOOGLE_CLIENT_ID = '749002051966-4usavn4inva0vs81dn0elf1f3jput163.apps.googleusercontent.com'
 import { useCookieConsent } from './hooks/useCookieConsent'
 import { useHashNavigation } from './hooks/useHashNavigation'
 import { useSEO } from './hooks/useSEO'
@@ -27,6 +25,8 @@ import ProduktDetailPage from './components/pages/Produkter/ProduktDetailPage'
 import UnderholdningPage from './components/pages/Underholdning/UnderholdningPage'
 import HandlekurvPage from './components/pages/Handlekurv/HandlekurvPage'
 import SkiltOgGraveringPage from './components/pages/SkiltOgGravering/SkiltOgGraveringPage'
+import MineBestillingerPage from './components/pages/MineBestillinger/MineBestillingerPage'
+import AdminBestillingerPage from './components/pages/Admin/AdminBestillingerPage'
 
 const VarmepumpehusPage = lazy(() => import('./components/pages/Varmepumpehus/VarmepumpehusPage'))
 const SoppelboderPage = lazy(() => import('./components/pages/Soppelboder/SoppelboderPage'))
@@ -60,31 +60,31 @@ function HomePage() {
 export default function App() {
   return (
     <BrowserRouter>
-      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-        <ThemeProvider theme={theme}>
-          <GlobalStyles />
-          <AuthProvider>
-            <BasketProvider>
-              <ModalProvider>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/slik-jobber-vi" element={<ProsessPage />} />
-              <Route path="/kontakt" element={<KontaktPage />} />
-              <Route path="/produkter" element={<ProdukterPage />} />
-              <Route path="/produkter/varmepumpehus" element={<Suspense fallback={null}><VarmepumpehusPage /></Suspense>} />
-              <Route path="/produkter/soppelboder" element={<Suspense fallback={null}><SoppelboderPage /></Suspense>} />
-              <Route path="/produkter/vedskjul" element={<Suspense fallback={null}><VedskjulPage /></Suspense>} />
-              <Route path="/produkter/postkassestativer" element={<Suspense fallback={null}><PostkasseStativPage /></Suspense>} />
-              <Route path="/produkter/:slug" element={<ProduktDetailPage />} />
-              <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
-              <Route path="/underholdning" element={<UnderholdningPage />} />
-              <Route path="/handlekurv" element={<HandlekurvPage />} />
-            </Routes>
-              </ModalProvider>
-            </BasketProvider>
-          </AuthProvider>
-        </ThemeProvider>
-      </GoogleOAuthProvider>
+      <ThemeProvider theme={theme}>
+        <GlobalStyles />
+        <AuthProvider>
+          <BasketProvider>
+            <ModalProvider>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/slik-jobber-vi" element={<ProsessPage />} />
+                <Route path="/kontakt" element={<KontaktPage />} />
+                <Route path="/produkter" element={<ProdukterPage />} />
+                <Route path="/produkter/varmepumpehus" element={<Suspense fallback={null}><VarmepumpehusPage /></Suspense>} />
+                <Route path="/produkter/soppelboder" element={<Suspense fallback={null}><SoppelboderPage /></Suspense>} />
+                <Route path="/produkter/vedskjul" element={<Suspense fallback={null}><VedskjulPage /></Suspense>} />
+                <Route path="/produkter/postkassestativer" element={<Suspense fallback={null}><PostkasseStativPage /></Suspense>} />
+                <Route path="/produkter/:slug" element={<ProduktDetailPage />} />
+                <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
+                <Route path="/underholdning" element={<UnderholdningPage />} />
+                <Route path="/handlekurv" element={<HandlekurvPage />} />
+                <Route path="/mine-bestillinger" element={<MineBestillingerPage />} />
+                <Route path="/admin/bestillinger" element={<AdminBestillingerPage />} />
+              </Routes>
+            </ModalProvider>
+          </BasketProvider>
+        </AuthProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }

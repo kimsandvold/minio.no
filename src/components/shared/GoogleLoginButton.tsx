@@ -1,7 +1,5 @@
-import { useGoogleLogin } from '@react-oauth/google'
 import styled from 'styled-components'
 import { useAuthContext } from '../../context/AuthContext'
-import type { GoogleUser } from '../../types/auth'
 import Icon from './Icon'
 
 const Button = styled.button`
@@ -27,18 +25,8 @@ const Button = styled.button`
 export default function GoogleLoginButton() {
   const { login } = useAuthContext()
 
-  const googleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      const res = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-        headers: { Authorization: `Bearer ${tokenResponse.access_token}` },
-      })
-      const userInfo: GoogleUser = await res.json()
-      login(userInfo)
-    },
-  })
-
   return (
-    <Button onClick={() => googleLogin()} type="button">
+    <Button onClick={() => login()} type="button">
       <Icon name="faGoogle" />
       Logg inn med Google
     </Button>
