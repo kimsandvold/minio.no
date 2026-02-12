@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const SITE_URL = 'https://minio.no'
-const DEFAULT_OG_IMAGE = '/images/branding/minio_dark_rect_transparent.webp'
+const DEFAULT_OG_IMAGE = '/images/branding/logo_dark.svg'
 
 interface SEOOptions {
   title: string

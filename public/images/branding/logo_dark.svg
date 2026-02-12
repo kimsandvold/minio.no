@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 48" fill="none">
+  <!-- Minio logo: dark for light backgrounds -->
+  <rect x="2" y="3" width="42" height="42" rx="11" stroke="#1a1a1a" stroke-width="2" fill="none"/>
+  <polyline points="11,36 18,12 23,30 28,12 35,36" stroke="#1a1a1a" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <text x="54" y="32" font-family="Inter,-apple-system,BlinkMacSystemFont,'Helvetica Neue','Segoe UI',sans-serif" font-weight="600" font-size="32" fill="#1a1a1a" letter-spacing="-0.5">Minio</text>
+  <text x="56" y="44" font-family="Inter,-apple-system,BlinkMacSystemFont,'Helvetica Neue','Segoe UI',sans-serif" font-weight="300" font-size="9.5" fill="rgba(26,26,26,0.4)" letter-spacing="1.5">Etter dine mål</text>
+</svg>

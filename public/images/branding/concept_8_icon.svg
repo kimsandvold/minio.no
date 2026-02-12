@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" fill="none">
+  <!-- 8: Filled Squircle — Solid rounded square with white M -->
+  <rect x="2" y="2" width="56" height="56" rx="15" fill="#1a1a1a"/>
+  <polyline
+    points="15,44 23,14 30,34 37,14 45,44"
+    stroke="#ffffff"
+    stroke-width="3"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+</svg>

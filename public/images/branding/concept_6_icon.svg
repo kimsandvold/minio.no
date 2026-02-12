@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 52" fill="none">
+  <!-- 6: Split Peaks — Two separate peak strokes with a gap, airy feel -->
+  <polyline
+    points="2,46 16,8 28,36"
+    stroke="#1a1a1a"
+    stroke-width="2.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+  <polyline
+    points="28,36 40,8 54,46"
+    stroke="#1a1a1a"
+    stroke-width="2.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+  <line x1="8" y1="50" x2="48" y2="50" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+</svg>

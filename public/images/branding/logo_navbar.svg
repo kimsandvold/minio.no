@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 170 36" fill="none">
+  <!-- Minio logo: compact navbar version, white -->
+  <rect x="1" y="1" width="34" height="34" rx="9" stroke="#f9f9f9" stroke-width="1.8" fill="none"/>
+  <polyline points="9,28 15,10 18,24 21,10 27,28" stroke="#f9f9f9" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <text x="44" y="27" font-family="Inter,-apple-system,BlinkMacSystemFont,'Helvetica Neue','Segoe UI',sans-serif" font-weight="600" font-size="26" fill="#f9f9f9" letter-spacing="-0.5">Minio</text>
+</svg>

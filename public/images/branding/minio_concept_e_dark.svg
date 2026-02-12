@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 290 76" fill="none">
+  <!-- Concept E: Carved Mark - Dark variant for light backgrounds -->
+  <path d="M 4,68 L 4,30 L 22,6 L 40,30 L 58,6 L 76,30 L 76,68 Z" fill="#1a1a1a"/>
+  <path d="M 14,68 L 14,36 L 22,22 L 32,36 L 32,68 Z" fill="#fafaf8"/>
+  <path d="M 48,68 L 48,36 L 58,22 L 66,36 L 66,68 Z" fill="#fafaf8"/>
+  <text x="94" y="48" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" font-weight="700" font-size="42" fill="#1a1a1a" letter-spacing="-1">Minio</text>
+  <text x="96" y="66" font-family="'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif" font-weight="400" font-size="13" fill="rgba(26,26,26,0.6)" letter-spacing="0.5">Fra ide til handverk.</text>
+</svg>

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 52" fill="none">
+  <!-- Concept F: Twin Peaks - Two clean triangles forming an M -->
+  <path d="M 2,48 L 17,6 L 30,32" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <path d="M 30,32 L 43,6 L 58,48" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

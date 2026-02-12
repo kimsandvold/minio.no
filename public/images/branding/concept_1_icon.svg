@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 48" fill="none">
+  <!-- 1: Open Peaks — Clean M peaks, no enclosure, thin elegant stroke -->
+  <polyline
+    points="2,44 15,6 28,34 41,6 54,44"
+    stroke="#1a1a1a"
+    stroke-width="2.8"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    fill="none"
+  />
+</svg>

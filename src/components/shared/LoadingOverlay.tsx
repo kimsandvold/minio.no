@@ -105,7 +105,7 @@ export default function LoadingOverlay({ hasConsented, onAccept }: LoadingOverla
   return (
     <Overlay $visible={visible}>
       <OverlayContent>
-        <Logo src="/images/branding/minio_dark_rect_transparent.webp" alt="Minio" />
+        <Logo src="/images/branding/logo_dark.svg" alt="Minio" />
         {!hasConsented && (
           <CookieBox>
             <h3>Cookies og personvern</h3>

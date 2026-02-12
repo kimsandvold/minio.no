@@ -13,10 +13,12 @@ const Nav = styled.nav`
   top: 0;
   left: 0;
   width: 100%;
-  padding: 0.5rem 2rem;
-  background-color: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  padding: 0.65rem 2rem;
+  background: rgba(20, 20, 20, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   z-index: ${({ theme }) => theme.zIndex.nav};
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -40,17 +42,25 @@ const NavContainer = styled.div`
 `
 
 const Logo = styled.div`
+  display: flex;
+  align-items: center;
+
+  a {
+    display: flex;
+    align-items: center;
+  }
+
   img {
-    height: 40px;
-    margin-top: 10px;
+    height: 36px;
     width: auto;
+    display: block;
   }
 `
 
 const MenuLinks = styled.div<{ $open: boolean }>`
   justify-self: center;
   display: flex;
-  gap: 1.2rem;
+  gap: 2rem;
   align-items: center;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -75,34 +85,23 @@ const MenuLinks = styled.div<{ $open: boolean }>`
 const textLinkStyles = `
   color: var(--text-light, #f9f9f9);
   text-decoration: none;
-  font-weight: 500;
-  font-size: 0.9rem;
-  transition: all 0.3s ease;
+  font-weight: 400;
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    bottom: -4px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    transition: width 0.3s ease;
-  }
 
   &:hover {
-    &::after { width: 100%; }
+    opacity: 1;
   }
 `
 
 const TextLink = styled.a`
   ${textLinkStyles}
   color: ${({ theme }) => theme.colors.textLight};
-  &::after { background-color: ${({ theme }) => theme.colors.textLight}; }
-  &:hover { color: ${({ theme }) => theme.colors.textLight}; }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     display: none;
@@ -112,8 +111,6 @@ const TextLink = styled.a`
 const TextRouterLink = styled(Link)`
   ${textLinkStyles}
   color: ${({ theme }) => theme.colors.textLight};
-  &::after { background-color: ${({ theme }) => theme.colors.textLight}; }
-  &:hover { color: ${({ theme }) => theme.colors.textLight}; }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     display: none;
@@ -196,9 +193,10 @@ const SocialIcons = styled.div`
   a {
     color: ${({ theme }) => theme.colors.textLight};
     font-size: 1.1rem;
-    transition: color 0.3s ease;
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
     text-decoration: none;
-    &:hover { color: ${({ theme }) => theme.colors.accent}; }
+    &:hover { opacity: 1; }
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -214,25 +212,26 @@ const BasketLink = styled(Link)`
   font-size: 1.2rem;
   cursor: pointer;
   padding: 0.5rem;
-  transition: color 0.3s ease;
+  opacity: 0.5;
+  transition: opacity 0.3s ease;
   text-decoration: none;
 
-  &:hover { color: ${({ theme }) => theme.colors.accent}; }
+  &:hover { opacity: 1; }
 `
 
 const BasketCount = styled.span`
   position: absolute;
-  top: -8px;
-  right: -8px;
+  top: -6px;
+  right: -6px;
   background: ${({ theme }) => theme.colors.error};
   color: white;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
+  font-size: 0.65rem;
   font-weight: 700;
 `
 
@@ -240,7 +239,7 @@ const UserPill = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: ${({ theme }) => theme.borderRadius.pill};
   padding: 0.3rem 0.75rem;
   color: ${({ theme }) => theme.colors.textLight};
@@ -280,15 +279,15 @@ const LoginLink = styled.button`
   border: none;
   color: ${({ theme }) => theme.colors.textLight};
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 400;
   cursor: pointer;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  transition: color ${({ theme }) => theme.transitions.default};
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
   font-family: ${({ theme }) => theme.fonts.body};
 
   &:hover {
-    color: ${({ theme }) => theme.colors.hover};
+    opacity: 1;
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -389,7 +388,7 @@ export default function Navbar() {
       <Nav aria-label="Hovedmeny">
         <NavContainer>
           <Logo>
-            <Link to="/"><img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio – skreddersydd i tre, etter dine mål" /></Link>
+            <Link to="/"><img src="/images/branding/logo_navbar.svg" alt="Minio" /></Link>
           </Logo>
 
           <MenuLinks $open={menuOpen}>

@@ -51,7 +51,7 @@ export default function UnderholdningPage() {
       <MainContent>
         <Container>
           <Logo>
-            <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio" />
+            <img src="/images/branding/logo_white.svg" alt="Minio" />
           </Logo>
 
           <Title>Underholdning</Title>
