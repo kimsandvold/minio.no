@@ -10,19 +10,25 @@ import GoogleLoginButton from '../shared/GoogleLoginButton'
 
 const Nav = styled.nav`
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  padding: 0.65rem 2rem;
-  background: rgba(20, 20, 20, 0.6);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  top: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 2rem);
+  max-width: ${({ theme }) => theme.spacing.containerMax};
+  padding: 0.6rem 1.5rem;
+  background: rgba(20, 20, 20, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   z-index: ${({ theme }) => theme.zIndex.nav};
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    top: 0.5rem;
+    width: calc(100% - 1rem);
     padding: 0.5rem 1rem;
+    border-radius: 14px;
   }
 `
 
@@ -31,8 +37,6 @@ const NavContainer = styled.div`
   grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: 2rem;
-  max-width: ${({ theme }) => theme.spacing.containerMax};
-  margin: 0 auto;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     display: flex;
