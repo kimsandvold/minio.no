@@ -854,7 +854,7 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
         <CheckMark $checked={signChecked}>
           {signChecked && <Icon name="faCheck" />}
         </CheckMark>
-        Skilt
+        Skilt (husnummer, adresse etc.)
       </CheckboxBox>
 
       {signChecked && (

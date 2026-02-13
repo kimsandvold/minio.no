@@ -23,49 +23,60 @@ const Overlay = styled.div`
   background: #111;
 `
 
-const LoginGate = styled.div`
-  flex: 1;
+const LoginOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`
+
+const LoginCard = styled.div`
+  background: #fff;
+  border-radius: 16px;
+  padding: 2.5rem 2.5rem 2rem;
+  max-width: 380px;
+  width: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  padding: 2rem;
+  gap: 1rem;
   text-align: center;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.3);
 `
 
-const LoginGateTitle = styled.h2`
-  color: #f9f9f9;
-  font-size: 1.5rem;
+const LoginCardIcon = styled.div`
+  font-size: 1.8rem;
+  color: #666;
+`
+
+const LoginCardTitle = styled.h2`
+  color: #202020;
+  font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
 `
 
-const LoginGateText = styled.p`
-  color: #aaa;
-  font-size: 1rem;
+const LoginCardText = styled.p`
+  color: #666;
+  font-size: 0.9rem;
   margin: 0;
-  max-width: 360px;
   line-height: 1.5;
 `
 
-const LoginGateClose = styled.button`
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.75rem;
-  border-radius: 6px;
-  border: 1px solid #444;
-  background: #333;
-  color: #ddd;
+const LoginCardClose = styled.button`
+  margin-top: 0.5rem;
+  background: none;
+  border: none;
+  color: #999;
   font-size: 0.85rem;
   cursor: pointer;
-  transition: background 0.15s ease;
+  padding: 0.25rem 0.5rem;
 
-  &:hover { background: #444; }
+  &:hover { color: #333; }
 `
 
 const EditorLayout = styled.div`
@@ -289,27 +300,23 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign }: Pr
 
   if (!isOpen) return null
 
-  if (!isAuthenticated) {
-    return createPortal(
-      <Overlay>
-        <LoginGateClose onClick={onClose}>
-          <Icon name="faTimes" /> Lukk
-        </LoginGateClose>
-        <LoginGate>
-          <Icon name="faPencilRuler" className="" />
-          <LoginGateTitle>Logg inn for å bruke designeren</LoginGateTitle>
-          <LoginGateText>
-            Du må logge inn med Google for å lage, lagre og eksportere dine skiltdesign.
-          </LoginGateText>
-          <GoogleLoginButton />
-        </LoginGate>
-      </Overlay>,
-      document.body,
-    )
-  }
-
   return createPortal(
     <Overlay>
+      {!isAuthenticated && (
+        <LoginOverlay>
+          <LoginCard>
+            <LoginCardIcon>
+              <Icon name="faPencilRuler" />
+            </LoginCardIcon>
+            <LoginCardTitle>Logg inn for å bruke designeren</LoginCardTitle>
+            <LoginCardText>
+              Du må logge inn med Google for å lage, lagre og eksportere dine skiltdesign.
+            </LoginCardText>
+            <GoogleLoginButton />
+            <LoginCardClose onClick={onClose}>Lukk</LoginCardClose>
+          </LoginCard>
+        </LoginOverlay>
+      )}
       <DesignerTopBar
         designName={designName}
         onNameChange={setDesignName}

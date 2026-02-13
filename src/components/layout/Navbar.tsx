@@ -97,7 +97,7 @@ const textLinkStyles = `
   font-weight: 400;
   font-size: 0.88rem;
   letter-spacing: 0.01em;
-  opacity: 0.7;
+  opacity: 0.85;
   transition: opacity 0.3s ease;
   display: inline-flex;
   align-items: center;
@@ -202,7 +202,7 @@ const SocialIcons = styled.div`
   a {
     color: ${({ theme }) => theme.colors.textLight};
     font-size: 1.1rem;
-    opacity: 0.5;
+    opacity: 0.65;
     transition: opacity 0.3s ease;
     text-decoration: none;
     &:hover { opacity: 1; }
@@ -217,15 +217,14 @@ const BasketLink = styled(Link)`
   position: relative;
   background: none;
   border: none;
-  color: ${({ theme }) => theme.colors.textLight};
+  color: rgba(255, 255, 255, 0.65);
   font-size: 1.2rem;
   cursor: pointer;
   padding: 0.5rem;
-  opacity: 0.5;
-  transition: opacity 0.3s ease;
+  transition: color 0.3s ease;
   text-decoration: none;
 
-  &:hover { opacity: 1; }
+  &:hover { color: #fff; }
 `
 
 const BasketCount = styled.span`
@@ -291,9 +290,12 @@ const UserDropdown = styled.div`
   top: 100%;
   right: 0;
   margin-top: 0.5rem;
-  background: ${({ theme }) => theme.colors.white};
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   min-width: 200px;
   overflow: hidden;
   z-index: ${({ theme }) => theme.zIndex.nav + 5};
@@ -304,13 +306,14 @@ const DropdownLink = styled(Link)`
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  color: ${({ theme }) => theme.colors.textDark};
+  color: rgba(255, 255, 255, 0.8);
   text-decoration: none;
   font-size: 0.9rem;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
 
   &:hover {
-    background: #f5f5f5;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
   }
 `
 
@@ -322,15 +325,16 @@ const DropdownBtn = styled.button`
   width: 100%;
   background: none;
   border: none;
-  border-top: 1px solid #eee;
-  color: ${({ theme }) => theme.colors.error};
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 120, 120, 0.9);
   font-size: 0.9rem;
   font-family: ${({ theme }) => theme.fonts.body};
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease;
 
   &:hover {
-    background: #f5f5f5;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ff8888;
   }
 `
 
@@ -342,7 +346,7 @@ const LoginLink = styled.button`
   font-weight: 400;
   cursor: pointer;
   text-decoration: none;
-  opacity: 0.7;
+  opacity: 0.85;
   transition: opacity 0.3s ease;
   font-family: ${({ theme }) => theme.fonts.body};
 
@@ -360,9 +364,12 @@ const LoginPopover = styled.div`
   top: 100%;
   right: 0;
   margin-top: 0.5rem;
-  background: ${({ theme }) => theme.colors.white};
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   padding: 1.5rem;
   z-index: ${({ theme }) => theme.zIndex.nav + 5};
   min-width: 260px;
@@ -371,7 +378,7 @@ const LoginPopover = styled.div`
   p {
     margin-bottom: 1rem;
     font-size: 0.9rem;
-    color: ${({ theme }) => theme.colors.textDark};
+    color: rgba(255, 255, 255, 0.7);
   }
 `
 
@@ -467,6 +474,7 @@ export default function Navbar() {
   const [loginOpen, setLoginOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
+  const loginPopoverRef = useRef<HTMLDivElement>(null)
   const { totalItems } = useBasketContext()
   const { user, logout, isAuthenticated, isAdmin } = useAuthContext()
   const location = useLocation()
@@ -488,10 +496,13 @@ export default function Navbar() {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false)
       }
+      if (loginPopoverRef.current && !loginPopoverRef.current.contains(e.target as Node)) {
+        setLoginOpen(false)
+      }
     }
-    if (userMenuOpen) document.addEventListener('mousedown', handleClickOutside)
+    if (userMenuOpen || loginOpen) document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [userMenuOpen])
+  }, [userMenuOpen, loginOpen])
 
   const navHref = (hash: string) => isHome ? hash : `/${hash}`
 
@@ -603,13 +614,13 @@ export default function Navbar() {
                 )}
               </UserMenuWrapper>
             ) : (
-              <LoginPopoverWrapper>
+              <LoginPopoverWrapper ref={loginPopoverRef}>
                 <LoginLink onClick={() => setLoginOpen(!loginOpen)}>
                   Logg inn
                 </LoginLink>
                 {loginOpen && (
                   <LoginPopover>
-                    <p>Logg inn for å bruke handlekurven</p>
+                    <p>Logg inn for å lagre design og bestillinger</p>
                     <GoogleLoginButton />
                   </LoginPopover>
                 )}

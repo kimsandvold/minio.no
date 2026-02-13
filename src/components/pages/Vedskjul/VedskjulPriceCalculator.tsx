@@ -921,7 +921,7 @@ export default function VedskjulPriceCalculator({ basePrice, onConfigChange }: V
         <CheckMark $checked={signChecked}>
           {signChecked && <Icon name="faCheck" />}
         </CheckMark>
-        Skilt
+        Skilt (husnummer, adresse etc.)
       </CheckboxBox>
 
       {signChecked && (
