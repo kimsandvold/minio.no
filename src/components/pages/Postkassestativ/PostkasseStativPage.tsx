@@ -84,7 +84,7 @@ const Container = styled.div`
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 420px;
-  gap: 4rem;
+  gap: 2rem;
   align-items: start;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -97,7 +97,6 @@ const Container = styled.div`
 
 const Article = styled.article`
   padding: 0;
-  padding-right: 4rem;
 
   h2 {
     font-size: 2rem;
@@ -146,15 +145,17 @@ const Article = styled.article`
 `
 
 const Sidebar = styled.aside`
-  padding: 0;
+  padding: 0 0 0 2rem;
   height: fit-content;
   position: sticky;
   top: 100px;
+  border-left: 1px solid #e0e0e0;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     position: static;
     padding: 0;
     padding-bottom: 2rem;
+    border-left: none;
     border-bottom: 1px solid #e0e0e0;
     order: 1;
     width: 100%;
@@ -257,16 +258,6 @@ export default function PostkasseStativPage() {
                 hjem ved innkjørselen. Hvert stativ bygges for hånd etter dine mål og tilpasses
                 antall postkasser, tilgjengelig plass og ønsket design.
               </p>
-              <PostkasseThreeVisualizer
-                width={config.width}
-                height={config.height}
-                depth={config.depth}
-                mailboxCount={config.mailboxCount}
-                finish={config.finish}
-                roof={config.roof}
-                hasNumberPanel={config.hasNumberPanel}
-              />
-
               <h3>Praktisk oppbevaring under postkassene</h3>
               <p>
                 Under postkassene er det et romslig, åpent hylle-rom som gir plass til pakker
@@ -316,6 +307,16 @@ export default function PostkasseStativPage() {
             </Article>
 
             <Sidebar>
+              <PostkasseThreeVisualizer
+                width={config.width}
+                height={config.height}
+                depth={config.depth}
+                mailboxCount={config.mailboxCount}
+                finish={config.finish}
+                roof={config.roof}
+                hasNumberPanel={config.hasNumberPanel}
+                onConfigChange={setConfig}
+              />
               <SidebarTitle>Pris kalkulator</SidebarTitle>
               <PostkassePriceCalculator basePrice={product?.basePrice ?? DEFAULT_BASE_PRICE} onConfigChange={handleConfigChange} />
             </Sidebar>

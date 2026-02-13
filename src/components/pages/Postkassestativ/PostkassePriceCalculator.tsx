@@ -24,10 +24,7 @@ const LILLEHAMMER_LON = 10.4662
 // ── Styled components ──────────────────────────────────────────────
 
 const CalculatorContainer = styled.div`
-  background: #fff;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  border: 1px solid #e0e0e0;
-  padding: 1.25rem;
+  padding: 0;
 `
 
 const SectionTitle = styled.h3`
@@ -44,26 +41,31 @@ const SectionTitle = styled.h3`
   }
 `
 
-const SelectWrapper = styled.div`
-  position: relative;
-  width: 100%;
+const ButtonGroup = styled.div`
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
 `
 
-const StyledSelect = styled.select`
-  width: 100%;
-  padding: 0.5rem 0.6rem;
-  border: 2px solid #e0e0e0;
-  border-radius: ${({ theme }) => theme.borderRadius.small};
-  font-size: 0.8rem;
-  color: ${({ theme }) => theme.colors.textDark};
-  background: #fff;
+const ButtonGroupBtn = styled.button<{ $active: boolean }>`
+  flex: 1;
+  padding: 0.45rem 0.3rem;
+  font-size: 0.72rem;
+  border: none;
+  background: ${({ $active }) => $active ? '#333' : '#fff'};
+  color: ${({ $active }) => $active ? '#fff' : '#555'};
   cursor: pointer;
-  transition: border-color ${({ theme }) => theme.transitions.default};
-  appearance: auto;
+  transition: all 0.15s;
+  font-weight: ${({ $active }) => $active ? '600' : '400'};
+  white-space: nowrap;
 
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.textDark};
+  &:not(:last-child) {
+    border-right: 1px solid #e0e0e0;
+  }
+
+  &:hover {
+    background: ${({ $active }) => $active ? '#333' : '#f5f5f5'};
   }
 `
 
@@ -634,21 +636,11 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
           </TooltipContent>
         </TooltipWrapper>
       </SectionTitle>
-      <SelectWrapper>
-        <StyledSelect
-          value={mailboxCount}
-          onChange={(e) => handleMailboxCountChange(parseInt(e.target.value, 10))}
-        >
-          <option value={1}>1 postkasse</option>
-          <option value={2}>2 postkasser</option>
-          <option value={3}>3 postkasser</option>
-          <option value={4}>4 postkasser</option>
-          <option value={5}>5 postkasser</option>
-          <option value={6}>6 postkasser</option>
-          <option value={7}>7 postkasser</option>
-          <option value={8}>8 postkasser</option>
-        </StyledSelect>
-      </SelectWrapper>
+      <ButtonGroup>
+        {[1, 2, 3, 4, 5, 6, 7, 8].map(n => (
+          <ButtonGroupBtn key={n} $active={mailboxCount === n} onClick={() => handleMailboxCountChange(n)}>{n}</ButtonGroupBtn>
+        ))}
+      </ButtonGroup>
 
       {/* Dimensions */}
       <SectionTitle>
@@ -713,32 +705,26 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
           </TooltipContent>
         </TooltipWrapper>
       </SectionTitle>
-      <SelectWrapper>
-        <StyledSelect value={construction} onChange={(e) => setConstruction(e.target.value)}>
-          <option value="whitewood">Hvitt treverk (+0,-)</option>
-          <option value="impregnated">Impregnert (+20%)</option>
-        </StyledSelect>
-      </SelectWrapper>
+      <ButtonGroup>
+        <ButtonGroupBtn $active={construction === 'whitewood'} onClick={() => setConstruction('whitewood')}>Hvitt treverk</ButtonGroupBtn>
+        <ButtonGroupBtn $active={construction === 'impregnated'} onClick={() => setConstruction('impregnated')}>Impregnert (+20%)</ButtonGroupBtn>
+      </ButtonGroup>
 
       {/* Surface finish */}
       <SectionTitle>Overflatebehandling</SectionTitle>
-      <SelectWrapper>
-        <StyledSelect value={finish} onChange={(e) => setFinish(e.target.value)}>
-          <option value="0">Ubehandlet (+0,-)</option>
-          <option value="1500">Grunnet (+1 500,-)</option>
-          <option value="3000">Grunnet og malt (+3 000,-)</option>
-        </StyledSelect>
-      </SelectWrapper>
+      <ButtonGroup>
+        <ButtonGroupBtn $active={finish === '0'} onClick={() => setFinish('0')}>Ubehandlet</ButtonGroupBtn>
+        <ButtonGroupBtn $active={finish === '1500'} onClick={() => setFinish('1500')}>Grunnet</ButtonGroupBtn>
+        <ButtonGroupBtn $active={finish === '3000'} onClick={() => setFinish('3000')}>Grunnet og malt</ButtonGroupBtn>
+      </ButtonGroup>
 
       {/* Roof type */}
       <SectionTitle>Taktype</SectionTitle>
-      <SelectWrapper>
-        <StyledSelect value={roofType} onChange={(e) => setRoofType(e.target.value)}>
-          <option value="0">Panel tak (+0,-)</option>
-          <option value="1500">Takpapp (+1 500,-)</option>
-          <option value="2500">Impregnert tak (+2 500,-)</option>
-        </StyledSelect>
-      </SelectWrapper>
+      <ButtonGroup>
+        <ButtonGroupBtn $active={roofType === '0'} onClick={() => setRoofType('0')}>Panel</ButtonGroupBtn>
+        <ButtonGroupBtn $active={roofType === '1500'} onClick={() => setRoofType('1500')}>Takpapp</ButtonGroupBtn>
+        <ButtonGroupBtn $active={roofType === '2500'} onClick={() => setRoofType('2500')}>Impregnert</ButtonGroupBtn>
+      </ButtonGroup>
 
       {/* Number panel */}
       <SectionTitle>Tilvalg</SectionTitle>

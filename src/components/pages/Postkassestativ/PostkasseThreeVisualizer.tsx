@@ -1,9 +1,14 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import {
+  SidebarPanel, SidebarHeader, SidebarTitle, SidebarClose, SidebarBody,
+  SbSection, SbLabel, SbSliderGroup, SbSliderRow, SbSliderName, SbSliderVal, SbSlider,
+  SegRow, SegBtn, ToggleRow, ToggleText, ToggleTrack,
+} from '../../shared/FullscreenSidebar'
 
-interface PostkasseVisualizerProps {
+interface VisualizerConfig {
   width: number
   height: number
   depth: number
@@ -13,20 +18,42 @@ interface PostkasseVisualizerProps {
   hasNumberPanel: boolean
 }
 
-const Wrapper = styled.div`
+interface PostkasseVisualizerProps extends VisualizerConfig {
+  onConfigChange?: (config: VisualizerConfig) => void
+}
+
+const Wrapper = styled.div<{ $fullscreen?: boolean }>`
   width: 100%;
   margin-bottom: 2rem;
+
+  ${({ $fullscreen }) => $fullscreen && `
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: #fff;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+  `}
 `
 
-const Viewport = styled.div`
-  width: 100%;
-  aspect-ratio: 4 / 3;
+const Viewport = styled.div<{ $fullscreen?: boolean }>`
+  ${({ $fullscreen }) => $fullscreen ? `
+    flex: 1;
+    height: 100%;
+    min-width: 0;
+  ` : `
+    width: 100%;
+    aspect-ratio: 4 / 3;
+  `}
   position: relative;
-  border-radius: 8px;
+  border-radius: ${({ $fullscreen }) => $fullscreen ? '0' : '8px'};
   overflow: hidden;
 
   canvas {
     display: block;
+    width: 100% !important;
+    height: 100% !important;
   }
 `
 
@@ -62,6 +89,37 @@ const RotateHint = styled.div`
 
 const HandIcon = styled.span`
   font-size: 0.7rem;
+`
+
+const ZoomControls = styled.div`
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 2;
+`
+
+const ZoomButton = styled.button`
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #fff;
+  }
 `
 
 // ── Geometry helpers ────────────────────────────────────────────────
@@ -168,7 +226,7 @@ function disposeGroup(group: THREE.Group) {
 
 function buildPostkasseModel(
   houseGroup: THREE.Group,
-  props: PostkasseVisualizerProps,
+  props: VisualizerConfig,
 ) {
   disposeGroup(houseGroup)
 
@@ -440,6 +498,15 @@ function buildPostkasseModel(
   houseGroup.position.y = 0
 }
 
+// ── Camera helper ───────────────────────────────────────────────────
+
+function centerCamera(houseGroup: THREE.Group, controls: OrbitControls) {
+  const box = new THREE.Box3().setFromObject(houseGroup)
+  const center = new THREE.Vector3()
+  box.getCenter(center)
+  controls.target.copy(center)
+}
+
 // ── Component ───────────────────────────────────────────────────────
 
 export default function PostkasseThreeVisualizer(props: PostkasseVisualizerProps) {
@@ -480,7 +547,6 @@ export default function PostkasseThreeVisualizer(props: PostkasseVisualizerProps
     controls.maxDistance = 8
     controls.maxPolarAngle = Math.PI / 2
     controls.enablePan = false
-    controls.target.set(0, 0.5, 0)
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
@@ -510,6 +576,7 @@ export default function PostkasseThreeVisualizer(props: PostkasseVisualizerProps
     scene.add(houseGroup)
 
     buildPostkasseModel(houseGroup, props)
+    centerCamera(houseGroup, controls)
 
     let animationId = 0
     function animate() {
@@ -572,17 +639,149 @@ export default function PostkasseThreeVisualizer(props: PostkasseVisualizerProps
   useEffect(() => {
     if (!sceneRef.current) return
     buildPostkasseModel(sceneRef.current.houseGroup, props)
+    centerCamera(sceneRef.current.houseGroup, sceneRef.current.controls)
   }, [props.width, props.height, props.depth, props.mailboxCount, props.finish, props.roof, props.hasNumberPanel])
 
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  useEffect(() => {
+    if (!sceneRef.current || !containerRef.current) return
+    const container = containerRef.current
+    const { camera, renderer } = sceneRef.current
+    const raf = requestAnimationFrame(() => {
+      const w = container.clientWidth
+      const h = container.clientHeight
+      camera.aspect = w / h
+      camera.updateProjectionMatrix()
+      renderer.setSize(w, h)
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [isFullscreen])
+
+  useEffect(() => {
+    if (!isFullscreen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsFullscreen(false)
+    }
+    window.addEventListener('keydown', handler)
+    return () => {
+      document.body.style.overflow = prev
+      window.removeEventListener('keydown', handler)
+    }
+  }, [isFullscreen])
+
+  const handleZoom = (direction: 'in' | 'out') => {
+    if (!sceneRef.current) return
+    const { camera, controls } = sceneRef.current
+    const offset = camera.position.clone().sub(controls.target)
+    const factor = direction === 'in' ? 0.8 : 1.25
+    const dist = Math.max(controls.minDistance, Math.min(controls.maxDistance, offset.length() * factor))
+    offset.normalize().multiplyScalar(dist)
+    camera.position.copy(controls.target).add(offset)
+  }
+
+  const config: VisualizerConfig = {
+    width: props.width,
+    height: props.height,
+    depth: props.depth,
+    mailboxCount: props.mailboxCount,
+    finish: props.finish,
+    roof: props.roof,
+    hasNumberPanel: props.hasNumberPanel,
+  }
+
+  const update = (partial: Partial<VisualizerConfig>) => {
+    props.onConfigChange?.({ ...config, ...partial })
+  }
+
   return (
-    <Wrapper>
-      <Viewport ref={containerRef}>
-        <Label>Eksempel visualisering for å se størrelsen omtrentlig</Label>
+    <Wrapper $fullscreen={isFullscreen}>
+      <Viewport ref={containerRef} $fullscreen={isFullscreen}>
+        {!isFullscreen && <Label>Eksempel visualisering for å se størrelsen omtrentlig</Label>}
         <RotateHint>
           <HandIcon>&#9995;</HandIcon>
           Roter
         </RotateHint>
+        <ZoomControls>
+          <ZoomButton onClick={() => handleZoom('in')} aria-label="Zoom inn">+</ZoomButton>
+          <ZoomButton onClick={() => handleZoom('out')} aria-label="Zoom ut">&minus;</ZoomButton>
+          {!isFullscreen && <ZoomButton onClick={() => setIsFullscreen(true)} aria-label="Fullskjerm">&#x26F6;</ZoomButton>}
+        </ZoomControls>
       </Viewport>
+
+      {isFullscreen && (
+        <SidebarPanel>
+          <SidebarHeader>
+            <SidebarTitle>Tilpass</SidebarTitle>
+            <SidebarClose onClick={() => setIsFullscreen(false)} aria-label="Lukk">&times;</SidebarClose>
+          </SidebarHeader>
+          <SidebarBody>
+            <SbSection>
+              <SbLabel>Antall postkasser</SbLabel>
+              <SegRow>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+                  <SegBtn key={n} $active={props.mailboxCount === n} onClick={() => update({ mailboxCount: n, width: n * 40 + 10 })}>{n}</SegBtn>
+                ))}
+              </SegRow>
+            </SbSection>
+
+            <SbSection>
+              <SbLabel>Mål</SbLabel>
+              <SbSliderGroup>
+                <SbSliderRow>
+                  <SbSliderName>Bredde</SbSliderName>
+                  <SbSliderVal>{props.width} cm</SbSliderVal>
+                </SbSliderRow>
+                <SbSlider type="range" min={40} max={400} step={5} value={props.width} onChange={(e) => {
+                  const w = +e.target.value
+                  update({ width: w, mailboxCount: Math.min(8, Math.max(1, Math.floor(w / 40))) })
+                }} />
+              </SbSliderGroup>
+              <SbSliderGroup>
+                <SbSliderRow>
+                  <SbSliderName>Høyde</SbSliderName>
+                  <SbSliderVal>{props.height} cm</SbSliderVal>
+                </SbSliderRow>
+                <SbSlider type="range" min={140} max={180} step={5} value={props.height} onChange={(e) => update({ height: +e.target.value })} />
+              </SbSliderGroup>
+              <SbSliderGroup>
+                <SbSliderRow>
+                  <SbSliderName>Dybde</SbSliderName>
+                  <SbSliderVal>{props.depth} cm</SbSliderVal>
+                </SbSliderRow>
+                <SbSlider type="range" min={40} max={70} step={5} value={props.depth} onChange={(e) => update({ depth: +e.target.value })} />
+              </SbSliderGroup>
+            </SbSection>
+
+            <SbSection>
+              <SbLabel>Overflatebehandling</SbLabel>
+              <SegRow>
+                <SegBtn $active={props.finish === '0'} onClick={() => update({ finish: '0' })}>Ubehandlet</SegBtn>
+                <SegBtn $active={props.finish === '1500'} onClick={() => update({ finish: '1500' })}>Grunnet</SegBtn>
+                <SegBtn $active={props.finish === '3000'} onClick={() => update({ finish: '3000' })}>Malt</SegBtn>
+              </SegRow>
+            </SbSection>
+
+            <SbSection>
+              <SbLabel>Taktype</SbLabel>
+              <SegRow>
+                <SegBtn $active={props.roof === '0'} onClick={() => update({ roof: '0' })}>Panel</SegBtn>
+                <SegBtn $active={props.roof === '1500'} onClick={() => update({ roof: '1500' })}>Takpapp</SegBtn>
+                <SegBtn $active={props.roof === '2500'} onClick={() => update({ roof: '2500' })}>Impregnert</SegBtn>
+              </SegRow>
+            </SbSection>
+
+            <SbSection>
+              <ToggleRow>
+                <ToggleText>Nummerskilt</ToggleText>
+                <ToggleTrack $on={props.hasNumberPanel} onClick={() => update({ hasNumberPanel: !props.hasNumberPanel })} />
+              </ToggleRow>
+            </SbSection>
+          </SidebarBody>
+        </SidebarPanel>
+      )}
     </Wrapper>
   )
 }

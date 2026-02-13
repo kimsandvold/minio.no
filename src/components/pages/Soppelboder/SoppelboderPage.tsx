@@ -84,7 +84,7 @@ const Container = styled.div`
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 420px;
-  gap: 4rem;
+  gap: 2rem;
   align-items: start;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -97,7 +97,6 @@ const Container = styled.div`
 
 const Article = styled.article`
   padding: 0;
-  padding-right: 4rem;
 
   h2 {
     font-size: 2rem;
@@ -146,15 +145,17 @@ const Article = styled.article`
 `
 
 const Sidebar = styled.aside`
-  padding: 0;
+  padding: 0 0 0 2rem;
   height: fit-content;
   position: sticky;
   top: 100px;
+  border-left: 1px solid #e0e0e0;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     position: static;
     padding: 0;
     padding-bottom: 2rem;
+    border-left: none;
     border-bottom: 1px solid #e0e0e0;
     order: 1;
     width: 100%;
@@ -324,16 +325,6 @@ export default function SoppelboderPage() {
                 hos deg, og at de synes så godt gjør ikke eiendommen din særlig penere.
                 Kjenner du deg igjen? Da kan dette produktet være noe for deg.
               </p>
-              <SoppelboderThreeVisualizer
-                width={config.width}
-                height={config.height}
-                depth={config.depth}
-                binCount={config.binCount}
-                doorType={config.doorType}
-                finish={config.finish}
-                roof={config.roof}
-              />
-
               <p>
                 <strong>En Minio søppelbod forandrer det.</strong> Håndlaget i Norge med
                 norske materialer og ekte håndverkskvalitet, skreddersydd millimeter for
@@ -391,6 +382,16 @@ export default function SoppelboderPage() {
             </Article>
 
             <Sidebar>
+              <SoppelboderThreeVisualizer
+                width={config.width}
+                height={config.height}
+                depth={config.depth}
+                binCount={config.binCount}
+                doorType={config.doorType}
+                finish={config.finish}
+                roof={config.roof}
+                onConfigChange={setConfig}
+              />
               <SidebarTitle>Pris kalkulator</SidebarTitle>
               <SoppelboderPriceCalculator basePrice={product?.basePrice ?? DEFAULT_BASE_PRICE} onConfigChange={handleConfigChange} />
             </Sidebar>

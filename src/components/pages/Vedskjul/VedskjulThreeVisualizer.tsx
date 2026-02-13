@@ -1,9 +1,14 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import {
+  SidebarPanel, SidebarHeader, SidebarTitle, SidebarClose, SidebarBody,
+  SbSection, SbLabel, SbSliderGroup, SbSliderRow, SbSliderName, SbSliderVal, SbSlider,
+  SegRow, SegBtn, ToggleRow, ToggleText, ToggleTrack,
+} from '../../shared/FullscreenSidebar'
 
-interface VedskjulVisualizerProps {
+interface VisualizerConfig {
   width: number
   height: number
   depth: number
@@ -16,20 +21,42 @@ interface VedskjulVisualizerProps {
   hasDoor: boolean
 }
 
-const Wrapper = styled.div`
+interface VedskjulVisualizerProps extends VisualizerConfig {
+  onConfigChange?: (config: VisualizerConfig) => void
+}
+
+const Wrapper = styled.div<{ $fullscreen?: boolean }>`
   width: 100%;
   margin-bottom: 2rem;
+
+  ${({ $fullscreen }) => $fullscreen && `
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    background: #fff;
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+  `}
 `
 
-const Viewport = styled.div`
-  width: 100%;
-  aspect-ratio: 4 / 3;
+const Viewport = styled.div<{ $fullscreen?: boolean }>`
+  ${({ $fullscreen }) => $fullscreen ? `
+    flex: 1;
+    height: 100%;
+    min-width: 0;
+  ` : `
+    width: 100%;
+    aspect-ratio: 4 / 3;
+  `}
   position: relative;
-  border-radius: 8px;
+  border-radius: ${({ $fullscreen }) => $fullscreen ? '0' : '8px'};
   overflow: hidden;
 
   canvas {
     display: block;
+    width: 100% !important;
+    height: 100% !important;
   }
 `
 
@@ -65,6 +92,37 @@ const RotateHint = styled.div`
 
 const HandIcon = styled.span`
   font-size: 0.7rem;
+`
+
+const ZoomControls = styled.div`
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 2;
+`
+
+const ZoomButton = styled.button`
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #fff;
+  }
 `
 
 // ── Geometry helpers ────────────────────────────────────────────────
@@ -149,7 +207,7 @@ function disposeGroup(group: THREE.Group) {
 
 function buildVedskjulModel(
   houseGroup: THREE.Group,
-  props: VedskjulVisualizerProps,
+  props: VisualizerConfig,
 ) {
   disposeGroup(houseGroup)
 
@@ -589,6 +647,13 @@ function buildVedskjulModel(
   houseGroup.position.y = 0
 }
 
+function centerCamera(houseGroup: THREE.Group, controls: OrbitControls) {
+  const box = new THREE.Box3().setFromObject(houseGroup)
+  const center = new THREE.Vector3()
+  box.getCenter(center)
+  controls.target.copy(center)
+}
+
 // ── Component ───────────────────────────────────────────────────────
 
 export default function VedskjulThreeVisualizer(props: VedskjulVisualizerProps) {
@@ -629,7 +694,6 @@ export default function VedskjulThreeVisualizer(props: VedskjulVisualizerProps) 
     controls.maxDistance = 8
     controls.maxPolarAngle = Math.PI / 2
     controls.enablePan = false
-    controls.target.set(0, 0.5, 0)
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
@@ -659,6 +723,7 @@ export default function VedskjulThreeVisualizer(props: VedskjulVisualizerProps) 
     scene.add(houseGroup)
 
     buildVedskjulModel(houseGroup, props)
+    centerCamera(houseGroup, controls)
 
     let animationId = 0
     function animate() {
@@ -721,17 +786,178 @@ export default function VedskjulThreeVisualizer(props: VedskjulVisualizerProps) 
   useEffect(() => {
     if (!sceneRef.current) return
     buildVedskjulModel(sceneRef.current.houseGroup, props)
+    centerCamera(sceneRef.current.houseGroup, sceneRef.current.controls)
   }, [props.width, props.height, props.depth, props.sectionCount, props.finish, props.roof, props.roofShape, props.roofDegree, props.roofSlopeDirection, props.hasDoor])
 
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  useEffect(() => {
+    if (!sceneRef.current || !containerRef.current) return
+    const container = containerRef.current
+    const { camera, renderer } = sceneRef.current
+    const raf = requestAnimationFrame(() => {
+      const w = container.clientWidth
+      const h = container.clientHeight
+      camera.aspect = w / h
+      camera.updateProjectionMatrix()
+      renderer.setSize(w, h)
+    })
+    return () => cancelAnimationFrame(raf)
+  }, [isFullscreen])
+
+  useEffect(() => {
+    if (!isFullscreen) return
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsFullscreen(false)
+    }
+    window.addEventListener('keydown', handler)
+    return () => {
+      document.body.style.overflow = prev
+      window.removeEventListener('keydown', handler)
+    }
+  }, [isFullscreen])
+
+  const handleZoom = (direction: 'in' | 'out') => {
+    if (!sceneRef.current) return
+    const { camera, controls } = sceneRef.current
+    const offset = camera.position.clone().sub(controls.target)
+    const factor = direction === 'in' ? 0.8 : 1.25
+    const dist = Math.max(controls.minDistance, Math.min(controls.maxDistance, offset.length() * factor))
+    offset.normalize().multiplyScalar(dist)
+    camera.position.copy(controls.target).add(offset)
+  }
+
+  const config: VisualizerConfig = {
+    width: props.width,
+    height: props.height,
+    depth: props.depth,
+    sectionCount: props.sectionCount,
+    finish: props.finish,
+    roof: props.roof,
+    roofShape: props.roofShape,
+    roofDegree: props.roofDegree,
+    roofSlopeDirection: props.roofSlopeDirection,
+    hasDoor: props.hasDoor,
+  }
+
+  const update = (partial: Partial<VisualizerConfig>) => {
+    props.onConfigChange?.({ ...config, ...partial })
+  }
+
   return (
-    <Wrapper>
-      <Viewport ref={containerRef}>
-        <Label>Eksempel visualisering for å se størrelsen omtrentlig</Label>
+    <Wrapper $fullscreen={isFullscreen}>
+      <Viewport ref={containerRef} $fullscreen={isFullscreen}>
+        {!isFullscreen && <Label>Eksempel visualisering for å se størrelsen omtrentlig</Label>}
         <RotateHint>
           <HandIcon>&#9995;</HandIcon>
           Roter
         </RotateHint>
+        <ZoomControls>
+          <ZoomButton onClick={() => handleZoom('in')} aria-label="Zoom inn">+</ZoomButton>
+          <ZoomButton onClick={() => handleZoom('out')} aria-label="Zoom ut">&minus;</ZoomButton>
+          {!isFullscreen && <ZoomButton onClick={() => setIsFullscreen(true)} aria-label="Fullskjerm">&#x26F6;</ZoomButton>}
+        </ZoomControls>
       </Viewport>
+
+      {isFullscreen && (
+        <SidebarPanel>
+          <SidebarHeader>
+            <SidebarTitle>Tilpass</SidebarTitle>
+            <SidebarClose onClick={() => setIsFullscreen(false)} aria-label="Lukk">&times;</SidebarClose>
+          </SidebarHeader>
+          <SidebarBody>
+            <SbSection>
+              <SbLabel>Seksjoner</SbLabel>
+              <SegRow>
+                <SegBtn $active={props.sectionCount === 1} onClick={() => update({ sectionCount: 1, hasDoor: false })}>1 seksjon</SegBtn>
+                <SegBtn $active={props.sectionCount === 2} onClick={() => update({ sectionCount: 2 })}>2 seksjoner</SegBtn>
+              </SegRow>
+              {props.sectionCount === 2 && (
+                <div style={{ marginTop: '0.75rem' }}>
+                  <ToggleRow>
+                    <ToggleText>Dør på redskapsbod</ToggleText>
+                    <ToggleTrack $on={props.hasDoor} onClick={() => update({ hasDoor: !props.hasDoor })} />
+                  </ToggleRow>
+                </div>
+              )}
+            </SbSection>
+
+            <SbSection>
+              <SbLabel>Mål</SbLabel>
+              <SbSliderGroup>
+                <SbSliderRow>
+                  <SbSliderName>Bredde</SbSliderName>
+                  <SbSliderVal>{props.width} cm</SbSliderVal>
+                </SbSliderRow>
+                <SbSlider type="range" min={200} max={400} step={5} value={props.width} onChange={(e) => update({ width: +e.target.value })} />
+              </SbSliderGroup>
+              <SbSliderGroup>
+                <SbSliderRow>
+                  <SbSliderName>Høyde</SbSliderName>
+                  <SbSliderVal>{props.height} cm</SbSliderVal>
+                </SbSliderRow>
+                <SbSlider type="range" min={150} max={250} step={5} value={props.height} onChange={(e) => update({ height: +e.target.value })} />
+              </SbSliderGroup>
+              <SbSliderGroup>
+                <SbSliderRow>
+                  <SbSliderName>Dybde</SbSliderName>
+                  <SbSliderVal>{props.depth} cm</SbSliderVal>
+                </SbSliderRow>
+                <SbSlider type="range" min={100} max={300} step={5} value={props.depth} onChange={(e) => update({ depth: +e.target.value })} />
+              </SbSliderGroup>
+            </SbSection>
+
+            <SbSection>
+              <SbLabel>Takform</SbLabel>
+              <SegRow>
+                <SegBtn $active={props.roofShape === 'flat'} onClick={() => update({ roofShape: 'flat' })}>Flatt</SegBtn>
+                <SegBtn $active={props.roofShape === 'hip'} onClick={() => update({ roofShape: 'hip' })}>Valmtak</SegBtn>
+              </SegRow>
+            </SbSection>
+
+            <SbSection>
+              <SbLabel>Takvinkel</SbLabel>
+              <SbSliderGroup>
+                <SbSliderRow>
+                  <SbSliderName>Grad</SbSliderName>
+                  <SbSliderVal>{props.roofDegree}%</SbSliderVal>
+                </SbSliderRow>
+                <SbSlider type="range" min={0} max={45} step={1} value={props.roofDegree} onChange={(e) => update({ roofDegree: +e.target.value })} />
+              </SbSliderGroup>
+            </SbSection>
+
+            {props.roofShape === 'flat' && (
+              <SbSection>
+                <SbLabel>Takfall retning</SbLabel>
+                <SegRow>
+                  <SegBtn $active={props.roofSlopeDirection === 'back'} onClick={() => update({ roofSlopeDirection: 'back' })}>Bak</SegBtn>
+                  <SegBtn $active={props.roofSlopeDirection === 'front'} onClick={() => update({ roofSlopeDirection: 'front' })}>Foran</SegBtn>
+                </SegRow>
+              </SbSection>
+            )}
+
+            <SbSection>
+              <SbLabel>Overflatebehandling</SbLabel>
+              <SegRow>
+                <SegBtn $active={props.finish === '0'} onClick={() => update({ finish: '0' })}>Ubehandlet</SegBtn>
+                <SegBtn $active={props.finish === '2000'} onClick={() => update({ finish: '2000' })}>Grunnet</SegBtn>
+                <SegBtn $active={props.finish === '4500'} onClick={() => update({ finish: '4500' })}>Malt</SegBtn>
+              </SegRow>
+            </SbSection>
+
+            <SbSection>
+              <SbLabel>Taktype</SbLabel>
+              <SegRow>
+                <SegBtn $active={props.roof === '0'} onClick={() => update({ roof: '0' })}>Panel</SegBtn>
+                <SegBtn $active={props.roof === '1200'} onClick={() => update({ roof: '1200' })}>Takpapp</SegBtn>
+                <SegBtn $active={props.roof === '2000'} onClick={() => update({ roof: '2000' })}>Impregnert</SegBtn>
+              </SegRow>
+            </SbSection>
+          </SidebarBody>
+        </SidebarPanel>
+      )}
     </Wrapper>
   )
 }

@@ -23,10 +23,7 @@ const LILLEHAMMER_LON = 10.4662
 // ── Styled components ──────────────────────────────────────────────
 
 const CalculatorContainer = styled.div`
-  background: #fff;
-  border-radius: ${({ theme }) => theme.borderRadius.medium};
-  border: 1px solid #e0e0e0;
-  padding: 1.25rem;
+  padding: 0;
 `
 
 const SectionTitle = styled.h3`
@@ -43,26 +40,31 @@ const SectionTitle = styled.h3`
   }
 `
 
-const SelectWrapper = styled.div`
-  position: relative;
-  width: 100%;
+const ButtonGroup = styled.div`
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
 `
 
-const StyledSelect = styled.select`
-  width: 100%;
-  padding: 0.5rem 0.6rem;
-  border: 2px solid #e0e0e0;
-  border-radius: ${({ theme }) => theme.borderRadius.small};
-  font-size: 0.8rem;
-  color: ${({ theme }) => theme.colors.textDark};
-  background: #fff;
+const ButtonGroupBtn = styled.button<{ $active: boolean }>`
+  flex: 1;
+  padding: 0.45rem 0.3rem;
+  font-size: 0.72rem;
+  border: none;
+  background: ${({ $active }) => $active ? '#333' : '#fff'};
+  color: ${({ $active }) => $active ? '#fff' : '#555'};
   cursor: pointer;
-  transition: border-color ${({ theme }) => theme.transitions.default};
-  appearance: auto;
+  transition: all 0.15s;
+  font-weight: ${({ $active }) => $active ? '600' : '400'};
+  white-space: nowrap;
 
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.textDark};
+  &:not(:last-child) {
+    border-right: 1px solid #e0e0e0;
+  }
+
+  &:hover {
+    background: ${({ $active }) => $active ? '#333' : '#f5f5f5'};
   }
 `
 
@@ -568,15 +570,10 @@ export default function PriceCalculator({ basePrice, onDimensionsChange }: Price
           </TooltipContent>
         </TooltipWrapper>
       </SectionTitle>
-      <SelectWrapper>
-        <StyledSelect
-          value={mounting}
-          onChange={(e) => setMounting(e.target.value as 'wall' | 'freestanding')}
-        >
-          <option value="wall">Vegghengt (+0,-)</option>
-          <option value="freestanding">Frittstående (+25% størrelseskostnad)</option>
-        </StyledSelect>
-      </SelectWrapper>
+      <ButtonGroup>
+        <ButtonGroupBtn $active={mounting === 'wall'} onClick={() => setMounting('wall')}>Vegghengt</ButtonGroupBtn>
+        <ButtonGroupBtn $active={mounting === 'freestanding'} onClick={() => setMounting('freestanding')}>Frittstående (+25%)</ButtonGroupBtn>
+      </ButtonGroup>
 
       {/* Roof angle */}
       <SectionTitle>Takvinkel</SectionTitle>
@@ -645,23 +642,19 @@ export default function PriceCalculator({ basePrice, onDimensionsChange }: Price
 
       {/* Surface finish */}
       <SectionTitle>Overflatebehandling</SectionTitle>
-      <SelectWrapper>
-        <StyledSelect value={finish} onChange={(e) => setFinish(e.target.value)}>
-          <option value="0">Ubehandlet (+0,-)</option>
-          <option value="800">Grunnet (+800,-)</option>
-          <option value="1500">Grunnet og malt (+1500,-)</option>
-        </StyledSelect>
-      </SelectWrapper>
+      <ButtonGroup>
+        <ButtonGroupBtn $active={finish === '0'} onClick={() => setFinish('0')}>Ubehandlet</ButtonGroupBtn>
+        <ButtonGroupBtn $active={finish === '800'} onClick={() => setFinish('800')}>Grunnet</ButtonGroupBtn>
+        <ButtonGroupBtn $active={finish === '1500'} onClick={() => setFinish('1500')}>Grunnet og malt</ButtonGroupBtn>
+      </ButtonGroup>
 
       {/* Roof type */}
       <SectionTitle>Taktype</SectionTitle>
-      <SelectWrapper>
-        <StyledSelect value={roofType} onChange={(e) => setRoofType(e.target.value)}>
-          <option value="0">Panel tak (+0,-)</option>
-          <option value="300">Takpapp (+300,-)</option>
-          <option value="500">Impregnert tak (+500,-)</option>
-        </StyledSelect>
-      </SelectWrapper>
+      <ButtonGroup>
+        <ButtonGroupBtn $active={roofType === '0'} onClick={() => setRoofType('0')}>Panel</ButtonGroupBtn>
+        <ButtonGroupBtn $active={roofType === '300'} onClick={() => setRoofType('300')}>Takpapp</ButtonGroupBtn>
+        <ButtonGroupBtn $active={roofType === '500'} onClick={() => setRoofType('500')}>Impregnert</ButtonGroupBtn>
+      </ButtonGroup>
 
       {/* Quality */}
       <SectionTitle>
@@ -673,12 +666,10 @@ export default function PriceCalculator({ basePrice, onDimensionsChange }: Price
           </TooltipContent>
         </TooltipWrapper>
       </SectionTitle>
-      <SelectWrapper>
-        <StyledSelect value={quality} onChange={(e) => setQuality(e.target.value)}>
-          <option value="0">Standard utførelse (+0,-)</option>
-          <option value="volume">Forsterket utførelse (pris avhenger av størrelse)</option>
-        </StyledSelect>
-      </SelectWrapper>
+      <ButtonGroup>
+        <ButtonGroupBtn $active={quality === '0'} onClick={() => setQuality('0')}>Standard</ButtonGroupBtn>
+        <ButtonGroupBtn $active={quality === 'volume'} onClick={() => setQuality('volume')}>Forsterket</ButtonGroupBtn>
+      </ButtonGroup>
 
       {/* Additional services */}
       <SectionTitle>Tilleggstjenester</SectionTitle>
