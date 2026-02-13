@@ -28,6 +28,7 @@ import SkiltOgGraveringPage from './components/pages/SkiltOgGravering/SkiltOgGra
 import MineBestillingerPage from './components/pages/MineBestillinger/MineBestillingerPage'
 import MineDesignPage from './components/pages/MineDesign/MineDesignPage'
 import AdminBestillingerPage from './components/pages/Admin/AdminBestillingerPage'
+import NotFoundPage from './components/pages/NotFound/NotFoundPage'
 
 const VarmepumpehusPage = lazy(() => import('./components/pages/Varmepumpehus/VarmepumpehusPage'))
 const SoppelboderPage = lazy(() => import('./components/pages/Soppelboder/SoppelboderPage'))
@@ -82,6 +83,7 @@ export default function App() {
                 <Route path="/mine-design" element={<MineDesignPage />} />
                 <Route path="/mine-bestillinger" element={<MineBestillingerPage />} />
                 <Route path="/admin/bestillinger" element={<AdminBestillingerPage />} />
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </ModalProvider>
           </BasketProvider>
