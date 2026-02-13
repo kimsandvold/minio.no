@@ -10,6 +10,7 @@ import SplideCarousel from '../../shared/SplideCarousel'
 import { ProductDetailSkeleton } from '../../shared/ProductSkeleton'
 import { useProductBySlug } from '../../../hooks/useProducts'
 import EngravingBanner from '../../shared/EngravingBanner'
+import CrossSellBanner from '../../shared/CrossSellBanner'
 
 const Hero = styled.section`
   min-height: 30vh;
@@ -214,6 +215,14 @@ export default function ProduktDetailPage() {
                 <ContactButton href={contactHref}>Ta kontakt for tilbud</ContactButton>
               </Info>
             </ProductLayout>
+
+            <CrossSellBanner
+              icon="faClipboardList"
+              heading="Trenger du noe spesialtilpasset?"
+              description="Vi designer og bygger produkter etter dine mål og ønsker. Se hvordan prosessen fungerer fra idé til ferdig produkt."
+              linkTo="/slik-jobber-vi"
+              linkText="Slik jobber vi"
+            />
 
             <EngravingBanner />
           </Container>

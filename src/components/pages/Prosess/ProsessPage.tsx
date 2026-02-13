@@ -65,6 +65,16 @@ const Container = styled.div`
   margin: 0 auto;
 `
 
+const Intro = styled.div`
+  margin-bottom: 3rem;
+
+  p {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #444;
+  }
+`
+
 const Steps = styled.div`
   display: grid;
   grid-template-columns: 1fr;
@@ -167,11 +177,16 @@ export default function ProsessPage() {
         <Hero>
           <HeroContent>
             <h1>Slik jobber vi</h1>
-            <p>Fra idé til ferdig produkt – her er prosessen når du bestiller skreddersydde treprodukter fra Minio.</p>
+            <p>Fra idé til ferdig produkt – her er prosessen når du bestiller fra Minio.</p>
           </HeroContent>
         </Hero>
         <Content>
           <Container>
+            <Intro>
+              <p>
+                Trenger du et produkt som er tilpasset akkurat ditt hjem, dine mål og dine ønsker? Enten det gjelder et varmepumpehus med spesielle dimensjoner, en søppelbod som matcher husets stil, eller noe helt annet – så hjelper vi deg hele veien. Vi designer produktet ut fra dine behov og ønsker, og sørger for at det blir både funksjonelt og pent. Under ser du stegene vi følger for å sikre at du får et resultat du er fornøyd med, fra første samtale til ferdig produkt levert på døra. Denne typen prosjekter prises individuelt basert på omfang, materialer og kompleksitet.
+              </p>
+            </Intro>
             <Steps>
               {processSteps.map(step => (
                 <ProcessStep key={step.number} step={step} />

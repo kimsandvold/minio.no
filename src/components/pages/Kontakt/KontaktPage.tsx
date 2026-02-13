@@ -64,6 +64,13 @@ const Container = styled.div`
   margin: 0 auto;
 `
 
+const Intro = styled.p`
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: #444;
+  margin-bottom: 2.5rem;
+`
+
 const Grid = styled.div`
   display: grid;
   grid-template-columns: 1fr 380px;
@@ -410,6 +417,7 @@ export default function KontaktPage() {
         </Hero>
         <Content>
           <Container>
+            <Intro>Enten du har en konkret idé eller bare lurer på hva som er mulig – send oss en melding. Vi svarer vanligvis innen 24 timer, og alle henvendelser er helt uforpliktende.</Intro>
             <Grid>
               <FormSection>
                 <h2>Send oss en melding</h2>

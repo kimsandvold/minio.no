@@ -9,6 +9,7 @@ import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import { useSEO } from '../../../hooks/useSEO'
 import { useProductBySlug } from '../../../hooks/useProducts'
 import EngravingBanner from '../../shared/EngravingBanner'
+import CrossSellBanner from '../../shared/CrossSellBanner'
 
 const Hero = styled.section`
   min-height: 50vh;
@@ -416,6 +417,14 @@ export default function VedskjulPage() {
             </ReviewsGrid>
             <ReviewNote>Din tilbakemelding legges ut etter avtale per e-post i etterkant av installasjon.</ReviewNote>
           </ReviewsSection>
+
+          <CrossSellBanner
+            icon="faTrashCan"
+            heading="Skjul søppeldunkene også"
+            description="Kombiner vedskjulet med en søppelbod i samme stil – holder hele uteområdet ryddig og gjennomført."
+            linkTo="/produkter/soppelboder"
+            linkText="Se søppelboder"
+          />
 
           <EngravingBanner
             heading="Merk vedskjulet med adresse"

@@ -9,6 +9,7 @@ import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import { useSEO } from '../../../hooks/useSEO'
 import { useProductBySlug } from '../../../hooks/useProducts'
 import EngravingBanner from '../../shared/EngravingBanner'
+import CrossSellBanner from '../../shared/CrossSellBanner'
 
 const Hero = styled.section`
   min-height: 50vh;
@@ -414,6 +415,14 @@ export default function SoppelboderPage() {
             </ReviewsGrid>
             <ReviewNote>Din tilbakemelding legges ut etter avtale per e-post i etterkant av installasjon.</ReviewNote>
           </ReviewsSection>
+
+          <CrossSellBanner
+            icon="faFire"
+            heading="Trenger du også et vedskjul?"
+            description="Hold veden tørr og eiendommen ryddig med et vedskjul i samme stil som søppelboden – tilpasset dine mål."
+            linkTo="/produkter/vedskjul"
+            linkText="Se vedskjul"
+          />
 
           <EngravingBanner
             heading="Merk søppelboden med adresse"

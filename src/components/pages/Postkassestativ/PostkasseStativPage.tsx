@@ -9,6 +9,7 @@ import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import { useSEO } from '../../../hooks/useSEO'
 import { useProductBySlug } from '../../../hooks/useProducts'
 import EngravingBanner from '../../shared/EngravingBanner'
+import CrossSellBanner from '../../shared/CrossSellBanner'
 
 const Hero = styled.section`
   min-height: 50vh;
@@ -328,6 +329,14 @@ export default function PostkasseStativPage() {
             </ReviewsHeader>
             <ReviewNote>Din tilbakemelding legges ut etter avtale per e-post i etterkant av installasjon.</ReviewNote>
           </ReviewsSection>
+
+          <CrossSellBanner
+            icon="faShieldHalved"
+            heading="Beskytt varmepumpen også"
+            description="Gi uteområdet et helhetlig uttrykk med et varmepumpehus i samme stil som postkassestativet."
+            linkTo="/produkter/varmepumpehus"
+            linkText="Se varmepumpehus"
+          />
 
           <EngravingBanner
             heading="Bestill adresseskilt til stativet"

@@ -48,6 +48,7 @@ const NavContainer = styled.div`
 const Logo = styled.div`
   display: flex;
   align-items: center;
+  margin-left: -0.5rem;
 
   a {
     display: flex;
@@ -58,6 +59,10 @@ const Logo = styled.div`
     height: 36px;
     width: auto;
     display: block;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    margin-left: 0;
   }
 `
 

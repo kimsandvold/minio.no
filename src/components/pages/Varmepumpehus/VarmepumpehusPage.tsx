@@ -9,6 +9,7 @@ import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import { useSEO } from '../../../hooks/useSEO'
 import { useProductBySlug } from '../../../hooks/useProducts'
 import EngravingBanner from '../../shared/EngravingBanner'
+import CrossSellBanner from '../../shared/CrossSellBanner'
 
 const Hero = styled.section`
   min-height: 50vh;
@@ -388,6 +389,14 @@ export default function VarmepumpehusPage() {
             </ReviewsGrid>
             <ReviewNote>Din tilbakemelding legges ut etter avtale per e-post i etterkant av installasjon.</ReviewNote>
           </ReviewsSection>
+
+          <CrossSellBanner
+            icon="faTrashCan"
+            heading="Hold hele uteområdet ryddig"
+            description="Kombiner varmepumpehuset med en søppelbod i samme stil – tilpasset dine mål og fargevalg for et helhetlig uttrykk."
+            linkTo="/produkter/soppelboder"
+            linkText="Se søppelboder"
+          />
 
           <EngravingBanner
             heading="Merk varmepumpehuset med husnummer"
