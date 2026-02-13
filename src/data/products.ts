@@ -13,8 +13,8 @@ export function fetchAllProducts(): Promise<Product[]> {
   return simulateFetch(allProducts)
 }
 
-export function fetchRandomProducts(count: number): Promise<Product[]> {
-  const pool = allProducts.filter(p => !p.isFeatured)
+export function fetchRandomProducts(count: number, excludeSlug?: string): Promise<Product[]> {
+  const pool = allProducts.filter(p => !p.isFeatured && p.slug !== excludeSlug)
   const shuffled = [...pool].sort(() => Math.random() - 0.5)
   return simulateFetch(shuffled.slice(0, count))
 }

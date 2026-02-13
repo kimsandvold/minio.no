@@ -225,6 +225,7 @@ export default function BasketView({ onCheckout }: BasketViewProps) {
                 {item.quality && <><strong>Kvalitet:</strong> {item.quality}<br /></>}
                 <strong>Tak:</strong> {item.roof}<br />
                 {item.lighting && <><strong>Belysning:</strong> {item.lighting}<br /></>}
+                {item.signRequested && <><strong>Skilt:</strong> Ja ({item.signWidthCm}×{item.signHeightCm} cm) — pris kommer separat<br /></>}
                 <strong>Levering:</strong> {item.delivery}<br />
                 <strong>Montering:</strong> {item.installation}
               </Details>

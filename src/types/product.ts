@@ -41,6 +41,9 @@ export interface BasketItem {
   complexity?: string
   lighting?: string
   designCount?: string
+  signRequested?: boolean
+  signWidthCm?: number
+  signHeightCm?: number
 }
 
 export interface ProcessStepData {

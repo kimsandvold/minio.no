@@ -26,16 +26,16 @@ export function useAllProducts(): UseProductsResult<Product[]> {
   return { data, loading }
 }
 
-export function useRandomProducts(count: number): UseProductsResult<Product[]> {
+export function useRandomProducts(count: number, excludeSlug?: string): UseProductsResult<Product[]> {
   const [data, setData] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchRandomProducts(count).then(products => {
+    fetchRandomProducts(count, excludeSlug).then(products => {
       setData(products)
       setLoading(false)
     })
-  }, [count])
+  }, [count, excludeSlug])
 
   return { data, loading }
 }

@@ -2,9 +2,9 @@ import { useCallback } from 'react'
 import type { SignDesign } from '../../../../types/design'
 
 export function useSvgExport(svgRef: React.RefObject<SVGSVGElement | null>) {
-  const getSvgString = useCallback((): string => {
+  const getCleanClone = useCallback((): SVGSVGElement | null => {
     const svg = svgRef.current
-    if (!svg) return ''
+    if (!svg) return null
     const clone = svg.cloneNode(true) as SVGSVGElement
     // Remove selection handles and UI-only elements
     clone.querySelectorAll('[data-ui-only]').forEach(el => el.remove())
@@ -12,19 +12,25 @@ export function useSvgExport(svgRef: React.RefObject<SVGSVGElement | null>) {
     clone.querySelectorAll('[style]').forEach(el => {
       el.removeAttribute('style')
     })
-    const serializer = new XMLSerializer()
-    return serializer.serializeToString(clone)
+    return clone
   }, [svgRef])
 
+  const getSvgString = useCallback((): string => {
+    const clone = getCleanClone()
+    if (!clone) return ''
+    return new XMLSerializer().serializeToString(clone)
+  }, [getCleanClone])
+
   const exportSvg = useCallback((design: SignDesign, filename?: string) => {
-    const svgString = getSvgString()
-    if (!svgString) return
+    const clone = getCleanClone()
+    if (!clone) return
 
-    // Wrap with proper SVG header including physical dimensions in mm
-    const wrappedSvg = svgString
-      .replace(/<svg /, `<svg xmlns="http://www.w3.org/2000/svg" width="${design.canvasWidth}mm" height="${design.canvasHeight}mm" `)
+    // Set physical dimensions in mm on the clone before serializing
+    clone.setAttribute('width', `${design.canvasWidth}mm`)
+    clone.setAttribute('height', `${design.canvasHeight}mm`)
 
-    const blob = new Blob([wrappedSvg], { type: 'image/svg+xml' })
+    const svgString = new XMLSerializer().serializeToString(clone)
+    const blob = new Blob([svgString], { type: 'image/svg+xml' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
@@ -33,7 +39,7 @@ export function useSvgExport(svgRef: React.RefObject<SVGSVGElement | null>) {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
-  }, [getSvgString])
+  }, [getCleanClone])
 
   return { getSvgString, exportSvg }
 }

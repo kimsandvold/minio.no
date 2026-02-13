@@ -129,6 +129,7 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
       if (item.quality) message += `Kvalitet: ${item.quality}\n`
       message += `Tak: ${item.roof}\n`
       if (item.lighting) message += `Belysning: ${item.lighting}\n`
+      if (item.signRequested) message += `Skilt: Ja (${item.signWidthCm}×${item.signHeightCm} cm) — pris kommer separat. Kunde har brukt skiltdesigneren.\n`
       message += `Levering: ${item.delivery}\n`
       message += `Montering: ${item.installation}\n`
       message += `Estimert pris per stk: ${item.price}\n`
@@ -223,6 +224,7 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
                 {item.quality && <>Kvalitet: {item.quality}<br /></>}
                 Tak: {item.roof}<br />
                 {item.lighting && <>Belysning: {item.lighting}<br /></>}
+                {item.signRequested && <>Skilt: Ja ({item.signWidthCm}&times;{item.signHeightCm} cm) — pris kommer separat<br /></>}
                 Levering: {item.delivery}<br />
                 Montering: {item.installation}<br />
                 Estimert pris: {item.price}{item.quantity > 1 ? ` × ${item.quantity} = ${formatPrice(item.price, item.quantity)}` : ''}

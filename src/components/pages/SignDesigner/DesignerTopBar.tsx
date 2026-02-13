@@ -197,7 +197,7 @@ export default function DesignerTopBar({
     <TopBar>
       {onClose && (
         <CloseButton onClick={onClose} title="Lukk designer">
-          <Icon name="faXmark" />
+          <Icon name="faTimes" />
         </CloseButton>
       )}
       <NameInput

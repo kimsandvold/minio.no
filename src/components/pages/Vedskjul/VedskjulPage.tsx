@@ -8,8 +8,7 @@ import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import { useSEO } from '../../../hooks/useSEO'
 import { useProductBySlug } from '../../../hooks/useProducts'
-import EngravingBanner from '../../shared/EngravingBanner'
-import CrossSellBanner from '../../shared/CrossSellBanner'
+import RelatedProducts from '../../shared/RelatedProducts'
 
 const Hero = styled.section`
   min-height: 50vh;
@@ -418,18 +417,7 @@ export default function VedskjulPage() {
             <ReviewNote>Din tilbakemelding legges ut etter avtale per e-post i etterkant av installasjon.</ReviewNote>
           </ReviewsSection>
 
-          <CrossSellBanner
-            icon="faTrashCan"
-            heading="Skjul søppeldunkene også"
-            description="Kombiner vedskjulet med en søppelbod i samme stil – holder hele uteområdet ryddig og gjennomført."
-            linkTo="/produkter/soppelboder"
-            linkText="Se søppelboder"
-          />
-
-          <EngravingBanner
-            heading="Merk vedskjulet med adresse"
-            description="Vi laserskjærer adresseskilt og husnummer i tre som passer perfekt til vedskjulet ditt."
-          />
+          <RelatedProducts currentSlug="vedskjul" />
         </Content>
       </main>
       <Footer />

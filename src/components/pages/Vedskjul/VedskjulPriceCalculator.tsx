@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import styled from 'styled-components'
 import Icon from '../../shared/Icon'
 import { useBasketContext } from '../../../context/BasketContext'
+import SignDesignerModal from '../SignDesigner/SignDesignerModal'
 
 interface VedskjulPriceCalculatorProps {
   basePrice: number
@@ -384,6 +385,56 @@ const Toast = styled.div<{ $visible: boolean }>`
   gap: 0.4rem;
 `
 
+const SignDetails = styled.div`
+  margin-top: 0.5rem;
+  padding: 0.75rem;
+  background: #fafafa;
+  border-radius: ${({ theme }) => theme.borderRadius.small};
+  border: 1px solid #e8e8e8;
+`
+
+const SignSizeRow = styled.div`
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+`
+
+const SignSizeField = styled.div`
+  flex: 1;
+`
+
+const SignNote = styled.div`
+  font-size: 0.68rem;
+  color: #e65100;
+  background: #fff3e0;
+  padding: 0.4rem 0.6rem;
+  border-radius: ${({ theme }) => theme.borderRadius.small};
+  border: 1px solid #ffcc80;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+`
+
+const DesignerLink = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: none;
+  border: 1px dashed #aaa;
+  border-radius: ${({ theme }) => theme.borderRadius.small};
+  padding: 0.4rem 0.65rem;
+  font-size: 0.75rem;
+  color: ${({ theme }) => theme.colors.textDark};
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: all ${({ theme }) => theme.transitions.default};
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.textDark};
+    background: #f5f5f5;
+  }
+`
+
 // ── Section presets ─────────────────────────────────────────────────
 
 const SECTION_PRESETS: Record<number, { width: number; depth: number; height: number }> = {
@@ -412,6 +463,10 @@ export default function VedskjulPriceCalculator({ basePrice, onConfigChange }: V
   const [deliveryChecked, setDeliveryChecked] = useState(false)
   const [installationChecked, setInstallationChecked] = useState(false)
   const [lightingChecked, setLightingChecked] = useState(false)
+  const [signChecked, setSignChecked] = useState(false)
+  const [signWidth, setSignWidth] = useState(30)
+  const [signHeight, setSignHeight] = useState(15)
+  const [showDesigner, setShowDesigner] = useState(false)
   const [distance, setDistance] = useState(0)
   const [location, setLocation] = useState('')
   const [locationStatus, setLocationStatus] = useState<{
@@ -567,6 +622,9 @@ export default function VedskjulPriceCalculator({ basePrice, onConfigChange }: V
       size: sectionCount === 1 ? '1 seksjon (vedskjul)' : '2 seksjoner (vedskjul + redskapsbod)',
       complexity: sectionCount === 2 ? `Redskapsbod${hasDoor ? ' med dør' : ' uten dør'}` : undefined,
       price: formatPrice(totalPrice),
+      signRequested: signChecked,
+      signWidthCm: signChecked ? signWidth : undefined,
+      signHeightCm: signChecked ? signHeight : undefined,
     })
 
     setShowToast(true)
@@ -854,6 +912,52 @@ export default function VedskjulPriceCalculator({ basePrice, onConfigChange }: V
         Belysning med skumringsrelé (+5 000,-)
       </CheckboxBox>
 
+      <CheckboxBox $checked={signChecked}>
+        <HiddenCheckbox
+          type="checkbox"
+          checked={signChecked}
+          onChange={(e) => setSignChecked(e.target.checked)}
+        />
+        <CheckMark $checked={signChecked}>
+          {signChecked && <Icon name="faCheck" />}
+        </CheckMark>
+        Skilt
+      </CheckboxBox>
+
+      {signChecked && (
+        <SignDetails>
+          <SignSizeRow>
+            <SignSizeField>
+              <InputLabel>Bredde (cm)</InputLabel>
+              <StyledInput
+                type="number"
+                min={5}
+                max={200}
+                value={signWidth}
+                onChange={(e) => setSignWidth(Math.max(5, parseInt(e.target.value, 10) || 5))}
+              />
+            </SignSizeField>
+            <SignSizeField>
+              <InputLabel>Høyde (cm)</InputLabel>
+              <StyledInput
+                type="number"
+                min={5}
+                max={200}
+                value={signHeight}
+                onChange={(e) => setSignHeight(Math.max(5, parseInt(e.target.value, 10) || 5))}
+              />
+            </SignSizeField>
+          </SignSizeRow>
+          <SignNote>
+            <Icon name="faInfoCircle" />
+            Pris for skilt kommer i tillegg til prisen over.
+          </SignNote>
+          <DesignerLink type="button" onClick={() => setShowDesigner(true)}>
+            <Icon name="faPencilRuler" /> Design skiltet i skiltdesigneren
+          </DesignerLink>
+        </SignDetails>
+      )}
+
       {/* Price display */}
       <PriceSection>
         <PriceRow>
@@ -881,6 +985,8 @@ export default function VedskjulPriceCalculator({ basePrice, onConfigChange }: V
         <Icon name="faCheck" />
         Lagt til i forespørselen!
       </Toast>
+
+      <SignDesignerModal isOpen={showDesigner} onClose={() => setShowDesigner(false)} />
     </CalculatorContainer>
   )
 }

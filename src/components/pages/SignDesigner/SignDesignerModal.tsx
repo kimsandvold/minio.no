@@ -11,6 +11,8 @@ import DesignerToolbar from './DesignerToolbar'
 import DesignerProperties from './DesignerProperties'
 import DesignerTopBar from './DesignerTopBar'
 import LoadDesignModal from './LoadDesignModal'
+import GoogleLoginButton from '../../shared/GoogleLoginButton'
+import Icon from '../../shared/Icon'
 
 const Overlay = styled.div`
   position: fixed;
@@ -19,6 +21,51 @@ const Overlay = styled.div`
   display: flex;
   flex-direction: column;
   background: #111;
+`
+
+const LoginGate = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 2rem;
+  text-align: center;
+`
+
+const LoginGateTitle = styled.h2`
+  color: #f9f9f9;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0;
+`
+
+const LoginGateText = styled.p`
+  color: #aaa;
+  font-size: 1rem;
+  margin: 0;
+  max-width: 360px;
+  line-height: 1.5;
+`
+
+const LoginGateClose = styled.button`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #444;
+  background: #333;
+  color: #ddd;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover { background: #444; }
 `
 
 const EditorLayout = styled.div`
@@ -85,6 +132,7 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign }: Pr
       lastSavedSnapshot.current = JSON.stringify(initialDesign.design)
       lastSavedName.current = initialDesign.name
     } else {
+      dispatch({ type: 'LOAD_DESIGN', design: { canvasWidth: 700, canvasHeight: 500, elements: [], backgroundColor: 'transparent' } })
       setDesignName('Mitt skilt')
       setCurrentDesignId(null)
       lastSavedSnapshot.current = null
@@ -240,6 +288,25 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign }: Pr
   }, [isOpen, onClose, dispatch, state.selectedElementId, isAuthenticated, handleExport, handleSave])
 
   if (!isOpen) return null
+
+  if (!isAuthenticated) {
+    return createPortal(
+      <Overlay>
+        <LoginGateClose onClick={onClose}>
+          <Icon name="faTimes" /> Lukk
+        </LoginGateClose>
+        <LoginGate>
+          <Icon name="faPencilRuler" className="" />
+          <LoginGateTitle>Logg inn for å bruke designeren</LoginGateTitle>
+          <LoginGateText>
+            Du må logge inn med Google for å lage, lagre og eksportere dine skiltdesign.
+          </LoginGateText>
+          <GoogleLoginButton />
+        </LoginGate>
+      </Overlay>,
+      document.body,
+    )
+  }
 
   return createPortal(
     <Overlay>
