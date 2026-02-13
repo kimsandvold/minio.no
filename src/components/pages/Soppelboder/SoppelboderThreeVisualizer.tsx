@@ -122,6 +122,12 @@ const ZoomButton = styled.button`
   }
 `
 
+const FullscreenBtn = styled(ZoomButton)`
+  @media (max-width: 768px) {
+    display: none;
+  }
+`
+
 // ── Geometry helpers ────────────────────────────────────────────────
 
 function createVerticalSlatWall(
@@ -731,7 +737,7 @@ export default function SoppelboderThreeVisualizer(props: SoppelboderVisualizerP
         <ZoomControls>
           <ZoomButton onClick={() => handleZoom('in')} aria-label="Zoom inn">+</ZoomButton>
           <ZoomButton onClick={() => handleZoom('out')} aria-label="Zoom ut">&minus;</ZoomButton>
-          {!isFullscreen && <ZoomButton onClick={() => setIsFullscreen(true)} aria-label="Fullskjerm">&#x26F6;</ZoomButton>}
+          {!isFullscreen && <FullscreenBtn onClick={() => setIsFullscreen(true)} aria-label="Fullskjerm">&#x26F6;</FullscreenBtn>}
         </ZoomControls>
       </Viewport>
 
