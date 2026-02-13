@@ -210,6 +210,7 @@ const ActionBtn = styled.button<{ $variant?: 'danger' }>`
   font-family: ${({ theme }) => theme.fonts.body};
   cursor: pointer;
   transition: background 0.2s ease;
+  text-decoration: none;
 
   ${({ $variant, theme }) =>
     $variant === 'danger'
@@ -352,6 +353,9 @@ export default function MineDesignPage() {
                         </DesignMeta>
                       </DesignInfo>
                       <DesignActions>
+                        <ActionBtn as="a" href={`/design/${design.id}`} target="_blank" rel="noopener noreferrer">
+                          <Icon name="faExternalLinkAlt" /> Vis
+                        </ActionBtn>
                         <ActionBtn onClick={() => handleEdit(design)}>
                           <Icon name="faPencilAlt" /> Rediger
                         </ActionBtn>

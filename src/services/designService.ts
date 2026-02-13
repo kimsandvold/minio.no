@@ -5,6 +5,7 @@ import {
   where,
   orderBy,
   getDocs,
+  getDoc,
   doc,
   updateDoc,
   deleteDoc,
@@ -47,6 +48,13 @@ export async function getUserDesigns(userId: string): Promise<SavedDesign[]> {
   )
   const snapshot = await getDocs(q)
   return snapshot.docs.map(d => ({ id: d.id, ...d.data() } as SavedDesign))
+}
+
+export async function getDesignById(designId: string): Promise<SavedDesign | null> {
+  const ref = doc(db, DESIGNS_COLLECTION, designId)
+  const snap = await getDoc(ref)
+  if (!snap.exists()) return null
+  return { id: snap.id, ...snap.data() } as SavedDesign
 }
 
 export async function deleteDesign(designId: string): Promise<void> {

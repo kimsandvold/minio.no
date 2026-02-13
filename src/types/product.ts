@@ -44,6 +44,7 @@ export interface BasketItem {
   signRequested?: boolean
   signWidthCm?: number
   signHeightCm?: number
+  signDesignId?: string
 }
 
 export interface ProcessStepData {

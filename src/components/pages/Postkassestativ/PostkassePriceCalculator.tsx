@@ -468,6 +468,7 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
   const [signWidth, setSignWidth] = useState(30)
   const [signHeight, setSignHeight] = useState(15)
   const [showDesigner, setShowDesigner] = useState(false)
+  const [signDesignId, setSignDesignId] = useState<string | null>(null)
   const [distance, setDistance] = useState(0)
   const [location, setLocation] = useState('')
   const [locationStatus, setLocationStatus] = useState<{
@@ -618,6 +619,7 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
       signRequested: signChecked,
       signWidthCm: signChecked ? signWidth : undefined,
       signHeightCm: signChecked ? signHeight : undefined,
+      signDesignId: signChecked && signDesignId ? signDesignId : undefined,
     })
 
     setShowToast(true)
@@ -872,8 +874,15 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
             Pris for skilt kommer i tillegg til prisen over.
           </SignNote>
           <DesignerLink type="button" onClick={() => setShowDesigner(true)}>
-            <Icon name="faPencilRuler" /> Design skiltet i skiltdesigneren
+            <Icon name="faPencilRuler" /> {signDesignId ? 'Endre skiltdesign' : 'Design skiltet i skiltdesigneren'}
           </DesignerLink>
+          {signDesignId && (
+            <SignNote style={{ color: '#4caf50' }}>
+              <Icon name="faCheck" />
+              Skiltdesign er koblet til bestillingen.{' '}
+              <a href={`/design/${signDesignId}`} target="_blank" rel="noopener noreferrer" style={{ color: '#1da1f2' }}>Vis design</a>
+            </SignNote>
+          )}
         </SignDetails>
       )}
 
@@ -905,7 +914,7 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
         Lagt til i forespørselen!
       </Toast>
 
-      <SignDesignerModal isOpen={showDesigner} onClose={() => setShowDesigner(false)} />
+      <SignDesignerModal isOpen={showDesigner} onClose={() => setShowDesigner(false)} loadDesignId={signDesignId} onDesignSaved={setSignDesignId} />
     </CalculatorContainer>
   )
 }

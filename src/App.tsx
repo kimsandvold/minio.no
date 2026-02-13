@@ -28,6 +28,7 @@ import SkiltOgGraveringPage from './components/pages/SkiltOgGravering/SkiltOgGra
 import MineBestillingerPage from './components/pages/MineBestillinger/MineBestillingerPage'
 import MineDesignPage from './components/pages/MineDesign/MineDesignPage'
 import AdminBestillingerPage from './components/pages/Admin/AdminBestillingerPage'
+import DesignViewPage from './components/pages/DesignView/DesignViewPage'
 import NotFoundPage from './components/pages/NotFound/NotFoundPage'
 
 const VarmepumpehusPage = lazy(() => import('./components/pages/Varmepumpehus/VarmepumpehusPage'))
@@ -83,6 +84,7 @@ export default function App() {
                 <Route path="/mine-design" element={<MineDesignPage />} />
                 <Route path="/mine-bestillinger" element={<MineBestillingerPage />} />
                 <Route path="/admin/bestillinger" element={<AdminBestillingerPage />} />
+                <Route path="/design/:designId" element={<DesignViewPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
             </ModalProvider>

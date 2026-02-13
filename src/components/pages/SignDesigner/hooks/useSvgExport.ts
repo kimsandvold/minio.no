@@ -6,12 +6,27 @@ export function useSvgExport(svgRef: React.RefObject<SVGSVGElement | null>) {
     const svg = svgRef.current
     if (!svg) return null
     const clone = svg.cloneNode(true) as SVGSVGElement
+
     // Remove selection handles and UI-only elements
     clone.querySelectorAll('[data-ui-only]').forEach(el => el.remove())
-    // Remove inline cursor styles
-    clone.querySelectorAll('[style]').forEach(el => {
-      el.removeAttribute('style')
+
+    // Ensure the root SVG has no background / box-shadow / cursor
+    clone.removeAttribute('style')
+    clone.style.background = ''
+
+    // Remove inline styles from all children (cursor: move, display: none, etc.)
+    clone.querySelectorAll('*').forEach(el => {
+      (el as HTMLElement).removeAttribute('style')
     })
+
+    // Set proper viewBox-based dimensions (no zoom scaling)
+    const vb = clone.getAttribute('viewBox')
+    if (vb) {
+      const [, , w, h] = vb.split(' ')
+      clone.setAttribute('width', w)
+      clone.setAttribute('height', h)
+    }
+
     return clone
   }, [svgRef])
 

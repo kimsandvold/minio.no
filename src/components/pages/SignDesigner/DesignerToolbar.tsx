@@ -1,7 +1,5 @@
-import { useState } from 'react'
 import styled from 'styled-components'
 import type { ToolMode, DesignerAction } from '../../../types/design'
-import { designerSymbols } from '../../../data/designerSymbols'
 import Icon from '../../shared/Icon'
 
 const Toolbar = styled.div`
@@ -60,42 +58,6 @@ const Divider = styled.div`
   }
 `
 
-const SymbolPicker = styled.div`
-  position: absolute;
-  left: 52px;
-  top: 0;
-  background: #1a1a1a;
-  border: 1px solid #333;
-  border-radius: 8px;
-  padding: 0.5rem;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 4px;
-  z-index: 100;
-  min-width: 140px;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    left: auto;
-    bottom: 52px;
-    top: auto;
-  }
-`
-
-const SymbolOption = styled.button<{ $active?: boolean }>`
-  padding: 6px 8px;
-  border: 1px solid ${({ $active }) => ($active ? '#1da1f2' : '#444')};
-  border-radius: 6px;
-  background: ${({ $active }) => ($active ? '#1da1f233' : 'transparent')};
-  color: #ddd;
-  cursor: pointer;
-  font-size: 0.7rem;
-  white-space: nowrap;
-
-  &:hover {
-    border-color: #1da1f2;
-  }
-`
-
 const tools: { mode: ToolMode; icon: string; label: string }[] = [
   { mode: 'select', icon: 'faMousePointer', label: 'Velg (V)' },
   { mode: 'text', icon: 'faFont', label: 'Tekst (T)' },
@@ -108,42 +70,20 @@ const tools: { mode: ToolMode; icon: string; label: string }[] = [
 interface Props {
   activeTool: ToolMode
   dispatch: React.Dispatch<DesignerAction>
-  activeSymbolId: string
-  onSymbolChange: (id: string) => void
 }
 
-export default function DesignerToolbar({ activeTool, dispatch, activeSymbolId, onSymbolChange }: Props) {
-  const [showSymbols, setShowSymbols] = useState(false)
-
+export default function DesignerToolbar({ activeTool, dispatch }: Props) {
   return (
     <Toolbar>
       {tools.map(t => (
-        <div key={t.mode} style={{ position: 'relative' }}>
-          <ToolButton
-            $active={activeTool === t.mode}
-            title={t.label}
-            onClick={() => {
-              dispatch({ type: 'SET_TOOL', tool: t.mode })
-              if (t.mode === 'symbol') setShowSymbols(s => !s)
-              else setShowSymbols(false)
-            }}
-          >
-            <Icon name={t.icon} />
-          </ToolButton>
-          {t.mode === 'symbol' && showSymbols && activeTool === 'symbol' && (
-            <SymbolPicker>
-              {designerSymbols.map(s => (
-                <SymbolOption
-                  key={s.id}
-                  $active={activeSymbolId === s.id}
-                  onClick={() => { onSymbolChange(s.id); setShowSymbols(false) }}
-                >
-                  {s.name}
-                </SymbolOption>
-              ))}
-            </SymbolPicker>
-          )}
-        </div>
+        <ToolButton
+          key={t.mode}
+          $active={activeTool === t.mode}
+          title={t.label}
+          onClick={() => dispatch({ type: 'SET_TOOL', tool: t.mode })}
+        >
+          <Icon name={t.icon} />
+        </ToolButton>
       ))}
       <Divider />
       <ToolButton title="Angre (Ctrl+Z)" onClick={() => dispatch({ type: 'UNDO' })}>

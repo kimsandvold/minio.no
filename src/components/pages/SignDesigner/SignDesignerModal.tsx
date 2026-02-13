@@ -4,15 +4,17 @@ import styled from 'styled-components'
 import { useDesignerState } from './hooks/useDesignerState'
 import { useSvgExport } from './hooks/useSvgExport'
 import { useAuthContext } from '../../../context/AuthContext'
-import { createDesign, updateDesign, getUserDesigns } from '../../../services/designService'
+import { createDesign, updateDesign, getUserDesigns, getDesignById } from '../../../services/designService'
 import type { SavedDesign } from '../../../types/design'
 import DesignerCanvas from './DesignerCanvas'
 import DesignerToolbar from './DesignerToolbar'
 import DesignerProperties from './DesignerProperties'
+import SymbolPickerPanel from './SymbolPickerPanel'
 import DesignerTopBar from './DesignerTopBar'
 import LoadDesignModal from './LoadDesignModal'
 import GoogleLoginButton from '../../shared/GoogleLoginButton'
 import Icon from '../../shared/Icon'
+import { loadDesignerFonts } from '../../../data/designerFonts'
 
 const Overlay = styled.div`
   position: fixed;
@@ -95,9 +97,12 @@ interface Props {
   isOpen: boolean
   onClose: () => void
   initialDesign?: SavedDesign
+  /** Pass a design ID to auto-load from Firestore when the modal opens */
+  loadDesignId?: string | null
+  onDesignSaved?: (designId: string) => void
 }
 
-export default function SignDesignerModal({ isOpen, onClose, initialDesign }: Props) {
+export default function SignDesignerModal({ isOpen, onClose, initialDesign, loadDesignId, onDesignSaved }: Props) {
   const { state, dispatch, selectedElement, generateId } = useDesignerState()
   const { user, isAuthenticated } = useAuthContext()
   const svgRef = useRef<SVGSVGElement>(null)
@@ -132,25 +137,40 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign }: Pr
     }
   }
 
+  const loadDesignIntoEditor = useCallback((saved: SavedDesign) => {
+    dispatch({ type: 'LOAD_DESIGN', design: saved.design })
+    setDesignName(saved.name)
+    setCurrentDesignId(saved.id)
+    lastSavedSnapshot.current = JSON.stringify(saved.design)
+    lastSavedName.current = saved.name
+  }, [dispatch])
+
+  const resetEditor = useCallback(() => {
+    dispatch({ type: 'LOAD_DESIGN', design: { canvasWidth: 700, canvasHeight: 500, elements: [], backgroundColor: 'transparent' } })
+    setDesignName('Mitt skilt')
+    setCurrentDesignId(null)
+    lastSavedSnapshot.current = null
+    lastSavedName.current = 'Mitt skilt'
+  }, [dispatch])
+
   // Init state when modal opens
   useEffect(() => {
     if (!isOpen) return
+    loadDesignerFonts()
     clearAutoSave()
     if (initialDesign) {
-      dispatch({ type: 'LOAD_DESIGN', design: initialDesign.design })
-      setDesignName(initialDesign.name)
-      setCurrentDesignId(initialDesign.id)
-      lastSavedSnapshot.current = JSON.stringify(initialDesign.design)
-      lastSavedName.current = initialDesign.name
+      loadDesignIntoEditor(initialDesign)
+    } else if (loadDesignId) {
+      // Fetch design from Firestore by ID
+      getDesignById(loadDesignId).then(saved => {
+        if (saved) loadDesignIntoEditor(saved)
+        else resetEditor()
+      }).catch(() => resetEditor())
     } else {
-      dispatch({ type: 'LOAD_DESIGN', design: { canvasWidth: 700, canvasHeight: 500, elements: [], backgroundColor: 'transparent' } })
-      setDesignName('Mitt skilt')
-      setCurrentDesignId(null)
-      lastSavedSnapshot.current = null
-      lastSavedName.current = 'Mitt skilt'
+      resetEditor()
     }
     setSaveStatus('idle')
-  }, [isOpen, initialDesign, dispatch])
+  }, [isOpen, initialDesign, loadDesignId, loadDesignIntoEditor, resetEditor])
 
   // Fetch design count for max limit check
   useEffect(() => {
@@ -220,6 +240,7 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign }: Pr
           design: state.design,
           svgSnapshot,
         })
+        onDesignSaved?.(currentDesignId)
       } else {
         const designs = await getUserDesigns(user.sub)
         if (designs.length >= MAX_DESIGNS) {
@@ -236,6 +257,7 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign }: Pr
         })
         setCurrentDesignId(id)
         setDesignCount(prev => prev + 1)
+        onDesignSaved?.(id)
       }
 
       lastSavedSnapshot.current = JSON.stringify(state.design)
@@ -252,12 +274,8 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign }: Pr
   }, [user, state.design, currentDesignId, designName, getSvgString])
 
   const handleLoadDesign = useCallback((saved: SavedDesign) => {
-    dispatch({ type: 'LOAD_DESIGN', design: saved.design })
-    setDesignName(saved.name)
-    setCurrentDesignId(saved.id)
-    lastSavedSnapshot.current = JSON.stringify(saved.design)
-    lastSavedName.current = saved.name
-  }, [dispatch])
+    loadDesignIntoEditor(saved)
+  }, [loadDesignIntoEditor])
 
   const handleExport = useCallback(() => {
     exportSvg(state.design, designName)
@@ -334,9 +352,13 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign }: Pr
         <DesignerToolbar
           activeTool={state.tool}
           dispatch={dispatch}
-          activeSymbolId={activeSymbolId}
-          onSymbolChange={setActiveSymbolId}
         />
+        {state.tool === 'symbol' && (
+          <SymbolPickerPanel
+            activeSymbolId={activeSymbolId}
+            onSymbolChange={setActiveSymbolId}
+          />
+        )}
         <DesignerCanvas
           state={state}
           dispatch={dispatch}
@@ -348,6 +370,9 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign }: Pr
         <DesignerProperties
           element={selectedElement}
           dispatch={dispatch}
+          activeTool={state.tool}
+          activeSymbolId={activeSymbolId}
+          onSymbolChange={setActiveSymbolId}
         />
       </EditorLayout>
 

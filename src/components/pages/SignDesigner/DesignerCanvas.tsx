@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect } from 'react'
+import { useRef, useState, useCallback, useEffect } from 'react'
 import styled from 'styled-components'
 import type { DesignerState, DesignerAction, DesignElement, Point } from '../../../types/design'
 import { useCanvasInteraction } from './hooks/useCanvasInteraction'
@@ -39,19 +39,62 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
   const wrapperRef = useRef<HTMLDivElement>(null)
   const drawStartRef = useRef<Point | null>(null)
   const drawPreviewRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null)
+  const [editingTextId, setEditingTextId] = useState<string | null>(null)
 
   const { screenToSvg, invalidateCTM } = useCanvasInteraction(svgRef)
-  const { startDrag } = useElementDrag(dispatch, design.elements, screenToSvg)
+  const { startDrag, snapGuides } = useElementDrag(dispatch, design.elements, screenToSvg, design.canvasWidth, design.canvasHeight)
   const { startResize } = useElementResize(dispatch, design.elements, screenToSvg)
 
   // Invalidate CTM on zoom/pan changes
   useEffect(() => { invalidateCTM() }, [zoom, panOffset, invalidateCTM])
+
+  const commitTextEdit = useCallback((elementId: string, text: string) => {
+    if (text.trim()) {
+      const el = design.elements.find(e => e.id === elementId)
+      if (el && el.type === 'text') {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')!
+        ctx.font = `${el.fontWeight} ${el.fontSize}px ${el.fontFamily}`
+        const measured = ctx.measureText(text).width + el.fontSize * 0.5
+        dispatch({
+          type: 'UPDATE_ELEMENT',
+          id: elementId,
+          changes: { text, width: Math.max(measured, 20) },
+        })
+      } else {
+        dispatch({ type: 'UPDATE_ELEMENT', id: elementId, changes: { text } })
+      }
+    }
+  }, [dispatch, design.elements])
+
+  // Flush any active text edit by reading the DOM input value
+  const flushActiveTextEdit = useCallback(() => {
+    if (!editingTextId) return
+    const input = svgRef.current?.querySelector('foreignObject input') as HTMLInputElement | null
+    if (input) {
+      commitTextEdit(editingTextId, input.value)
+    }
+    setEditingTextId(null)
+  }, [editingTextId, commitTextEdit, svgRef])
+
+  const handleTextCommit = useCallback((elementId: string, text: string) => {
+    commitTextEdit(elementId, text)
+    setEditingTextId(null)
+  }, [commitTextEdit])
+
+  // Clear editing if the edited element is deselected or deleted
+  useEffect(() => {
+    if (editingTextId && editingTextId !== state.selectedElementId) {
+      flushActiveTextEdit()
+    }
+  }, [state.selectedElementId, editingTextId, flushActiveTextEdit])
 
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
     if (e.button !== 0) return
     const svgPt = screenToSvg(e.clientX, e.clientY)
 
     if (tool === 'select') {
+      flushActiveTextEdit()
       dispatch({ type: 'SELECT_ELEMENT', id: null })
       return
     }
@@ -62,12 +105,14 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
         type: 'ADD_ELEMENT',
         element: {
           id, type: 'text', x: svgPt.x, y: svgPt.y,
-          width: 60, height: 14, rotation: 0,
+          width: 120, height: 40, rotation: 0,
           fill: '#000000', stroke: 'none', strokeWidth: 0, opacity: 1,
-          text: 'Tekst', fontSize: 12, fontFamily: 'Inter',
+          text: 'Tekst', fontSize: 32, fontFamily: 'Inter',
           fontWeight: 400, textAnchor: 'start', letterSpacing: 0,
         },
       })
+      // Auto-start editing the newly placed text
+      setEditingTextId(id)
       return
     }
 
@@ -76,9 +121,9 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
       dispatch({
         type: 'ADD_ELEMENT',
         element: {
-          id, type: 'symbol', x: svgPt.x - 15, y: svgPt.y - 15,
-          width: 30, height: 30, rotation: 0,
-          fill: '#000000', stroke: 'none', strokeWidth: 0, opacity: 1,
+          id, type: 'symbol', x: svgPt.x - 50, y: svgPt.y - 50,
+          width: 100, height: 100, rotation: 0,
+          fill: 'none', stroke: '#000000', strokeWidth: 2, opacity: 1,
           symbolId: activeSymbolId,
         },
       })
@@ -87,7 +132,7 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
 
     // rect, circle, line — start drawing
     drawStartRef.current = svgPt
-  }, [tool, dispatch, generateId, screenToSvg, activeSymbolId])
+  }, [tool, dispatch, generateId, screenToSvg, activeSymbolId, flushActiveTextEdit])
 
   const handleCanvasMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
     if (!drawStartRef.current) return
@@ -146,7 +191,7 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
         type: 'ADD_ELEMENT',
         element: {
           id, type: 'rect', x, y, width: w, height: h, rotation: 0,
-          fill: 'none', stroke: '#000000', strokeWidth: 1, opacity: 1, rx: 0, ry: 0,
+          fill: '#000000', stroke: 'none', strokeWidth: 0, opacity: 1, rx: 0, ry: 0,
         },
       })
     } else if (tool === 'circle') {
@@ -159,7 +204,7 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
         type: 'ADD_ELEMENT',
         element: {
           id, type: 'circle', x, y, width: w, height: h, rotation: 0,
-          fill: 'none', stroke: '#000000', strokeWidth: 1, opacity: 1,
+          fill: '#000000', stroke: 'none', strokeWidth: 0, opacity: 1,
         },
       })
     } else if (tool === 'line') {
@@ -202,7 +247,15 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
       case 'line':
         return <LineElement key={el.id} element={el} isSelected={isSelected} />
       case 'text':
-        return <TextElement key={el.id} element={el} isSelected={isSelected} />
+        return (
+          <TextElement
+            key={el.id}
+            element={el}
+            isSelected={isSelected}
+            isEditing={editingTextId === el.id}
+            onTextCommit={text => handleTextCommit(el.id, text)}
+          />
+        )
       case 'symbol':
         return <SymbolElement key={el.id} element={el} isSelected={isSelected} />
     }
@@ -212,8 +265,22 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
   const handleGroupMouseDown = (el: DesignElement) => (e: React.MouseEvent) => {
     e.stopPropagation()
     if (tool === 'select') {
+      // If clicking a different element, commit and exit text editing
+      if (editingTextId && editingTextId !== el.id) {
+        flushActiveTextEdit()
+      }
       dispatch({ type: 'SELECT_ELEMENT', id: el.id })
-      startDrag(el.id, e)
+      // Don't start drag if we're editing this text element
+      if (editingTextId !== el.id) {
+        startDrag(el.id, e)
+      }
+    }
+  }
+
+  const handleGroupDoubleClick = (el: DesignElement) => (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (tool === 'select' && el.type === 'text') {
+      setEditingTextId(el.id)
     }
   }
 
@@ -237,17 +304,17 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
       >
         {/* Draw preview shapes */}
         {tool === 'rect' && (
-          <rect data-draw-preview data-ui-only x={0} y={0} width={0} height={0} fill="none" stroke="#1da1f2" strokeWidth={0.5} strokeDasharray="3 3" style={{ display: 'none' }} />
+          <rect data-draw-preview data-ui-only x={0} y={0} width={0} height={0} fill="none" stroke="#1da1f2" strokeWidth={1.5} strokeDasharray="4 3" style={{ display: 'none' }} />
         )}
         {tool === 'circle' && (
-          <ellipse data-draw-preview data-ui-only cx={0} cy={0} rx={0} ry={0} fill="none" stroke="#1da1f2" strokeWidth={0.5} strokeDasharray="3 3" style={{ display: 'none' }} />
+          <ellipse data-draw-preview data-ui-only cx={0} cy={0} rx={0} ry={0} fill="none" stroke="#1da1f2" strokeWidth={1.5} strokeDasharray="4 3" style={{ display: 'none' }} />
         )}
         {tool === 'line' && (
-          <line data-draw-preview data-ui-only x1={0} y1={0} x2={0} y2={0} stroke="#1da1f2" strokeWidth={0.5} strokeDasharray="3 3" style={{ display: 'none' }} />
+          <line data-draw-preview data-ui-only x1={0} y1={0} x2={0} y2={0} stroke="#1da1f2" strokeWidth={1.5} strokeDasharray="4 3" style={{ display: 'none' }} />
         )}
 
         {design.elements.map(el => (
-          <g key={el.id} onMouseDown={handleGroupMouseDown(el)}>
+          <g key={el.id} onMouseDown={handleGroupMouseDown(el)} onDoubleClick={handleGroupDoubleClick(el)}>
             {renderElement(el)}
           </g>
         ))}
@@ -256,6 +323,26 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
           <g data-ui-only>
             <SelectionHandles element={selectedElement} onResizeStart={handleResizeStart} />
           </g>
+        )}
+
+        {/* Snap guide lines */}
+        {snapGuides.vertical && (
+          <line
+            data-ui-only
+            x1={design.canvasWidth / 2} y1={0}
+            x2={design.canvasWidth / 2} y2={design.canvasHeight}
+            stroke="#ff4081" strokeWidth={0.8} strokeDasharray="6 3"
+            pointerEvents="none"
+          />
+        )}
+        {snapGuides.horizontal && (
+          <line
+            data-ui-only
+            x1={0} y1={design.canvasHeight / 2}
+            x2={design.canvasWidth} y2={design.canvasHeight / 2}
+            stroke="#ff4081" strokeWidth={0.8} strokeDasharray="6 3"
+            pointerEvents="none"
+          />
         )}
       </svg>
     </CanvasWrapper>

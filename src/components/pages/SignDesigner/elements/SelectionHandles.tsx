@@ -5,7 +5,7 @@ interface Props {
   onResizeStart: (corner: string, startPoint: Point) => void
 }
 
-const HANDLE_SIZE = 3
+const HANDLE_SIZE = 5
 
 export default function SelectionHandles({ element, onResizeStart }: Props) {
   if (element.type === 'line') {
@@ -31,8 +31,8 @@ export default function SelectionHandles({ element, onResizeStart }: Props) {
     <g>
       <rect
         x={x} y={y} width={width} height={height}
-        fill="none" stroke="#1da1f2" strokeWidth={0.5}
-        strokeDasharray="2 2" pointerEvents="none"
+        fill="none" stroke="#1da1f2" strokeWidth={1.5}
+        strokeDasharray="4 3" pointerEvents="none"
       />
       {corners.map(c => (
         <rect
@@ -43,7 +43,7 @@ export default function SelectionHandles({ element, onResizeStart }: Props) {
           height={HANDLE_SIZE}
           fill="#fff"
           stroke="#1da1f2"
-          strokeWidth={0.5}
+          strokeWidth={1}
           style={{ cursor: c.cursor }}
           onMouseDown={e => { e.stopPropagation(); onResizeStart(c.id, { x: e.clientX, y: e.clientY }) }}
         />

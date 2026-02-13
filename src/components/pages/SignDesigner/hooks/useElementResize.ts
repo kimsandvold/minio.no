@@ -5,7 +5,7 @@ interface ResizeState {
   elementId: string
   corner: string
   startMouse: Point
-  startBounds: { x: number; y: number; width: number; height: number; x2?: number; y2?: number }
+  startBounds: { x: number; y: number; width: number; height: number; x2?: number; y2?: number; fontSize?: number; elementType?: string; text?: string; fontWeight?: number; fontFamily?: string }
 }
 
 export function useElementResize(
@@ -30,6 +30,11 @@ export function useElementResize(
         height: el.height,
         x2: el.type === 'line' ? el.x2 : undefined,
         y2: el.type === 'line' ? el.y2 : undefined,
+        fontSize: el.type === 'text' ? el.fontSize : undefined,
+        text: el.type === 'text' ? el.text : undefined,
+        fontWeight: el.type === 'text' ? el.fontWeight : undefined,
+        fontFamily: el.type === 'text' ? el.fontFamily : undefined,
+        elementType: el.type,
       },
     })
   }, [elements, screenToSvg])
@@ -77,10 +82,25 @@ export function useElementResize(
           break
       }
 
+      const changes: Record<string, number> = { x: newX, y: newY, width: newW, height: newH }
+
+      if (b.elementType === 'text' && b.fontSize && b.text) {
+        const scale = newH / b.height
+        const newFontSize = Math.max(4, Math.round(b.fontSize * scale))
+        changes.fontSize = newFontSize
+
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')!
+        ctx.font = `${b.fontWeight ?? 400} ${newFontSize}px ${b.fontFamily ?? 'Inter'}`
+        const measuredWidth = ctx.measureText(b.text).width + newFontSize * 0.5
+        changes.width = Math.max(measuredWidth, 20)
+        changes.height = newFontSize * 1.25
+      }
+
       dispatch({
         type: 'UPDATE_ELEMENT',
         id: resize.elementId,
-        changes: { x: newX, y: newY, width: newW, height: newH },
+        changes,
       })
     }
 

@@ -1,7 +1,8 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import styled from 'styled-components'
-import type { DesignElement, DesignerAction } from '../../../types/design'
+import type { DesignElement, DesignerAction, ToolMode } from '../../../types/design'
 import { designerFonts } from '../../../data/designerFonts'
+import { designerSymbols, symbolCategories } from '../../../data/designerSymbols'
 import Icon from '../../shared/Icon'
 
 const Panel = styled.div<{ $visible: boolean }>`
@@ -107,12 +108,71 @@ const EmptyState = styled.div`
   padding: 2rem 1rem;
 `
 
+const CategoryTabs = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 0.5rem;
+`
+
+const CategoryTab = styled.button<{ $active: boolean }>`
+  padding: 3px 8px;
+  border: 1px solid ${({ $active }) => ($active ? '#1da1f2' : '#444')};
+  border-radius: 4px;
+  background: ${({ $active }) => ($active ? '#1da1f233' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#1da1f2' : '#aaa')};
+  cursor: pointer;
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+
+  &:hover {
+    border-color: #1da1f2;
+    color: #ddd;
+  }
+`
+
+const SymbolGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 3px;
+`
+
+const SymbolCell = styled.button<{ $active: boolean }>`
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px solid ${({ $active }) => ($active ? '#1da1f2' : '#333')};
+  border-radius: 4px;
+  background: ${({ $active }) => ($active ? '#1da1f220' : '#2a2a2a')};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover {
+    border-color: #1da1f2;
+    background: #333;
+  }
+
+  svg {
+    width: 24px;
+    height: 24px;
+  }
+`
+
 interface Props {
   element: DesignElement | null
   dispatch: React.Dispatch<DesignerAction>
+  activeTool: ToolMode
+  activeSymbolId: string
+  onSymbolChange: (id: string) => void
 }
 
-export default function DesignerProperties({ element, dispatch }: Props) {
+export default function DesignerProperties({ element, dispatch, activeTool, activeSymbolId, onSymbolChange }: Props) {
+  const [symbolCategory, setSymbolCategory] = useState<string>(symbolCategories[0])
+
   const update = useCallback(
     (changes: Partial<DesignElement>) => {
       if (!element) return
@@ -120,6 +180,42 @@ export default function DesignerProperties({ element, dispatch }: Props) {
     },
     [element, dispatch],
   )
+
+  const filteredSymbols = designerSymbols.filter(s => s.category === symbolCategory)
+
+  // Show symbol picker when symbol tool is active and no element is selected
+  if (activeTool === 'symbol' && !element) {
+    return (
+      <Panel $visible={true}>
+        <SectionTitle>Velg symbol</SectionTitle>
+        <CategoryTabs>
+          {symbolCategories.map(cat => (
+            <CategoryTab
+              key={cat}
+              $active={symbolCategory === cat}
+              onClick={() => setSymbolCategory(cat)}
+            >
+              {cat}
+            </CategoryTab>
+          ))}
+        </CategoryTabs>
+        <SymbolGrid>
+          {filteredSymbols.map(s => (
+            <SymbolCell
+              key={s.id}
+              $active={activeSymbolId === s.id}
+              title={s.name}
+              onClick={() => onSymbolChange(s.id)}
+            >
+              <svg viewBox={s.viewBox} fill="none" stroke="#ddd" strokeWidth="2">
+                <path d={s.path} />
+              </svg>
+            </SymbolCell>
+          ))}
+        </SymbolGrid>
+      </Panel>
+    )
+  }
 
   if (!element) {
     return (
@@ -203,7 +299,7 @@ export default function DesignerProperties({ element, dispatch }: Props) {
             <Label>Font</Label>
             <Select value={element.fontFamily} onChange={e => update({ fontFamily: e.target.value })}>
               {designerFonts.map(f => (
-                <option key={f.family} value={f.family}>{f.label}</option>
+                <option key={f.family} value={f.family} style={{ fontFamily: f.family }}>{f.label}</option>
               ))}
             </Select>
           </Row>
@@ -233,6 +329,37 @@ export default function DesignerProperties({ element, dispatch }: Props) {
             <Label>Mellomrom</Label>
             <Input type="number" value={element.letterSpacing} step={0.5} onChange={e => update({ letterSpacing: Number(e.target.value) })} />
           </Row>
+        </>
+      )}
+
+      {element.type === 'symbol' && (
+        <>
+          <SectionTitle>Bytt symbol</SectionTitle>
+          <CategoryTabs>
+            {symbolCategories.map(cat => (
+              <CategoryTab
+                key={cat}
+                $active={symbolCategory === cat}
+                onClick={() => setSymbolCategory(cat)}
+              >
+                {cat}
+              </CategoryTab>
+            ))}
+          </CategoryTabs>
+          <SymbolGrid>
+            {filteredSymbols.map(s => (
+              <SymbolCell
+                key={s.id}
+                $active={element.symbolId === s.id}
+                title={s.name}
+                onClick={() => update({ symbolId: s.id })}
+              >
+                <svg viewBox={s.viewBox} fill="none" stroke="#ddd" strokeWidth="2">
+                  <path d={s.path} />
+                </svg>
+              </SymbolCell>
+            ))}
+          </SymbolGrid>
         </>
       )}
 
