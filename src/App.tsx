@@ -26,6 +26,7 @@ import UnderholdningPage from './components/pages/Underholdning/UnderholdningPag
 import HandlekurvPage from './components/pages/Handlekurv/HandlekurvPage'
 import SkiltOgGraveringPage from './components/pages/SkiltOgGravering/SkiltOgGraveringPage'
 import MineBestillingerPage from './components/pages/MineBestillinger/MineBestillingerPage'
+import MineDesignPage from './components/pages/MineDesign/MineDesignPage'
 import AdminBestillingerPage from './components/pages/Admin/AdminBestillingerPage'
 
 const VarmepumpehusPage = lazy(() => import('./components/pages/Varmepumpehus/VarmepumpehusPage'))
@@ -78,6 +79,7 @@ export default function App() {
                 <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
                 <Route path="/underholdning" element={<UnderholdningPage />} />
                 <Route path="/handlekurv" element={<HandlekurvPage />} />
+                <Route path="/mine-design" element={<MineDesignPage />} />
                 <Route path="/mine-bestillinger" element={<MineBestillingerPage />} />
                 <Route path="/admin/bestillinger" element={<AdminBestillingerPage />} />
               </Routes>

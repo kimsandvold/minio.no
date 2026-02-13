@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
+import SignDesignerModal from '../SignDesigner/SignDesignerModal'
 import Icon from '../../shared/Icon'
 import { useSEO } from '../../../hooks/useSEO'
 
@@ -239,6 +241,27 @@ const CrossSellLink = styled(Link)`
   }
 `
 
+const CrossSellButton = styled.button`
+  display: inline-block;
+  padding: 0.9rem 1.5rem;
+  background: #fff;
+  color: ${({ theme }) => theme.colors.textDark};
+  border: 0;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+`
+
 const Cta = styled.div`
   text-align: center;
   margin-top: 3rem;
@@ -313,6 +336,8 @@ const PRODUCTS = [
 ]
 
 export default function SkiltOgGraveringPage() {
+  const [showDesigner, setShowDesigner] = useState(false)
+
   useSEO({
     title: 'Skilt og gravering – Minio',
     description: 'Laserskårne nummerskilt, adresseskilt, hytteskilt og dekorative utendørsskilt i tre. Håndlaget i Lillehammer, tilpasset dine ønsker.',
@@ -349,6 +374,18 @@ export default function SkiltOgGraveringPage() {
                 </ProductCard>
               ))}
             </ProductGrid>
+
+            <CrossSell>
+              <div>
+                <h3>Design ditt eget skilt</h3>
+                <p>
+                  Bruk vår interaktive skiltdesigner til å lage ditt eget skilt. Legg til tekst, former og symboler, og eksporter designet som SVG – klart for laserskjæring.
+                </p>
+              </div>
+              <CrossSellButton onClick={() => setShowDesigner(true)}>
+                <Icon name="faPencilRuler" /> Åpne skiltdesigner
+              </CrossSellButton>
+            </CrossSell>
 
             <DetailSection>
               <h2>Materialer og teknikk</h2>
@@ -400,6 +437,7 @@ export default function SkiltOgGraveringPage() {
       <Footer />
       <ProductModal />
       <NewsletterModal />
+      <SignDesignerModal isOpen={showDesigner} onClose={() => setShowDesigner(false)} />
     </>
   )
 }
