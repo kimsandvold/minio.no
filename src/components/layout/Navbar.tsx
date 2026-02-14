@@ -53,12 +53,7 @@ const Logo = styled.div`
   a {
     display: flex;
     align-items: center;
-
-    &:focus-visible {
-      outline: 2px solid rgba(255, 255, 255, 0.8);
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
+    outline: none;
   }
 
   img {
