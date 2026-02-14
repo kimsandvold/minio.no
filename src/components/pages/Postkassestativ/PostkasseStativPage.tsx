@@ -234,8 +234,8 @@ export default function PostkasseStativPage() {
   }, [])
 
   useSEO({
-    title: 'Skreddersydd postkassestativ – Minio',
-    description: 'Konfigurer og bestill skreddersydd postkassestativ i tre. Velg antall postkasser, finish og tak. Levering fra Lillehammer.',
+    title: 'Skreddersydd postkassestativ i tre – Minio',
+    description: 'Skreddersydd postkassestativ i tre for borettslag, sameie og felles innkjørsler. Plass til 1–8 postkasser med pakkehylle, belysning og husnummer. Håndlaget i Lillehammer.',
     ogImage: '/images/products/mail_box_3.webp',
   })
 
@@ -256,22 +256,35 @@ export default function PostkasseStativPage() {
             <Article>
               <h2>Gi innkjørselen et gjennomført uttrykk</h2>
               <p>
-                Et skreddersydd postkassestativ fra Minio gir postkassen din et stilrent og solid
-                hjem ved innkjørselen. Hvert stativ bygges for hånd etter dine mål og tilpasses
-                antall postkasser, tilgjengelig plass og ønsket design.
-              </p>
-              <h3>Praktisk oppbevaring under postkassene</h3>
-              <p>
-                Under postkassene er det et romslig, åpent hylle-rom som gir plass til pakker
-                som skal sendes, leveranser som ikke får plass i postkassen, eller andre ting
-                du ønsker å oppbevare lett tilgjengelig. Rommet er tilpasset bredden på stativet
-                og delt opp med skillevegger for ryddig organisering.
+                I borettslag, sameier og rekkehusområder samles ofte postkassene på ett felles punkt.
+                Et skreddersydd postkassestativ i tre gir et ryddig, helhetlig inntrykk ved innkjørselen
+                og sørger for at post og pakker håndteres på en ordentlig måte. Hvert stativ bygges
+                for hånd etter dine mål og tilpasses antall enheter, tilgjengelig plass og ønsket design.
               </p>
 
-              <h3>Skreddersydd etter dine behov</h3>
+              <h3>Ideelt for felles innkjørsler</h3>
               <p>
-                Bruk priskalkulatoren til høyre for å sette sammen ditt eget postkassestativ.
-                Du velger selv:
+                Mange borettslag og sameier sliter med rotete postkasseløsninger – løse stativer
+                som velter, misfarget plast eller slitte metallkonstruksjoner som trekker ned
+                helhetsinntrykket. Et skreddersydd postkassestativ i tre løser dette problemet.
+                Stativet tilpasses eksakt antall postkasser for borettslaget eller sameiet,
+                fra 2 til 8 enheter, og gir et gjennomført, representativt uttrykk som
+                alle beboere kan være stolte av.
+              </p>
+
+              <h3>Praktisk pakkehylle for beboere</h3>
+              <p>
+                Under postkassene er det et romslig, åpent hyllerom som gir plass til pakker
+                som skal sendes, leveranser som ikke får plass i postkassen, eller andre ting
+                beboerne ønsker å oppbevare lett tilgjengelig. Rommet er tilpasset bredden på stativet
+                og delt opp med skillevegger for ryddig organisering – en funksjon som er spesielt
+                nyttig i borettslag og sameier med mange leveranser.
+              </p>
+
+              <h3>Skreddersydd for ditt borettslag</h3>
+              <p>
+                Bruk priskalkulatoren til høyre for å sette sammen et stativ som passer ditt
+                borettslag, sameie eller felles innkjørsel. Du velger selv:
               </p>
               <ul>
                 <li><strong>Antall postkasser</strong> – Plass til 1 til 8 postkasser. Bredden justeres automatisk, eller du kan stille den inn manuelt.</li>
@@ -285,6 +298,15 @@ export default function PostkasseStativPage() {
                 <li><strong>Montering</strong> – Vi setter opp stativet ferdig på stedet.</li>
               </ul>
 
+              <h3>Populært valg for styret</h3>
+              <p>
+                For styret i borettslag og sameier er et felles postkassestativ en enkel
+                oppgradering som hever standarden på fellesarealet. Det er en investering
+                som alle beboere drar nytte av, og som gjør inngangspartiet mer innbydende
+                for både beboere og besøkende. Vi leverer gjerne til hele borettslaget
+                med montering inkludert.
+              </p>
+
               <h3>Overflatebehandling</h3>
               <ul>
                 <li><strong>Ubehandlet</strong> – Naturlig tre som du behandler selv med olje, beis eller maling.</li>
@@ -295,16 +317,19 @@ export default function PostkasseStativPage() {
               <h3>Materialvalg</h3>
               <p>
                 Du kan velge mellom hvitt treverk og trykkimpregnert tre. Impregnert tre gir
-                vesentlig bedre motstand mot råte og fukt, og er et godt valg dersom stativet
-                skal stå eksponert for vær og vind uten ekstra overflatebehandling.
+                vesentlig bedre motstand mot råte og fukt, og er et godt valg for borettslag
+                og sameier der stativet skal stå eksponert for vær og vind uten ekstra
+                overflatebehandling.
               </p>
 
-              <h3>Kvalitet som varer</h3>
+              <h3>Bygget for norsk klima</h3>
               <p>
                 Alle postkassestativer fra Minio bygges med solide materialer og gjennomtenkt
                 konstruksjon for å tåle norsk klima. Saltede vinterveier, regn og sterk sol
                 setter krav til både materialvalg og utførelse. Vi bruker kraftige hjørnestolper,
-                valmtak med takutstikk og grundig overflatebehandling for å sikre lang levetid.
+                valmtak med takutstikk og grundig overflatebehandling for å sikre lang levetid
+                – uansett om stativet står i et borettslag i Oslo, et sameie i Bergen eller
+                et rekkehusområde på Lillehammer.
               </p>
             </Article>
 
