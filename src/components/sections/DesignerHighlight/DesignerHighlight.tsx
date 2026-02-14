@@ -41,12 +41,11 @@ const ImageWrap = styled.div`
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    padding: 1rem 1rem 0;
-    justify-content: center;
+    padding: 0;
     order: 1;
 
     img {
-      border-radius: 6px 6px 0 0;
+      border-radius: 0;
     }
   }
 `
@@ -115,6 +114,8 @@ const ButtonRow = styled.div`
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     flex-direction: column;
     padding: 1rem 1.75rem 1.25rem;
+    align-items: stretch;
+    text-align: center;
   }
 `
 
