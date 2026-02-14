@@ -53,7 +53,7 @@ const ImageWrap = styled.div`
 const Info = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 2.5rem;
   gap: 0.75rem;
 
