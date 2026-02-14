@@ -105,7 +105,13 @@ const DetailsButton = styled(Link)`
   transition: opacity 0.2s ease;
 
   &:hover {
-    opacity: 0.85;
+    background: #333;
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
   }
 `
 

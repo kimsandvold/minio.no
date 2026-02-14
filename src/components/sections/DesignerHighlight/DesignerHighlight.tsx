@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import Section from '../../layout/Section'
 import Container from '../../layout/Container'
 import Icon from '../../shared/Icon'
+import AnimatedBlock from '../../shared/AnimatedBlock'
 import SignDesignerModal from '../../pages/SignDesigner/SignDesignerModal'
 
 const Card = styled.div`
@@ -141,6 +142,11 @@ const PrimaryButton = styled.button`
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
+  }
 `
 
 const SecondaryLink = styled(Link)`
@@ -165,6 +171,11 @@ const SecondaryLink = styled(Link)`
     color: #fff;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
   }
 `
 
@@ -193,6 +204,7 @@ export default function DesignerHighlight() {
           <SectionHeader>
             <h2>Skilt og gravering</h2>
           </SectionHeader>
+          <AnimatedBlock>
           <Card>
             <Content>
               <Info>
@@ -217,7 +229,7 @@ export default function DesignerHighlight() {
               </Info>
               <ImageWrap>
                 <img
-                  src="/images/featured/designer-preview.png"
+                  src="/images/featured/designer-preview.webp"
                   alt="Skiltdesigner – design ditt eget skilt med tekst, former og symboler"
                   loading="lazy"
                 />
@@ -232,6 +244,7 @@ export default function DesignerHighlight() {
               </SecondaryLink>
             </ButtonRow>
           </Card>
+          </AnimatedBlock>
         </Container>
       </Section>
       <SignDesignerModal isOpen={showDesigner} onClose={() => setShowDesigner(false)} />

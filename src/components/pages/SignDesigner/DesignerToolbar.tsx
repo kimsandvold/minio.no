@@ -59,6 +59,7 @@ const Divider = styled.div`
 `
 
 const tools: { mode: ToolMode; icon: string; label: string }[] = [
+  { mode: 'template', icon: 'faClone', label: 'Maler (M)' },
   { mode: 'select', icon: 'faMousePointer', label: 'Velg (V)' },
   { mode: 'text', icon: 'faFont', label: 'Tekst (T)' },
   { mode: 'rect', icon: 'faSquare', label: 'Rektangel (R)' },

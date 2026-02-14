@@ -19,7 +19,7 @@ const Header = styled.div`
 
   p {
     font-size: 0.9rem;
-    color: #888;
+    color: #666;
     margin: 0;
   }
 `
@@ -50,6 +50,11 @@ const Card = styled(Link)`
   &:hover {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
   }
 `
 
@@ -85,7 +90,7 @@ const CardTitle = styled.div`
 
 const CardPrice = styled.div`
   font-size: 0.78rem;
-  color: #888;
+  color: #666;
 `
 
 interface RelatedProductsProps {

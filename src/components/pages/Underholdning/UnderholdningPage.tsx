@@ -1,6 +1,7 @@
 import styled, { keyframes } from 'styled-components'
 import { Link } from 'react-router-dom'
 import { useSEO } from '../../../hooks/useSEO'
+import PageTransition from '../../shared/PageTransition'
 
 const GAMES = [
   {
@@ -42,6 +43,7 @@ export default function UnderholdningPage() {
   })
 
   return (
+    <PageTransition>
     <PageWrapper>
       <StarsContainer>
         <Stars />
@@ -82,6 +84,7 @@ export default function UnderholdningPage() {
         </Container>
       </MainContent>
     </PageWrapper>
+    </PageTransition>
   )
 }
 

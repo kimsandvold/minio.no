@@ -5,6 +5,7 @@ import Container from '../../layout/Container'
 import FeaturedProduct from './FeaturedProduct'
 import ProductCard from './ProductCard'
 import { ProductCardSkeleton } from '../../shared/ProductSkeleton'
+import AnimatedBlock from '../../shared/AnimatedBlock'
 import { useRandomProducts } from '../../../hooks/useProducts'
 
 const SectionHeader = styled.div`
@@ -96,6 +97,11 @@ const ViewAllLink = styled(Link)`
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
+  }
 `
 
 export default function Portfolio() {
@@ -116,8 +122,10 @@ export default function Portfolio() {
         <Grid>
           {loading
             ? Array.from({ length: 4 }, (_, i) => <ProductCardSkeleton key={i} />)
-            : randomProducts.map(product => (
-                <ProductCard key={product.id} product={product} />
+            : randomProducts.map((product, index) => (
+                <AnimatedBlock key={product.id} delay={index * 100}>
+                  <ProductCard product={product} />
+                </AnimatedBlock>
               ))}
         </Grid>
         <ViewAllWrapper>

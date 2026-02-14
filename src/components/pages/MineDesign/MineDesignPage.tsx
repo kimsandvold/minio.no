@@ -5,6 +5,7 @@ import { getUserDesigns, deleteDesign } from '../../../services/designService'
 import { useSEO } from '../../../hooks/useSEO'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
+import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
 import GoogleLoginButton from '../../shared/GoogleLoginButton'
 import SignDesignerModal from '../SignDesigner/SignDesignerModal'
@@ -294,6 +295,7 @@ export default function MineDesignPage() {
   return (
     <>
       <Navbar />
+      <PageTransition>
       <main>
         <Hero>
           <HeroContent>
@@ -371,6 +373,7 @@ export default function MineDesignPage() {
           </Container>
         </Content>
       </main>
+      </PageTransition>
       <Footer />
       <SignDesignerModal
         isOpen={designerOpen}

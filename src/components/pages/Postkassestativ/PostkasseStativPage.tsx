@@ -6,6 +6,7 @@ import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
+import PageTransition from '../../shared/PageTransition'
 import { useSEO } from '../../../hooks/useSEO'
 import { useProductBySlug } from '../../../hooks/useProducts'
 import RelatedProducts from '../../shared/RelatedProducts'
@@ -241,6 +242,7 @@ export default function PostkasseStativPage() {
   return (
     <>
       <Navbar />
+      <PageTransition>
       <main id="main-content">
         <Hero>
           <HeroContent>
@@ -333,6 +335,7 @@ export default function PostkasseStativPage() {
           </ReviewsSection>
         </Content>
       </main>
+      </PageTransition>
       <Footer />
       <ProductModal />
       <NewsletterModal />

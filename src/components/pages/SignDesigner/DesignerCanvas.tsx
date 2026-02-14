@@ -296,7 +296,7 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
             ? 'repeating-conic-gradient(#e0e0e0 0% 25%, #fff 0% 50%) 0 0 / 20px 20px'
             : design.backgroundColor,
           boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
-          cursor: tool === 'select' ? 'default' : 'crosshair',
+          cursor: tool === 'select' || tool === 'template' ? 'default' : 'crosshair',
         }}
         onMouseDown={handleCanvasMouseDown}
         onMouseMove={handleCanvasMouseMove}

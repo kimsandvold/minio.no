@@ -183,40 +183,6 @@ export default function DesignerProperties({ element, dispatch, activeTool, acti
 
   const filteredSymbols = designerSymbols.filter(s => s.category === symbolCategory)
 
-  // Show symbol picker when symbol tool is active and no element is selected
-  if (activeTool === 'symbol' && !element) {
-    return (
-      <Panel $visible={true}>
-        <SectionTitle>Velg symbol</SectionTitle>
-        <CategoryTabs>
-          {symbolCategories.map(cat => (
-            <CategoryTab
-              key={cat}
-              $active={symbolCategory === cat}
-              onClick={() => setSymbolCategory(cat)}
-            >
-              {cat}
-            </CategoryTab>
-          ))}
-        </CategoryTabs>
-        <SymbolGrid>
-          {filteredSymbols.map(s => (
-            <SymbolCell
-              key={s.id}
-              $active={activeSymbolId === s.id}
-              title={s.name}
-              onClick={() => onSymbolChange(s.id)}
-            >
-              <svg viewBox={s.viewBox} fill="none" stroke="#ddd" strokeWidth="2">
-                <path d={s.path} />
-              </svg>
-            </SymbolCell>
-          ))}
-        </SymbolGrid>
-      </Panel>
-    )
-  }
-
   if (!element) {
     return (
       <Panel $visible={false}>

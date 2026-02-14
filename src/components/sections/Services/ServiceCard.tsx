@@ -76,6 +76,11 @@ const ContactButton = styled.button`
     background-color: #333;
     transform: translateY(-2px);
   }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
+  }
 `
 
 const linkButtonStyles = `
@@ -104,6 +109,11 @@ const LinkButton = styled.a`
     color: #fff;
     transform: translateY(-2px);
   }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
+  }
 `
 
 const RouterLinkButton = styled(Link)`
@@ -115,6 +125,11 @@ const RouterLinkButton = styled(Link)`
     background-color: ${({ theme }) => theme.colors.textDark};
     color: #fff;
     transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
   }
 `
 

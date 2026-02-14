@@ -39,6 +39,11 @@ const HeroBtn = styled.button`
     transform: translateY(0);
   }
 
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+  }
+
   @media (max-width: 768px) {
     padding: 0.55rem 1.25rem;
     font-size: 0.85rem;
@@ -83,6 +88,11 @@ const SectionBtn = styled.button<{ $platform: 'facebook' | 'instagram' }>`
     transform: translateY(0);
   }
 
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
+  }
+
   @media (max-width: 768px) {
     padding: 0.65rem 1.5rem;
     font-size: 0.9rem;
@@ -113,6 +123,11 @@ const SmallBtn = styled.button<{ $platform: 'facebook' | 'instagram' }>`
     color: #e4405f; border-color: #e4405f;
     &:hover { background: #e4405f; color: #fff; transform: scale(1.1); box-shadow: 0 3px 8px rgba(228, 64, 95, 0.3); }
   `}
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
+  }
 `
 
 interface ShareButtonsProps {

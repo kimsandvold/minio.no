@@ -10,6 +10,8 @@ import DesignerCanvas from './DesignerCanvas'
 import DesignerToolbar from './DesignerToolbar'
 import DesignerProperties from './DesignerProperties'
 import SymbolPickerPanel from './SymbolPickerPanel'
+import TemplatePickerPanel from './TemplatePickerPanel'
+import { createTemplateDesign } from '../../../data/doorSignTemplates'
 import DesignerTopBar from './DesignerTopBar'
 import LoadDesignModal from './LoadDesignModal'
 import GoogleLoginButton from '../../shared/GoogleLoginButton'
@@ -147,6 +149,7 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign, load
 
   const resetEditor = useCallback(() => {
     dispatch({ type: 'LOAD_DESIGN', design: { canvasWidth: 700, canvasHeight: 500, elements: [], backgroundColor: 'transparent' } })
+    dispatch({ type: 'SET_TOOL', tool: 'template' })
     setDesignName('Mitt skilt')
     setCurrentDesignId(null)
     lastSavedSnapshot.current = null
@@ -302,6 +305,7 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign, load
       }
       else if (!ctrl) {
         switch (e.key.toLowerCase()) {
+          case 'm': dispatch({ type: 'SET_TOOL', tool: 'template' }); break
           case 'v': dispatch({ type: 'SET_TOOL', tool: 'select' }); break
           case 't': dispatch({ type: 'SET_TOOL', tool: 'text' }); break
           case 'r': dispatch({ type: 'SET_TOOL', tool: 'rect' }); break
@@ -353,6 +357,14 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign, load
           activeTool={state.tool}
           dispatch={dispatch}
         />
+        {state.tool === 'template' && (
+          <TemplatePickerPanel
+            onApplyTemplate={(templateId) => {
+              const design = createTemplateDesign(templateId)
+              dispatch({ type: 'LOAD_DESIGN', design })
+            }}
+          />
+        )}
         {state.tool === 'symbol' && (
           <SymbolPickerPanel
             activeSymbolId={activeSymbolId}

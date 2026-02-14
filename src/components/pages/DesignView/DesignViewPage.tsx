@@ -5,6 +5,7 @@ import { getDesignById } from '../../../services/designService'
 import { useSEO } from '../../../hooks/useSEO'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
+import PageTransition from '../../shared/PageTransition'
 import type { SavedDesign } from '../../../types/design'
 
 const Hero = styled.section`
@@ -146,6 +147,7 @@ export default function DesignViewPage() {
   return (
     <>
       <Navbar />
+      <PageTransition>
       <Hero>
         <HeroContent>
           <h1>Skiltdesign</h1>
@@ -167,6 +169,7 @@ export default function DesignViewPage() {
           </Card>
         )}
       </Content>
+      </PageTransition>
       <Footer />
     </>
   )

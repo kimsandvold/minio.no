@@ -110,6 +110,12 @@ const Socials = styled.div`
     text-decoration: none;
 
     &:hover { color: ${({ theme }) => theme.colors.accent}; }
+
+    &:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.8);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
   }
 `
 
@@ -127,7 +133,13 @@ const FooterNav = styled.nav`
 
     &:hover {
       color: ${({ theme }) => theme.colors.accent};
-      transform: translateX(4px);
+      transform: translateY(-2px);
+    }
+
+    &:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.8);
+      outline-offset: 2px;
+      border-radius: 4px;
     }
   }
 `
@@ -140,7 +152,13 @@ const FooterLink = styled(Link)`
 
   &:hover {
     color: ${({ theme }) => theme.colors.accent};
-    transform: translateX(4px);
+    transform: translateY(-2px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 `
 

@@ -90,6 +90,10 @@ const StyledButton = styled.button<{ $variant: ButtonVariant }>`
   text-decoration: none;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
   touch-action: manipulation;
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
+  }
   ${({ $variant }) => variants[$variant]}
 `
 

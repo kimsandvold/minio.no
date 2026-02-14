@@ -5,6 +5,7 @@ import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
+import PageTransition from '../../shared/PageTransition'
 import { useSEO } from '../../../hooks/useSEO'
 import SplideCarousel from '../../shared/SplideCarousel'
 import { ProductDetailSkeleton } from '../../shared/ProductSkeleton'
@@ -160,6 +161,7 @@ export default function ProduktDetailPage() {
     return (
       <>
         <Navbar />
+        <PageTransition>
         <main>
           <Hero>
             <HeroContent>
@@ -172,6 +174,7 @@ export default function ProduktDetailPage() {
             </Container>
           </Content>
         </main>
+        </PageTransition>
         <Footer />
         <ProductModal />
         <NewsletterModal />
@@ -186,6 +189,7 @@ export default function ProduktDetailPage() {
   return (
     <>
       <Navbar />
+      <PageTransition>
       <main>
         <Hero>
           <HeroContent>
@@ -219,6 +223,7 @@ export default function ProduktDetailPage() {
           </Container>
         </Content>
       </main>
+      </PageTransition>
       <Footer />
       <ProductModal />
       <NewsletterModal />

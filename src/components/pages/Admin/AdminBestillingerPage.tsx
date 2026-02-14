@@ -6,6 +6,7 @@ import { getAllOrders } from '../../../services/orderService'
 import { useSEO } from '../../../hooks/useSEO'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
+import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
 import AdminOrderCard from './AdminOrderCard'
 import type { Order, OrderStatus } from '../../../types/order'
@@ -164,6 +165,7 @@ export default function AdminBestillingerPage() {
     return (
       <>
         <Navbar />
+        <PageTransition>
         <main>
           <Hero>
             <HeroContent>
@@ -182,6 +184,7 @@ export default function AdminBestillingerPage() {
             </Container>
           </Content>
         </main>
+        </PageTransition>
         <Footer />
       </>
     )
@@ -190,6 +193,7 @@ export default function AdminBestillingerPage() {
   return (
     <>
       <Navbar />
+      <PageTransition>
       <main>
         <Hero>
           <HeroContent>
@@ -234,6 +238,7 @@ export default function AdminBestillingerPage() {
           </Container>
         </Content>
       </main>
+      </PageTransition>
       <Footer />
     </>
   )

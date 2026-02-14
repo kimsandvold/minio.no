@@ -53,6 +53,12 @@ const Logo = styled.div`
   a {
     display: flex;
     align-items: center;
+
+    &:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.8);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
   }
 
   img {
@@ -106,6 +112,12 @@ const textLinkStyles = `
   &:hover {
     opacity: 1;
   }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 `
 
 const TextLink = styled.a`
@@ -131,6 +143,12 @@ const iconLinkStyles = `
   font-size: 1rem;
   transition: color 0.3s ease;
   text-decoration: none;
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 `
 
 const IconLink = styled.a`
@@ -206,6 +224,11 @@ const SocialIcons = styled.div`
     transition: opacity 0.3s ease;
     text-decoration: none;
     &:hover { opacity: 1; }
+    &:focus-visible {
+      outline: 2px solid rgba(255, 255, 255, 0.8);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -225,6 +248,12 @@ const BasketLink = styled(Link)`
   text-decoration: none;
 
   &:hover { color: #fff; }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 `
 
 const BasketCount = styled.span`
@@ -268,6 +297,11 @@ const UserPill = styled.button`
 
   &:hover {
     background: rgba(255, 255, 255, 0.15);
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
   }
 `
 
@@ -315,6 +349,11 @@ const DropdownLink = styled(Link)`
     background: rgba(255, 255, 255, 0.1);
     color: #fff;
   }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+  }
 `
 
 const DropdownBtn = styled.button`
@@ -336,6 +375,11 @@ const DropdownBtn = styled.button`
     background: rgba(255, 255, 255, 0.1);
     color: #ff8888;
   }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+  }
 `
 
 const LoginLink = styled.button`
@@ -352,6 +396,12 @@ const LoginLink = styled.button`
 
   &:hover {
     opacity: 1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+    border-radius: 4px;
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -421,6 +471,12 @@ const MobileLogoutBtn = styled.button`
   cursor: pointer;
   padding: 0.5rem 0;
   opacity: 0.6;
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 `
 
 const Hamburger = styled.button<{ $open: boolean }>`
@@ -449,6 +505,12 @@ const Hamburger = styled.button<{ $open: boolean }>`
     span:nth-child(2) { opacity: 0; }
     span:nth-child(3) { transform: translateY(-10.5px) rotate(-45deg); }
   `}
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     display: flex;

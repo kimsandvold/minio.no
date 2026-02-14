@@ -1,6 +1,6 @@
 import type { Timestamp } from 'firebase/firestore'
 
-export type ToolMode = 'select' | 'text' | 'rect' | 'circle' | 'line' | 'symbol'
+export type ToolMode = 'select' | 'template' | 'text' | 'rect' | 'circle' | 'line' | 'symbol'
 
 export interface Point {
   x: number

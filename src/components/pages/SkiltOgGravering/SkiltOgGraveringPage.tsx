@@ -7,6 +7,7 @@ import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import SignDesignerModal from '../SignDesigner/SignDesignerModal'
 import Icon from '../../shared/Icon'
+import PageTransition from '../../shared/PageTransition'
 import { useSEO } from '../../../hooks/useSEO'
 
 const Hero = styled.section`
@@ -347,6 +348,7 @@ export default function SkiltOgGraveringPage() {
   return (
     <>
       <Navbar />
+      <PageTransition>
       <main>
         <Hero>
           <HeroContent>
@@ -434,6 +436,7 @@ export default function SkiltOgGraveringPage() {
           </Container>
         </Content>
       </main>
+      </PageTransition>
       <Footer />
       <ProductModal />
       <NewsletterModal />
