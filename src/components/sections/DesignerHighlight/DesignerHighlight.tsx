@@ -39,6 +39,16 @@ const ImageWrap = styled.div`
     display: block;
     border-radius: 8px 0 0 0;
   }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    padding: 1rem 1rem 0;
+    justify-content: center;
+    order: 1;
+
+    img {
+      border-radius: 6px 6px 0 0;
+    }
+  }
 `
 
 const Info = styled.div`
@@ -57,7 +67,8 @@ const Info = styled.div`
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    padding: 1.75rem;
+    padding: 1.5rem 1.75rem;
+    order: 2;
     h3 { font-size: 1.3rem; }
   }
 `
@@ -102,13 +113,15 @@ const ButtonRow = styled.div`
   border-top: 1px solid rgba(0, 0, 0, 0.06);
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    padding: 1.25rem 1.75rem;
+    flex-direction: column;
+    padding: 1rem 1.75rem 1.25rem;
   }
 `
 
 const PrimaryButton = styled.button`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   padding: 0.8rem 2rem;
   font-size: 0.9rem;
@@ -132,6 +145,7 @@ const PrimaryButton = styled.button`
 const SecondaryLink = styled(Link)`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   padding: 0.8rem 2rem;
   font-size: 0.9rem;
