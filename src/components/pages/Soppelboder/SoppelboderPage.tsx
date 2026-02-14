@@ -395,7 +395,7 @@ export default function SoppelboderPage() {
                 onConfigChange={setConfig}
               />
               <SidebarTitle>Pris kalkulator</SidebarTitle>
-              <SoppelboderPriceCalculator basePrice={product?.basePrice ?? DEFAULT_BASE_PRICE} onConfigChange={handleConfigChange} />
+              <SoppelboderPriceCalculator basePrice={product?.basePrice ?? DEFAULT_BASE_PRICE} config={config} onConfigChange={handleConfigChange} />
             </Sidebar>
           </Container>
 

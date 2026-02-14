@@ -4,17 +4,20 @@ import Icon from '../../shared/Icon'
 import { useBasketContext } from '../../../context/BasketContext'
 import SignDesignerModal from '../SignDesigner/SignDesignerModal'
 
+interface PostkasseConfig {
+  width: number
+  height: number
+  depth: number
+  mailboxCount: number
+  finish: string
+  roof: string
+  hasNumberPanel: boolean
+}
+
 interface PostkassePriceCalculatorProps {
   basePrice: number
-  onConfigChange?: (config: {
-    width: number
-    height: number
-    depth: number
-    mailboxCount: number
-    finish: string
-    roof: string
-    hasNumberPanel: boolean
-  }) => void
+  config?: PostkasseConfig
+  onConfigChange?: (config: PostkasseConfig) => void
 }
 
 const VAT_PERCENTAGE = 0
@@ -449,7 +452,7 @@ const MAILBOX_PRESETS: Record<number, { width: number; depth: number; height: nu
 
 // ── Component ──────────────────────────────────────────────────────
 
-export default function PostkassePriceCalculator({ basePrice, onConfigChange }: PostkassePriceCalculatorProps) {
+export default function PostkassePriceCalculator({ basePrice, config, onConfigChange }: PostkassePriceCalculatorProps) {
   const { addItem } = useBasketContext()
 
   // Form state
@@ -478,6 +481,20 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
   const [showToast, setShowToast] = useState(false)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const syncingFromParent = useRef(false)
+
+  // Sync internal state from external config (e.g. visualizer sidebar changes)
+  useEffect(() => {
+    if (!config) return
+    syncingFromParent.current = true
+    setWidth(prev => prev !== config.width ? config.width : prev)
+    setHeight(prev => prev !== config.height ? config.height : prev)
+    setDepth(prev => prev !== config.depth ? config.depth : prev)
+    setMailboxCount(prev => prev !== config.mailboxCount ? config.mailboxCount : prev)
+    setFinish(prev => prev !== config.finish ? config.finish : prev)
+    setRoofType(prev => prev !== config.roof ? config.roof : prev)
+    queueMicrotask(() => { syncingFromParent.current = false })
+  }, [config])
 
   // When mailbox dropdown changes, update all dimensions from preset
   const handleMailboxCountChange = useCallback((count: number) => {
@@ -495,8 +512,9 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
     setMailboxCount(mailboxesFromWidth)
   }, [])
 
-  // Notify parent of config changes
+  // Notify parent of config changes (skip when syncing from parent to avoid loop)
   useEffect(() => {
+    if (syncingFromParent.current) return
     onConfigChange?.({ width, height, depth, mailboxCount, finish, roof: roofType, hasNumberPanel: false })
   }, [width, height, depth, mailboxCount, finish, roofType, onConfigChange])
 

@@ -397,7 +397,7 @@ export default function VedskjulPage() {
                 onConfigChange={setConfig}
               />
               <SidebarTitle>Pris kalkulator</SidebarTitle>
-              <VedskjulPriceCalculator basePrice={product?.basePrice ?? DEFAULT_BASE_PRICE} onConfigChange={handleConfigChange} />
+              <VedskjulPriceCalculator basePrice={product?.basePrice ?? DEFAULT_BASE_PRICE} config={config} onConfigChange={handleConfigChange} />
             </Sidebar>
           </Container>
 

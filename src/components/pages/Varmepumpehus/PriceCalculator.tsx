@@ -3,17 +3,20 @@ import styled from 'styled-components'
 import Icon from '../../shared/Icon'
 import { useBasketContext } from '../../../context/BasketContext'
 
+interface VarmepumpehusConfig {
+  width: number
+  height: number
+  depth: number
+  angle: number
+  mounting: 'wall' | 'freestanding'
+  finish: string
+  roof: string
+}
+
 interface PriceCalculatorProps {
   basePrice: number
-  onDimensionsChange: (dims: {
-    width: number
-    height: number
-    depth: number
-    angle: number
-    mounting: 'wall' | 'freestanding'
-    finish: string
-    roof: string
-  }) => void
+  config?: VarmepumpehusConfig
+  onDimensionsChange: (dims: VarmepumpehusConfig) => void
 }
 
 const VAT_PERCENTAGE = 0
@@ -392,7 +395,7 @@ const Toast = styled.div<{ $visible: boolean }>`
 
 // ── Component ──────────────────────────────────────────────────────
 
-export default function PriceCalculator({ basePrice, onDimensionsChange }: PriceCalculatorProps) {
+export default function PriceCalculator({ basePrice, config, onDimensionsChange }: PriceCalculatorProps) {
   const { addItem } = useBasketContext()
 
   // Form state
@@ -416,9 +419,25 @@ export default function PriceCalculator({ basePrice, onDimensionsChange }: Price
   const [showToast, setShowToast] = useState(false)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const syncingFromParent = useRef(false)
 
-  // Notify parent of dimension/option changes
+  // Sync internal state from external config (e.g. visualizer sidebar changes)
   useEffect(() => {
+    if (!config) return
+    syncingFromParent.current = true
+    setWidth(prev => prev !== config.width ? config.width : prev)
+    setHeight(prev => prev !== config.height ? config.height : prev)
+    setDepth(prev => prev !== config.depth ? config.depth : prev)
+    setAngle(prev => prev !== config.angle ? config.angle : prev)
+    setMounting(prev => prev !== config.mounting ? config.mounting : prev)
+    setFinish(prev => prev !== config.finish ? config.finish : prev)
+    setRoofType(prev => prev !== config.roof ? config.roof : prev)
+    queueMicrotask(() => { syncingFromParent.current = false })
+  }, [config])
+
+  // Notify parent of dimension/option changes (skip when syncing from parent to avoid loop)
+  useEffect(() => {
+    if (syncingFromParent.current) return
     onDimensionsChange({
       width,
       height,

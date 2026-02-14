@@ -369,7 +369,7 @@ export default function VarmepumpehusPage() {
                 onConfigChange={setDims}
               />
               <SidebarTitle>Pris kalkulator</SidebarTitle>
-              <PriceCalculator basePrice={product?.basePrice ?? DEFAULT_BASE_PRICE} onDimensionsChange={setDims} />
+              <PriceCalculator basePrice={product?.basePrice ?? DEFAULT_BASE_PRICE} config={dims} onDimensionsChange={setDims} />
             </Sidebar>
           </Container>
 

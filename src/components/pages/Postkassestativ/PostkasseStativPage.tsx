@@ -345,7 +345,7 @@ export default function PostkasseStativPage() {
                 onConfigChange={setConfig}
               />
               <SidebarTitle>Pris kalkulator</SidebarTitle>
-              <PostkassePriceCalculator basePrice={product?.basePrice ?? DEFAULT_BASE_PRICE} onConfigChange={handleConfigChange} />
+              <PostkassePriceCalculator basePrice={product?.basePrice ?? DEFAULT_BASE_PRICE} config={config} onConfigChange={handleConfigChange} />
             </Sidebar>
           </Container>
 

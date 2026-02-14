@@ -4,17 +4,20 @@ import Icon from '../../shared/Icon'
 import { useBasketContext } from '../../../context/BasketContext'
 import SignDesignerModal from '../SignDesigner/SignDesignerModal'
 
+interface SoppelboderConfig {
+  width: number
+  height: number
+  depth: number
+  binCount: number
+  doorType: string
+  finish: string
+  roof: string
+}
+
 interface SoppelboderPriceCalculatorProps {
   basePrice: number
-  onConfigChange?: (config: {
-    width: number
-    height: number
-    depth: number
-    binCount: number
-    doorType: string
-    finish: string
-    roof: string
-  }) => void
+  config?: SoppelboderConfig
+  onConfigChange?: (config: SoppelboderConfig) => void
 }
 
 const VAT_PERCENTAGE = 0
@@ -446,7 +449,7 @@ const BIN_PRESETS: Record<number, { width: number; depth: number; height: number
 
 // ── Component ──────────────────────────────────────────────────────
 
-export default function SoppelboderPriceCalculator({ basePrice, onConfigChange }: SoppelboderPriceCalculatorProps) {
+export default function SoppelboderPriceCalculator({ basePrice, config, onConfigChange }: SoppelboderPriceCalculatorProps) {
   const { addItem } = useBasketContext()
 
   // Form state
@@ -454,7 +457,7 @@ export default function SoppelboderPriceCalculator({ basePrice, onConfigChange }
   const [width, setWidth] = useState(BIN_PRESETS[4].width)
   const [height, setHeight] = useState(BIN_PRESETS[4].height)
   const [depth, setDepth] = useState(BIN_PRESETS[4].depth)
-  const [doorType, _setDoorType] = useState('front')
+  const [doorType, setDoorType] = useState('front')
   const [finish, setFinish] = useState('0')
   const [roofType, setRoofType] = useState('0')
   const [construction, setConstruction] = useState('whitewood')
@@ -477,6 +480,22 @@ export default function SoppelboderPriceCalculator({ basePrice, onConfigChange }
   const [showToast, setShowToast] = useState(false)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const syncingFromParent = useRef(false)
+
+  // Sync internal state from external config (e.g. visualizer sidebar changes)
+  useEffect(() => {
+    if (!config) return
+    syncingFromParent.current = true
+    setWidth(prev => prev !== config.width ? config.width : prev)
+    setHeight(prev => prev !== config.height ? config.height : prev)
+    setDepth(prev => prev !== config.depth ? config.depth : prev)
+    setBinCount(prev => prev !== config.binCount ? config.binCount : prev)
+    setDoorType(prev => prev !== config.doorType ? config.doorType : prev)
+    setFinish(prev => prev !== config.finish ? config.finish : prev)
+    setRoofType(prev => prev !== config.roof ? config.roof : prev)
+    // Reset flag after React processes the state updates
+    queueMicrotask(() => { syncingFromParent.current = false })
+  }, [config])
 
   // When bin dropdown changes, update all dimensions from preset
   const handleBinCountChange = useCallback((count: number) => {
@@ -494,8 +513,9 @@ export default function SoppelboderPriceCalculator({ basePrice, onConfigChange }
     setBinCount(binsFromWidth)
   }, [])
 
-  // Notify parent of config changes
+  // Notify parent of config changes (skip when syncing from parent to avoid loop)
   useEffect(() => {
+    if (syncingFromParent.current) return
     onConfigChange?.({ width, height, depth, binCount, doorType, finish, roof: roofType })
   }, [width, height, depth, binCount, doorType, finish, roofType, onConfigChange])
 

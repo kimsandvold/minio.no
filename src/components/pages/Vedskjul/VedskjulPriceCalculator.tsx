@@ -4,20 +4,23 @@ import Icon from '../../shared/Icon'
 import { useBasketContext } from '../../../context/BasketContext'
 import SignDesignerModal from '../SignDesigner/SignDesignerModal'
 
+interface VedskjulConfig {
+  width: number
+  height: number
+  depth: number
+  sectionCount: number
+  finish: string
+  roof: string
+  roofShape: string
+  roofDegree: number
+  roofSlopeDirection: string
+  hasDoor: boolean
+}
+
 interface VedskjulPriceCalculatorProps {
   basePrice: number
-  onConfigChange?: (config: {
-    width: number
-    height: number
-    depth: number
-    sectionCount: number
-    finish: string
-    roof: string
-    roofShape: string
-    roofDegree: number
-    roofSlopeDirection: string
-    hasDoor: boolean
-  }) => void
+  config?: VedskjulConfig
+  onConfigChange?: (config: VedskjulConfig) => void
 }
 
 const VAT_PERCENTAGE = 0
@@ -446,7 +449,7 @@ const SECTION_PRESETS: Record<number, { width: number; depth: number; height: nu
 
 // ── Component ──────────────────────────────────────────────────────
 
-export default function VedskjulPriceCalculator({ basePrice, onConfigChange }: VedskjulPriceCalculatorProps) {
+export default function VedskjulPriceCalculator({ basePrice, config, onConfigChange }: VedskjulPriceCalculatorProps) {
   const { addItem } = useBasketContext()
 
   // Form state
@@ -480,6 +483,24 @@ export default function VedskjulPriceCalculator({ basePrice, onConfigChange }: V
   const [showToast, setShowToast] = useState(false)
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const syncingFromParent = useRef(false)
+
+  // Sync internal state from external config (e.g. visualizer sidebar changes)
+  useEffect(() => {
+    if (!config) return
+    syncingFromParent.current = true
+    setWidth(prev => prev !== config.width ? config.width : prev)
+    setHeight(prev => prev !== config.height ? config.height : prev)
+    setDepth(prev => prev !== config.depth ? config.depth : prev)
+    setSectionCount(prev => prev !== config.sectionCount ? config.sectionCount : prev)
+    setFinish(prev => prev !== config.finish ? config.finish : prev)
+    setRoofType(prev => prev !== config.roof ? config.roof : prev)
+    setRoofShape(prev => prev !== config.roofShape ? config.roofShape : prev)
+    setRoofDegree(prev => prev !== config.roofDegree ? config.roofDegree : prev)
+    setRoofSlopeDirection(prev => prev !== config.roofSlopeDirection ? config.roofSlopeDirection : prev)
+    setHasDoor(prev => prev !== config.hasDoor ? config.hasDoor : prev)
+    queueMicrotask(() => { syncingFromParent.current = false })
+  }, [config])
 
   // When section dropdown changes, update all dimensions from preset
   const handleSectionCountChange = useCallback((count: number) => {
@@ -495,8 +516,9 @@ export default function VedskjulPriceCalculator({ basePrice, onConfigChange }: V
     setWidth(w)
   }, [])
 
-  // Notify parent of config changes
+  // Notify parent of config changes (skip when syncing from parent to avoid loop)
   useEffect(() => {
+    if (syncingFromParent.current) return
     onConfigChange?.({ width, height, depth, sectionCount, finish, roof: roofType, roofShape, roofDegree, roofSlopeDirection, hasDoor })
   }, [width, height, depth, sectionCount, finish, roofType, roofShape, roofDegree, roofSlopeDirection, hasDoor, onConfigChange])
 
