@@ -170,7 +170,7 @@ interface Props {
   onSymbolChange: (id: string) => void
 }
 
-export default function DesignerProperties({ element, dispatch, activeTool, activeSymbolId, onSymbolChange }: Props) {
+export default function DesignerProperties({ element, dispatch, activeTool: _activeTool, activeSymbolId: _activeSymbolId, onSymbolChange: _onSymbolChange }: Props) {
   const [symbolCategory, setSymbolCategory] = useState<string>(symbolCategories[0])
 
   const update = useCallback(

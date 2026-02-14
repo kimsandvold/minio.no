@@ -2,10 +2,11 @@ import { useRef, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { useScrollLock } from '../../../hooks/useScrollLock'
 import {
   SidebarPanel, SidebarHeader, SidebarTitle, SidebarClose, SidebarBody,
   SbSection, SbLabel, SbSliderGroup, SbSliderRow, SbSliderName, SbSliderVal, SbSlider,
-  SegRow, SegBtn, ToggleRow, ToggleText, ToggleTrack,
+  SegRow, SegBtn,
 } from '../../shared/FullscreenSidebar'
 
 interface VisualizerConfig {
@@ -34,13 +35,15 @@ const Wrapper = styled.div<{ $fullscreen?: boolean }>`
     margin: 0;
     display: flex;
     flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
   `}
 `
 
 const Viewport = styled.div<{ $fullscreen?: boolean }>`
   ${({ $fullscreen }) => $fullscreen ? `
     flex: 1;
-    height: 100%;
+    height: 100vh;
     min-width: 0;
   ` : `
     width: 100%;
@@ -52,8 +55,6 @@ const Viewport = styled.div<{ $fullscreen?: boolean }>`
 
   canvas {
     display: block;
-    width: 100% !important;
-    height: 100% !important;
   }
 `
 
@@ -70,6 +71,16 @@ const Label = styled.div`
   white-space: nowrap;
   pointer-events: none;
   z-index: 1;
+`
+
+const FullscreenLogo = styled.img`
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  height: 24px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.5;
 `
 
 const RotateHint = styled.div`
@@ -592,15 +603,15 @@ export default function PostkasseThreeVisualizer(props: PostkasseVisualizerProps
     }
     animate()
 
-    function onWindowResize() {
-      if (!container) return
+    const resizeObserver = new ResizeObserver(() => {
       const w = container.clientWidth
       const h = container.clientHeight
+      if (w === 0 || h === 0) return
       camera.aspect = w / h
       camera.updateProjectionMatrix()
       renderer.setSize(w, h)
-    }
-    window.addEventListener('resize', onWindowResize)
+    })
+    resizeObserver.observe(container)
 
     sceneRef.current = {
       scene,
@@ -612,7 +623,7 @@ export default function PostkasseThreeVisualizer(props: PostkasseVisualizerProps
     }
 
     return () => {
-      window.removeEventListener('resize', onWindowResize)
+      resizeObserver.disconnect()
       cancelAnimationFrame(animationId)
       controls.dispose()
 
@@ -649,31 +660,17 @@ export default function PostkasseThreeVisualizer(props: PostkasseVisualizerProps
   }, [props.width, props.height, props.depth, props.mailboxCount, props.finish, props.roof, props.hasNumberPanel])
 
   const [isFullscreen, setIsFullscreen] = useState(false)
-
-  useEffect(() => {
-    if (!sceneRef.current || !containerRef.current) return
-    const container = containerRef.current
-    const { camera, renderer } = sceneRef.current
-    const raf = requestAnimationFrame(() => {
-      const w = container.clientWidth
-      const h = container.clientHeight
-      camera.aspect = w / h
-      camera.updateProjectionMatrix()
-      renderer.setSize(w, h)
-    })
-    return () => cancelAnimationFrame(raf)
-  }, [isFullscreen])
+  useScrollLock(isFullscreen)
 
   useEffect(() => {
     if (!isFullscreen) return
-    const prev = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
+    document.documentElement.setAttribute('data-fullscreen-preview', '')
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setIsFullscreen(false)
     }
     window.addEventListener('keydown', handler)
     return () => {
-      document.body.style.overflow = prev
+      document.documentElement.removeAttribute('data-fullscreen-preview')
       window.removeEventListener('keydown', handler)
     }
   }, [isFullscreen])
@@ -706,6 +703,7 @@ export default function PostkasseThreeVisualizer(props: PostkasseVisualizerProps
     <Wrapper $fullscreen={isFullscreen}>
       <Viewport ref={containerRef} $fullscreen={isFullscreen}>
         {!isFullscreen && <Label>Eksempel visualisering for å se størrelsen omtrentlig</Label>}
+        {isFullscreen && <FullscreenLogo src="/images/branding/logo_dark.svg" alt="Minio" />}
         <RotateHint>
           <HandIcon>&#9995;</HandIcon>
           Roter
@@ -779,12 +777,6 @@ export default function PostkasseThreeVisualizer(props: PostkasseVisualizerProps
               </SegRow>
             </SbSection>
 
-            <SbSection>
-              <ToggleRow>
-                <ToggleText>Nummerskilt</ToggleText>
-                <ToggleTrack $on={props.hasNumberPanel} onClick={() => update({ hasNumberPanel: !props.hasNumberPanel })} />
-              </ToggleRow>
-            </SbSection>
           </SidebarBody>
         </SidebarPanel>
       )}

@@ -13,6 +13,13 @@ const Nav = styled.nav`
   top: 0.75rem;
   left: 50%;
   transform: translateX(-50%);
+  transition: top 0.3s ease, opacity 0.3s ease;
+
+  [data-fullscreen-preview] & {
+    top: -100px;
+    opacity: 0;
+    pointer-events: none;
+  }
   width: calc(100% - 2rem);
   max-width: ${({ theme }) => theme.spacing.containerMax};
   padding: 0.6rem 1.5rem;

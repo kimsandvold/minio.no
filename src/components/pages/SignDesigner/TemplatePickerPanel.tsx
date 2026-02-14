@@ -144,7 +144,7 @@ function TodeltPreview() {
   )
 }
 
-const previews: Record<string, () => JSX.Element> = {
+const previews: Record<string, () => React.JSX.Element> = {
   'klassisk': KlassiskPreview,
   'moderne': ModernePreview,
   'innrammet': InnrammetPreview,

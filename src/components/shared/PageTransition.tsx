@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 const Wrapper = styled.div<{ $mounted: boolean }>`
   opacity: ${({ $mounted }) => ($mounted ? 1 : 0)};
-  transform: translateY(${({ $mounted }) => ($mounted ? 0 : 8)}px);
+  transform: ${({ $mounted }) => ($mounted ? 'none' : 'translateY(8px)')};
   transition: opacity 0.35s ease, transform 0.35s ease;
 
   @media (prefers-reduced-motion: reduce) {
