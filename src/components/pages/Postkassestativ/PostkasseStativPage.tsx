@@ -277,7 +277,7 @@ export default function PostkasseStativPage() {
                 <li><strong>Konstruksjon</strong> – Velg mellom hvitt treverk eller trykkimpregnert for ekstra holdbarhet mot råte og fukt.</li>
                 <li><strong>Overflatebehandling</strong> – Ubehandlet, grunnet eller ferdig grunnet og malt.</li>
                 <li><strong>Taktype</strong> – Paneltak, takpapp eller impregnert tak.</li>
-                <li><strong>Nummerskilt</strong> – Integrert panel på siden for husnummer.</li>
+                <li><strong>Skilt</strong> – Legg til husnummer, adresseskilt eller annen gravering. Design selv i skiltdesigneren.</li>
                 <li><strong>Belysning</strong> – Lysinstallasjon per postkasse for god synlighet hele året.</li>
                 <li><strong>Levering</strong> – Vi leverer inntil 200 km fra Lillehammer. Avstandsbasert pris beregnes automatisk.</li>
                 <li><strong>Montering</strong> – Vi setter opp stativet ferdig på stedet.</li>
@@ -322,6 +322,8 @@ export default function PostkasseStativPage() {
             </Sidebar>
           </Container>
 
+          <RelatedProducts currentSlug="postkassestativer" />
+
           <ReviewsSection>
             <ReviewsHeader>
               <h2>Hva kundene sier</h2>
@@ -329,8 +331,6 @@ export default function PostkasseStativPage() {
             </ReviewsHeader>
             <ReviewNote>Din tilbakemelding legges ut etter avtale per e-post i etterkant av installasjon.</ReviewNote>
           </ReviewsSection>
-
-          <RelatedProducts currentSlug="postkassestativer" />
         </Content>
       </main>
       <Footer />

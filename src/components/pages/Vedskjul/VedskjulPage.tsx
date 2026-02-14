@@ -399,6 +399,8 @@ export default function VedskjulPage() {
             </Sidebar>
           </Container>
 
+          <RelatedProducts currentSlug="vedskjul" />
+
           <ReviewsSection>
             <ReviewsHeader>
               <h2>Hva kundene sier</h2>
@@ -417,8 +419,6 @@ export default function VedskjulPage() {
             </ReviewsGrid>
             <ReviewNote>Din tilbakemelding legges ut etter avtale per e-post i etterkant av installasjon.</ReviewNote>
           </ReviewsSection>
-
-          <RelatedProducts currentSlug="vedskjul" />
         </Content>
       </main>
       <Footer />

@@ -460,7 +460,6 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
   const [construction, setConstruction] = useState('whitewood')
   const [finish, setFinish] = useState('0')
   const [roofType, setRoofType] = useState('0')
-  const [hasNumberPanel, setHasNumberPanel] = useState(false)
   const [deliveryChecked, setDeliveryChecked] = useState(false)
   const [installationChecked, setInstallationChecked] = useState(false)
   const [lightingChecked, setLightingChecked] = useState(false)
@@ -498,8 +497,8 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
 
   // Notify parent of config changes
   useEffect(() => {
-    onConfigChange?.({ width, height, depth, mailboxCount, finish, roof: roofType, hasNumberPanel })
-  }, [width, height, depth, mailboxCount, finish, roofType, hasNumberPanel, onConfigChange])
+    onConfigChange?.({ width, height, depth, mailboxCount, finish, roof: roofType, hasNumberPanel: false })
+  }, [width, height, depth, mailboxCount, finish, roofType, onConfigChange])
 
   // Price calculation
   const baseVolume = MAILBOX_PRESETS[1].width * MAILBOX_PRESETS[1].depth * MAILBOX_PRESETS[1].height
@@ -509,12 +508,11 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
 
   const finishCost = parseInt(finish, 10)
   const roofCost = parseInt(roofType, 10)
-  const numberPanelCost = hasNumberPanel ? 1200 : 0
   const deliveryCost = deliveryChecked ? distance * 15 * 2 : 0
   const installationCost = installationChecked ? 4500 : 0
   const lightingCost = lightingChecked ? mailboxCount * 1500 : 0
 
-  const subtotal = volumeCost + finishCost + roofCost + numberPanelCost + deliveryCost + installationCost + lightingCost
+  const subtotal = volumeCost + finishCost + roofCost + deliveryCost + installationCost + lightingCost
   const constructionMultiplier = construction === 'impregnated' ? 1.2 : 1
   const priceExclVat = Math.round(subtotal * constructionMultiplier)
   const vatAmount = Math.round(priceExclVat * (VAT_PERCENTAGE / 100))
@@ -614,7 +612,7 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
       installation: installationChecked ? 'Ja' : 'Nei',
       lighting: lightingChecked ? `Ja (${mailboxCount} lys)` : 'Nei',
       size: `${mailboxCount} postkasse${mailboxCount > 1 ? 'r' : ''}`,
-      complexity: hasNumberPanel ? 'Med nummerskilt' : 'Uten nummerskilt',
+      complexity: signChecked ? 'Med skilt' : undefined,
       price: formatPrice(totalPrice),
       signRequested: signChecked,
       signWidthCm: signChecked ? signWidth : undefined,
@@ -728,20 +726,6 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
         <ButtonGroupBtn $active={roofType === '2500'} onClick={() => setRoofType('2500')}>Impregnert</ButtonGroupBtn>
       </ButtonGroup>
 
-      {/* Number panel */}
-      <SectionTitle>Tilvalg</SectionTitle>
-      <CheckboxBox $checked={hasNumberPanel}>
-        <HiddenCheckbox
-          type="checkbox"
-          checked={hasNumberPanel}
-          onChange={(e) => setHasNumberPanel(e.target.checked)}
-        />
-        <CheckMark $checked={hasNumberPanel}>
-          {hasNumberPanel && <Icon name="faCheck" />}
-        </CheckMark>
-        Nummerskilt (+1 200,-)
-      </CheckboxBox>
-
       {/* Additional services */}
       <SectionTitle>Tilleggstjenester</SectionTitle>
 
@@ -833,6 +817,8 @@ export default function PostkassePriceCalculator({ basePrice, onConfigChange }: 
         Lysinstallasjon (+{formatPrice(mailboxCount * 1500)})
       </CheckboxBox>
 
+      {/* Sign option */}
+      <SectionTitle>Tilvalg</SectionTitle>
       <CheckboxBox $checked={signChecked}>
         <HiddenCheckbox
           type="checkbox"

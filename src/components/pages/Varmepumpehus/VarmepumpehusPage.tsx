@@ -371,6 +371,8 @@ export default function VarmepumpehusPage() {
             </Sidebar>
           </Container>
 
+          <RelatedProducts currentSlug="varmepumpehus" />
+
           <ReviewsSection>
             <ReviewsHeader>
               <h2>Hva kundene sier</h2>
@@ -389,8 +391,6 @@ export default function VarmepumpehusPage() {
             </ReviewsGrid>
             <ReviewNote>Din tilbakemelding legges ut etter avtale per e-post i etterkant av installasjon.</ReviewNote>
           </ReviewsSection>
-
-          <RelatedProducts currentSlug="varmepumpehus" />
         </Content>
       </main>
       <Footer />

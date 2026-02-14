@@ -7,7 +7,7 @@ import GoogleLoginButton from '../../shared/GoogleLoginButton'
 const TopBar = styled.div`
   background: #1a1a1a;
   border-bottom: 1px solid #333;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 1rem 0.5rem 10px;
   display: flex;
   align-items: center;
   gap: 1rem;

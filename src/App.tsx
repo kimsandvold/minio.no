@@ -15,6 +15,7 @@ import LoadingOverlay from './components/shared/LoadingOverlay'
 import Navbar from './components/layout/Navbar'
 import Hero from './components/sections/Hero/Hero'
 import Portfolio from './components/sections/Portfolio/Portfolio'
+import DesignerHighlight from './components/sections/DesignerHighlight/DesignerHighlight'
 import ProsessPage from './components/pages/Prosess/ProsessPage'
 import KontaktPage from './components/pages/Kontakt/KontaktPage'
 import Footer from './components/layout/Footer'
@@ -52,6 +53,7 @@ function HomePage() {
       <main id="main-content">
         <Hero />
         <Portfolio />
+        <DesignerHighlight />
       </main>
       <Footer />
       <ProductModal />

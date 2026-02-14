@@ -397,6 +397,8 @@ export default function SoppelboderPage() {
             </Sidebar>
           </Container>
 
+          <RelatedProducts currentSlug="soppelboder" />
+
           <ReviewsSection>
             <ReviewsHeader>
               <h2>Hva kundene sier</h2>
@@ -415,8 +417,6 @@ export default function SoppelboderPage() {
             </ReviewsGrid>
             <ReviewNote>Din tilbakemelding legges ut etter avtale per e-post i etterkant av installasjon.</ReviewNote>
           </ReviewsSection>
-
-          <RelatedProducts currentSlug="soppelboder" />
         </Content>
       </main>
       <Footer />
