@@ -8,6 +8,7 @@ import Footer from '../../layout/Footer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import { useSEO } from '../../../hooks/useSEO'
+import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
 import GoogleLoginButton from '../../shared/GoogleLoginButton'
 import BasketView from '../../shared/BasketModal/BasketView'
@@ -175,6 +176,7 @@ export default function HandlekurvPage() {
   return (
     <>
       <Navbar />
+      <PageTransition>
       <main>
         <Hero>
           <HeroContent>
@@ -221,6 +223,7 @@ export default function HandlekurvPage() {
           </Container>
         </Content>
       </main>
+      </PageTransition>
       <Footer />
       <ProductModal />
       <NewsletterModal />

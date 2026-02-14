@@ -5,6 +5,7 @@ import Footer from '../../layout/Footer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import { useSEO } from '../../../hooks/useSEO'
+import PageTransition from '../../shared/PageTransition'
 import SplideCarousel from '../../shared/SplideCarousel'
 import PromoRibbon from '../../shared/PromoRibbon'
 import { ProductGridCardSkeleton } from '../../shared/ProductSkeleton'
@@ -174,6 +175,7 @@ export default function ProdukterPage() {
   return (
     <>
       <Navbar />
+      <PageTransition>
       <main>
         <Hero>
           <HeroContent>
@@ -213,6 +215,7 @@ export default function ProdukterPage() {
           </Container>
         </Content>
       </main>
+      </PageTransition>
       <Footer />
       <ProductModal />
       <NewsletterModal />

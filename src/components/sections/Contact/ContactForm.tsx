@@ -1,5 +1,7 @@
 import styled from 'styled-components'
 import { useContactForm } from '../../../hooks/useContactForm'
+import { scaleIn, shake } from '../../../styles/animations'
+import Icon from '../../shared/Icon'
 
 const Form = styled.form`
   display: flex;
@@ -56,6 +58,10 @@ const HelperText = styled.div`
 `
 
 const SubmitButton = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   padding: 0.9rem 1.5rem;
   background-color: ${({ theme }) => theme.colors.textDark};
   color: #fff;
@@ -79,23 +85,127 @@ const SubmitButton = styled.button`
   }
 `
 
-const Status = styled.div<{ $type: 'success' | 'error' }>`
-  padding: 1rem;
-  border-radius: 8px;
-  margin-top: 1rem;
+const SuccessPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  max-width: 600px;
+  width: 100%;
+  animation: ${scaleIn} 0.4s ease both;
 
-  ${({ $type }) =>
-    $type === 'success'
-      ? `background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb;`
-      : `background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb;`}
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`
+
+const SuccessIcon = styled.div`
+  font-size: 2.5rem;
+  color: #28a745;
+  margin-bottom: 1rem;
+`
+
+const SuccessHeading = styled.h3`
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.textDark};
+  margin: 0 0 0.5rem;
+`
+
+const SuccessBody = styled.p`
+  font-size: 0.95rem;
+  color: #555;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+`
+
+const ResetButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: 2px solid ${({ theme }) => theme.colors.textDark};
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: ${({ theme }) => theme.colors.textDark};
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.textDark};
+    color: #fff;
+  }
+`
+
+const ErrorPanel = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 8px;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  margin-top: 1rem;
+  animation: ${shake} 0.4s ease;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`
+
+const ErrorIcon = styled.div`
+  font-size: 1.5rem;
+  color: #721c24;
+  margin-bottom: 0.5rem;
+`
+
+const ErrorText = styled.p`
+  font-size: 0.9rem;
+  color: #721c24;
+  margin: 0 0 1rem;
+  line-height: 1.5;
+`
+
+const RetryButton = styled.button`
+  padding: 0.6rem 1.25rem;
+  background: #721c24;
+  color: #fff;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.85;
+  }
 `
 
 export default function ContactForm() {
-  const { formState, setField, submit, status } = useContactForm()
+  const { formState, setField, submit, status, reset } = useContactForm()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     submit()
+  }
+
+  if (status === 'success') {
+    return (
+      <SuccessPanel>
+        <SuccessIcon>
+          <Icon name="faCheckCircle" />
+        </SuccessIcon>
+        <SuccessHeading>Meldingen er sendt!</SuccessHeading>
+        <SuccessBody>
+          Takk for din henvendelse. Vi svarer vanligvis innen 24 timer.
+        </SuccessBody>
+        <ResetButton onClick={reset}>Send ny melding</ResetButton>
+      </SuccessPanel>
+    )
   }
 
   return (
@@ -141,13 +251,24 @@ export default function ContactForm() {
       />
       <HelperText>Vær så spesifikk som mulig med størrelse, utførelse, forventet levering etc.</HelperText>
       <SubmitButton type="submit" disabled={status === 'submitting'}>
-        {status === 'submitting' ? 'Sender...' : 'Send melding'}
+        {status === 'submitting' ? (
+          <>
+            <Icon name="faSpinner" spin /> Sender...
+          </>
+        ) : (
+          <>
+            <Icon name="faPaperPlane" /> Send melding
+          </>
+        )}
       </SubmitButton>
-      {status === 'success' && (
-        <Status $type="success">Takk for din melding! Vi tar kontakt så snart som mulig.</Status>
-      )}
       {status === 'error' && (
-        <Status $type="error">Noe gikk galt. Vennligst prøv igjen eller kontakt oss via sosiale medier.</Status>
+        <ErrorPanel>
+          <ErrorIcon>
+            <Icon name="faExclamationTriangle" />
+          </ErrorIcon>
+          <ErrorText>Noe gikk galt. Vennligst prøv igjen eller kontakt oss via sosiale medier.</ErrorText>
+          <RetryButton onClick={reset}>Prøv igjen</RetryButton>
+        </ErrorPanel>
       )}
     </Form>
   )

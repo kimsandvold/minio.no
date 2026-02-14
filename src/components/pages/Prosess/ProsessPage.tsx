@@ -3,6 +3,8 @@ import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
+import PageTransition from '../../shared/PageTransition'
+import AnimatedBlock from '../../shared/AnimatedBlock'
 import { useSEO } from '../../../hooks/useSEO'
 import ProcessStep from '../../sections/Process/ProcessStep'
 import ServiceCard from '../../sections/Services/ServiceCard'
@@ -173,44 +175,56 @@ export default function ProsessPage() {
   return (
     <>
       <Navbar />
-      <main>
-        <Hero>
-          <HeroContent>
-            <h1>Slik jobber vi</h1>
-            <p>Fra idé til ferdig produkt – her er prosessen når du bestiller fra Minio.</p>
-          </HeroContent>
-        </Hero>
-        <Content>
-          <Container>
-            <Intro>
-              <p>
-                Trenger du et produkt som er tilpasset akkurat ditt hjem, dine mål og dine ønsker? Enten det gjelder et varmepumpehus med spesielle dimensjoner, en søppelbod som matcher husets stil, eller noe helt annet – så hjelper vi deg hele veien. Vi designer produktet ut fra dine behov og ønsker, og sørger for at det blir både funksjonelt og pent. Under ser du stegene vi følger for å sikre at du får et resultat du er fornøyd med, fra første samtale til ferdig produkt levert på døra. Denne typen prosjekter prises individuelt basert på omfang, materialer og kompleksitet.
-              </p>
-            </Intro>
-            <Steps>
-              {processSteps.map(step => (
-                <ProcessStep key={step.number} step={step} />
-              ))}
-            </Steps>
-            <ServicesSection>
-              <h2>Hva tilbyr Minio?</h2>
-              <p>Minio tilbyr skreddersydde treløsninger for uteområdet ditt, samt laserskjæring og gravering av skilt og dekor. Fra varmepumpehus og postkassestativer til personlige nummerskilt – alt lages på bestilling etter dine mål og ønsker.</p>
-              <ServiceGrid>
-                {services.map((service, i) => (
-                  <ServiceCard key={i} service={service} />
+      <PageTransition>
+        <main>
+          <Hero>
+            <HeroContent>
+              <h1>Slik jobber vi</h1>
+              <p>Fra idé til ferdig produkt – her er prosessen når du bestiller fra Minio.</p>
+            </HeroContent>
+          </Hero>
+          <Content>
+            <Container>
+              <AnimatedBlock>
+                <Intro>
+                  <p>
+                    Trenger du et produkt som er tilpasset akkurat ditt hjem, dine mål og dine ønsker? Enten det gjelder et varmepumpehus med spesielle dimensjoner, en søppelbod som matcher husets stil, eller noe helt annet – så hjelper vi deg hele veien. Vi designer produktet ut fra dine behov og ønsker, og sørger for at det blir både funksjonelt og pent. Under ser du stegene vi følger for å sikre at du får et resultat du er fornøyd med, fra første samtale til ferdig produkt levert på døra. Denne typen prosjekter prises individuelt basert på omfang, materialer og kompleksitet.
+                  </p>
+                </Intro>
+              </AnimatedBlock>
+              <Steps>
+                {processSteps.map((step, i) => (
+                  <AnimatedBlock key={step.number} delay={i * 100}>
+                    <ProcessStep step={step} />
+                  </AnimatedBlock>
                 ))}
-              </ServiceGrid>
-            </ServicesSection>
-            <Cta>
-              <h3>Klar til å starte ditt prosjekt?</h3>
-              <p>Ta kontakt i dag for en uforpliktende samtale om ditt neste treprodukt.</p>
-              <ContactButton href="/kontakt">
-                <Icon name="faEnvelope" /> Ta kontakt
-              </ContactButton>
-            </Cta>
-          </Container>
-        </Content>
-      </main>
+              </Steps>
+              <AnimatedBlock>
+                <ServicesSection>
+                  <h2>Hva tilbyr Minio?</h2>
+                  <p>Minio tilbyr skreddersydde treløsninger for uteområdet ditt, samt laserskjæring og gravering av skilt og dekor. Fra varmepumpehus og postkassestativer til personlige nummerskilt – alt lages på bestilling etter dine mål og ønsker.</p>
+                  <ServiceGrid>
+                    {services.map((service, i) => (
+                      <AnimatedBlock key={i} delay={i * 80}>
+                        <ServiceCard service={service} />
+                      </AnimatedBlock>
+                    ))}
+                  </ServiceGrid>
+                </ServicesSection>
+              </AnimatedBlock>
+              <AnimatedBlock>
+                <Cta>
+                  <h3>Klar til å starte ditt prosjekt?</h3>
+                  <p>Ta kontakt i dag for en uforpliktende samtale om ditt neste treprodukt.</p>
+                  <ContactButton href="/kontakt">
+                    <Icon name="faEnvelope" /> Ta kontakt
+                  </ContactButton>
+                </Cta>
+              </AnimatedBlock>
+            </Container>
+          </Content>
+        </main>
+      </PageTransition>
       <Footer />
       <ProductModal />
       <NewsletterModal />

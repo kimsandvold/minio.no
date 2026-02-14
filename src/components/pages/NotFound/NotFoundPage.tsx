@@ -2,7 +2,10 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
+import PageTransition from '../../shared/PageTransition'
+import Icon from '../../shared/Icon'
 import { useSEO } from '../../../hooks/useSEO'
+import { rockGently, fadeIn } from '../../../styles/animations'
 
 const Wrapper = styled.main`
   min-height: 100vh;
@@ -16,38 +19,100 @@ const Wrapper = styled.main`
 `
 
 const Content = styled.div`
-  max-width: 520px;
+  max-width: 560px;
+`
 
-  h1 {
-    font-size: 6rem;
-    font-weight: 800;
-    margin: 0 0 0.5rem;
-    line-height: 1;
+const HammerIcon = styled.div`
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+  animation: ${rockGently} 2s ease-in-out infinite;
 
-    @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 4rem;
-    }
-  }
-
-  h2 {
-    font-size: 1.5rem;
-    font-weight: 600;
-    margin: 0 0 1rem;
-
-    @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1.2rem;
-    }
-  }
-
-  p {
-    font-size: 1rem;
-    color: rgba(255, 255, 255, 0.6);
-    line-height: 1.6;
-    margin: 0 0 2rem;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
   }
 `
 
-const HomeLink = styled(Link)`
+const Title = styled.h1`
+  font-size: 6rem;
+  font-weight: 800;
+  margin: 0 0 0.5rem;
+  line-height: 1;
+  animation: ${fadeIn} 0.6s ease both;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    font-size: 4rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`
+
+const Subtitle = styled.h2`
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    font-size: 1.2rem;
+  }
+`
+
+const Description = styled.p`
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.6;
+  margin: 0 0 2.5rem;
+`
+
+const SuggestionGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+`
+
+const SuggestionCard = styled(Link)<{ $delay: number }>`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  text-decoration: none;
+  color: ${({ theme }) => theme.colors.textLight};
+  transition: background 0.2s, transform 0.2s;
+  animation: ${fadeIn} 0.5s ease both;
+  animation-delay: ${({ $delay }) => $delay}ms;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  svg {
+    font-size: 1.2rem;
+    color: ${({ theme }) => theme.colors.accent};
+  }
+
+  span {
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+`
+
+const HomeButton = styled(Link)`
   display: inline-block;
   padding: 0.85rem 2rem;
   background: ${({ theme }) => theme.colors.accent};
@@ -73,14 +138,35 @@ export default function NotFoundPage() {
   return (
     <>
       <Navbar />
-      <Wrapper>
-        <Content>
-          <h1>404</h1>
-          <h2>Siden ble ikke funnet</h2>
-          <p>Beklager, siden du leter etter finnes ikke eller har blitt flyttet.</p>
-          <HomeLink to="/">Tilbake til forsiden</HomeLink>
-        </Content>
-      </Wrapper>
+      <PageTransition>
+        <Wrapper>
+          <Content>
+            <HammerIcon>
+              <Icon name="faHammer" />
+            </HammerIcon>
+            <Title>404</Title>
+            <Subtitle>Her var det tomt for materialer</Subtitle>
+            <Description>
+              Siden du leter etter finnes ikke, eller har blitt flyttet til et nytt verksted.
+            </Description>
+            <SuggestionGrid>
+              <SuggestionCard to="/" $delay={100}>
+                <Icon name="faHome" />
+                <span>Hjem</span>
+              </SuggestionCard>
+              <SuggestionCard to="/produkter" $delay={200}>
+                <Icon name="faCube" />
+                <span>Produkter</span>
+              </SuggestionCard>
+              <SuggestionCard to="/kontakt" $delay={300}>
+                <Icon name="faEnvelope" />
+                <span>Kontakt</span>
+              </SuggestionCard>
+            </SuggestionGrid>
+            <HomeButton to="/">Tilbake til forsiden</HomeButton>
+          </Content>
+        </Wrapper>
+      </PageTransition>
       <Footer />
     </>
   )

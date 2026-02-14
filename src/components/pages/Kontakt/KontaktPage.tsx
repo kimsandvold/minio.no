@@ -5,6 +5,8 @@ import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
+import PageTransition from '../../shared/PageTransition'
+import AnimatedBlock from '../../shared/AnimatedBlock'
 import { useSEO } from '../../../hooks/useSEO'
 import ContactForm from '../../sections/Contact/ContactForm'
 import ShareButtons from '../../shared/ShareButtons'
@@ -408,89 +410,99 @@ export default function KontaktPage() {
   return (
     <>
       <Navbar />
-      <main>
-        <Hero>
-          <HeroContent>
-            <h1>Ta kontakt</h1>
-            <p>Vi hjelper deg gjerne med ditt neste prosjekt. Send oss en melding, så tar vi kontakt innen kort tid.</p>
-          </HeroContent>
-        </Hero>
-        <Content>
-          <Container>
-            <Intro>Enten du har en konkret idé eller bare lurer på hva som er mulig – send oss en melding. Vi svarer vanligvis innen 24 timer, og alle henvendelser er helt uforpliktende.</Intro>
-            <Grid>
-              <FormSection>
-                <h2>Send oss en melding</h2>
-                <p>Felter merket med * er obligatoriske</p>
-                <ContactForm />
-              </FormSection>
+      <PageTransition>
+        <main>
+          <Hero>
+            <HeroContent>
+              <h1>Ta kontakt</h1>
+              <p>Vi hjelper deg gjerne med ditt neste prosjekt. Send oss en melding, så tar vi kontakt innen kort tid.</p>
+            </HeroContent>
+          </Hero>
+          <Content>
+            <Container>
+              <AnimatedBlock>
+                <Intro>Enten du har en konkret idé eller bare lurer på hva som er mulig – send oss en melding. Vi svarer vanligvis innen 24 timer, og alle henvendelser er helt uforpliktende.</Intro>
+              </AnimatedBlock>
+              <Grid>
+                <AnimatedBlock delay={100}>
+                  <FormSection>
+                    <h2>Send oss en melding</h2>
+                    <p>Felter merket med * er obligatoriske</p>
+                    <ContactForm />
+                  </FormSection>
+                </AnimatedBlock>
 
-              <Sidebar>
-                <InfoCard>
-                  <h3>Kontaktinformasjon</h3>
-                  <InfoItem>
-                    <InfoIcon><Icon name="faHandPointer" /></InfoIcon>
-                    <InfoText>
-                      <span>Lokasjon</span>
-                      <p>Lillehammer, Norge</p>
-                    </InfoText>
-                  </InfoItem>
-                  <InfoItem>
-                    <InfoIcon><Icon name="faTruck" /></InfoIcon>
-                    <InfoText>
-                      <span>Leveringsområde</span>
-                      <p>Inntil 200 km fra Lillehammer</p>
-                    </InfoText>
-                  </InfoItem>
-                  <InfoItem>
-                    <InfoIcon><Icon name="faEnvelope" /></InfoIcon>
-                    <InfoText>
-                      <span>E-post</span>
-                      <p>Bruk kontaktskjemaet på denne siden</p>
-                    </InfoText>
-                  </InfoItem>
-                </InfoCard>
+                <AnimatedBlock delay={200}>
+                  <Sidebar>
+                    <InfoCard>
+                      <h3>Kontaktinformasjon</h3>
+                      <InfoItem>
+                        <InfoIcon><Icon name="faHandPointer" /></InfoIcon>
+                        <InfoText>
+                          <span>Lokasjon</span>
+                          <p>Lillehammer, Norge</p>
+                        </InfoText>
+                      </InfoItem>
+                      <InfoItem>
+                        <InfoIcon><Icon name="faTruck" /></InfoIcon>
+                        <InfoText>
+                          <span>Leveringsområde</span>
+                          <p>Inntil 200 km fra Lillehammer</p>
+                        </InfoText>
+                      </InfoItem>
+                      <InfoItem>
+                        <InfoIcon><Icon name="faEnvelope" /></InfoIcon>
+                        <InfoText>
+                          <span>E-post</span>
+                          <p>Bruk kontaktskjemaet på denne siden</p>
+                        </InfoText>
+                      </InfoItem>
+                    </InfoCard>
 
-                <InfoCard>
-                  <h3>Finn oss på sosiale medier</h3>
-                  <SocialLinks>
-                    <SocialLink
-                      href="https://www.facebook.com/profile.php?id=61576010648640&locale=nb_NO"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      $platform="facebook"
-                      aria-label="Kontakt oss på Facebook (åpnes i nytt vindu)"
-                    >
-                      <Icon name="faFacebookF" /> Facebook
-                    </SocialLink>
-                    <SocialLink
-                      href="https://www.instagram.com/minio2624"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      $platform="instagram"
-                      aria-label="Kontakt oss på Instagram (åpnes i nytt vindu)"
-                    >
-                      <Icon name="faInstagram" /> Instagram
-                    </SocialLink>
-                  </SocialLinks>
-                </InfoCard>
+                    <InfoCard>
+                      <h3>Finn oss på sosiale medier</h3>
+                      <SocialLinks>
+                        <SocialLink
+                          href="https://www.facebook.com/profile.php?id=61576010648640&locale=nb_NO"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          $platform="facebook"
+                          aria-label="Kontakt oss på Facebook (åpnes i nytt vindu)"
+                        >
+                          <Icon name="faFacebookF" /> Facebook
+                        </SocialLink>
+                        <SocialLink
+                          href="https://www.instagram.com/minio2624"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          $platform="instagram"
+                          aria-label="Kontakt oss på Instagram (åpnes i nytt vindu)"
+                        >
+                          <Icon name="faInstagram" /> Instagram
+                        </SocialLink>
+                      </SocialLinks>
+                    </InfoCard>
 
-                <ShareCard>
-                  <p>Liker du det du ser? Anbefal oss til venner og familie!</p>
-                  <ShareButtons variant="section" context="contact" />
-                </ShareCard>
-              </Sidebar>
-            </Grid>
-            <FaqSection>
-              <FaqHeader>
-                <h2>Vanlige spørsmål</h2>
-                <p>Finner du ikke svaret du leter etter? Send oss en melding!</p>
-              </FaqHeader>
-              <FaqAccordion />
-            </FaqSection>
-          </Container>
-        </Content>
-      </main>
+                    <ShareCard>
+                      <p>Liker du det du ser? Anbefal oss til venner og familie!</p>
+                      <ShareButtons variant="section" context="contact" />
+                    </ShareCard>
+                  </Sidebar>
+                </AnimatedBlock>
+              </Grid>
+              <AnimatedBlock>
+                <FaqSection>
+                  <FaqHeader>
+                    <h2>Vanlige spørsmål</h2>
+                    <p>Finner du ikke svaret du leter etter? Send oss en melding!</p>
+                  </FaqHeader>
+                  <FaqAccordion />
+                </FaqSection>
+              </AnimatedBlock>
+            </Container>
+          </Content>
+        </main>
+      </PageTransition>
       <Footer />
       <ProductModal />
       <NewsletterModal />

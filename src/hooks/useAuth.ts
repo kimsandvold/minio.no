@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth'
 import { auth, googleProvider } from '../lib/firebase'
+import { subscribeToNewsletter } from '../services/newsletterService'
 
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL ?? ''
 
@@ -17,7 +18,10 @@ export function useAuth() {
   }, [])
 
   const login = useCallback(async () => {
-    await signInWithPopup(auth, googleProvider)
+    const result = await signInWithPopup(auth, googleProvider)
+    if (result.user.email) {
+      subscribeToNewsletter(result.user.email)
+    }
   }, [])
 
   const logout = useCallback(async () => {
