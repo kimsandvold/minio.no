@@ -31,7 +31,7 @@ const ImageWrap = styled.div`
   align-items: flex-start;
   justify-content: flex-end;
   overflow: hidden;
-  padding: 1.5rem 1.5rem 0 0;
+  padding: 2.5rem 2.5rem 0 0;
 
   img {
     width: 100%;
