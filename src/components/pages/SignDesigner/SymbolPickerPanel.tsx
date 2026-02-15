@@ -13,7 +13,7 @@ const Panel = styled.div`
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     width: 100%;
-    max-height: 45vh;
+    max-height: 35vh;
     border-right: none;
     border-bottom: 1px solid #333;
   }
@@ -53,6 +53,10 @@ const Grid = styled.div`
   flex: 1;
   overflow-y: auto;
   align-content: start;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-template-columns: repeat(6, 1fr);
+  }
 `
 
 const Cell = styled.button<{ $active: boolean }>`

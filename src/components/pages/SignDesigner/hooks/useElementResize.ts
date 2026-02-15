@@ -42,7 +42,7 @@ export function useElementResize(
   useEffect(() => {
     if (!resize) return
 
-    const handleMove = (e: MouseEvent) => {
+    const handleMove = (e: PointerEvent) => {
       const svgPt = screenToSvg(e.clientX, e.clientY)
       const dx = svgPt.x - resize.startMouse.x
       const dy = svgPt.y - resize.startMouse.y
@@ -106,11 +106,11 @@ export function useElementResize(
 
     const handleUp = () => setResize(null)
 
-    window.addEventListener('mousemove', handleMove)
-    window.addEventListener('mouseup', handleUp)
+    window.addEventListener('pointermove', handleMove)
+    window.addEventListener('pointerup', handleUp)
     return () => {
-      window.removeEventListener('mousemove', handleMove)
-      window.removeEventListener('mouseup', handleUp)
+      window.removeEventListener('pointermove', handleMove)
+      window.removeEventListener('pointerup', handleUp)
     }
   }, [resize, dispatch, screenToSvg])
 

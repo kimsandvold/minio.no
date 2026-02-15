@@ -19,7 +19,7 @@ const DesignList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  max-height: 400px;
+  max-height: min(400px, 60vh);
   overflow-y: auto;
 `
 

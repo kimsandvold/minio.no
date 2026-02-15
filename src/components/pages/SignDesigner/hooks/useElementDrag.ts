@@ -26,7 +26,7 @@ export function useElementDrag(
   const [drag, setDrag] = useState<DragState | null>(null)
   const [snapGuides, setSnapGuides] = useState<SnapGuides>({ horizontal: false, vertical: false })
 
-  const startDrag = useCallback((elementId: string, e: React.MouseEvent) => {
+  const startDrag = useCallback((elementId: string, e: React.PointerEvent) => {
     const el = elements.find(el => el.id === elementId)
     if (!el) return
     const svgPt = screenToSvg(e.clientX, e.clientY)
@@ -45,10 +45,10 @@ export function useElementDrag(
       return
     }
 
-    const handleMove = (e: MouseEvent) => {
+    const handleMove = (e: PointerEvent) => {
       const svgPt = screenToSvg(e.clientX, e.clientY)
-      let dx = svgPt.x - drag.startMouse.x
-      let dy = svgPt.y - drag.startMouse.y
+      const dx = svgPt.x - drag.startMouse.x
+      const dy = svgPt.y - drag.startMouse.y
 
       const el = elements.find(el => el.id === drag.elementId)
       if (!el) return
@@ -123,11 +123,11 @@ export function useElementDrag(
       setSnapGuides({ horizontal: false, vertical: false })
     }
 
-    window.addEventListener('mousemove', handleMove)
-    window.addEventListener('mouseup', handleUp)
+    window.addEventListener('pointermove', handleMove)
+    window.addEventListener('pointerup', handleUp)
     return () => {
-      window.removeEventListener('mousemove', handleMove)
-      window.removeEventListener('mouseup', handleUp)
+      window.removeEventListener('pointermove', handleMove)
+      window.removeEventListener('pointerup', handleUp)
     }
   }, [drag, dispatch, screenToSvg, elements, canvasWidth, canvasHeight])
 

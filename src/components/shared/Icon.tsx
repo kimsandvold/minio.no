@@ -9,10 +9,11 @@ import {
   faSpinner, faCheckCircle, faInfoCircle, faSearch,
   faCheck, faTimesCircle, faExclamationTriangle, faHandPointer,
   faSignOutAlt, faLock, faUser, faClipboardList, faUserShield,
-  faChevronDown,
+  faChevronDown, faChevronUp,
   faMousePointer, faFont, faSquare, faCircle,
   faUndo, faRedo, faDownload, faSave, faFolderOpen,
   faCopy, faClone, faStar, faArrowUp, faArrowDown, faPencilRuler,
+  faMobileAlt, faTabletAlt, faDesktop,
 } from '@fortawesome/free-solid-svg-icons'
 import { faFacebookF, faInstagram, faGoogle } from '@fortawesome/free-brands-svg-icons'
 
@@ -26,10 +27,11 @@ const iconMap: Record<string, IconProp> = {
   faCheck, faTimesCircle, faExclamationTriangle, faHandPointer,
   faFacebookF, faInstagram, faGoogle,
   faSignOutAlt, faLock, faUser, faClipboardList, faUserShield,
-  faChevronDown,
+  faChevronDown, faChevronUp,
   faMousePointer, faFont, faSquare, faCircle,
   faUndo, faRedo, faDownload, faSave, faFolderOpen,
   faCopy, faClone, faStar, faArrowUp, faArrowDown, faPencilRuler,
+  faMobileAlt, faTabletAlt, faDesktop,
 }
 
 interface IconProps {

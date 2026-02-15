@@ -5,7 +5,7 @@ import { designerFonts } from '../../../data/designerFonts'
 import { designerSymbols, symbolCategories } from '../../../data/designerSymbols'
 import Icon from '../../shared/Icon'
 
-const Panel = styled.div<{ $visible: boolean }>`
+const Panel = styled.div<{ $visible: boolean; $collapsed?: boolean }>`
   width: 260px;
   background: #1a1a1a;
   border-left: 1px solid #333;
@@ -18,11 +18,35 @@ const Panel = styled.div<{ $visible: boolean }>`
     width: 100%;
     border-left: none;
     border-top: 1px solid #333;
-    max-height: ${({ $visible }) => ($visible ? '50vh' : '0')};
-    padding: ${({ $visible }) => ($visible ? '1rem' : '0 1rem')};
-    overflow: hidden;
+    max-height: ${({ $visible, $collapsed }) => !$visible ? '0' : $collapsed ? '0' : '40vh'};
+    padding: ${({ $visible, $collapsed }) => (!$visible || $collapsed) ? '0 1rem' : '1rem'};
+    overflow-y: ${({ $visible, $collapsed }) => ($visible && !$collapsed) ? 'auto' : 'hidden'};
     transition: max-height 0.3s ease, padding 0.3s ease;
     order: 2;
+  }
+`
+
+const MobileToggle = styled.button<{ $visible: boolean }>`
+  display: none;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    display: ${({ $visible }) => $visible ? 'flex' : 'none'};
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0.4rem;
+    background: #1a1a1a;
+    border: none;
+    border-top: 1px solid #333;
+    color: #888;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    order: 2;
+
+    &:hover { color: #ddd; }
   }
 `
 
@@ -172,6 +196,7 @@ interface Props {
 
 export default function DesignerProperties({ element, dispatch, activeTool: _activeTool, activeSymbolId: _activeSymbolId, onSymbolChange: _onSymbolChange }: Props) {
   const [symbolCategory, setSymbolCategory] = useState<string>(symbolCategories[0])
+  const [mobileCollapsed, setMobileCollapsed] = useState(false)
 
   const update = useCallback(
     (changes: Partial<DesignElement>) => {
@@ -185,14 +210,19 @@ export default function DesignerProperties({ element, dispatch, activeTool: _act
 
   if (!element) {
     return (
-      <Panel $visible={false}>
+      <Panel $visible={false} $collapsed={false}>
         <EmptyState>Velg et element for a redigere egenskaper</EmptyState>
       </Panel>
     )
   }
 
   return (
-    <Panel $visible={true}>
+    <>
+    <MobileToggle $visible={!!element} onClick={() => setMobileCollapsed(c => !c)}>
+      <Icon name={mobileCollapsed ? 'faChevronUp' : 'faChevronDown'} />
+      {mobileCollapsed ? 'Vis egenskaper' : 'Skjul egenskaper'}
+    </MobileToggle>
+    <Panel $visible={true} $collapsed={mobileCollapsed}>
       <SectionTitle>Posisjon og storrelse</SectionTitle>
       <Row>
         <Label>X</Label>
@@ -347,5 +377,6 @@ export default function DesignerProperties({ element, dispatch, activeTool: _act
         </DeleteButton>
       </Row>
     </Panel>
+    </>
   )
 }

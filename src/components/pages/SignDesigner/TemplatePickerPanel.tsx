@@ -12,7 +12,7 @@ const Panel = styled.div`
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     width: 100%;
-    max-height: 45vh;
+    max-height: 35vh;
     border-right: none;
     border-bottom: 1px solid #333;
   }
@@ -35,6 +35,14 @@ const List = styled.div`
   padding: 0.5rem;
   flex: 1;
   overflow-y: auto;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+  }
 `
 
 const Card = styled.button`
@@ -57,6 +65,12 @@ const Card = styled.button`
   &:focus-visible {
     outline: 2px solid rgba(255, 255, 255, 0.8);
     outline-offset: 2px;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    min-width: 45%;
+    flex-shrink: 0;
+    scroll-snap-align: start;
   }
 `
 

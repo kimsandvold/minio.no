@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import type { DesignerAction, SignDesign } from '../../../types/design'
+import { devicePresets, findPresetByDimensions } from '../../../data/devicePresets'
 import Icon from '../../shared/Icon'
 import GoogleLoginButton from '../../shared/GoogleLoginButton'
 
@@ -15,8 +16,8 @@ const TopBar = styled.div`
   flex-wrap: wrap;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    padding: 0.5rem;
-    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    gap: 0.4rem;
   }
 `
 
@@ -33,8 +34,7 @@ const NameInput = styled.input`
   &:focus { border-color: #1da1f2; }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    min-width: 100px;
-    flex: 1;
+    display: none;
   }
 `
 
@@ -44,6 +44,10 @@ const SizeGroup = styled.div`
   gap: 0.3rem;
   color: #aaa;
   font-size: 0.8rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    display: none;
+  }
 `
 
 const SizeInput = styled.input`
@@ -58,6 +62,47 @@ const SizeInput = styled.input`
   outline: none;
 
   &:focus { border-color: #1da1f2; }
+`
+
+const FormatButton = styled.button<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
+  border: 1px solid ${({ $active }) => $active ? '#1da1f2' : '#444'};
+  background: ${({ $active }) => $active ? 'rgba(29, 161, 242, 0.15)' : 'transparent'};
+  color: ${({ $active }) => $active ? '#1da1f2' : '#999'};
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    border-color: #1da1f2;
+    color: #1da1f2;
+  }
+`
+
+const SizeBadge = styled.span`
+  color: #888;
+  font-size: 0.75rem;
+  white-space: nowrap;
+`
+
+const BgGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: #aaa;
+  font-size: 0.8rem;
+`
+
+const BgLabel = styled.span`
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    display: none;
+  }
 `
 
 const Spacer = styled.div`
@@ -94,6 +139,16 @@ const Button = styled.button<{ $primary?: boolean }>`
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    padding: 0.4rem 0.5rem;
+  }
+`
+
+const ButtonLabel = styled.span`
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    display: none;
   }
 `
 
@@ -178,18 +233,39 @@ export default function DesignerTopBar({
   designName, onNameChange, design, dispatch,
   onSave, onLoad, onExport, canSave, onClose, saveStatus = 'idle', saveError,
 }: Props) {
-  const [widthStr, setWidthStr] = useState(String(design.canvasWidth))
-  const [heightStr, setHeightStr] = useState(String(design.canvasHeight))
+  const [selectedPresetId, setSelectedPresetId] = useState(() => {
+    const match = findPresetByDimensions(design.canvasWidth, design.canvasHeight)
+    return match ? match.id : 'custom'
+  })
+  const [customWidth, setCustomWidth] = useState(String(design.canvasWidth))
+  const [customHeight, setCustomHeight] = useState(String(design.canvasHeight))
   const [showLoginHint, setShowLoginHint] = useState(false)
+
+  // Sync preset selection when canvas dimensions change externally (undo, load, template)
+  useEffect(() => {
+    const match = findPresetByDimensions(design.canvasWidth, design.canvasHeight)
+    setSelectedPresetId(match ? match.id : 'custom')
+    setCustomWidth(String(design.canvasWidth))
+    setCustomHeight(String(design.canvasHeight))
+  }, [design.canvasWidth, design.canvasHeight])
 
   // Dismiss login popover when user logs in
   useEffect(() => {
     if (canSave) setShowLoginHint(false)
   }, [canSave])
 
-  const applySize = () => {
-    const w = parseInt(widthStr) || design.canvasWidth
-    const h = parseInt(heightStr) || design.canvasHeight
+  const handlePresetChange = (presetId: string) => {
+    setSelectedPresetId(presetId)
+    if (presetId === 'custom') return
+    const preset = devicePresets.find(p => p.id === presetId)
+    if (preset) {
+      dispatch({ type: 'SET_CANVAS_SIZE', width: preset.width, height: preset.height })
+    }
+  }
+
+  const applyCustomSize = () => {
+    const w = parseInt(customWidth) || design.canvasWidth
+    const h = parseInt(customHeight) || design.canvasHeight
     dispatch({ type: 'SET_CANVAS_SIZE', width: Math.max(50, w), height: Math.max(50, h) })
   }
 
@@ -207,24 +283,46 @@ export default function DesignerTopBar({
       />
 
       <SizeGroup>
-        <SizeInput
-          value={widthStr}
-          onChange={e => setWidthStr(e.target.value)}
-          onBlur={applySize}
-          onKeyDown={e => e.key === 'Enter' && applySize()}
-        />
-        <span>x</span>
-        <SizeInput
-          value={heightStr}
-          onChange={e => setHeightStr(e.target.value)}
-          onBlur={applySize}
-          onKeyDown={e => e.key === 'Enter' && applySize()}
-        />
-        <span>mm</span>
+        {devicePresets.map(p => (
+          <FormatButton
+            key={p.id}
+            $active={selectedPresetId === p.id}
+            onClick={() => handlePresetChange(p.id)}
+            title={p.label}
+          >
+            <Icon name={p.icon} className={p.rotate ? 'fa-rotate-90' : undefined} />
+          </FormatButton>
+        ))}
+        <FormatButton
+          $active={selectedPresetId === 'custom'}
+          onClick={() => handlePresetChange('custom')}
+          title="Egendefinert"
+        >
+          <Icon name="faRulerCombined" />
+        </FormatButton>
+        {selectedPresetId !== 'custom' ? (
+          <SizeBadge>{design.canvasWidth} × {design.canvasHeight}</SizeBadge>
+        ) : (
+          <>
+            <SizeInput
+              value={customWidth}
+              onChange={e => setCustomWidth(e.target.value)}
+              onBlur={applyCustomSize}
+              onKeyDown={e => e.key === 'Enter' && applyCustomSize()}
+            />
+            <span>×</span>
+            <SizeInput
+              value={customHeight}
+              onChange={e => setCustomHeight(e.target.value)}
+              onBlur={applyCustomSize}
+              onKeyDown={e => e.key === 'Enter' && applyCustomSize()}
+            />
+          </>
+        )}
       </SizeGroup>
 
-      <SizeGroup>
-        <span>Bakgrunn:</span>
+      <BgGroup>
+        <BgLabel>Bakgrunn:</BgLabel>
         <TransparentToggle
           $active={design.backgroundColor === 'transparent'}
           onClick={() => dispatch({ type: 'SET_BACKGROUND_COLOR', color: 'transparent' })}
@@ -235,7 +333,7 @@ export default function DesignerTopBar({
           value={design.backgroundColor === 'transparent' ? '#ffffff' : design.backgroundColor}
           onChange={e => dispatch({ type: 'SET_BACKGROUND_COLOR', color: e.target.value })}
         />
-      </SizeGroup>
+      </BgGroup>
 
       {saveStatus === 'saving' && (
         <SaveIndicator><Icon name="faSpinner" spin /> Lagrer...</SaveIndicator>
@@ -257,7 +355,7 @@ export default function DesignerTopBar({
           disabled={canSave && saveStatus === 'saving'}
         >
           {saveStatus === 'saving' ? <Icon name="faSpinner" spin /> : <Icon name="faSave" />}
-          Lagre
+          <ButtonLabel>Lagre</ButtonLabel>
         </Button>
         {showLoginHint && !canSave && (
           <LoginPopover>
@@ -269,10 +367,10 @@ export default function DesignerTopBar({
       <Button
         onClick={canSave ? onLoad : () => setShowLoginHint(v => !v)}
       >
-        <Icon name="faFolderOpen" /> Last inn
+        <Icon name="faFolderOpen" /> <ButtonLabel>Last inn</ButtonLabel>
       </Button>
       <Button $primary onClick={onExport}>
-        <Icon name="faDownload" /> Eksporter SVG
+        <Icon name="faDownload" /> <ButtonLabel>Eksporter SVG</ButtonLabel>
       </Button>
     </TopBar>
   )

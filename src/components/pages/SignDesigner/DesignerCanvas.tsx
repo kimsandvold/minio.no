@@ -19,9 +19,10 @@ const CanvasWrapper = styled.div`
   align-items: center;
   justify-content: center;
   position: relative;
+  touch-action: none;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    min-height: 300px;
+    min-height: 200px;
   }
 `
 
@@ -40,6 +41,7 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
   const drawStartRef = useRef<Point | null>(null)
   const drawPreviewRef = useRef<{ x: number; y: number; width: number; height: number } | null>(null)
   const [editingTextId, setEditingTextId] = useState<string | null>(null)
+  const pinchRef = useRef<{ startDist: number; startZoom: number } | null>(null)
 
   const { screenToSvg, invalidateCTM } = useCanvasInteraction(svgRef)
   const { startDrag, snapGuides } = useElementDrag(dispatch, design.elements, screenToSvg, design.canvasWidth, design.canvasHeight)
@@ -47,6 +49,69 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
 
   // Invalidate CTM on zoom/pan changes
   useEffect(() => { invalidateCTM() }, [zoom, panOffset, invalidateCTM])
+
+  // Auto-fit zoom: scale canvas to fill available wrapper area
+  useEffect(() => {
+    const wrapper = wrapperRef.current
+    if (!wrapper) return
+
+    const isMobile = window.matchMedia('(max-width: 768px)').matches
+    const padding = isMobile ? 16 : 40
+
+    const computeFitZoom = () => {
+      const availW = wrapper.clientWidth - padding
+      const availH = wrapper.clientHeight - padding
+      if (availW <= 0 || availH <= 0) return
+      const fitZoom = Math.min(availW / design.canvasWidth, availH / design.canvasHeight)
+      dispatch({ type: 'SET_ZOOM', zoom: fitZoom })
+      dispatch({ type: 'SET_PAN_OFFSET', offset: { x: 0, y: 0 } })
+    }
+
+    computeFitZoom()
+
+    const observer = new ResizeObserver(computeFitZoom)
+    observer.observe(wrapper)
+    return () => observer.disconnect()
+  }, [design.canvasWidth, design.canvasHeight, dispatch])
+
+  // Pinch-to-zoom via touch events on the wrapper
+  useEffect(() => {
+    const wrapper = wrapperRef.current
+    if (!wrapper) return
+
+    const getTouchDist = (e: TouchEvent) => {
+      const [a, b] = [e.touches[0], e.touches[1]]
+      return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY)
+    }
+
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        pinchRef.current = { startDist: getTouchDist(e), startZoom: zoom }
+      }
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2 && pinchRef.current) {
+        e.preventDefault()
+        const dist = getTouchDist(e)
+        const scale = dist / pinchRef.current.startDist
+        dispatch({ type: 'SET_ZOOM', zoom: Math.max(0.1, Math.min(5, pinchRef.current.startZoom * scale)) })
+      }
+    }
+
+    const onTouchEnd = () => {
+      pinchRef.current = null
+    }
+
+    wrapper.addEventListener('touchstart', onTouchStart, { passive: true })
+    wrapper.addEventListener('touchmove', onTouchMove, { passive: false })
+    wrapper.addEventListener('touchend', onTouchEnd, { passive: true })
+    return () => {
+      wrapper.removeEventListener('touchstart', onTouchStart)
+      wrapper.removeEventListener('touchmove', onTouchMove)
+      wrapper.removeEventListener('touchend', onTouchEnd)
+    }
+  }, [zoom, dispatch])
 
   const commitTextEdit = useCallback((elementId: string, text: string) => {
     if (text.trim()) {
@@ -89,7 +154,7 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
     }
   }, [state.selectedElementId, editingTextId, flushActiveTextEdit])
 
-  const handleCanvasMouseDown = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
+  const handleCanvasPointerDown = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
     if (e.button !== 0) return
     const svgPt = screenToSvg(e.clientX, e.clientY)
 
@@ -134,7 +199,7 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
     drawStartRef.current = svgPt
   }, [tool, dispatch, generateId, screenToSvg, activeSymbolId, flushActiveTextEdit])
 
-  const handleCanvasMouseMove = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
+  const handleCanvasPointerMove = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
     if (!drawStartRef.current) return
     const svgPt = screenToSvg(e.clientX, e.clientY)
     const start = drawStartRef.current
@@ -169,7 +234,7 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
     }
   }, [screenToSvg, tool, svgRef])
 
-  const handleCanvasMouseUp = useCallback((e: React.MouseEvent<SVGSVGElement>) => {
+  const handleCanvasPointerUp = useCallback((e: React.PointerEvent<SVGSVGElement>) => {
     if (!drawStartRef.current) return
     const svgPt = screenToSvg(e.clientX, e.clientY)
     const start = drawStartRef.current
@@ -261,8 +326,8 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
     }
   }
 
-  // We need a separate drag handler on each element group
-  const handleGroupMouseDown = (el: DesignElement) => (e: React.MouseEvent) => {
+  // Separate pointer handler on each element group
+  const handleGroupPointerDown = (el: DesignElement) => (e: React.PointerEvent) => {
     e.stopPropagation()
     if (tool === 'select') {
       // If clicking a different element, commit and exit text editing
@@ -298,9 +363,9 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
           boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
           cursor: tool === 'select' || tool === 'template' ? 'default' : 'crosshair',
         }}
-        onMouseDown={handleCanvasMouseDown}
-        onMouseMove={handleCanvasMouseMove}
-        onMouseUp={handleCanvasMouseUp}
+        onPointerDown={handleCanvasPointerDown}
+        onPointerMove={handleCanvasPointerMove}
+        onPointerUp={handleCanvasPointerUp}
       >
         {/* Draw preview shapes */}
         {tool === 'rect' && (
@@ -314,7 +379,7 @@ export default function DesignerCanvas({ state, dispatch, selectedElement, gener
         )}
 
         {design.elements.map(el => (
-          <g key={el.id} onMouseDown={handleGroupMouseDown(el)} onDoubleClick={handleGroupDoubleClick(el)}>
+          <g key={el.id} onPointerDown={handleGroupPointerDown(el)} onDoubleClick={handleGroupDoubleClick(el)}>
             {renderElement(el)}
           </g>
         ))}
