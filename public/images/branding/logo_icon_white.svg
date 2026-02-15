@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 46 48" fill="none">
+  <!-- Minio square icon: white for dark backgrounds -->
+  <rect x="2" y="3" width="42" height="42" rx="11" stroke="#f9f9f9" stroke-width="2" fill="none"/>
+  <polyline points="11,36 18,12 23,30 28,12 35,36" stroke="#f9f9f9" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>
