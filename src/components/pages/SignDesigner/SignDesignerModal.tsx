@@ -148,7 +148,7 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign, load
   }, [dispatch])
 
   const resetEditor = useCallback(() => {
-    dispatch({ type: 'LOAD_DESIGN', design: { canvasWidth: 700, canvasHeight: 500, elements: [], backgroundColor: 'transparent' } })
+    dispatch({ type: 'LOAD_DESIGN', design: { canvasWidth: 1440, canvasHeight: 900, elements: [], backgroundColor: 'transparent' } })
     dispatch({ type: 'SET_TOOL', tool: 'template' })
     setDesignName('Mitt skilt')
     setCurrentDesignId(null)

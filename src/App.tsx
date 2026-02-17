@@ -29,6 +29,7 @@ import SkiltOgGraveringPage from './components/pages/SkiltOgGravering/SkiltOgGra
 import MineBestillingerPage from './components/pages/MineBestillinger/MineBestillingerPage'
 import MineDesignPage from './components/pages/MineDesign/MineDesignPage'
 import AdminBestillingerPage from './components/pages/Admin/AdminBestillingerPage'
+import AdminPollsPage from './components/pages/Admin/AdminPollsPage'
 import DesignViewPage from './components/pages/DesignView/DesignViewPage'
 import NotFoundPage from './components/pages/NotFound/NotFoundPage'
 import PageLoadingFallback from './components/shared/PageLoadingFallback'
@@ -37,6 +38,7 @@ const VarmepumpehusPage = lazy(() => import('./components/pages/Varmepumpehus/Va
 const SoppelboderPage = lazy(() => import('./components/pages/Soppelboder/SoppelboderPage'))
 const VedskjulPage = lazy(() => import('./components/pages/Vedskjul/VedskjulPage'))
 const PostkasseStativPage = lazy(() => import('./components/pages/Postkassestativ/PostkasseStativPage'))
+
 
 function HomePage() {
   const { hasConsented, acceptCookies } = useCookieConsent()
@@ -84,9 +86,11 @@ export default function App() {
                 <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
                 <Route path="/underholdning" element={<UnderholdningPage />} />
                 <Route path="/handlekurv" element={<HandlekurvPage />} />
+
                 <Route path="/mine-design" element={<MineDesignPage />} />
                 <Route path="/mine-bestillinger" element={<MineBestillingerPage />} />
                 <Route path="/admin/bestillinger" element={<AdminBestillingerPage />} />
+                <Route path="/admin/avstemninger" element={<AdminPollsPage />} />
                 <Route path="/design/:designId" element={<DesignViewPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>

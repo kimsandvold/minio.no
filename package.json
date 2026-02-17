@@ -16,9 +16,12 @@
     "@fortawesome/react-fontawesome": "^3.1.1",
     "@splidejs/react-splide": "^0.7.12",
     "@splidejs/splide": "^4.1.4",
+    "@types/leaflet": "^1.9.21",
     "firebase": "^12.9.0",
+    "leaflet": "^1.9.4",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.13.0",
     "styled-components": "^6.3.8",
     "three": "^0.182.0"

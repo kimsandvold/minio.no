@@ -10,6 +10,8 @@ import SplideCarousel from '../../shared/SplideCarousel'
 import PromoRibbon from '../../shared/PromoRibbon'
 import { ProductGridCardSkeleton } from '../../shared/ProductSkeleton'
 import { useAllProducts } from '../../../hooks/useProducts'
+import PollCard from '../../sections/Portfolio/PollCard'
+import { useActivePoll } from '../../../hooks/useActivePoll'
 
 const Hero = styled.section`
   min-height: 30vh;
@@ -166,6 +168,7 @@ const DetailsButton = styled(Link)`
 
 export default function ProdukterPage() {
   const { data: allProducts, loading } = useAllProducts()
+  const { activePollId } = useActivePoll()
 
   useSEO({
     title: 'Alle produkter – Minio',
@@ -211,6 +214,7 @@ export default function ProdukterPage() {
                       <DetailsButton to={`/produkter/${product.slug}`}>Se detaljer</DetailsButton>
                     </Card>
                   ))}
+              {activePollId && <PollCard pollId={activePollId} />}
             </Grid>
           </Container>
         </Content>

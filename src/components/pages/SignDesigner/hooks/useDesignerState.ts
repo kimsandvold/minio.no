@@ -4,8 +4,8 @@ import type { DesignerState, DesignerAction, SignDesign, DesignElement } from '.
 const MAX_UNDO = 50
 
 const initialDesign: SignDesign = {
-  canvasWidth: 700,
-  canvasHeight: 500,
+  canvasWidth: 1440,
+  canvasHeight: 900,
   elements: [],
   backgroundColor: 'transparent',
 }

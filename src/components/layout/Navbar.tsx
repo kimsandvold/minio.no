@@ -667,9 +667,14 @@ export default function Navbar() {
                       <Icon name="faClipboardList" /> Mine bestillinger
                     </DropdownLink>
                     {isAdmin && (
-                      <DropdownLink to="/admin/bestillinger" onClick={() => setUserMenuOpen(false)}>
-                        <Icon name="faUserShield" /> Admin
-                      </DropdownLink>
+                      <>
+                        <DropdownLink to="/admin/bestillinger" onClick={() => setUserMenuOpen(false)}>
+                          <Icon name="faUserShield" /> Bestillinger
+                        </DropdownLink>
+                        <DropdownLink to="/admin/avstemninger" onClick={() => setUserMenuOpen(false)}>
+                          <Icon name="faChartBar" /> Avstemninger
+                        </DropdownLink>
+                      </>
                     )}
                     <DropdownBtn onClick={() => { logout(); setUserMenuOpen(false) }}>
                       <Icon name="faSignOutAlt" /> Logg ut

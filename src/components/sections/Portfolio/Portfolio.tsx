@@ -6,7 +6,9 @@ import FeaturedProduct from './FeaturedProduct'
 import ProductCard from './ProductCard'
 import { ProductCardSkeleton } from '../../shared/ProductSkeleton'
 import AnimatedBlock from '../../shared/AnimatedBlock'
+import PollCard from './PollCard'
 import { useRandomProducts } from '../../../hooks/useProducts'
+import { useActivePoll } from '../../../hooks/useActivePoll'
 
 const SectionHeader = styled.div`
   text-align: center;
@@ -105,7 +107,9 @@ const ViewAllLink = styled(Link)`
 `
 
 export default function Portfolio() {
-  const { data: randomProducts, loading } = useRandomProducts(4)
+  const { activePollId, loading: pollLoading } = useActivePoll()
+  const productCount = activePollId ? 3 : 4
+  const { data: randomProducts, loading } = useRandomProducts(productCount)
 
   return (
     <Section id="portefolje" variant="light">
@@ -120,13 +124,18 @@ export default function Portfolio() {
         <FeaturedProduct />
         <GridHeading>Utforsk flere produkter</GridHeading>
         <Grid>
-          {loading
-            ? Array.from({ length: 4 }, (_, i) => <ProductCardSkeleton key={i} />)
+          {loading || pollLoading
+            ? Array.from({ length: productCount }, (_, i) => <ProductCardSkeleton key={i} />)
             : randomProducts.map((product, index) => (
                 <AnimatedBlock key={product.id} delay={index * 100}>
                   <ProductCard product={product} />
                 </AnimatedBlock>
               ))}
+          {activePollId && (
+            <AnimatedBlock delay={400}>
+              <PollCard pollId={activePollId} />
+            </AnimatedBlock>
+          )}
         </Grid>
         <ViewAllWrapper>
           <ViewAllLink to="/produkter">Se alle produkter &rarr;</ViewAllLink>
