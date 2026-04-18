@@ -4,8 +4,8 @@
     "slug": "varmepumpehus",
     "title": "Varmepumpehus – tilpasset ditt hjem",
     "shortDescription": "Beskytt varmepumpen mot vær og vind med et solid hus bygget etter dine mål. Reduserer støy, forlenger levetiden og gir uteområdet et ryddigere preg.",
-    "price": "Pris fra 6990,-",
-    "regularPrice": "Ordinær pris fra 7990,-",
+    "price": "Pris fra 3490,-",
+    "regularPrice": "Ordinær pris fra 4990,-",
     "images": [
       { "src": "/images/products/minio_vps.webp", "alt": "Elegant varmepumpehus i hvitmalt tre som beskytter varmepumpe" },
       { "src": "/images/products/minio_vph1.webp", "alt": "Varmepumpehus montert på husvegg med ventilasjonsspalter" },
@@ -17,7 +17,7 @@
     "isFeatured": true,
     "hasPromoRibbon": false,
     "hasConfigurator": true,
-    "basePrice": 6990
+    "basePrice": 3490
   },
   {
     "id": "soppelbod",

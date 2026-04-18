@@ -280,7 +280,7 @@ interface VisualizerDims {
   roof: string
 }
 
-const DEFAULT_BASE_PRICE = 6990
+const DEFAULT_BASE_PRICE = 3490
 
 export default function VarmepumpehusPage() {
   const { data: product } = useProductBySlug('varmepumpehus')
