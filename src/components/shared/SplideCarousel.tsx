@@ -13,7 +13,7 @@ const defaultOptions: Options = {
   type: 'fade',
   rewind: true,
   autoplay: true,
-  interval: 6000,
+  interval: 12000,
   pauseOnHover: true,
   pauseOnFocus: true,
   arrows: true,

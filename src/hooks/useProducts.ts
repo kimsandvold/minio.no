@@ -4,6 +4,7 @@ import {
   fetchAllProducts,
   fetchRandomProducts,
   fetchFeaturedProduct,
+  fetchFeaturedProducts,
   fetchProductBySlug,
 } from '../data/products'
 
@@ -47,6 +48,20 @@ export function useFeaturedProduct(): UseProductsResult<Product | undefined> {
   useEffect(() => {
     fetchFeaturedProduct().then(product => {
       setData(product)
+      setLoading(false)
+    })
+  }, [])
+
+  return { data, loading }
+}
+
+export function useFeaturedProducts(): UseProductsResult<Product[]> {
+  const [data, setData] = useState<Product[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchFeaturedProducts().then(products => {
+      setData(products)
       setLoading(false)
     })
   }, [])

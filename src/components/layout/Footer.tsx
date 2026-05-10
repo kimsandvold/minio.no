@@ -233,6 +233,7 @@ export default function Footer() {
               <FooterLink to="/slik-jobber-vi">Slik jobber vi</FooterLink>
               <FooterLink to="/kontakt">Kontakt</FooterLink>
               <FooterLink to="/underholdning">Underholdning</FooterLink>
+              <FooterLink to="/spill-av-leah-noelle">Spill av Leah Noelle</FooterLink>
             </FooterNav>
           </FooterSection>
 

@@ -6,8 +6,8 @@ export function useBasket() {
   const [items, setItems] = useLocalStorage<BasketItem[]>('minio_basket', [])
   const [notes, setNotes] = useLocalStorage<string>('minio_basket_notes', '')
 
-  const addItem = useCallback((item: Omit<BasketItem, 'id' | 'quantity'>) => {
-    setItems(prev => [...prev, { ...item, id: Date.now(), quantity: 1 }])
+  const addItem = useCallback((item: Omit<BasketItem, 'id' | 'quantity'>, quantity = 1) => {
+    setItems(prev => [...prev, { ...item, id: Date.now(), quantity: Math.max(1, quantity) }])
   }, [setItems])
 
   const removeItem = useCallback((itemId: number) => {

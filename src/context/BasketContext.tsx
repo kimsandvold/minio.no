@@ -6,7 +6,7 @@ interface BasketContextType {
   items: BasketItem[]
   notes: string
   setNotes: (notes: string) => void
-  addItem: (item: Omit<BasketItem, 'id' | 'quantity'>) => void
+  addItem: (item: Omit<BasketItem, 'id' | 'quantity'>, quantity?: number) => void
   removeItem: (itemId: number) => void
   updateQuantity: (itemId: number, quantity: number) => void
   clearBasket: () => void

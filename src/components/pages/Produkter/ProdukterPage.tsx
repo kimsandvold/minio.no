@@ -97,10 +97,13 @@ const Card = styled.div`
 
 const CardImageWrap = styled.div`
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   overflow: hidden;
 
-  .splide {
+  .splide,
+  .splide__track,
+  .splide__list,
+  .splide__slide {
     height: 100%;
   }
 

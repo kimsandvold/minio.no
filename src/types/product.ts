@@ -31,10 +31,10 @@ export interface BasketItem {
   mounting?: string
   angle?: string
   finish: string
-  roof: string
+  roof?: string
   quality?: string
   delivery: string
-  installation: string
+  installation?: string
   price: string
   product?: string
   size?: string

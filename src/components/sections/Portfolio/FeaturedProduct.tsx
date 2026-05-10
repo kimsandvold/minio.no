@@ -3,7 +3,13 @@ import styled from 'styled-components'
 import SplideCarousel from '../../shared/SplideCarousel'
 import Icon from '../../shared/Icon'
 import { FeaturedProductSkeleton } from '../../shared/ProductSkeleton'
-import { useFeaturedProduct } from '../../../hooks/useProducts'
+import { useFeaturedProducts } from '../../../hooks/useProducts'
+
+const Stack = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+`
 
 const Wrapper = styled.div`
   position: relative;
@@ -204,51 +210,55 @@ const ReadMoreLink = styled(Link)`
 `
 
 export default function FeaturedProduct() {
-  const { data: p, loading } = useFeaturedProduct()
+  const { data: products, loading } = useFeaturedProducts()
 
   if (loading) return <FeaturedProductSkeleton />
-  if (!p) return null
+  if (products.length === 0) return null
 
   return (
-    <Wrapper>
-      <Content>
-        <ImageWrap>
-          <CornerRibbon>
-            <strong>-30%</strong>
-            <small>Kampanje</small>
-          </CornerRibbon>
-          <SplideCarousel>
-            {p.images.map((img, i) => (
-              <img key={i} src={img.src} alt={img.alt} loading="lazy" />
-            ))}
-          </SplideCarousel>
-        </ImageWrap>
-        <Info>
-          <Badge>Kampanjepris</Badge>
-          <h3>{p.title}</h3>
-          <Description>{p.shortDescription}</Description>
-          <FeatureList>
-            <FeatureItem>
-              <Icon name="faRulerCombined" /> Skreddersydd etter dine mål
-            </FeatureItem>
-            <FeatureItem>
-              <Icon name="faPalette" /> Velg finish: ubehandlet, grunnet eller malt
-            </FeatureItem>
-            <FeatureItem>
-              <Icon name="faTruck" /> Levering inntil 200 km fra Lillehammer
-            </FeatureItem>
-          </FeatureList>
-          <PriceBlock>
-            <PriceRow>
-              <Price>{p.price}</Price>
-              {p.regularPrice && <RegularPrice>{p.regularPrice}</RegularPrice>}
-            </PriceRow>
-          </PriceBlock>
-          <ReadMoreLink to="/produkter/varmepumpehus">
-            Konfigurer og bestill <Icon name="faArrowRight" />
-          </ReadMoreLink>
-        </Info>
-      </Content>
-    </Wrapper>
+    <Stack>
+      {products.map(p => (
+        <Wrapper key={p.slug}>
+          <Content>
+            <ImageWrap>
+              <CornerRibbon>
+                <strong>-30%</strong>
+                <small>Kampanje</small>
+              </CornerRibbon>
+              <SplideCarousel>
+                {p.images.map((img, i) => (
+                  <img key={i} src={img.src} alt={img.alt} loading="lazy" />
+                ))}
+              </SplideCarousel>
+            </ImageWrap>
+            <Info>
+              <Badge>Kampanjepris</Badge>
+              <h3>{p.title}</h3>
+              <Description>{p.shortDescription}</Description>
+              <FeatureList>
+                <FeatureItem>
+                  <Icon name="faRulerCombined" /> Skreddersydd etter dine mål
+                </FeatureItem>
+                <FeatureItem>
+                  <Icon name="faPalette" /> Velg finish: ubehandlet, grunnet eller malt
+                </FeatureItem>
+                <FeatureItem>
+                  <Icon name="faTruck" /> Levering inntil 200 km fra Lillehammer
+                </FeatureItem>
+              </FeatureList>
+              <PriceBlock>
+                <PriceRow>
+                  <Price>{p.price}</Price>
+                  {p.regularPrice && <RegularPrice>{p.regularPrice}</RegularPrice>}
+                </PriceRow>
+              </PriceBlock>
+              <ReadMoreLink to={`/produkter/${p.slug}`}>
+                Konfigurer og bestill <Icon name="faArrowRight" />
+              </ReadMoreLink>
+            </Info>
+          </Content>
+        </Wrapper>
+      ))}
+    </Stack>
   )
 }

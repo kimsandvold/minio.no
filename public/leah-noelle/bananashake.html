@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, viewport-fit=cover">
+<meta name="description" content="Bananashake - et morsomt spill der bananen samler truser. Laget av Leah Noelle.">
+<meta name="theme-color" content="#FAC775">
+<title>Bananashake</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    min-height: 100dvh;
+    background: linear-gradient(135deg, #FFE066 0%, #FAC775 60%, #FFB3BA 100%);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    overflow: hidden;
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    display: flex; align-items: center; justify-content: center;
+    padding: 12px;
+  }
+  .page { width: 100%; max-width: 700px; }
+  .bt-game {
+    position: relative; width: 100%;
+    height: 480px;
+    max-height: calc(100dvh - 160px);
+    min-height: 380px;
+    background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 65%, #C0E89F 100%);
+    border-radius: 14px; overflow: hidden;
+    user-select: none;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    transition: background 0.4s;
+  }
+  .bt-game.storm-mode {
+    background: linear-gradient(to bottom, #2C2C5E 0%, #4A3A6E 65%, #5A6E5E 100%);
+    animation: btShake 0.18s ease-in-out infinite alternate;
+  }
+  @keyframes btShake {
+    from { transform: translateX(-3px) rotate(-0.4deg); }
+    to { transform: translateX(3px) rotate(0.4deg); }
+  }
+  .bt-pill {
+    position: absolute; background: white;
+    padding: 6px 12px; border-radius: 16px;
+    font-size: 13px; font-weight: 500; z-index: 10;
+    white-space: nowrap;
+  }
+  .bt-score {
+    top: 10px; left: 10px; color: #993556;
+    max-width: 60%; overflow: hidden; text-overflow: ellipsis;
+  }
+  .bt-money { top: 46px; left: 10px; color: #BA7517; background: #FAEEDA; }
+  .bt-round {
+    top: 44px; left: 50%; transform: translateX(-50%);
+    background: #C8A2E0; color: #4A2D6E;
+    font-size: 12px; padding: 5px 12px;
+  }
+  .bt-shop-btn {
+    position: absolute; top: 82px; left: 10px;
+    background: #97C459; color: #173404;
+    border: none; padding: 6px 12px;
+    border-radius: 16px; cursor: pointer;
+    font-size: 12px; font-weight: 500;
+    font-family: inherit; z-index: 10;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bt-shop-btn:hover, .bt-shop-btn:active { background: #639922; color: white; }
+  .bt-title {
+    top: 10px; left: 50%; transform: translateX(-50%);
+    background: #FAC775; color: #633806;
+    font-weight: 600;
+  }
+  .bt-icon-btn {
+    position: absolute; top: 10px;
+    width: 36px; height: 36px;
+    background: white; border: none;
+    border-radius: 50%; cursor: pointer;
+    font-size: 16px; padding: 0;
+    z-index: 10; line-height: 36px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bt-mute { right: 10px; font-size: 18px; }
+  .bt-edit-game { right: 54px; }
+  .bt-overlay {
+    position: absolute; inset: 0;
+    background: rgba(255, 232, 153, 0.96);
+    z-index: 25;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center; color: #5A4220;
+    overflow-y: auto;
+    padding: 12px;
+  }
+  .bt-overlay-content { width: 100%; max-width: 400px; }
+  .bt-game-title {
+    font-size: 32px; font-weight: 600; color: #633806;
+    letter-spacing: 0.5px; line-height: 1.1;
+  }
+  .bt-game-subtitle {
+    font-size: 13px; margin-top: 2px;
+    color: #8B6914; font-style: italic;
+    margin-bottom: 10px;
+  }
+  .bt-preview { display: flex; justify-content: center; margin: 4px 0 10px; min-height: 100px; }
+  .bt-form {
+    text-align: left;
+    background: rgba(255, 255, 255, 0.65);
+    padding: 12px;
+    border-radius: 12px;
+  }
+  .bt-form-label {
+    font-size: 13px; font-weight: 500;
+    color: #5A4220; margin-bottom: 5px;
+    display: block;
+  }
+  .bt-form-row { margin-bottom: 10px; }
+  .bt-form-row:last-child { margin-bottom: 0; }
+  .bt-name-input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #FAC775;
+    border-radius: 10px;
+    font-size: 16px;
+    font-family: inherit;
+    background: white;
+    color: #2C2C2A;
+    outline: none;
+  }
+  .bt-name-input:focus { border-color: #ED93B1; }
+  .bt-color-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+  .bt-color-circle {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 3px solid transparent;
+    cursor: pointer;
+    transition: transform 0.1s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bt-color-circle.selected {
+    border-color: #2C2C2A;
+    transform: scale(1.1);
+  }
+  .bt-face-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+  .bt-face-btn {
+    width: 44px; height: 44px;
+    border: 2px solid transparent;
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    font-size: 22px;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent;
+    padding: 0; font-family: inherit;
+  }
+  .bt-face-btn.selected {
+    border-color: #2C2C2A;
+    background: #FFE066;
+  }
+  .bt-play-btn {
+    margin-top: 12px;
+    background: #ED93B1;
+    color: white; border: none;
+    padding: 14px 28px;
+    font-size: 18px; font-weight: 600;
+    border-radius: 24px;
+    cursor: pointer; font-family: inherit;
+    box-shadow: 0 4px 0 #993556;
+    -webkit-tap-highlight-color: transparent;
+    width: 100%;
+  }
+  .bt-play-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #993556;
+  }
+  .bt-banana {
+    position: absolute; bottom: 8px;
+    left: calc(50% - 40px); width: 80px; height: 80px;
+    pointer-events: none; transition: transform 0.1s;
+    z-index: 8;
+  }
+  .bt-banana svg { display: block; }
+  .bt-stacked { position: absolute; font-size: 22px; left: 50%; margin-left: -11px; pointer-events: none; }
+  .bt-hat { position: absolute; font-size: 28px; left: 50%; margin-left: -14px; pointer-events: none; }
+  .bt-falling { position: absolute; font-size: 32px; pointer-events: none; }
+  .bt-falling.golden {
+    font-size: 36px;
+    filter: drop-shadow(0 0 8px gold) drop-shadow(0 0 4px yellow);
+    animation: btSparkle 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes btSparkle {
+    from { transform: scale(1) rotate(-8deg); }
+    to { transform: scale(1.15) rotate(8deg); }
+  }
+  .bt-falling.storm-spin {
+    animation: btSpin 0.9s linear infinite;
+  }
+  @keyframes btSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  .bt-boss {
+    position: absolute;
+    top: 40px;
+    width: 120px; height: 100px;
+    pointer-events: none;
+    z-index: 9;
+    transition: transform 0.15s;
+  }
+  .bt-boss.hit {
+    animation: btBossHit 0.25s ease-out;
+  }
+  @keyframes btBossHit {
+    0% { transform: scale(1); filter: none; }
+    50% { transform: scale(1.12); filter: brightness(1.6) hue-rotate(320deg) saturate(3); }
+    100% { transform: scale(1); filter: none; }
+  }
+  .bt-boss svg { display: block; }
+  .bt-hp-bar {
+    position: absolute;
+    top: 10px; left: 50%;
+    transform: translateX(-50%);
+    width: 240px; max-width: 70%;
+    height: 22px;
+    background: rgba(0,0,0,0.45);
+    border: 2px solid white;
+    border-radius: 12px;
+    z-index: 11;
+    overflow: hidden;
+  }
+  .bt-hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #97C459 0%, #FFE066 50%, #ED4444 100%);
+    transition: width 0.25s ease-out;
+  }
+  .bt-hp-label {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700;
+    color: white;
+    text-shadow: 0 1px 2px #2C2C2A;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .bt-projectile {
+    position: absolute;
+    font-size: 28px;
+    pointer-events: none;
+    z-index: 8;
+  }
+  .bt-lives {
+    position: absolute;
+    top: 10px; left: 10px;
+    background: white;
+    padding: 6px 10px;
+    border-radius: 16px;
+    font-size: 18px;
+    line-height: 1;
+    z-index: 11;
+    display: none;
+    letter-spacing: 2px;
+  }
+  .bt-lives.show { display: block; }
+  .bt-life {
+    display: inline-block;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .bt-life.lost {
+    opacity: 0.18;
+    transform: scale(0.65);
+    filter: grayscale(1);
+  }
+  .bt-banana.stunned {
+    animation: btStunShake 0.4s linear;
+  }
+  @keyframes btStunShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px) rotate(-5deg); }
+    40% { transform: translateX(6px) rotate(5deg); }
+    60% { transform: translateX(-4px) rotate(-3deg); }
+    80% { transform: translateX(4px) rotate(3deg); }
+  }
+  .bt-confetti {
+    position: absolute;
+    top: -20px;
+    width: 8px; height: 14px;
+    z-index: 22;
+    pointer-events: none;
+    animation: btConfettiFall 1.6s linear forwards;
+  }
+  @keyframes btConfettiFall {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(700px) rotate(720deg); opacity: 0.3; }
+  }
+  .bt-combo {
+    position: absolute;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 80, 130, 0.92);
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 6px 16px;
+    border-radius: 16px;
+    z-index: 20;
+    pointer-events: none;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    animation: btComboPop 1s ease-out forwards;
+  }
+  @keyframes btComboPop {
+    0%   { transform: translate(-50%, 10px) scale(0.5); opacity: 0; }
+    20%  { transform: translate(-50%, 0) scale(1.15); opacity: 1; }
+    35%  { transform: translate(-50%, 0) scale(1); }
+    80%  { opacity: 1; }
+    100% { transform: translate(-50%, -30px) scale(1); opacity: 0; }
+  }
+  .bt-flash {
+    position: absolute; inset: 0;
+    background: white; opacity: 0;
+    z-index: 24; pointer-events: none;
+    animation: btFlashAnim 0.5s ease-out;
+  }
+  @keyframes btFlashAnim {
+    0% { opacity: 0; }
+    18% { opacity: 0.85; }
+    100% { opacity: 0; }
+  }
+  .bt-toast {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: #FFD84D; color: #5A4220;
+    padding: 12px 20px; border-radius: 20px;
+    font-size: 16px; font-weight: 500;
+    z-index: 23; pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    animation: btToast 1.7s ease-out forwards;
+    text-align: center;
+  }
+  .bt-toast.storm {
+    background: #2C2C5E; color: #FFE066;
+    font-weight: 600; letter-spacing: 1px;
+  }
+  .bt-toast.gold {
+    background: #FFE066; color: #5A4220;
+    border: 2px solid #FFB300;
+  }
+  @keyframes btToast {
+    0% { opacity: 0; transform: translate(-50%, -30%); }
+    20% { opacity: 1; transform: translate(-50%, -50%); }
+    80% { opacity: 1; transform: translate(-50%, -50%); }
+    100% { opacity: 0; transform: translate(-50%, -70%); }
+  }
+  .bt-shop-overlay {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 30; display: flex;
+    align-items: center; justify-content: center;
+    padding: 12px;
+  }
+  .bt-shop {
+    background: white; border-radius: 16px;
+    padding: 14px 16px; width: 320px; max-width: 100%;
+    max-height: 100%; overflow-y: auto;
+  }
+  .bt-shop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .bt-shop-title { font-size: 17px; font-weight: 500; color: #5A4220; }
+  .bt-shop-close {
+    background: none; border: none; font-size: 22px;
+    cursor: pointer; color: #888; padding: 0 8px; line-height: 1;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bt-shop-money {
+    background: #FAEEDA; color: #BA7517;
+    padding: 6px 12px; border-radius: 10px;
+    font-size: 14px; font-weight: 500;
+    margin-bottom: 12px; text-align: center;
+  }
+  .bt-shop-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px; border-radius: 10px;
+    margin-bottom: 6px; background: #F8F8F8;
+  }
+  .bt-shop-emoji { font-size: 26px; width: 32px; text-align: center; }
+  .bt-shop-info { flex: 1; min-width: 0; }
+  .bt-shop-name { font-size: 14px; font-weight: 500; color: #2C2C2A; }
+  .bt-shop-price { font-size: 12px; color: #888; }
+  .bt-shop-buy {
+    background: #97C459; color: #173404;
+    border: none; border-radius: 10px;
+    padding: 6px 12px; font-size: 13px;
+    font-weight: 500; cursor: pointer;
+    font-family: inherit; min-width: 60px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bt-shop-buy:hover, .bt-shop-buy:active { background: #639922; color: white; }
+  .bt-shop-buy:disabled { background: #DDD; color: #999; cursor: not-allowed; }
+  .bt-shop-buy.equipped { background: #FAC775; color: #633806; }
+  .bt-shop-buy.equipped:hover, .bt-shop-buy.equipped:active { background: #FAC775; color: #633806; }
+
+  .bt-controls {
+    position: absolute;
+    bottom: 16px; left: 0; right: 0;
+    display: flex; justify-content: space-between;
+    padding: 0 14px;
+    z-index: 11;
+    pointer-events: none;
+  }
+  .bt-control {
+    pointer-events: auto;
+    width: 68px; height: 68px;
+    border: none; border-radius: 50%;
+    background: rgba(237, 147, 177, 0.78);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    color: white;
+    font-size: 30px; font-weight: 500;
+    cursor: pointer; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    font-family: inherit;
+    box-shadow: 0 3px 0 rgba(153, 53, 86, 0.65), 0 2px 8px rgba(0,0,0,0.15);
+    touch-action: manipulation;
+  }
+  .bt-control:active {
+    background: rgba(212, 83, 126, 0.92);
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 rgba(153, 53, 86, 0.65);
+  }
+
+  .bt-footer {
+    text-align: center; margin-top: 12px;
+    font-size: 13px; color: #5A4220; opacity: 0.85;
+  }
+
+  /* === Mobile / small screens: fullscreen viewport === */
+  @media (max-width: 800px), (max-height: 600px) {
+    body { padding: 0; overflow: hidden; }
+    .page {
+      width: 100vw;
+      height: 100vh; height: 100dvh;
+      max-width: none;
+    }
+    .bt-game {
+      width: 100%;
+      height: 100%;
+      max-height: none; min-height: 0;
+      border-radius: 0;
+      box-shadow: none;
+    }
+    .bt-footer { display: none; }
+    /* Title pill smaller on mobile so it doesn't crowd */
+    .bt-title { font-size: 12px; padding: 5px 10px; }
+  }
+
+  /* === Very small screens === */
+  @media (max-width: 400px) {
+    .bt-color-circle { width: 32px; height: 32px; }
+    .bt-face-btn { width: 40px; height: 40px; font-size: 20px; }
+    .bt-game-title { font-size: 28px; }
+    .bt-control { width: 60px; height: 60px; font-size: 26px; }
+    .bt-pill { font-size: 12px; padding: 5px 10px; }
+    .bt-money { top: 42px; }
+    .bt-shop-btn { top: 74px; font-size: 11px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="bt-game" id="btGame" tabindex="0">
+    <div class="bt-pill bt-title">🍌 Bananashake 🩲</div>
+    <div class="bt-pill bt-score" id="btScore">🩲 Truser: 0</div>
+    <div class="bt-lives" id="btLives"><span class="bt-life">❤️</span><span class="bt-life">❤️</span><span class="bt-life">❤️</span></div>
+    <div class="bt-pill bt-round" id="btRound">Runde 1</div>
+    <div class="bt-pill bt-money" id="btMoney">💰 50 penger</div>
+    <button class="bt-shop-btn" id="btShopBtn">🛒 Butikk</button>
+    <button class="bt-icon-btn bt-edit-game" id="btEditGame" title="Endre spiller">👤</button>
+    <button class="bt-icon-btn bt-mute" id="btMute" title="Skru av/på lyd">🔊</button>
+    <div class="bt-overlay" id="btOverlay">
+      <div class="bt-overlay-content">
+        <div class="bt-game-title">Bananashake</div>
+        <div class="bt-game-subtitle">Laget av Leah Noelle</div>
+        <div class="bt-preview" id="btPreview"></div>
+        <div class="bt-form">
+          <div class="bt-form-row">
+            <label class="bt-form-label" for="btNameInput">Hva heter du?</label>
+            <input type="text" id="btNameInput" class="bt-name-input" maxlength="20" placeholder="Ditt navn" autocomplete="off">
+          </div>
+          <div class="bt-form-row">
+            <label class="bt-form-label">Velg farge på bananen:</label>
+            <div class="bt-color-picker" id="btColorPicker"></div>
+          </div>
+          <div class="bt-form-row">
+            <label class="bt-form-label">Velg fjes:</label>
+            <div class="bt-face-picker" id="btFacePicker"></div>
+          </div>
+          <button class="bt-play-btn" id="btPlayBtn">Spill! 🚀</button>
+        </div>
+      </div>
+    </div>
+    <div class="bt-banana" id="btBanana"></div>
+    <div class="bt-controls">
+      <button class="bt-control" id="btLeft" aria-label="Venstre">←</button>
+      <button class="bt-control" id="btRight" aria-label="Høyre">→</button>
+    </div>
+  </div>
+  <div class="bt-footer">
+    🍌 Bananashake — Laget av Leah Noelle 🩲
+  </div>
+</div>
+<script>
+(function() {
+  const game = document.getElementById('btGame');
+  const banana = document.getElementById('btBanana');
+  const scoreEl = document.getElementById('btScore');
+  const roundEl = document.getElementById('btRound');
+  const moneyEl = document.getElementById('btMoney');
+  const overlay = document.getElementById('btOverlay');
+  const muteBtn = document.getElementById('btMute');
+  const shopBtn = document.getElementById('btShopBtn');
+  const leftBtn = document.getElementById('btLeft');
+  const rightBtn = document.getElementById('btRight');
+  const previewEl = document.getElementById('btPreview');
+  const nameInput = document.getElementById('btNameInput');
+  const colorPicker = document.getElementById('btColorPicker');
+  const facePicker = document.getElementById('btFacePicker');
+  const playBtn = document.getElementById('btPlayBtn');
+  const editBtn = document.getElementById('btEditGame');
+  const livesEl = document.getElementById('btLives');
+
+  const colors = [
+    { id: 'gul',     name: 'Gul',     body: '#FFD84D', stroke: '#C49A00' },
+    { id: 'rosa',    name: 'Rosa',    body: '#FFB3D9', stroke: '#D4537E' },
+    { id: 'bla',     name: 'Blå',     body: '#87CEEB', stroke: '#1E6FA5' },
+    { id: 'gronn',   name: 'Grønn',   body: '#A8E07E', stroke: '#3F7A2B' },
+    { id: 'lilla',   name: 'Lilla',   body: '#C8A2E0', stroke: '#7F4DA1' },
+    { id: 'oransje', name: 'Oransje', body: '#FFB366', stroke: '#C66A00' }
+  ];
+  const facesList = [
+    { id: 'glad',       emoji: '😊', name: 'Glad' },
+    { id: 'kul',        emoji: '😎', name: 'Kul' },
+    { id: 'tunge',      emoji: '😋', name: 'Tunge' },
+    { id: 'overrasket', emoji: '😮', name: 'Overrasket' }
+  ];
+
+  const itemTypes = [
+    {
+      id: 'truser', name: 'truser', icon: '🩲', width: 32,
+      spawn() {
+        const hue = Math.floor(Math.random() * 360);
+        return { html: '🩲', filter: 'hue-rotate(' + hue + 'deg)', isSvg: false };
+      }
+    },
+    {
+      id: 'baesjsokk', name: 'bæsj-sokker', icon: '🧦', width: 38,
+      spawn() {
+        const sockColors = [
+          { body: '#FF6B9D', stripe: '#C44078' },
+          { body: '#5FB3E5', stripe: '#1E6FA5' },
+          { body: '#A8E07E', stripe: '#3F7A2B' },
+          { body: '#FFB347', stripe: '#C66A00' },
+          { body: '#C8A2E0', stripe: '#7F4DA1' },
+          { body: '#FFE066', stripe: '#C49A00' }
+        ];
+        const c = sockColors[Math.floor(Math.random() * sockColors.length)];
+        const html =
+          '<svg viewBox="0 0 38 38" width="38" height="38">' +
+            // sock body (L-shape: vertical leg + horizontal foot)
+            '<path d="M 10 3 L 22 3 L 22 22 L 32 22 L 32 32 L 10 32 Z" fill="' + c.body + '" stroke="#2C2C2A" stroke-width="1.5" stroke-linejoin="round"/>' +
+            // cuff stripes at top
+            '<rect x="10" y="5" width="12" height="2" fill="' + c.stripe + '"/>' +
+            '<rect x="10" y="9" width="12" height="2" fill="' + c.stripe + '"/>' +
+            // poop swirl emerging from sock opening
+            '<path d="M 13 4 Q 14 0 17 1 Q 19 -1 20 2 Q 22 0 22 3 Q 20 5 18 4 Q 15 6 13 4 Z" fill="#6B4226" stroke="#3E2515" stroke-width="0.8" stroke-linejoin="round"/>' +
+            '<ellipse cx="15" cy="2.5" rx="0.5" ry="0.4" fill="white"/>' +
+            '<ellipse cx="19" cy="2" rx="0.5" ry="0.4" fill="white"/>' +
+            // stink lines
+            '<path d="M 12 -1 Q 11.5 -2 12 -3" stroke="#6B4226" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.6"/>' +
+            '<path d="M 23 -1 Q 23.5 -2 23 -3" stroke="#6B4226" stroke-width="0.8" fill="none" stroke-linecap="round" opacity="0.6"/>' +
+          '</svg>';
+        return { html: html, filter: '', isSvg: true };
+      }
+    }
+  ];
+  let roundIndex = 0;
+  let roundCount = 0;
+  function currentItem() { return itemTypes[roundIndex % itemTypes.length]; }
+  function getLevel() { return Math.floor(roundIndex / itemTypes.length) + 1; }
+  function getRoundInLevel() { return (roundIndex % itemTypes.length) + 1; }
+  function levelSpeedMultiplier() { return 1 + (getLevel() - 1) * 0.15; }
+  const faceSVG = {
+    glad:
+      '<ellipse cx="33" cy="38" rx="4" ry="5" fill="white" stroke="#2C2C2A" stroke-width="1.5"/>' +
+      '<ellipse cx="50" cy="38" rx="4" ry="5" fill="white" stroke="#2C2C2A" stroke-width="1.5"/>' +
+      '<ellipse cx="33" cy="39" rx="2" ry="2.5" fill="#2C2C2A"/>' +
+      '<ellipse cx="50" cy="39" rx="2" ry="2.5" fill="#2C2C2A"/>' +
+      '<circle cx="34" cy="38" r="0.8" fill="white"/>' +
+      '<circle cx="51" cy="38" r="0.8" fill="white"/>' +
+      '<path d="M 28 50 Q 42 62 56 50" stroke="#2C2C2A" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+      '<ellipse cx="25" cy="50" rx="3.5" ry="2.5" fill="#FF9999" opacity="0.7"/>' +
+      '<ellipse cx="58" cy="50" rx="3.5" ry="2.5" fill="#FF9999" opacity="0.7"/>',
+    kul:
+      '<rect x="25" y="33" width="14" height="9" fill="#2C2C2A" rx="2"/>' +
+      '<rect x="44" y="33" width="14" height="9" fill="#2C2C2A" rx="2"/>' +
+      '<rect x="38" y="36" width="7" height="2" fill="#2C2C2A"/>' +
+      '<rect x="27" y="34" width="3" height="2" fill="white" opacity="0.5"/>' +
+      '<rect x="46" y="34" width="3" height="2" fill="white" opacity="0.5"/>' +
+      '<path d="M 30 52 Q 42 60 54 52" stroke="#2C2C2A" stroke-width="2.5" fill="none" stroke-linecap="round"/>',
+    tunge:
+      '<ellipse cx="33" cy="38" rx="4" ry="5" fill="white" stroke="#2C2C2A" stroke-width="1.5"/>' +
+      '<ellipse cx="50" cy="38" rx="4" ry="5" fill="white" stroke="#2C2C2A" stroke-width="1.5"/>' +
+      '<ellipse cx="33" cy="39" rx="2" ry="2.5" fill="#2C2C2A"/>' +
+      '<ellipse cx="50" cy="39" rx="2" ry="2.5" fill="#2C2C2A"/>' +
+      '<circle cx="34" cy="38" r="0.8" fill="white"/>' +
+      '<circle cx="51" cy="38" r="0.8" fill="white"/>' +
+      '<path d="M 30 50 Q 42 60 54 50" stroke="#2C2C2A" stroke-width="2.5" fill="none" stroke-linecap="round"/>' +
+      '<ellipse cx="42" cy="58" rx="4" ry="3" fill="#FF8DAA" stroke="#D4537E" stroke-width="0.8"/>' +
+      '<line x1="42" y1="56" x2="42" y2="60" stroke="#D4537E" stroke-width="0.8"/>' +
+      '<ellipse cx="25" cy="50" rx="3.5" ry="2.5" fill="#FF9999" opacity="0.7"/>' +
+      '<ellipse cx="58" cy="50" rx="3.5" ry="2.5" fill="#FF9999" opacity="0.7"/>',
+    overrasket:
+      '<circle cx="33" cy="38" r="5" fill="white" stroke="#2C2C2A" stroke-width="1.5"/>' +
+      '<circle cx="50" cy="38" r="5" fill="white" stroke="#2C2C2A" stroke-width="1.5"/>' +
+      '<circle cx="33" cy="39" r="2.5" fill="#2C2C2A"/>' +
+      '<circle cx="50" cy="39" r="2.5" fill="#2C2C2A"/>' +
+      '<circle cx="34" cy="38" r="0.8" fill="white"/>' +
+      '<circle cx="51" cy="38" r="0.8" fill="white"/>' +
+      '<ellipse cx="42" cy="55" rx="4" ry="5" fill="#2C2C2A"/>' +
+      '<ellipse cx="42" cy="55" rx="2.5" ry="3.5" fill="#5A2D2D"/>'
+  };
+  function bananaSVG(color, faceId) {
+    return '<svg viewBox="0 0 80 80" width="80" height="80">' +
+      '<path d="M 25 10 Q 12 25 15 50 Q 22 72 45 73 Q 68 70 68 50 Q 65 25 50 12 Q 35 5 25 10 Z" fill="' + color.body + '" stroke="' + color.stroke + '" stroke-width="2.5" stroke-linejoin="round"/>' +
+      '<path d="M 38 8 L 36 2" stroke="#4A3818" stroke-width="3" stroke-linecap="round"/>' +
+      faceSVG[faceId] +
+      '</svg>';
+  }
+
+  let player = { name: '', colorId: 'gul', faceId: 'glad' };
+  function loadPlayer() {
+    try {
+      const saved = localStorage.getItem('bananashake_player');
+      if (saved) {
+        const p = JSON.parse(saved);
+        if (p && typeof p === 'object') {
+          player.name = String(p.name || '').slice(0, 20);
+          if (colors.find(c => c.id === p.colorId)) player.colorId = p.colorId;
+          if (facesList.find(f => f.id === p.faceId)) player.faceId = p.faceId;
+        }
+      }
+    } catch (e) {}
+  }
+  function savePlayer() {
+    try { localStorage.setItem('bananashake_player', JSON.stringify(player)); } catch (e) {}
+  }
+  loadPlayer();
+
+  let formColor = player.colorId;
+  let formFace = player.faceId;
+  nameInput.value = player.name;
+
+  function renderColorPicker() {
+    colorPicker.innerHTML = '';
+    colors.forEach(c => {
+      const el = document.createElement('div');
+      el.className = 'bt-color-circle' + (c.id === formColor ? ' selected' : '');
+      el.style.background = c.body;
+      el.title = c.name;
+      el.addEventListener('click', () => {
+        formColor = c.id;
+        renderColorPicker();
+        updatePreview();
+      });
+      colorPicker.appendChild(el);
+    });
+  }
+  function renderFacePicker() {
+    facePicker.innerHTML = '';
+    facesList.forEach(f => {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'bt-face-btn' + (f.id === formFace ? ' selected' : '');
+      el.textContent = f.emoji;
+      el.title = f.name;
+      el.addEventListener('click', () => {
+        formFace = f.id;
+        renderFacePicker();
+        updatePreview();
+      });
+      facePicker.appendChild(el);
+    });
+  }
+  function updatePreview() {
+    const c = colors.find(x => x.id === formColor);
+    previewEl.innerHTML = bananaSVG(c, formFace);
+    const svg = previewEl.querySelector('svg');
+    if (svg) { svg.setAttribute('width', '100'); svg.setAttribute('height', '100'); }
+  }
+
+  function showCreation() {
+    formColor = player.colorId;
+    formFace = player.faceId;
+    nameInput.value = player.name;
+    renderColorPicker();
+    renderFacePicker();
+    updatePreview();
+    overlay.style.display = 'flex';
+    paused = true;
+  }
+
+  let GAME_WIDTH = game.offsetWidth;
+  let GAME_HEIGHT = game.offsetHeight;
+  const BW = 80;
+  let BANANA_TOP = GAME_HEIGHT - 8 - 70;
+  let bananaX = GAME_WIDTH / 2 - BW / 2;
+  let money = 50;
+  let running = false, paused = true, gameStarted = false;
+  let stormActive = false;
+  let stormEndTime = 0;
+  // Boss fight state
+  let bossMode = false;
+  let bossEl = null;
+  let hpBarEl = null;
+  let hpFillEl = null;
+  let bossHP = 0;
+  const BOSS_MAX_HP = 10;
+  let bossX = 0;
+  let bossDir = 1;
+  const bossY = 40;
+  const projectilesUp = [];
+  const projectilesDown = [];
+  let bossShootScheduled = false;
+  let bananaShootScheduled = false;
+  let bossLives = 3;
+  const BOSS_MAX_LIVES = 3;
+  let bossInvincible = false;
+  // Combo
+  let combo = 0;
+  let lastCatchTime = 0;
+  const COMBO_TIMEOUT = 1800;
+  const truser = [];
+  const keys = {};
+  const speed = 5;
+
+  function recomputeDimensions() {
+    GAME_WIDTH = game.offsetWidth;
+    GAME_HEIGHT = game.offsetHeight;
+    BANANA_TOP = GAME_HEIGHT - 8 - 70;
+    bananaX = Math.min(bananaX, GAME_WIDTH - BW);
+    bananaX = Math.max(0, bananaX);
+    banana.style.left = bananaX + 'px';
+  }
+  window.addEventListener('resize', recomputeDimensions);
+  window.addEventListener('orientationchange', () => setTimeout(recomputeDimensions, 200));
+
+  function renderBanana() {
+    const c = colors.find(x => x.id === player.colorId);
+    const stacked = Array.from(banana.querySelectorAll('.bt-stacked'));
+    const hat = banana.querySelector('.bt-hat');
+    banana.innerHTML = bananaSVG(c, player.faceId);
+    stacked.forEach(s => banana.appendChild(s));
+    if (hat) banana.appendChild(hat);
+  }
+
+  const hats = [
+    { id: 'cap', emoji: '🧢', name: 'Caps', price: 20 },
+    { id: 'grad', emoji: '🎓', name: 'Studenterhatt', price: 30 },
+    { id: 'top', emoji: '🎩', name: 'Topp-lue', price: 40 },
+    { id: 'crown', emoji: '👑', name: 'Krone', price: 50 }
+  ];
+  const owned = new Set();
+  let equipped = null;
+
+  let audioCtx = null;
+  let muted = false;
+  let melodyTimer = null;
+  let melodyIndex = 0;
+  const melody = [
+    { f: 523, d: 0.22 }, { f: 659, d: 0.22 }, { f: 784, d: 0.22 }, { f: 659, d: 0.22 },
+    { f: 523, d: 0.22 }, { f: 784, d: 0.44 }, { f: 0, d: 0.22 },
+    { f: 698, d: 0.22 }, { f: 880, d: 0.22 }, { f: 1047, d: 0.22 }, { f: 880, d: 0.22 },
+    { f: 698, d: 0.22 }, { f: 587, d: 0.44 }, { f: 0, d: 0.22 },
+    { f: 523, d: 0.22 }, { f: 587, d: 0.22 }, { f: 659, d: 0.22 }, { f: 698, d: 0.22 },
+    { f: 784, d: 0.44 }, { f: 0, d: 0.30 }
+  ];
+  function getCtx() {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function playCatch() {
+    if (muted) return;
+    try {
+      const ctx = getCtx(); const now = ctx.currentTime;
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(660, now);
+      osc.frequency.exponentialRampToValueAtTime(1320, now + 0.12);
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+      osc.start(now); osc.stop(now + 0.25);
+    } catch (e) {}
+  }
+  function playMoneySound() {
+    if (muted) return;
+    try {
+      const ctx = getCtx(); const now = ctx.currentTime;
+      [523, 659, 784, 1047].forEach((freq, i) => {
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine'; osc.frequency.value = freq;
+        const t = now + i * 0.08;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.2, t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+        osc.start(t); osc.stop(t + 0.25);
+      });
+    } catch (e) {}
+  }
+  function playGoldenSound() {
+    if (muted) return;
+    try {
+      const ctx = getCtx(); const now = ctx.currentTime;
+      [880, 1175, 1480, 1760, 2349].forEach((freq, i) => {
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sine'; osc.frequency.value = freq;
+        const t = now + i * 0.05;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.16, t + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.18);
+        osc.start(t); osc.stop(t + 0.2);
+      });
+    } catch (e) {}
+  }
+  function playThunder() {
+    if (muted) return;
+    try {
+      const ctx = getCtx(); const now = ctx.currentTime;
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(120, now);
+      osc.frequency.exponentialRampToValueAtTime(40, now + 0.6);
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
+      osc.start(now); osc.stop(now + 0.85);
+    } catch (e) {}
+  }
+  function playMelodyNote() {
+    if (!running) return;
+    const note = melody[melodyIndex];
+    if (!muted && note.f > 0) {
+      try {
+        const ctx = getCtx(); const now = ctx.currentTime;
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.value = stormActive ? note.f * 1.5 : note.f;
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.05, now + 0.02);
+        gain.gain.setValueAtTime(0.05, now + note.d - 0.06);
+        gain.gain.linearRampToValueAtTime(0, now + note.d);
+        osc.start(now); osc.stop(now + note.d);
+      } catch (e) {}
+    }
+    melodyIndex = (melodyIndex + 1) % melody.length;
+    const speed = stormActive ? 0.45 : 1;
+    melodyTimer = setTimeout(playMelodyNote, note.d * 1000 * speed);
+  }
+  function startMusic() {
+    if (melodyTimer) return;
+    melodyIndex = 0;
+    playMelodyNote();
+  }
+  muteBtn.addEventListener('click', () => {
+    muted = !muted;
+    muteBtn.textContent = muted ? '🔇' : '🔊';
+  });
+
+  function showToast(text, kind) {
+    const t = document.createElement('div');
+    t.className = 'bt-toast' + (kind ? ' ' + kind : '');
+    t.textContent = text;
+    game.appendChild(t);
+    setTimeout(() => t.remove(), 1700);
+  }
+  function flashScreen() {
+    const f = document.createElement('div');
+    f.className = 'bt-flash';
+    game.appendChild(f);
+    setTimeout(() => f.remove(), 550);
+  }
+
+  function startStorm() {
+    if (stormActive) return;
+    stormActive = true;
+    stormEndTime = Date.now() + 5000;
+    game.classList.add('storm-mode');
+    showToast('⚡ TRUSE-STORM! ⚡', 'storm');
+    flashScreen();
+    playThunder();
+    setTimeout(() => {
+      if (Date.now() >= stormEndTime) endStorm();
+    }, 5200);
+    setTimeout(() => { if (stormActive) flashScreen(); }, 1500);
+    setTimeout(() => { if (stormActive) { flashScreen(); playThunder(); } }, 3000);
+  }
+  function endStorm() {
+    stormActive = false;
+    game.classList.remove('storm-mode');
+  }
+  function scheduleNextStorm() {
+    setTimeout(() => {
+      if (!running) { scheduleNextStorm(); return; }
+      if (paused || stormActive || bossMode) { scheduleNextStorm(); return; }
+      startStorm();
+      scheduleNextStorm();
+    }, 25000 + Math.random() * 25000);
+  }
+
+  function updateScoreEl() {
+    const item = currentItem();
+    const prefix = player.name ? player.name + ': ' : '';
+    scoreEl.textContent = prefix + roundCount + '/15 ' + item.icon;
+  }
+  function updateRoundEl() {
+    roundEl.textContent = 'Level ' + getLevel() + ' · Runde ' + getRoundInLevel();
+  }
+  function updateMoneyEl() { moneyEl.textContent = '💰 ' + money + ' penger'; }
+
+  function updateHatPosition() {
+    const hatEl = banana.querySelector('.bt-hat');
+    if (!hatEl) return;
+    const count = banana.querySelectorAll('.bt-stacked').length;
+    hatEl.style.bottom = (65 + count * 16 + 8) + 'px';
+  }
+  function setEquippedHat(hatId) {
+    const existing = banana.querySelector('.bt-hat');
+    if (existing) existing.remove();
+    equipped = hatId;
+    if (!hatId) return;
+    const hat = hats.find(h => h.id === hatId);
+    if (!hat) return;
+    const hatEl = document.createElement('div');
+    hatEl.className = 'bt-hat';
+    hatEl.textContent = hat.emoji;
+    banana.appendChild(hatEl);
+    updateHatPosition();
+  }
+
+  function openShop() {
+    if (!running) return;
+    paused = true;
+    const o = document.createElement('div');
+    o.className = 'bt-shop-overlay';
+    o.id = 'btShopOverlay';
+    const shop = document.createElement('div');
+    shop.className = 'bt-shop';
+    const header = document.createElement('div');
+    header.className = 'bt-shop-header';
+    header.innerHTML = '<span class="bt-shop-title">🛒 Banan-butikk</span>';
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'bt-shop-close';
+    closeBtn.textContent = '✕';
+    closeBtn.addEventListener('click', closeShop);
+    header.appendChild(closeBtn);
+    shop.appendChild(header);
+    const moneyDisplay = document.createElement('div');
+    moneyDisplay.className = 'bt-shop-money';
+    moneyDisplay.textContent = '💰 Du har ' + money + ' penger';
+    shop.appendChild(moneyDisplay);
+    hats.forEach(hat => {
+      const item = document.createElement('div');
+      item.className = 'bt-shop-item';
+      const emojiSpan = document.createElement('div');
+      emojiSpan.className = 'bt-shop-emoji';
+      emojiSpan.textContent = hat.emoji;
+      item.appendChild(emojiSpan);
+      const info = document.createElement('div');
+      info.className = 'bt-shop-info';
+      info.innerHTML = '<div class="bt-shop-name">' + hat.name + '</div><div class="bt-shop-price">' + hat.price + ' penger</div>';
+      item.appendChild(info);
+      const buyBtn = document.createElement('button');
+      buyBtn.className = 'bt-shop-buy';
+      if (equipped === hat.id) {
+        buyBtn.textContent = 'På 👍';
+        buyBtn.classList.add('equipped');
+      } else if (owned.has(hat.id)) {
+        buyBtn.textContent = 'Bruk';
+      } else if (money >= hat.price) {
+        buyBtn.textContent = 'Kjøp';
+      } else {
+        buyBtn.textContent = 'Kjøp';
+        buyBtn.disabled = true;
+      }
+      buyBtn.addEventListener('click', () => {
+        if (equipped === hat.id) return;
+        if (owned.has(hat.id)) {
+          setEquippedHat(hat.id);
+        } else if (money >= hat.price) {
+          money -= hat.price;
+          owned.add(hat.id);
+          setEquippedHat(hat.id);
+          updateMoneyEl();
+          playCatch();
+        }
+        closeShop();
+        openShop();
+      });
+      item.appendChild(buyBtn);
+      shop.appendChild(item);
+    });
+    o.appendChild(shop);
+    game.appendChild(o);
+  }
+  function closeShop() {
+    const o = document.getElementById('btShopOverlay');
+    if (o) o.remove();
+    paused = false;
+  }
+  shopBtn.addEventListener('click', openShop);
+
+  playBtn.addEventListener('click', () => {
+    const name = (nameInput.value || '').trim().slice(0, 20);
+    player.name = name;
+    player.colorId = formColor;
+    player.faceId = formFace;
+    savePlayer();
+    renderBanana();
+    updateScoreEl();
+    updateRoundEl();
+    overlay.style.display = 'none';
+    paused = false;
+    if (!gameStarted) {
+      gameStarted = true;
+      running = true;
+      recomputeDimensions();
+      bananaX = GAME_WIDTH / 2 - BW / 2;
+      banana.style.left = bananaX + 'px';
+      spawnLoop();
+      requestAnimationFrame(loop);
+      startMusic();
+      scheduleNextStorm();
+    }
+  });
+  nameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); playBtn.click(); }
+  });
+  editBtn.addEventListener('click', showCreation);
+
+  showCreation();
+  renderBanana();
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+      if (overlay.style.display !== 'none') return;
+      e.preventDefault();
+      keys[e.key] = true;
+    }
+  });
+  window.addEventListener('keyup', (e) => { keys[e.key] = false; });
+
+  function holdKey(key) { keys[key] = true; }
+  function releaseKey(key) { keys[key] = false; }
+  leftBtn.addEventListener('touchstart', (e) => { e.preventDefault(); holdKey('ArrowLeft'); }, { passive: false });
+  leftBtn.addEventListener('touchend', (e) => { e.preventDefault(); releaseKey('ArrowLeft'); });
+  leftBtn.addEventListener('touchcancel', () => releaseKey('ArrowLeft'));
+  leftBtn.addEventListener('mousedown', (e) => { e.preventDefault(); holdKey('ArrowLeft'); });
+  leftBtn.addEventListener('mouseup', () => releaseKey('ArrowLeft'));
+  leftBtn.addEventListener('mouseleave', () => releaseKey('ArrowLeft'));
+  rightBtn.addEventListener('touchstart', (e) => { e.preventDefault(); holdKey('ArrowRight'); }, { passive: false });
+  rightBtn.addEventListener('touchend', (e) => { e.preventDefault(); releaseKey('ArrowRight'); });
+  rightBtn.addEventListener('touchcancel', () => releaseKey('ArrowRight'));
+  rightBtn.addEventListener('mousedown', (e) => { e.preventDefault(); holdKey('ArrowRight'); });
+  rightBtn.addEventListener('mouseup', () => releaseKey('ArrowRight'));
+  rightBtn.addEventListener('mouseleave', () => releaseKey('ArrowRight'));
+
+  function spawnTruse() {
+    const isGolden = !stormActive && Math.random() < 0.05;
+    const t = document.createElement('div');
+    t.className = 'bt-falling' + (isGolden ? ' golden' : '') + (stormActive ? ' storm-spin' : '');
+    let appearance, w;
+    if (isGolden) {
+      appearance = { html: '⭐', filter: '', isSvg: false };
+      w = 36;
+    } else {
+      const item = currentItem();
+      appearance = item.spawn();
+      w = item.width;
+    }
+    t.innerHTML = appearance.html;
+    if (appearance.filter) t.style.filter = appearance.filter;
+    if (appearance.isSvg) t.style.fontSize = '0';
+    const x = Math.random() * (GAME_WIDTH - w);
+    t.style.left = x + 'px';
+    t.style.top = '-40px';
+    game.appendChild(t);
+    const lvlMult = levelSpeedMultiplier();
+    const baseSpeed = stormActive ? 3.0 : 1.4 * lvlMult;
+    const variance = stormActive ? 1.5 : 1.1 * lvlMult;
+    truser.push({ el: t, x: x, y: -40, vy: baseSpeed + Math.random() * variance, appearance: appearance, golden: isGolden, w: w });
+  }
+  function spawnLoop() {
+    if (!running) return;
+    if (!paused && !bossMode) spawnTruse();
+    const lvlMult = 1 + (getLevel() - 1) * 0.1;
+    const delay = stormActive
+      ? 80 + Math.random() * 140
+      : (900 + Math.random() * 700) / lvlMult;
+    setTimeout(spawnLoop, delay);
+  }
+  function addStacked(item) {
+    const s = document.createElement('div');
+    s.className = 'bt-stacked';
+    if (item.golden) {
+      s.textContent = '⭐';
+    } else {
+      s.innerHTML = item.appearance.html;
+      if (item.appearance.filter) s.style.filter = item.appearance.filter;
+      if (item.appearance.isSvg) {
+        s.style.fontSize = '0';
+        const svg = s.querySelector('svg');
+        if (svg) { svg.setAttribute('width', '22'); svg.setAttribute('height', '22'); }
+      }
+    }
+    const count = banana.querySelectorAll('.bt-stacked').length;
+    s.style.bottom = (65 + count * 16) + 'px';
+    banana.appendChild(s);
+    updateHatPosition();
+  }
+  function potatoSVG() {
+    return '<svg viewBox="0 0 120 100" width="120" height="100">' +
+      '<ellipse cx="62" cy="58" rx="50" ry="38" fill="#C19A6B" stroke="#5A3920" stroke-width="2.5"/>' +
+      '<ellipse cx="50" cy="50" rx="6" ry="4" fill="#A47148" opacity="0.5"/>' +
+      '<ellipse cx="80" cy="65" rx="5" ry="3" fill="#A47148" opacity="0.5"/>' +
+      '<circle cx="30" cy="42" r="2.5" fill="#5A3920"/>' +
+      '<circle cx="92" cy="38" r="2.5" fill="#5A3920"/>' +
+      '<circle cx="55" cy="86" r="2.5" fill="#5A3920"/>' +
+      '<circle cx="100" cy="68" r="2.5" fill="#5A3920"/>' +
+      '<circle cx="22" cy="65" r="2.5" fill="#5A3920"/>' +
+      '<ellipse cx="44" cy="50" rx="8" ry="9" fill="white" stroke="#2C2C2A" stroke-width="2"/>' +
+      '<ellipse cx="80" cy="50" rx="8" ry="9" fill="white" stroke="#2C2C2A" stroke-width="2"/>' +
+      '<ellipse cx="46" cy="52" rx="4" ry="5" fill="#D32F2F"/>' +
+      '<ellipse cx="82" cy="52" rx="4" ry="5" fill="#D32F2F"/>' +
+      '<circle cx="46" cy="53" r="1.8" fill="#2C2C2A"/>' +
+      '<circle cx="82" cy="53" r="1.8" fill="#2C2C2A"/>' +
+      '<path d="M 32 38 L 52 46" stroke="#2C2C2A" stroke-width="3.5" stroke-linecap="round"/>' +
+      '<path d="M 92 38 L 72 46" stroke="#2C2C2A" stroke-width="3.5" stroke-linecap="round"/>' +
+      '<path d="M 40 76 Q 62 68 84 76 L 84 80 Q 62 86 40 80 Z" fill="#3E2515" stroke="#2C2C2A" stroke-width="2" stroke-linejoin="round"/>' +
+      '<path d="M 47 75 L 49 81 L 51 75 Z" fill="white"/>' +
+      '<path d="M 58 74 L 60 82 L 62 74 Z" fill="white"/>' +
+      '<path d="M 69 74 L 71 81 L 73 75 Z" fill="white"/>' +
+      '<path d="M 78 75 L 80 80 L 82 75 Z" fill="white"/>' +
+    '</svg>';
+  }
+
+  function confetti(count) {
+    const colors = ['#FF6B9D', '#5FB3E5', '#A8E07E', '#FFB347', '#C8A2E0', '#FFE066', '#ED4444'];
+    for (let i = 0; i < count; i++) {
+      const c = document.createElement('div');
+      c.className = 'bt-confetti';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.left = (Math.random() * GAME_WIDTH) + 'px';
+      c.style.animationDelay = (Math.random() * 0.4) + 's';
+      c.style.animationDuration = (1.2 + Math.random() * 0.8) + 's';
+      if (Math.random() < 0.5) c.style.borderRadius = '50%';
+      game.appendChild(c);
+      setTimeout(() => c.remove(), 2400);
+    }
+  }
+
+  function showCombo(n) {
+    const existing = game.querySelector('.bt-combo');
+    if (existing) existing.remove();
+    const c = document.createElement('div');
+    c.className = 'bt-combo';
+    c.textContent = '🔥 Combo x' + n + '!';
+    game.appendChild(c);
+    setTimeout(() => c.remove(), 1100);
+  }
+
+  function registerCombo() {
+    const now = Date.now();
+    if (now - lastCatchTime < COMBO_TIMEOUT) {
+      combo++;
+    } else {
+      combo = 1;
+    }
+    lastCatchTime = now;
+    if (combo >= 3 && combo % 3 === 0) {
+      showCombo(combo);
+      money += combo;
+      updateMoneyEl();
+    }
+  }
+  function resetCombo() { combo = 0; lastCatchTime = 0; }
+
+  function playBossHit() {
+    if (muted) return;
+    try {
+      const ctx = getCtx(); const now = ctx.currentTime;
+      const osc = ctx.createOscillator(); const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.exponentialRampToValueAtTime(80, now + 0.18);
+      gain.gain.setValueAtTime(0.22, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+      osc.start(now); osc.stop(now + 0.22);
+    } catch (e) {}
+  }
+  function playStunSound() {
+    if (muted) return;
+    try {
+      const ctx = getCtx(); const now = ctx.currentTime;
+      [200, 150, 100].forEach((freq, i) => {
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'sawtooth'; osc.frequency.value = freq;
+        const t = now + i * 0.06;
+        gain.gain.setValueAtTime(0.18, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.12);
+        osc.start(t); osc.stop(t + 0.14);
+      });
+    } catch (e) {}
+  }
+  function playVictoryFanfare() {
+    if (muted) return;
+    try {
+      const ctx = getCtx(); const now = ctx.currentTime;
+      [523, 659, 784, 1047, 1319, 1568].forEach((freq, i) => {
+        const osc = ctx.createOscillator(); const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.type = 'triangle'; osc.frequency.value = freq;
+        const t = now + i * 0.12;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.18, t + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+        osc.start(t); osc.stop(t + 0.42);
+      });
+    } catch (e) {}
+  }
+
+  function updateHpBar() {
+    if (!hpFillEl) return;
+    const pct = Math.max(0, bossHP / BOSS_MAX_HP) * 100;
+    hpFillEl.style.width = pct + '%';
+  }
+
+  function updateLivesEl() {
+    const hearts = livesEl.querySelectorAll('.bt-life');
+    hearts.forEach((h, i) => {
+      if (i < bossLives) h.classList.remove('lost');
+      else h.classList.add('lost');
+    });
+  }
+
+  function bossLoseFight() {
+    showToast('💔 Du tapte! Prøv igjen! 💔', 'storm');
+    flashScreen();
+    projectilesDown.forEach(p => p.el.remove());
+    projectilesDown.length = 0;
+    projectilesUp.forEach(p => p.el.remove());
+    projectilesUp.length = 0;
+    bossHP = BOSS_MAX_HP;
+    updateHpBar();
+    bossLives = BOSS_MAX_LIVES;
+    updateLivesEl();
+    bossInvincible = true;
+    setTimeout(() => { bossInvincible = false; }, 1500);
+  }
+
+  function startBossFight() {
+    bossMode = true;
+    truser.forEach(t => t.el.remove());
+    truser.length = 0;
+    document.querySelector('.bt-title').style.display = 'none';
+    roundEl.style.display = 'none';
+    scoreEl.style.display = 'none';
+    hpBarEl = document.createElement('div');
+    hpBarEl.className = 'bt-hp-bar';
+    hpFillEl = document.createElement('div');
+    hpFillEl.className = 'bt-hp-fill';
+    hpBarEl.appendChild(hpFillEl);
+    const lbl = document.createElement('div');
+    lbl.className = 'bt-hp-label';
+    lbl.textContent = '🥔 KJEMPEPOTET 🥔';
+    hpBarEl.appendChild(lbl);
+    game.appendChild(hpBarEl);
+    bossEl = document.createElement('div');
+    bossEl.className = 'bt-boss';
+    bossEl.innerHTML = potatoSVG();
+    bossX = GAME_WIDTH / 2 - 60;
+    bossEl.style.left = bossX + 'px';
+    bossEl.style.top = bossY + 'px';
+    game.appendChild(bossEl);
+    bossHP = BOSS_MAX_HP;
+    updateHpBar();
+    bossLives = BOSS_MAX_LIVES;
+    bossInvincible = false;
+    updateLivesEl();
+    livesEl.classList.add('show');
+    showToast('🥔 BOSS-KAMP! 🥔', 'storm');
+    flashScreen();
+    playThunder();
+    if (!bossShootScheduled) { bossShootScheduled = true; scheduleBossShoot(); }
+    if (!bananaShootScheduled) { bananaShootScheduled = true; scheduleBananaShoot(); }
+  }
+
+  function endBossFight() {
+    bossMode = false;
+    livesEl.classList.remove('show');
+    if (bossEl) { bossEl.remove(); bossEl = null; }
+    if (hpBarEl) { hpBarEl.remove(); hpBarEl = null; hpFillEl = null; }
+    projectilesUp.forEach(p => p.el.remove());
+    projectilesUp.length = 0;
+    projectilesDown.forEach(p => p.el.remove());
+    projectilesDown.length = 0;
+    document.querySelector('.bt-title').style.display = '';
+    roundEl.style.display = '';
+    scoreEl.style.display = '';
+    showToast('🎉 KJEMPEPOTETEN ER BESEIRET! +100 penger 🎉', 'gold');
+    confetti(60);
+    playVictoryFanfare();
+    money += 100;
+    updateMoneyEl();
+    setTimeout(() => {
+      if (!running) return;
+      roundIndex += 2;
+      roundCount = 0;
+      updateRoundEl();
+      updateScoreEl();
+      const next = currentItem();
+      showToast('Level ' + getLevel() + '! Neste: ' + next.name + ' ' + next.icon, 'gold');
+    }, 2200);
+  }
+
+  function scheduleBossShoot() {
+    setTimeout(() => {
+      if (bossMode && !paused && running) {
+        shootRock();
+        if (Math.random() < 0.35) {
+          setTimeout(() => {
+            if (bossMode && !paused && running) shootRock();
+          }, 180 + Math.random() * 120);
+        }
+      }
+      if (running) scheduleBossShoot();
+      else bossShootScheduled = false;
+    }, 480 + Math.random() * 350);
+  }
+  function scheduleBananaShoot() {
+    setTimeout(() => {
+      if (bossMode && !paused && running) shootBananaTruse();
+      if (running) scheduleBananaShoot();
+      else bananaShootScheduled = false;
+    }, 480);
+  }
+  function shootRock() {
+    const rock = document.createElement('div');
+    rock.className = 'bt-projectile';
+    rock.textContent = '🪨';
+    const x = bossX + 10 + Math.random() * 100;
+    rock.style.left = x + 'px';
+    rock.style.top = (bossY + 80) + 'px';
+    game.appendChild(rock);
+    projectilesDown.push({ el: rock, x: x, y: bossY + 80, vy: 3.0 + Math.random() * 1.4, w: 32 });
+  }
+  function shootBananaTruse() {
+    const t = document.createElement('div');
+    t.className = 'bt-projectile';
+    t.textContent = '🩲';
+    const hue = Math.floor(Math.random() * 360);
+    t.style.filter = 'hue-rotate(' + hue + 'deg)';
+    const x = bananaX + BW / 2 - 14;
+    t.style.left = x + 'px';
+    t.style.top = (BANANA_TOP - 10) + 'px';
+    game.appendChild(t);
+    projectilesUp.push({ el: t, x: x, y: BANANA_TOP - 10, vy: -7.5, w: 28 });
+  }
+
+  function completeRound() {
+    truser.forEach(t => t.el.remove());
+    truser.length = 0;
+    resetCombo();
+    const justCompletedLevel = getLevel();
+    const justCompletedRound = getRoundInLevel();
+    money += 50;
+    updateMoneyEl();
+    playMoneySound();
+    roundIndex++;
+    roundCount = 0;
+    const newLevel = getLevel();
+    if (newLevel === 5 && justCompletedLevel === 4) {
+      showToast('🥔 KJEMPEPOTETEN KOMMER! 🥔', 'storm');
+      flashScreen();
+      setTimeout(startBossFight, 1500);
+      return;
+    }
+    const next = currentItem();
+    if (newLevel > justCompletedLevel) {
+      showToast('🚀 LEVEL ' + newLevel + '! 🚀', 'storm');
+      flashScreen();
+      confetti(40);
+      setTimeout(() => {
+        if (running) showToast('Vanskeligere nå! +50 penger', 'gold');
+      }, 1800);
+    } else {
+      showToast('🎉 Runde ' + justCompletedRound + ' ferdig! Neste: ' + next.name + ' ' + next.icon, 'gold');
+      confetti(20);
+    }
+    updateRoundEl();
+    updateScoreEl();
+  }
+
+  function loop() {
+    if (!running) return;
+    if (paused) { requestAnimationFrame(loop); return; }
+    if (keys['ArrowLeft']) bananaX = Math.max(0, bananaX - speed);
+    if (keys['ArrowRight']) bananaX = Math.min(GAME_WIDTH - BW, bananaX + speed);
+    banana.style.left = bananaX + 'px';
+    if (bossMode) {
+      bossX += bossDir * 1.6;
+      if (bossX < 8) { bossX = 8; bossDir = 1; }
+      if (bossX > GAME_WIDTH - 128) { bossX = GAME_WIDTH - 128; bossDir = -1; }
+      if (bossEl) bossEl.style.left = bossX + 'px';
+      for (let i = projectilesDown.length - 1; i >= 0; i--) {
+        const p = projectilesDown[i];
+        p.y += p.vy;
+        p.el.style.top = p.y + 'px';
+        if (p.y + p.w > BANANA_TOP && p.y < BANANA_TOP + 50 &&
+            p.x + p.w > bananaX + 8 && p.x < bananaX + BW - 8) {
+          p.el.remove();
+          projectilesDown.splice(i, 1);
+          if (!bossInvincible) {
+            banana.classList.add('stunned');
+            setTimeout(() => banana.classList.remove('stunned'), 400);
+            playStunSound();
+            bossLives--;
+            updateLivesEl();
+            bossInvincible = true;
+            setTimeout(() => { bossInvincible = false; }, 900);
+            if (bossLives <= 0) {
+              bossLoseFight();
+              break;
+            }
+          }
+        } else if (p.y > GAME_HEIGHT) {
+          p.el.remove();
+          projectilesDown.splice(i, 1);
+        }
+      }
+      for (let i = projectilesUp.length - 1; i >= 0; i--) {
+        const p = projectilesUp[i];
+        p.y += p.vy;
+        p.el.style.top = p.y + 'px';
+        if (p.y < bossY + 90 && p.y + p.w > bossY + 10 &&
+            p.x + p.w > bossX + 10 && p.x < bossX + 110) {
+          p.el.remove();
+          projectilesUp.splice(i, 1);
+          bossHP--;
+          updateHpBar();
+          if (bossEl) {
+            bossEl.classList.remove('hit');
+            void bossEl.offsetWidth;
+            bossEl.classList.add('hit');
+          }
+          playBossHit();
+          if (bossHP <= 0) {
+            endBossFight();
+            requestAnimationFrame(loop);
+            return;
+          }
+        } else if (p.y < -40) {
+          p.el.remove();
+          projectilesUp.splice(i, 1);
+        }
+      }
+      requestAnimationFrame(loop);
+      return;
+    }
+    for (let i = truser.length - 1; i >= 0; i--) {
+      const t = truser[i];
+      t.y += t.vy;
+      t.el.style.top = t.y + 'px';
+      const truseRight = t.x + t.w;
+      const bananaRight = bananaX + BW;
+      if (t.y + t.w > BANANA_TOP && t.y < BANANA_TOP + 50 &&
+          truseRight > bananaX + 8 && t.x < bananaRight - 8) {
+        addStacked(t);
+        t.el.remove();
+        truser.splice(i, 1);
+        roundCount++;
+        registerCombo();
+        banana.style.transform = 'scale(1.15)';
+        setTimeout(() => { banana.style.transform = 'scale(1)'; }, 100);
+        if (t.golden) {
+          money += 15;
+          updateMoneyEl();
+          showToast('⭐ Gull-truse! +15 penger! ⭐', 'gold');
+          playGoldenSound();
+        } else {
+          playCatch();
+        }
+        if (roundCount >= 15) {
+          completeRound();
+          break;
+        } else {
+          updateScoreEl();
+        }
+      } else if (t.y > GAME_HEIGHT) {
+        t.el.remove();
+        truser.splice(i, 1);
+        resetCombo();
+      }
+    }
+    requestAnimationFrame(loop);
+  }
+})();
+</script>
+</body>
+</html>

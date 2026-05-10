@@ -23,6 +23,10 @@ export function fetchFeaturedProduct(): Promise<Product | undefined> {
   return simulateFetch(allProducts.find(p => p.isFeatured))
 }
 
+export function fetchFeaturedProducts(): Promise<Product[]> {
+  return simulateFetch(allProducts.filter(p => p.isFeatured))
+}
+
 export function fetchProductBySlug(slug: string): Promise<Product | undefined> {
   return simulateFetch(allProducts.find(p => p.slug === slug))
 }

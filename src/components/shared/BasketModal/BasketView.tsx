@@ -223,11 +223,10 @@ export default function BasketView({ onCheckout }: BasketViewProps) {
                 {item.complexity && <><strong>Tilvalg:</strong> {item.complexity}<br /></>}
                 <strong>Overflatebehandling:</strong> {item.finish}<br />
                 {item.quality && <><strong>Kvalitet:</strong> {item.quality}<br /></>}
-                <strong>Tak:</strong> {item.roof}<br />
+                {item.roof && <><strong>Tak:</strong> {item.roof}<br /></>}
                 {item.lighting && <><strong>Belysning:</strong> {item.lighting}<br /></>}
                 {item.signRequested && <><strong>Skilt:</strong> Ja ({item.signWidthCm}×{item.signHeightCm} cm) — pris kommer separat<br /></>}
-                <strong>Levering:</strong> {item.delivery}<br />
-                <strong>Montering:</strong> {item.installation}
+                <strong>Levering:</strong> {item.delivery}{item.installation && <><br /><strong>Montering:</strong> {item.installation}</>}
               </Details>
               <PriceSection>
                 <PriceLabel>Estimert pris inkl. mva {item.quantity > 1 ? `(${item.quantity} stk)` : ''}</PriceLabel>

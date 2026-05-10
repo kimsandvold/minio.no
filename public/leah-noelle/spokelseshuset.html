@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Spøkelseshuset Gjemsel</title>
+<style>
+html,body{margin:0!important;padding:0!important;height:100%!important;width:100%!important;overflow:hidden!important;background:#0d1424!important;font-family:system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+*{box-sizing:border-box}
+#gh-wrap{position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;display:flex!important;flex-direction:column!important;background:#0d1424;user-select:none;-webkit-user-select:none;z-index:1}
+@keyframes ghFloatA{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+@keyframes ghPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@keyframes ghDanger{0%,100%{box-shadow:inset 0 0 60px 20px rgba(226,75,74,0)}50%{box-shadow:inset 0 0 60px 20px rgba(226,75,74,.7)}}
+@keyframes ghAnnouncePulse{0%{opacity:0;transform:translate(-50%,-50%) scale(.8)}30%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}70%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.1)}}
+@keyframes ghPrepGlow{0%,100%{box-shadow:0 0 0 rgba(239,203,39,.3)}50%{box-shadow:0 0 30px rgba(239,203,39,.7)}}
+.gh-fa{animation:ghFloatA 4s ease-in-out infinite}
+.gh-pulse{animation:ghPulse 1.4s ease-in-out infinite}
+.gh-danger{animation:ghDanger .6s ease-in-out infinite}
+.gh-announce-anim{animation:ghAnnouncePulse 1.8s ease-out forwards}
+.gh-prep-glow{animation:ghPrepGlow 1.5s ease-in-out infinite}
+.gh-hidden{display:none!important}
+.gh-btn-p:hover{background:#ff9a6c}.gh-btn-p:active{transform:scale(.97)}
+.gh-btn-s:hover{background:#3a6390}.gh-btn-s:active{transform:scale(.97)}
+.gh-card:hover{border-color:#ff8866}
+.gh-input{background:#2c4a72;color:#f0e9ff;border:0;border-radius:8px;padding:14px 18px;font-size:18px;font-weight:500;font-family:inherit;width:280px;max-width:90vw;text-align:center}
+.gh-input:focus{outline:2px solid #ff8866}
+.gh-shop-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;min-height:0}
+.gh-fs-btn{position:absolute;top:8px;background:rgba(13,20,36,.7);border:1px solid #2c4a72;border-radius:6px;width:38px;height:38px;cursor:pointer;color:#f0e9ff;display:flex;align-items:center;justify-content:center;z-index:7;padding:0;touch-action:manipulation}
+.gh-fs-btn:hover{background:rgba(44,74,114,.9)}
+#gh-fs-btn{right:8px}
+#gh-mute-btn{right:54px}
+.gh-canvas-wrap{flex:1 1 0;min-height:0;width:100%;position:relative}
+#gh-canvas{display:block;width:100%;height:100%;touch-action:none}
+#gh-joy{position:absolute;width:150px;height:150px;border-radius:50%;background:rgba(13,20,36,.4);border:3px solid rgba(255,255,255,.3);transform:translate(-50%,-50%);pointer-events:none;z-index:5;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);box-shadow:0 4px 18px rgba(0,0,0,.5)}
+#gh-joy-stick{position:absolute;left:50%;top:50%;width:64px;height:64px;border-radius:50%;background:rgba(255,136,102,.85);border:3px solid rgba(255,255,255,.75);transform:translate(-50%,-50%);box-shadow:0 4px 14px rgba(0,0,0,.5);transition:background .12s}
+#gh-touch-hint{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);color:#f0e9ff;font-size:13px;pointer-events:none;text-align:center;background:rgba(13,20,36,.75);padding:10px 18px;border-radius:18px;z-index:4;border:1px solid rgba(255,255,255,.15);transition:opacity .35s;white-space:nowrap}
+</style>
+</head>
+<body>
+
+<div id="gh-wrap">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#080d18;border-bottom:1px solid #2c4a72;gap:8px;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:10px;min-width:0">
+      <div id="gh-target-pic" class="gh-pulse" style="width:42px;height:42px;background:#fcf9ff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"></div>
+      <div style="min-width:0">
+        <div style="color:#7d99c2;font-size:10px;font-weight:500;letter-spacing:1px">FINN</div>
+        <div id="gh-target-name" style="color:#f0e9ff;font-size:14px;font-weight:500;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">—</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+      <div id="gh-distance" style="text-align:center;display:none">
+        <div id="gh-distance-val" style="color:#e24b4a;font-size:13px;font-weight:500;line-height:1">—</div>
+        <div style="color:#7d99c2;font-size:9px;font-weight:500;letter-spacing:1px;margin-top:1px">JEGER</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;background:#2c4a72;padding:6px 10px;border-radius:8px">
+        <svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#efcb27" stroke="#bA7517" stroke-width="1.5"/><text x="12" y="17" font-size="13" font-weight="500" text-anchor="middle" fill="#bA7517" font-family="sans-serif">M</text></svg>
+        <div id="gh-coins" style="color:#efcb27;font-size:16px;font-weight:500;font-variant-numeric:tabular-nums">0</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="gh-canvas-wrap">
+    <canvas id="gh-canvas"></canvas>
+
+    <button id="gh-mute-btn" class="gh-fs-btn" onclick="ghToggleMute()" title="Lyd av/på" aria-label="Lyd av/på">
+      <svg id="gh-sound-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M19 5a9 9 0 0 1 0 14"/></svg>
+      <svg id="gh-sound-off" class="gh-hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor"/><line x1="22" y1="9" x2="16" y2="15"/><line x1="16" y1="9" x2="22" y2="15"/></svg>
+    </button>
+
+    <button id="gh-fs-btn" class="gh-fs-btn" onclick="ghFullscreen()" title="Fullskjerm" aria-label="Bytt fullskjerm">
+      <svg id="gh-fs-icon-enter" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>
+      <svg id="gh-fs-icon-exit" class="gh-hidden" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>
+    </button>
+
+    <div id="gh-danger-overlay" class="gh-hidden" style="position:absolute;inset:0;pointer-events:none;z-index:5"></div>
+
+    <div id="gh-prep" class="gh-hidden gh-prep-glow" style="position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(13,20,36,.92);border:3px solid #efcb27;border-radius:14px;padding:10px 22px;text-align:center;pointer-events:none;z-index:6;min-width:180px">
+      <div style="color:#efcb27;font-size:11px;font-weight:500;letter-spacing:2px">JEGEREN TELLER...</div>
+      <div id="gh-prep-countdown" style="color:#fcf9ff;font-size:38px;font-weight:500;line-height:1.1;font-variant-numeric:tabular-nums">10</div>
+      <div style="color:#a8bfd9;font-size:11px;margin-top:1px">Gjem deg fort!</div>
+    </div>
+
+    <div id="gh-announce" class="gh-hidden" style="position:absolute;top:50%;left:50%;font-size:34px;font-weight:500;color:#ff3030;text-shadow:0 0 28px rgba(226,75,74,.95);pointer-events:none;z-index:6;letter-spacing:3px;white-space:nowrap">—</div>
+
+    <div id="gh-overlay-name" class="gh-hidden" style="position:absolute;inset:0;background:rgba(13,20,36,.96);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.5rem;z-index:10">
+      <svg class="gh-fa" style="width:70px;height:90px;margin-bottom:.5rem" viewBox="0 0 90 110">
+        <path d="M45 8 Q15 8 15 42 L15 95 Q21 103 27 95 Q33 103 39 95 Q45 103 51 95 Q57 103 63 95 Q69 103 75 95 L75 42 Q75 8 45 8 Z" fill="#fcf9ff"/>
+        <ellipse cx="33" cy="40" rx="4" ry="6" fill="#0d1424"/><ellipse cx="57" cy="40" rx="4" ry="6" fill="#0d1424"/><ellipse cx="45" cy="62" rx="6" ry="9" fill="#0d1424"/>
+      </svg>
+      <h2 style="color:#f0e9ff;font-size:21px;font-weight:500;margin:.5rem 0 .25rem">Hva heter du?</h2>
+      <p style="color:#a8bfd9;font-size:13px;margin:0 0 1.25rem">Skriv inn navnet ditt så vi husker deg</p>
+      <input type="text" id="gh-name-input" class="gh-input" maxlength="20" placeholder="Skriv navnet" autocomplete="off" />
+      <button class="gh-btn-p" onclick="ghSetName()" style="background:#ff8866;color:white;border:0;border-radius:8px;padding:14px 32px;font-size:16px;font-weight:500;cursor:pointer;font-family:inherit;margin-top:1rem">Klar!</button>
+    </div>
+
+    <div id="gh-overlay-start" class="gh-hidden" style="position:absolute;inset:0;background:rgba(13,20,36,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.25rem;z-index:10">
+      <div style="display:flex;gap:24px;margin-bottom:.5rem">
+        <svg class="gh-fa" style="width:60px;height:78px" viewBox="0 0 90 110">
+          <path d="M45 8 Q15 8 15 42 L15 95 Q21 103 27 95 Q33 103 39 95 Q45 103 51 95 Q57 103 63 95 Q69 103 75 95 L75 42 Q75 8 45 8 Z" fill="#fcf9ff"/>
+          <ellipse cx="33" cy="40" rx="4" ry="6" fill="#0d1424"/><ellipse cx="57" cy="40" rx="4" ry="6" fill="#0d1424"/><ellipse cx="45" cy="62" rx="6" ry="9" fill="#0d1424"/>
+        </svg>
+        <svg class="gh-fa" style="width:60px;height:78px" viewBox="0 0 90 110">
+          <path d="M45 8 Q15 8 15 42 L15 95 Q21 103 27 95 Q33 103 39 95 Q45 103 51 95 Q57 103 63 95 Q69 103 75 95 L75 42 Q75 8 45 8 Z" fill="#4a1525"/>
+          <ellipse cx="33" cy="40" rx="5" ry="7" fill="#ff3030"/><ellipse cx="57" cy="40" rx="5" ry="7" fill="#ff3030"/><path d="M30 65 Q45 60 60 65 Q55 70 50 65 Q45 70 40 65 Z" fill="#0d1424"/>
+        </svg>
+      </div>
+      <h2 id="gh-welcome" style="color:#f0e9ff;font-size:22px;font-weight:500;margin:.5rem 0 .25rem">Hei!</h2>
+      <p style="color:#a8bfd9;font-size:13px;margin:0 0 1rem;max-width:380px;line-height:1.4">Du har <b style="color:#efcb27">10 sekunder</b> til å gjemme deg mens jegeren teller. Du flyr <b style="color:#ff8866">over 3 ganger raskere</b> enn ham!</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+        <button class="gh-btn-p" onclick="ghStart()" style="background:#ff8866;color:white;border:0;border-radius:8px;padding:14px 26px;font-size:16px;font-weight:500;cursor:pointer;font-family:inherit">Start jakten</button>
+        <button class="gh-btn-s" onclick="ghOpenShop()" style="background:#2c4a72;color:#f0e9ff;border:0;border-radius:8px;padding:14px 26px;font-size:16px;font-weight:500;cursor:pointer;font-family:inherit">Butikken</button>
+      </div>
+    </div>
+
+    <div id="gh-overlay-win" class="gh-hidden" style="position:absolute;inset:0;background:rgba(13,20,36,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.25rem;z-index:10">
+      <svg style="width:70px;height:70px;margin-bottom:.25rem" viewBox="0 0 100 100">
+        <polygon points="50,10 61,38 91,38 67,56 76,86 50,68 24,86 33,56 9,38 39,38" fill="#efcb27" stroke="#bA7517" stroke-width="3" stroke-linejoin="round"/>
+      </svg>
+      <h2 style="color:#f0e9ff;font-size:21px;font-weight:500;margin:.25rem 0">Du fant den!</h2>
+      <p id="gh-win-msg" style="color:#a8bfd9;font-size:13px;margin:0 0 .5rem">—</p>
+      <p id="gh-win-coins" style="color:#efcb27;font-size:17px;font-weight:500;margin:0 0 1rem">+5 mynter</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+        <button class="gh-btn-p" onclick="ghStart()" style="background:#ff8866;color:white;border:0;border-radius:8px;padding:13px 24px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit">Spill igjen</button>
+        <button class="gh-btn-s" onclick="ghOpenShop()" style="background:#2c4a72;color:#f0e9ff;border:0;border-radius:8px;padding:13px 24px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit">Butikken</button>
+      </div>
+    </div>
+
+    <div id="gh-overlay-lose" class="gh-hidden" style="position:absolute;inset:0;background:rgba(74,21,37,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.25rem;z-index:10">
+      <svg style="width:70px;height:80px;margin-bottom:.25rem" viewBox="0 0 90 110">
+        <path d="M45 8 Q15 8 15 42 L15 95 Q21 103 27 95 Q33 103 39 95 Q45 103 51 95 Q57 103 63 95 Q69 103 75 95 L75 42 Q75 8 45 8 Z" fill="#4a1525"/>
+        <ellipse cx="33" cy="40" rx="6" ry="8" fill="#ff3030"/><ellipse cx="57" cy="40" rx="6" ry="8" fill="#ff3030"/>
+        <path d="M30 65 Q45 75 60 65 Q55 70 50 65 Q45 70 40 65 Z" fill="#0d1424"/>
+      </svg>
+      <h2 style="color:#f0e9ff;font-size:21px;font-weight:500;margin:.25rem 0">Du ble tatt!</h2>
+      <p style="color:#f4c0a0;font-size:13px;margin:0 0 .5rem">Jegeren fanget deg — ingen mynter denne gangen</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:.75rem">
+        <button class="gh-btn-p" onclick="ghStart()" style="background:#ff8866;color:white;border:0;border-radius:8px;padding:13px 24px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit">Prøv igjen</button>
+        <button class="gh-btn-s" onclick="ghOpenShop()" style="background:#2c4a72;color:#f0e9ff;border:0;border-radius:8px;padding:13px 24px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit">Butikken</button>
+      </div>
+    </div>
+
+    <div id="gh-overlay-shop" class="gh-hidden" style="position:absolute;inset:0;background:#0d1424;display:flex;flex-direction:column;padding:14px 16px;z-index:10">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h2 style="color:#f0e9ff;font-size:20px;font-weight:500;margin:0">Butikk</h2>
+        <div style="display:flex;align-items:center;gap:6px;background:#2c4a72;padding:6px 10px;border-radius:8px">
+          <svg width="18" height="18" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#efcb27" stroke="#bA7517" stroke-width="1.5"/><text x="12" y="17" font-size="13" font-weight="500" text-anchor="middle" fill="#bA7517" font-family="sans-serif">M</text></svg>
+          <div id="gh-shop-coins" style="color:#efcb27;font-size:16px;font-weight:500">0</div>
+        </div>
+      </div>
+      <div class="gh-shop-scroll">
+        <div style="color:#7d99c2;font-size:11px;font-weight:500;letter-spacing:1px;margin:4px 0 6px">HATTER</div>
+        <div id="gh-shop-hats" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:14px"></div>
+        <div style="color:#7d99c2;font-size:11px;font-weight:500;letter-spacing:1px;margin:0 0 6px">KLÆR</div>
+        <div id="gh-shop-capes" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-bottom:14px"></div>
+      </div>
+      <button class="gh-btn-s" onclick="ghCloseShop()" style="background:#2c4a72;color:#f0e9ff;border:0;border-radius:8px;padding:12px 24px;font-size:15px;font-weight:500;cursor:pointer;font-family:inherit;margin-top:10px;align-self:center">Tilbake</button>
+    </div>
+    <div id="gh-joy" class="gh-hidden">
+      <div id="gh-joy-stick"></div>
+    </div>
+    <div id="gh-touch-hint" class="gh-hidden">Venstre side: bevegelse · Høyre side: snu</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+let T;
+
+// ===== AUDIO SYSTEM =====
+let audioCtx,bgGain,bgRunning=false,masterMuted=false;
+try{masterMuted=localStorage.getItem('ghost_muted')==='1'}catch(e){}
+
+function startAmbient(){
+  if(!audioCtx||bgRunning)return;
+  bgRunning=true;
+  try{
+    const filter=audioCtx.createBiquadFilter();
+    filter.type='lowpass';filter.frequency.value=220;filter.Q.value=0.6;
+    bgGain=audioCtx.createGain();bgGain.gain.value=masterMuted?0:0.035;
+    const o1=audioCtx.createOscillator();o1.type='sawtooth';o1.frequency.value=55;
+    const o2=audioCtx.createOscillator();o2.type='sawtooth';o2.frequency.value=55.7;
+    const o3=audioCtx.createOscillator();o3.type='sine';o3.frequency.value=110.3;
+    const lfo=audioCtx.createOscillator();lfo.frequency.value=0.27;
+    const lfoG=audioCtx.createGain();lfoG.gain.value=18;
+    lfo.connect(lfoG);lfoG.connect(filter.frequency);
+    o1.connect(filter);o2.connect(filter);o3.connect(filter);
+    filter.connect(bgGain);bgGain.connect(audioCtx.destination);
+    o1.start();o2.start();o3.start();lfo.start();
+  }catch(e){console.error('ambient',e)}
+}
+
+function initAudio(){
+  if(audioCtx)return;
+  try{
+    audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==='suspended')audioCtx.resume();
+    startAmbient();
+  }catch(e){console.error('audio init',e)}
+}
+
+function tone(freq,dur,type,vol,startOff){
+  if(!audioCtx||masterMuted)return;
+  startOff=startOff||0;
+  const t=audioCtx.currentTime+startOff;
+  const o=audioCtx.createOscillator();o.type=type||'sine';o.frequency.value=freq;
+  const g=audioCtx.createGain();
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(vol||0.12,t+0.015);
+  g.gain.exponentialRampToValueAtTime(0.001,t+dur);
+  o.connect(g);g.connect(audioCtx.destination);
+  o.start(t);o.stop(t+dur+0.05);
+}
+
+function playFound(){
+  if(!audioCtx||masterMuted)return;
+  [523,659,784,1047].forEach((f,i)=>tone(f,0.4,'triangle',0.13,i*0.09));
+}
+function playCaught(){
+  if(!audioCtx||masterMuted)return;
+  [440,330,220,165].forEach((f,i)=>tone(f,0.32,'sawtooth',0.11,i*0.08));
+  tone(55,1.2,'sine',0.18,0);
+}
+function playHuntStart(){
+  if(!audioCtx||masterMuted)return;
+  tone(98,1.5,'sine',0.22,0);
+  tone(196,1.2,'triangle',0.09,0);
+  tone(147,1.0,'sine',0.07,0.1);
+}
+function playTick(){
+  if(!audioCtx||masterMuted)return;
+  tone(880,0.1,'square',0.06,0);
+}
+function playStartGame(){
+  if(!audioCtx||masterMuted)return;
+  const t=audioCtx.currentTime;
+  const o=audioCtx.createOscillator();o.type='triangle';
+  o.frequency.setValueAtTime(220,t);
+  o.frequency.linearRampToValueAtTime(440,t+0.18);
+  const g=audioCtx.createGain();
+  g.gain.setValueAtTime(0,t);
+  g.gain.linearRampToValueAtTime(0.1,t+0.02);
+  g.gain.exponentialRampToValueAtTime(0.001,t+0.32);
+  o.connect(g);g.connect(audioCtx.destination);
+  o.start(t);o.stop(t+0.36);
+}
+
+window.ghToggleMute=function(){
+  masterMuted=!masterMuted;
+  try{localStorage.setItem('ghost_muted',masterMuted?'1':'0')}catch(e){}
+  if(bgGain)bgGain.gain.setTargetAtTime(masterMuted?0:0.035,audioCtx.currentTime,0.05);
+  document.getElementById('gh-sound-on').classList.toggle('gh-hidden',masterMuted);
+  document.getElementById('gh-sound-off').classList.toggle('gh-hidden',!masterMuted);
+};
+
+// ===== ITEM BUILDERS =====
+function buildBok(){const g=new T.Group();const c=new T.Mesh(new T.BoxGeometry(0.7,0.18,0.95),new T.MeshStandardMaterial({color:0x7f77dd}));c.position.y=0.09;g.add(c);const sp=new T.Mesh(new T.BoxGeometry(0.05,0.2,0.97),new T.MeshStandardMaterial({color:0x534ab7}));sp.position.set(-0.34,0.1,0);g.add(sp);const pg=new T.Mesh(new T.BoxGeometry(0.65,0.14,0.92),new T.MeshStandardMaterial({color:0xfcf9ff}));pg.position.set(0.02,0.09,0);g.add(pg);return g}
+function buildKopp(){const g=new T.Group();const m=new T.MeshStandardMaterial({color:0x1d9e75});const b=new T.Mesh(new T.CylinderGeometry(0.28,0.27,0.55,20),m);b.position.y=0.275;g.add(b);const cf=new T.Mesh(new T.CircleGeometry(0.26,20),new T.MeshStandardMaterial({color:0x3a2614}));cf.rotation.x=-Math.PI/2;cf.position.y=0.55;g.add(cf);const h=new T.Mesh(new T.TorusGeometry(0.13,0.035,8,12,Math.PI),m);h.position.set(0.3,0.275,0);h.rotation.y=Math.PI/2;g.add(h);return g}
+function buildBall(){const g=new T.Group();const b=new T.Mesh(new T.SphereGeometry(0.35,20,20),new T.MeshStandardMaterial({color:0xe24b4a}));b.position.y=0.35;g.add(b);const s=new T.Mesh(new T.TorusGeometry(0.36,0.04,6,24),new T.MeshStandardMaterial({color:0xfcf9ff}));s.position.y=0.35;s.rotation.x=Math.PI/2;g.add(s);return g}
+function buildEple(){const g=new T.Group();const a=new T.Mesh(new T.SphereGeometry(0.32,16,16),new T.MeshStandardMaterial({color:0xe24b4a}));a.position.y=0.32;a.scale.y=0.95;g.add(a);const s=new T.Mesh(new T.CylinderGeometry(0.03,0.03,0.18,6),new T.MeshStandardMaterial({color:0x6b4226}));s.position.y=0.65;g.add(s);const l=new T.Mesh(new T.SphereGeometry(0.1,8,8),new T.MeshStandardMaterial({color:0x3d8c4a}));l.position.set(0.13,0.66,0);l.scale.set(1,0.3,0.5);g.add(l);return g}
+function buildSmultring(){const g=new T.Group();const d=new T.Mesh(new T.TorusGeometry(0.3,0.13,12,24),new T.MeshStandardMaterial({color:0xed93b1}));d.position.y=0.18;d.rotation.x=Math.PI/2;g.add(d);const cs=[0xfcf9ff,0xe24b4a,0x378add,0xefcb27,0x3d8c4a];for(let i=0;i<14;i++){const a=(i/14)*Math.PI*2+Math.random()*0.3;const r=0.3+(Math.random()-0.5)*0.13;const sp=new T.Mesh(new T.BoxGeometry(0.045,0.025,0.018),new T.MeshStandardMaterial({color:cs[i%cs.length]}));sp.position.set(Math.cos(a)*r,0.31,Math.sin(a)*r);sp.rotation.y=Math.random()*Math.PI;g.add(sp)}return g}
+function buildBanan(){const g=new T.Group();const b=new T.Mesh(new T.TorusGeometry(0.45,0.11,8,14,Math.PI*0.7),new T.MeshStandardMaterial({color:0xefb327}));b.rotation.x=-Math.PI/2;b.position.y=0.13;g.add(b);return g}
+function buildBamse(){const g=new T.Group();const fur=new T.MeshStandardMaterial({color:0x854f0b});const lt=new T.MeshStandardMaterial({color:0xfac775});const bk=new T.MeshBasicMaterial({color:0x1f1438});const body=new T.Mesh(new T.SphereGeometry(0.3,16,16),fur);body.position.y=0.3;body.scale.y=1.1;g.add(body);const bel=new T.Mesh(new T.SphereGeometry(0.18,12,12),lt);bel.position.set(0,0.3,0.18);bel.scale.set(1,1.1,0.4);g.add(bel);const head=new T.Mesh(new T.SphereGeometry(0.22,16,16),fur);head.position.set(0,0.7,0);g.add(head);const eL=new T.Mesh(new T.SphereGeometry(0.08,12,12),fur);eL.position.set(-0.16,0.85,0);g.add(eL);const eR=eL.clone();eR.position.x=0.16;g.add(eR);const yL=new T.Mesh(new T.SphereGeometry(0.025,6,6),bk);yL.position.set(-0.08,0.74,0.18);g.add(yL);const yR=yL.clone();yR.position.x=0.08;g.add(yR);return g}
+function buildKroneTing(){const g=new T.Group();const gold=new T.MeshStandardMaterial({color:0xefcb27,metalness:0.5,roughness:0.4});const ring=new T.Mesh(new T.CylinderGeometry(0.25,0.25,0.16,16),gold);ring.position.y=0.08;g.add(ring);const gc=[0xe24b4a,0x378add,0x3d8c4a];for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;const pk=new T.Mesh(new T.ConeGeometry(0.06,0.18,4),gold);pk.position.set(Math.cos(a)*0.25,0.25,Math.sin(a)*0.25);g.add(pk);if(i%2===0){const gm=new T.Mesh(new T.OctahedronGeometry(0.05),new T.MeshStandardMaterial({color:gc[(i/2)%3],metalness:0.6,roughness:0.2}));gm.position.set(Math.cos(a)*0.25,0.38,Math.sin(a)*0.25);g.add(gm)}}return g}
+function buildSopp(){const g=new T.Group();const st=new T.Mesh(new T.CylinderGeometry(0.1,0.13,0.4,12),new T.MeshStandardMaterial({color:0xf8efd9}));st.position.y=0.2;g.add(st);const cap=new T.Mesh(new T.SphereGeometry(0.32,16,12,0,Math.PI*2,0,Math.PI/2),new T.MeshStandardMaterial({color:0xe24b4a}));cap.position.y=0.4;g.add(cap);const sm=new T.MeshStandardMaterial({color:0xfcf9ff});[[0,0.62,0],[-0.18,0.45,0.05],[0.16,0.46,-0.08],[0,0.5,-0.18]].forEach(p=>{const sp=new T.Mesh(new T.SphereGeometry(0.05,8,8),sm);sp.position.set(p[0],p[1],p[2]);sp.scale.set(1,0.4,1);g.add(sp)});return g}
+function buildStjerne(){const g=new T.Group();const sh=new T.Shape();for(let i=0;i<10;i++){const r=i%2===0?0.32:0.14;const a=(i/10)*Math.PI*2-Math.PI/2;const x=Math.cos(a)*r,y=Math.sin(a)*r;if(i===0)sh.moveTo(x,y);else sh.lineTo(x,y)}sh.closePath();const star=new T.Mesh(new T.ExtrudeGeometry(sh,{depth:0.1,bevelEnabled:true,bevelThickness:0.02,bevelSize:0.02,bevelSegments:1}),new T.MeshStandardMaterial({color:0xefcb27,metalness:0.4,roughness:0.4,emissive:0xefcb27,emissiveIntensity:0.2}));star.rotation.x=-Math.PI/2;star.position.y=0.05;g.add(star);return g}
+function buildSkattekiste(){const g=new T.Group();const w=new T.MeshStandardMaterial({color:0x6b4226});const w2=new T.MeshStandardMaterial({color:0x854f0b});const gold=new T.MeshStandardMaterial({color:0xefcb27,metalness:0.5,roughness:0.4});const base=new T.Mesh(new T.BoxGeometry(0.7,0.4,0.5),w);base.position.y=0.2;g.add(base);const lid=new T.Mesh(new T.BoxGeometry(0.72,0.16,0.52),w2);lid.position.y=0.48;g.add(lid);const s1=new T.Mesh(new T.BoxGeometry(0.74,0.04,0.53),gold);s1.position.y=0.4;g.add(s1);const lock=new T.Mesh(new T.BoxGeometry(0.12,0.16,0.05),gold);lock.position.set(0,0.34,0.27);g.add(lock);return g}
+function buildDiamant(){const g=new T.Group();const d=new T.Mesh(new T.OctahedronGeometry(0.3),new T.MeshStandardMaterial({color:0x85b7eb,metalness:0.6,roughness:0.15,emissive:0x378add,emissiveIntensity:0.4}));d.position.y=0.4;d.scale.y=1.3;g.add(d);return g}
+
+function buildHatWitch(){const g=new T.Group();const m=new T.MeshStandardMaterial({color:0x1a1a1a});g.add(new T.Mesh(new T.CylinderGeometry(0.45,0.45,0.05,16),m));const c=new T.Mesh(new T.ConeGeometry(0.3,0.6,12),m);c.position.y=0.32;g.add(c);const s=new T.Mesh(new T.OctahedronGeometry(0.05),new T.MeshStandardMaterial({color:0xefcb27,emissive:0xefcb27,emissiveIntensity:0.4}));s.position.set(0,0.5,0.27);g.add(s);return g}
+function buildHatParty(){const g=new T.Group();const c=new T.Mesh(new T.ConeGeometry(0.3,0.6,16),new T.MeshStandardMaterial({color:0xed93b1}));c.position.y=0.3;g.add(c);const cs=[0xefcb27,0x378add,0xfcf9ff];for(let i=0;i<3;i++){const y=0.15+i*0.13;const r=0.3-i*0.065;const st=new T.Mesh(new T.TorusGeometry(r,0.025,6,16),new T.MeshStandardMaterial({color:cs[i]}));st.position.y=y;st.rotation.x=Math.PI/2;g.add(st)}const p=new T.Mesh(new T.SphereGeometry(0.07,8,8),new T.MeshStandardMaterial({color:0xefcb27}));p.position.y=0.62;g.add(p);return g}
+function buildHatCowboy(){const g=new T.Group();const m=new T.MeshStandardMaterial({color:0x8b5a2b});g.add(new T.Mesh(new T.CylinderGeometry(0.55,0.55,0.05,16),m));const cr=new T.Mesh(new T.CylinderGeometry(0.25,0.3,0.32,12),m);cr.position.y=0.18;g.add(cr);const b=new T.Mesh(new T.CylinderGeometry(0.32,0.32,0.05,12),new T.MeshStandardMaterial({color:0x3a2614}));b.position.y=0.05;g.add(b);return g}
+function buildHatCrown(){const g=new T.Group();const gold=new T.MeshStandardMaterial({color:0xefcb27,metalness:0.5,roughness:0.4});const r=new T.Mesh(new T.CylinderGeometry(0.32,0.32,0.18,16),gold);r.position.y=0.09;g.add(r);const gc=[0xe24b4a,0x378add,0x3d8c4a];for(let i=0;i<6;i++){const a=(i/6)*Math.PI*2;const pk=new T.Mesh(new T.ConeGeometry(0.07,0.2,4),gold);pk.position.set(Math.cos(a)*0.32,0.28,Math.sin(a)*0.32);g.add(pk);if(i%2===0){const gm=new T.Mesh(new T.OctahedronGeometry(0.05),new T.MeshStandardMaterial({color:gc[(i/2)%3],metalness:0.6,roughness:0.2}));gm.position.set(Math.cos(a)*0.32,0.42,Math.sin(a)*0.32);g.add(gm)}}return g}
+function buildScarf(color){return function(){const g=new T.Group();const m=new T.MeshStandardMaterial({color:color,side:T.DoubleSide});const sc=new T.Mesh(new T.PlaneGeometry(0.8,0.25),m);sc.position.set(0,0.1,-0.3);g.add(sc);const e1=new T.Mesh(new T.PlaneGeometry(0.18,0.5),m);e1.position.set(0.18,-0.18,-0.25);g.add(e1);const e2=new T.Mesh(new T.PlaneGeometry(0.18,0.4),m);e2.position.set(-0.16,-0.13,-0.28);g.add(e2);return g}}
+function buildCape(color,trim){return function(){const g=new T.Group();const m=new T.MeshStandardMaterial({color:color,side:T.DoubleSide});const cape=new T.Mesh(new T.PlaneGeometry(0.85,1.0),m);cape.position.set(0,-0.05,-0.45);cape.rotation.x=-0.15;g.add(cape);const collar=new T.Mesh(new T.TorusGeometry(0.45,0.05,6,12,Math.PI),new T.MeshStandardMaterial({color:trim||color}));collar.position.y=0.45;collar.rotation.x=Math.PI/2;g.add(collar);return g}}
+
+// ===== FURNITURE BUILDERS =====
+function buildWardrobe(){const g=new T.Group();const wood=new T.MeshStandardMaterial({color:0x4a2818});const dark=new T.MeshStandardMaterial({color:0x2a1408});const body=new T.Mesh(new T.BoxGeometry(1.6,2.5,0.7),wood);body.position.y=1.25;g.add(body);const split=new T.Mesh(new T.BoxGeometry(0.04,2.3,0.04),dark);split.position.set(0,1.25,0.37);g.add(split);const knobMat=new T.MeshStandardMaterial({color:0xefcb27,metalness:0.6});const k1=new T.Mesh(new T.SphereGeometry(0.06,8,8),knobMat);k1.position.set(-0.15,1.25,0.4);g.add(k1);const k2=k1.clone();k2.position.x=0.15;g.add(k2);return g}
+function buildBookshelf(){const g=new T.Group();const wood=new T.MeshStandardMaterial({color:0x4a2818});const dark=new T.MeshStandardMaterial({color:0x2a1408});const body=new T.Mesh(new T.BoxGeometry(2,2.5,0.5),wood);body.position.y=1.25;g.add(body);for(let i=0;i<4;i++){const sh=new T.Mesh(new T.BoxGeometry(1.92,0.05,0.45),dark);sh.position.set(0,0.3+i*0.6,0.04);g.add(sh)}const bcs=[0xe24b4a,0x378add,0x3d8c4a,0x534ab7,0xefcb27,0x993556];for(let i=0;i<12;i++){const book=new T.Mesh(new T.BoxGeometry(0.13,0.4,0.18),new T.MeshStandardMaterial({color:bcs[i%bcs.length]}));book.position.set(-0.7+(i%4)*0.4,0.55+Math.floor(i/4)*0.6,0.16);g.add(book)}return g}
+function buildBed(){const g=new T.Group();const wood=new T.MeshStandardMaterial({color:0x4a2818});const blanket=new T.MeshStandardMaterial({color:0x534ab7});const pillow=new T.MeshStandardMaterial({color:0xfcf9ff});const head=new T.Mesh(new T.BoxGeometry(1.8,1.4,0.15),wood);head.position.set(0,0.7,-1.4);g.add(head);const mat=new T.Mesh(new T.BoxGeometry(1.7,0.4,2.5),blanket);mat.position.set(0,0.3,0);g.add(mat);const pl=new T.Mesh(new T.BoxGeometry(1.5,0.15,0.5),pillow);pl.position.set(0,0.55,-0.95);g.add(pl);return g}
+function buildSofa(){const g=new T.Group();const m=new T.MeshStandardMaterial({color:0x4a1525});const dark=new T.MeshStandardMaterial({color:0x2a0d18});const seat=new T.Mesh(new T.BoxGeometry(2,0.4,0.9),m);seat.position.y=0.25;g.add(seat);const back=new T.Mesh(new T.BoxGeometry(2,0.7,0.2),dark);back.position.set(0,0.8,-0.35);g.add(back);const arm1=new T.Mesh(new T.BoxGeometry(0.2,0.6,0.9),dark);arm1.position.set(-0.9,0.55,0);g.add(arm1);const arm2=arm1.clone();arm2.position.x=0.9;g.add(arm2);return g}
+function buildPiano(){const g=new T.Group();const black=new T.MeshStandardMaterial({color:0x0a0a0a});const white=new T.MeshStandardMaterial({color:0xfcf9ff});const body=new T.Mesh(new T.BoxGeometry(1.8,0.9,1.4),black);body.position.y=0.7;g.add(body);const keys=new T.Mesh(new T.BoxGeometry(1.2,0.05,0.25),white);keys.position.set(-0.2,0.92,0.65);g.add(keys);for(const p of[[-0.7,0.6],[0.7,0.6],[0,-0.5]]){const leg=new T.Mesh(new T.CylinderGeometry(0.06,0.06,0.7),black);leg.position.set(p[0],0.35,p[1]);g.add(leg)}return g}
+function buildChestFurniture(){const g=new T.Group();const wood=new T.MeshStandardMaterial({color:0x4a2818});const gold=new T.MeshStandardMaterial({color:0xefcb27,metalness:0.5});const body=new T.Mesh(new T.BoxGeometry(1.2,0.8,0.7),wood);body.position.y=0.4;g.add(body);const lid=new T.Mesh(new T.BoxGeometry(1.22,0.12,0.72),wood);lid.position.y=0.86;g.add(lid);const trim=new T.Mesh(new T.BoxGeometry(1.24,0.04,0.74),gold);trim.position.y=0.79;g.add(trim);return g}
+function buildTable(){const g=new T.Group();const wood=new T.MeshStandardMaterial({color:0x4a2818});const top=new T.Mesh(new T.BoxGeometry(1.5,0.1,1),wood);top.position.y=0.85;g.add(top);for(const p of[[-0.65,-0.4],[0.65,-0.4],[-0.65,0.4],[0.65,0.4]]){const leg=new T.Mesh(new T.BoxGeometry(0.1,0.85,0.1),wood);leg.position.set(p[0],0.42,p[1]);g.add(leg)}return g}
+function buildCandle(){const g=new T.Group();const wax=new T.MeshStandardMaterial({color:0xfcf9ff});const c=new T.Mesh(new T.CylinderGeometry(0.08,0.08,0.5,12),wax);c.position.y=0.25;g.add(c);const flame=new T.Mesh(new T.ConeGeometry(0.06,0.18,8),new T.MeshBasicMaterial({color:0xff8866}));flame.position.y=0.6;g.add(flame);return g}
+
+const FURNITURE_TYPES=[
+  {build:buildWardrobe,r:1.0},
+  {build:buildBookshelf,r:1.1},
+  {build:buildBed,r:1.5},
+  {build:buildSofa,r:1.1},
+  {build:buildPiano,r:1.1},
+  {build:buildChestFurniture,r:0.8},
+  {build:buildTable,r:0.9}
+];
+
+const LAYOUTS=[
+  // Layout 1: horisontal vegg deler nord/sør
+  {
+    walls:[
+      [-30,0,8,0.3],
+      [30,0,8,0.3]
+    ],
+    slots:[
+      [-35,25],[-22,25],[-8,25],[8,25],[22,25],[35,25],
+      [-35,15],[-22,15],[-8,15],[22,15],[35,15],
+      [-35,-15],[-22,-15],[-8,-15],[22,-15],[35,-15],
+      [-35,-25],[-22,-25],[-8,-25],[8,-25],[22,-25],[35,-25]
+    ],
+    playerSpawn:{x:0,z:25,a:Math.PI},
+    seekerSpawn:{x:0,z:-25}
+  },
+  // Layout 2: vertikal vegg deler øst/vest
+  {
+    walls:[
+      [0,-22,0.3,7],
+      [0,22,0.3,7]
+    ],
+    slots:[
+      [-35,25],[-30,12],[-30,0],[-30,-12],[-35,-25],
+      [-15,22],[-15,8],[-15,-8],[-15,-22],
+      [15,22],[15,8],[15,-8],[15,-22],
+      [35,25],[30,12],[30,0],[30,-12],[35,-25]
+    ],
+    playerSpawn:{x:30,z:0,a:-Math.PI/2},
+    seekerSpawn:{x:-30,z:0}
+  },
+  // Layout 3: tre striper
+  {
+    walls:[
+      [-30,15,9,0.3],
+      [10,15,9,0.3],
+      [-10,-15,9,0.3],
+      [30,-15,9,0.3]
+    ],
+    slots:[
+      [-35,25],[-22,25],[-8,25],[8,25],[22,25],[35,25],
+      [-35,5],[-22,2],[-8,5],[8,2],[22,5],[35,2],
+      [-35,-25],[-22,-25],[-8,-25],[8,-25],[22,-25],[35,-25]
+    ],
+    playerSpawn:{x:0,z:25,a:Math.PI},
+    seekerSpawn:{x:0,z:-25}
+  }
+];
+
+// ===== STATE =====
+let player={name:'',coins:0,owned:[],equippedHat:null,equippedCape:null};
+const STORAGE_KEY='ghost_house_player_local';
+let scene,camera,renderer,ghost,seeker,hatSlot,capeSlot;
+let staticObstacles=[],dynamicObstacles=[],hidingSpots=[],candles=[],layoutGroup;
+let targetGroup=null,targetGlow=null,targetPos={x:0,z:0},currentTarget=null;
+let gameRunning=false,startTime=0,huntStartTime=0,huntStartedAnnounced=false;
+let lastTargetIdx=-1,lastSpotIdx=-1,lastLayoutIdx=-1,currentLayout=null,lastTickShown=-1;
+const seekerState={x:0,z:0,angle:0,bob:0};
+const keys={};
+const ghostState={x:0,z:0,angle:0,bob:0};
+const PLAYER_SPEED=0.20;
+const SEEKER_SPEED=0.06;
+const PLAYER_RADIUS=0.45;
+const SEEKER_RADIUS=0.55;
+const HIDE_TIME=10000;
+let joyActive=false,joyTouchId=null,joyOriginX=0,joyOriginY=0,joyCurrentX=0,joyCurrentY=0;
+let lookTouchId=null,lookLastX=0;
+const JOY_RADIUS=58;
+const JOY_DEADZONE=10;
+const LOOK_SENS=0.0085;
+
+let seekerEyeMat,seekerLightRef;
+function buildSeeker(){
+  const g=new T.Group();
+  const m=new T.MeshStandardMaterial({color:0x4a1525,transparent:true,opacity:0.92,emissive:0xa0202a,emissiveIntensity:0.5});
+  const head=new T.Mesh(new T.SphereGeometry(0.6,16,16),m);head.position.y=0.4;g.add(head);
+  const tail=new T.Mesh(new T.ConeGeometry(0.6,0.85,16),m);tail.position.y=-0.4;tail.rotation.x=Math.PI;g.add(tail);
+  seekerEyeMat=new T.MeshBasicMaterial({color:0xff3030});
+  const eyeL=new T.Mesh(new T.SphereGeometry(0.1,10,10),seekerEyeMat);eyeL.position.set(-0.2,0.5,0.5);g.add(eyeL);
+  const eyeR=eyeL.clone();eyeR.position.x=0.2;g.add(eyeR);
+  const mouth=new T.Mesh(new T.SphereGeometry(0.12,10,10),new T.MeshBasicMaterial({color:0x0d1424}));mouth.position.set(0,0.25,0.5);mouth.scale.set(1.2,0.5,0.5);g.add(mouth);
+  seekerLightRef=new T.PointLight(0xff3030,1.5,5);seekerLightRef.position.y=0;g.add(seekerLightRef);
+  return g;
+}
+
+const ghObjects=[
+  {name:'En bok',svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect x="40" y="25" width="120" height="155" rx="4" fill="#7f77dd"/><rect x="40" y="25" width="14" height="155" fill="#534ab7"/><rect x="70" y="55" width="80" height="6" rx="2" fill="#fcf9ff"/></svg>',build:buildBok},
+  {name:'En kopp',svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect x="45" y="60" width="100" height="105" rx="8" fill="#1d9e75"/><rect x="45" y="60" width="100" height="16" fill="#3a2614"/><path d="M145 85 Q180 85 180 115 Q180 145 145 145" stroke="#1d9e75" stroke-width="14" fill="none"/></svg>',build:buildKopp},
+  {name:'En ball',svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="75" fill="#e24b4a"/><line x1="100" y1="25" x2="100" y2="175" stroke="#fcf9ff" stroke-width="4"/></svg>',build:buildBall},
+  {name:'Et eple',svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="100" cy="120" r="62" fill="#e24b4a"/><rect x="96" y="55" width="8" height="22" fill="#6b4226" rx="2"/><ellipse cx="120" cy="58" rx="14" ry="7" fill="#3d8c4a" transform="rotate(20 120 58)"/></svg>',build:buildEple},
+  {name:'En smultring',svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="100" cy="100" r="65" fill="#ed93b1"/><circle cx="100" cy="100" r="22" fill="#fcf9ff"/></svg>',build:buildSmultring},
+  {name:'En banan',svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path d="M40 60 Q35 130 95 165 Q155 178 178 148 Q172 138 165 145 Q120 162 82 132 Q60 100 60 65 Q56 52 40 60 Z" fill="#ef9f27"/></svg>',build:buildBanan},
+  {name:'En bamse',svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><circle cx="55" cy="55" r="22" fill="#854f0b"/><circle cx="145" cy="55" r="22" fill="#854f0b"/><circle cx="100" cy="90" r="58" fill="#854f0b"/><circle cx="100" cy="105" r="38" fill="#fac775"/><circle cx="80" cy="80" r="5" fill="#1f1438"/><circle cx="120" cy="80" r="5" fill="#1f1438"/></svg>',build:buildBamse},
+  {name:'En krone',svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><path d="M30 140 L30 70 L60 105 L80 50 L100 105 L120 50 L140 105 L170 70 L170 140 Z" fill="#efcb27" stroke="#bA7517" stroke-width="3"/><rect x="30" y="140" width="140" height="14" fill="#bA7517"/></svg>',build:buildKroneTing},
+  {name:'En sopp',svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect x="80" y="100" width="40" height="65" fill="#f8efd9" rx="4"/><path d="M30 105 Q30 50 100 50 Q170 50 170 105 Q170 115 100 115 Q30 115 30 105 Z" fill="#e24b4a"/><ellipse cx="75" cy="80" rx="12" ry="9" fill="#fcf9ff"/></svg>',build:buildSopp},
+  {name:'En stjerne',svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><polygon points="100,25 122,82 182,82 134,118 152,178 100,142 48,178 66,118 18,82 78,82" fill="#efcb27" stroke="#bA7517" stroke-width="3"/></svg>',build:buildStjerne},
+  {name:'En skattekiste',svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><rect x="30" y="100" width="140" height="70" fill="#6b4226"/><rect x="30" y="60" width="140" height="50" fill="#854f0b"/><rect x="88" y="108" width="24" height="28" fill="#efcb27"/></svg>',build:buildSkattekiste},
+  {name:'En diamant',svg:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><polygon points="100,25 50,80 100,175 150,80" fill="#85b7eb"/><polygon points="100,25 50,80 100,80" fill="#b5d4f4"/><polygon points="50,80 100,80 100,175" fill="#185fa5"/></svg>',build:buildDiamant}
+];
+
+const shopItems=[
+  {id:'witch',name:'Spisshatt',cat:'hat',price:5,build:buildHatWitch,icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,15 25,80 75,80" fill="#1a1a1a"/><rect x="18" y="76" width="64" height="8" rx="2" fill="#1a1a1a"/></svg>'},
+  {id:'party',name:'Bursdagshatt',cat:'hat',price:8,build:buildHatParty,icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><polygon points="50,15 30,82 70,82" fill="#ed93b1"/><line x1="36" y1="60" x2="64" y2="60" stroke="#efcb27" stroke-width="3"/><circle cx="50" cy="14" r="5" fill="#efcb27"/></svg>'},
+  {id:'cowboy',name:'Cowboyhatt',cat:'hat',price:12,build:buildHatCowboy,icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><ellipse cx="50" cy="65" rx="38" ry="8" fill="#8b5a2b"/><path d="M28 65 Q28 35 50 32 Q72 35 72 65 Z" fill="#8b5a2b"/></svg>'},
+  {id:'crown',name:'Krone',cat:'hat',price:25,build:buildHatCrown,icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M22 78 L22 38 L36 56 L50 30 L64 56 L78 38 L78 78 Z" fill="#efcb27" stroke="#bA7517" stroke-width="2"/><rect x="22" y="78" width="56" height="6" fill="#bA7517"/></svg>'},
+  {id:'scarf_red',name:'Rødt skjerf',cat:'cape',price:4,build:buildScarf(0xe24b4a),icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M18 38 Q40 28 60 40 Q80 50 88 38 L88 52 Q80 65 60 53 Q40 42 18 52 Z" fill="#e24b4a"/></svg>'},
+  {id:'cape_red',name:'Rød kappe',cat:'cape',price:10,build:buildCape(0xe24b4a,0x993556),icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M30 25 L70 25 L80 82 L20 82 Z" fill="#e24b4a"/></svg>'},
+  {id:'cape_gold',name:'Gullkappe',cat:'cape',price:30,build:buildCape(0xefcb27,0xbA7517),icon:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M30 25 L70 25 L80 82 L20 82 Z" fill="#efcb27"/></svg>'}
+];
+
+function savePlayer(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(player))}catch(e){}}
+function loadPlayer(){try{const v=localStorage.getItem(STORAGE_KEY);if(v){const s=JSON.parse(v);Object.assign(player,s)}}catch(e){}}
+function clearKeys(){for(const k in keys)keys[k]=false}
+
+function isColliding(x,z,radius){
+  for(const arr of [staticObstacles,dynamicObstacles]){
+    for(const o of arr){
+      if(o.type==='box'){
+        const cx=Math.max(o.cx-o.hw,Math.min(x,o.cx+o.hw));
+        const cz=Math.max(o.cz-o.hd,Math.min(z,o.cz+o.hd));
+        const dx=x-cx,dz=z-cz;
+        if(dx*dx+dz*dz<radius*radius)return true;
+      }else{
+        const dx=x-o.cx,dz=z-o.cz;
+        const rr=(o.r+radius);
+        if(dx*dx+dz*dz<rr*rr)return true;
+      }
+    }
+  }
+  return false;
+}
+
+function addOuterWall(cx,cz,hw,hd,parent){
+  const wall=new T.Mesh(new T.BoxGeometry(hw*2,3,hd*2),new T.MeshStandardMaterial({color:0x2a1c2c}));
+  wall.position.set(cx,1.5,cz);parent.add(wall);
+  staticObstacles.push({type:'box',cx,cz,hw:hw+0.05,hd:hd+0.05});
+}
+
+function addLayoutWall(cx,cz,hw,hd){
+  const wall=new T.Mesh(new T.BoxGeometry(hw*2,3,hd*2),new T.MeshStandardMaterial({color:0x2a1c2c}));
+  wall.position.set(cx,1.5,cz);layoutGroup.add(wall);
+  dynamicObstacles.push({type:'box',cx,cz,hw:hw+0.05,hd:hd+0.05});
+}
+
+function addLayoutFurniture(builder,x,z,rotY,radius){
+  const f=builder();f.position.set(x,0,z);if(rotY)f.rotation.y=rotY;layoutGroup.add(f);
+  dynamicObstacles.push({type:'circle',cx:x,cz:z,r:radius});
+  hidingSpots.push({x,z,radius});
+}
+
+function disposeGroup(group){
+  try{
+    group.traverse(obj=>{
+      if(obj.geometry)obj.geometry.dispose();
+      if(obj.material){
+        if(Array.isArray(obj.material))obj.material.forEach(m=>{try{m.dispose()}catch(e){}});
+        else{try{obj.material.dispose()}catch(e){}}
+      }
+    });
+  }catch(e){console.error('disposeGroup',e)}
+}
+
+function buildLayout(){
+  if(layoutGroup){disposeGroup(layoutGroup);scene.remove(layoutGroup)}
+  layoutGroup=new T.Group();
+  scene.add(layoutGroup);
+  dynamicObstacles=[];
+  hidingSpots=[];
+  let idx;do{idx=Math.floor(Math.random()*LAYOUTS.length)}while(LAYOUTS.length>1&&idx===lastLayoutIdx);
+  lastLayoutIdx=idx;
+  currentLayout=LAYOUTS[idx];
+  for(const w of currentLayout.walls)addLayoutWall(w[0],w[1],w[2],w[3]);
+  // Filter out slots too close to spawn points so player and seeker never spawn inside furniture.
+  // This is the fix for the "stuck — can turn but not move forward" bug.
+  const ps=currentLayout.playerSpawn,ss=currentLayout.seekerSpawn;
+  const SPAWN_CLEARANCE=3.5;
+  const slots=currentLayout.slots.filter(([x,z])=>{
+    const dp=Math.hypot(x-ps.x,z-ps.z);
+    const ds=Math.hypot(x-ss.x,z-ss.z);
+    return dp>SPAWN_CLEARANCE&&ds>SPAWN_CLEARANCE;
+  });
+  for(let i=slots.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[slots[i],slots[j]]=[slots[j],slots[i]]}
+  const count=Math.min(14,slots.length);
+  for(let i=0;i<count;i++){
+    const[x,z]=slots[i];
+    const ft=FURNITURE_TYPES[Math.floor(Math.random()*FURNITURE_TYPES.length)];
+    const rot=Math.floor(Math.random()*4)*Math.PI/2;
+    addLayoutFurniture(ft.build,x,z,rot,ft.r);
+  }
+}
+
+function initThree(){
+  T=THREE;
+  const cv=document.getElementById('gh-canvas');
+  const w=cv.clientWidth||window.innerWidth,h=cv.clientHeight||window.innerHeight-180;
+  cv.width=w;cv.height=h;
+  scene=new T.Scene();scene.background=new T.Color(0x0d1424);scene.fog=new T.Fog(0x0d1424,15,55);
+  camera=new T.PerspectiveCamera(65,w/h,0.1,160);
+  renderer=new T.WebGLRenderer({canvas:cv,antialias:true});renderer.setSize(w,h,false);renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+
+  const floor=new T.Mesh(new T.PlaneGeometry(100,80),new T.MeshStandardMaterial({color:0x2a1c14}));
+  floor.rotation.x=-Math.PI/2;scene.add(floor);
+
+  scene.add(new T.AmbientLight(0x4a3c5c,0.42));
+  const moon=new T.DirectionalLight(0x8a9cd4,0.4);moon.position.set(5,10,-3);scene.add(moon);
+
+  const wallsGroup=new T.Group();scene.add(wallsGroup);
+  addOuterWall(0,-30,40,0.3,wallsGroup);
+  addOuterWall(0,30,40,0.3,wallsGroup);
+  addOuterWall(-40,0,0.3,30,wallsGroup);
+  addOuterWall(40,0,0.3,30,wallsGroup);
+
+  const cps=[[-38,-29],[38,-29],[-38,29],[38,29],[-38,0],[38,0],[0,-29],[0,29]];
+  for(const[cx,cz]of cps){
+    const c=buildCandle();c.position.set(cx,0,cz);scene.add(c);
+    const light=new T.PointLight(0xff8866,0.6,5);light.position.set(cx,0.7,cz);scene.add(light);
+    candles.push({light,baseIntensity:0.6});
+  }
+
+  ghost=new T.Group();
+  const gM=new T.MeshStandardMaterial({color:0xfcf9ff,transparent:true,opacity:0.94,emissive:0xaaccff,emissiveIntensity:0.3});
+  const head=new T.Mesh(new T.SphereGeometry(0.5,16,16),gM);head.position.y=0.3;ghost.add(head);
+  const tail=new T.Mesh(new T.ConeGeometry(0.5,0.7,16),gM);tail.position.y=-0.3;tail.rotation.x=Math.PI;ghost.add(tail);
+  const eM=new T.MeshBasicMaterial({color:0x0d1424});
+  const eL=new T.Mesh(new T.SphereGeometry(0.07,8,8),eM);eL.position.set(-0.16,0.35,0.42);ghost.add(eL);
+  const eR=eL.clone();eR.position.x=0.16;ghost.add(eR);
+  ghost.position.set(0,1.2,25);scene.add(ghost);
+  const gL=new T.PointLight(0xaaccff,0.9,5);gL.position.y=0;ghost.add(gL);
+  hatSlot=new T.Group();hatSlot.position.y=0.78;ghost.add(hatSlot);
+  capeSlot=new T.Group();ghost.add(capeSlot);
+
+  seeker=buildSeeker();seeker.position.set(0,1.2,-25);scene.add(seeker);
+
+  buildLayout();
+
+  window.addEventListener('resize',onResize);
+  window.addEventListener('orientationchange',()=>{setTimeout(onResize,100);setTimeout(onResize,400)});
+  setTimeout(onResize,50);
+  setTimeout(onResize,300);
+}
+
+function onResize(){
+  if(!renderer)return;
+  const cv=document.getElementById('gh-canvas');
+  const w=cv.clientWidth,h=cv.clientHeight;
+  if(w<10||h<10)return;
+  cv.width=w;cv.height=h;
+  camera.aspect=w/h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w,h,false);
+}
+
+function applyEquipped(slot){
+  try{
+    if(slot==='hat'){while(hatSlot.children.length)hatSlot.remove(hatSlot.children[0]);if(player.equippedHat){const it=shopItems.find(i=>i.id===player.equippedHat);if(it)hatSlot.add(it.build())}}
+    else{while(capeSlot.children.length)capeSlot.remove(capeSlot.children[0]);if(player.equippedCape){const it=shopItems.find(i=>i.id===player.equippedCape);if(it)capeSlot.add(it.build())}}
+  }catch(e){}
+}
+function updateCoins(){const c=document.getElementById('gh-coins');if(c)c.textContent=player.coins;const sc=document.getElementById('gh-shop-coins');if(sc)sc.textContent=player.coins}
+
+function placeTarget(){
+  try{
+    if(targetGroup){disposeGroup(targetGroup);scene.remove(targetGroup);targetGroup=null}
+    if(targetGlow){scene.remove(targetGlow);targetGlow=null}
+    let idx;do{idx=Math.floor(Math.random()*ghObjects.length)}while(ghObjects.length>1&&idx===lastTargetIdx);
+    lastTargetIdx=idx;currentTarget=ghObjects[idx];
+    let validX,validZ,tries=0;
+    if(hidingSpots.length>0){
+      while(tries<40){
+        const si=Math.floor(Math.random()*hidingSpots.length);
+        if(si===lastSpotIdx&&hidingSpots.length>1){tries++;continue}
+        const spot=hidingSpots[si];
+        const angle=Math.random()*Math.PI*2;
+        const ux=Math.cos(angle),uz=Math.sin(angle);
+        const off=spot.radius+0.9;
+        const tx=spot.x+ux*off,tz=spot.z+uz*off;
+        if(!isColliding(tx,tz,0.4)&&Math.abs(tx)<39&&Math.abs(tz)<29){
+          validX=tx;validZ=tz;lastSpotIdx=si;break;
+        }
+        tries++;
+      }
+    }
+    // Fallback: scan a grid for any clear spot so we never end up without a target
+    if(validX===undefined){
+      const candidates=[[15,15],[-15,15],[15,-15],[-15,-15],[20,5],[-20,5],[20,-5],[-20,-5],[5,20],[-5,20],[5,-20],[-5,-20]];
+      for(const[fx,fz]of candidates){
+        if(!isColliding(fx,fz,0.4)){validX=fx;validZ=fz;break}
+      }
+    }
+    if(validX===undefined){validX=0;validZ=18}
+    targetPos.x=validX;targetPos.z=validZ;
+    targetGroup=currentTarget.build();
+    targetGroup.position.set(validX,0.05,validZ);
+    targetGroup.scale.set(0.95,0.95,0.95);
+    scene.add(targetGroup);
+    targetGlow=new T.PointLight(0xff8866,0.7,4);targetGlow.position.set(validX,0.5,validZ);scene.add(targetGlow);
+    document.getElementById('gh-target-name').textContent=currentTarget.name;
+    document.getElementById('gh-target-pic').innerHTML=currentTarget.svg.replace('<svg ','<svg width="38" height="38" ');
+  }catch(e){console.error('placeTarget',e)}
+}
+
+function moveSeeker(){
+  const dx=ghostState.x-seekerState.x,dz=ghostState.z-seekerState.z;
+  const dist=Math.sqrt(dx*dx+dz*dz);
+  if(dist<0.05)return dist;
+  const dirX=dx/dist,dirZ=dz/dist;
+  const stuck=isColliding(seekerState.x,seekerState.z,SEEKER_RADIUS);
+  if(stuck){
+    // Safety net: if somehow inside a collider, allow free movement to escape
+    seekerState.x+=dirX*SEEKER_SPEED;
+    seekerState.z+=dirZ*SEEKER_SPEED;
+  }else{
+    const px=seekerState.x,pz=seekerState.z;
+    const nx=seekerState.x+dirX*SEEKER_SPEED,nz=seekerState.z+dirZ*SEEKER_SPEED;
+    if(!isColliding(nx,seekerState.z,SEEKER_RADIUS))seekerState.x=nx;
+    if(!isColliding(seekerState.x,nz,SEEKER_RADIUS))seekerState.z=nz;
+    if(seekerState.x===px&&seekerState.z===pz){
+      const sx=seekerState.x+dirZ*SEEKER_SPEED,sz=seekerState.z-dirX*SEEKER_SPEED;
+      if(!isColliding(sx,seekerState.z,SEEKER_RADIUS))seekerState.x=sx;
+      if(!isColliding(seekerState.x,sz,SEEKER_RADIUS))seekerState.z=sz;
+    }
+  }
+  seekerState.angle=Math.atan2(dirX,dirZ);
+  return dist;
+}
+
+function showAnnounce(text){
+  const el=document.getElementById('gh-announce');
+  if(!el)return;
+  el.textContent=text;
+  el.classList.remove('gh-hidden','gh-announce-anim');
+  void el.offsetWidth;
+  el.classList.add('gh-announce-anim');
+  setTimeout(()=>{el.classList.add('gh-hidden')},1900);
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  try{
+    if(!renderer||!scene||!camera)return;
+    const t=Date.now()*0.005;
+    for(let i=0;i<candles.length;i++)candles[i].light.intensity=candles[i].baseIntensity*(0.85+Math.sin(t+i*1.7)*0.15);
+    if(gameRunning){
+      const now=Date.now();
+      const hunting=now>=huntStartTime;
+
+      let turn=(keys['arrowleft']||keys['a']?1:0)-(keys['arrowright']||keys['d']?1:0);
+      let fwd=(keys['arrowup']||keys['w']?1:0)-(keys['arrowdown']||keys['s']?1:0);
+      let strafe=(keys['e']?1:0)-(keys['q']?1:0);
+      if(joyActive){
+        const jdx=joyCurrentX-joyOriginX,jdy=joyCurrentY-joyOriginY;
+        const jmag=Math.hypot(jdx,jdy);
+        if(jmag>JOY_DEADZONE){
+          const norm=Math.min(jmag,JOY_RADIUS)/JOY_RADIUS;
+          strafe=(jdx/jmag)*norm;
+          fwd=-(jdy/jmag)*norm;
+        }else{strafe=0;fwd=0}
+      }
+      ghostState.angle+=turn*0.05;
+      if(fwd!==0||strafe!==0){
+        // Combine forward and strafe in ghost-local space
+        let dx=Math.sin(ghostState.angle)*fwd*PLAYER_SPEED+Math.cos(ghostState.angle)*strafe*PLAYER_SPEED;
+        let dz=Math.cos(ghostState.angle)*fwd*PLAYER_SPEED-Math.sin(ghostState.angle)*strafe*PLAYER_SPEED;
+        // Cap diagonal speed so combining axes doesn't exceed PLAYER_SPEED
+        const dmag=Math.hypot(dx,dz);
+        if(dmag>PLAYER_SPEED){dx=dx/dmag*PLAYER_SPEED;dz=dz/dmag*PLAYER_SPEED}
+        const nx=ghostState.x+dx;
+        const nz=ghostState.z+dz;
+        const stuck=isColliding(ghostState.x,ghostState.z,PLAYER_RADIUS);
+        if(stuck){
+          ghostState.x=nx;ghostState.z=nz;
+        }else{
+          if(!isColliding(nx,ghostState.z,PLAYER_RADIUS))ghostState.x=nx;
+          if(!isColliding(ghostState.x,nz,PLAYER_RADIUS))ghostState.z=nz;
+        }
+      }
+      ghostState.bob+=0.04;
+      ghost.position.x=ghostState.x;ghost.position.z=ghostState.z;
+      ghost.position.y=1.2+Math.sin(ghostState.bob)*0.12;
+      ghost.rotation.y=ghostState.angle;
+
+      let seekerDist=Math.sqrt((ghostState.x-seekerState.x)**2+(ghostState.z-seekerState.z)**2);
+      if(hunting){
+        seekerDist=moveSeeker();
+        seekerState.bob+=0.05;
+        seeker.position.set(seekerState.x,1.2+Math.sin(seekerState.bob)*0.15,seekerState.z);
+        seeker.rotation.y=seekerState.angle;
+        if(seekerEyeMat)seekerEyeMat.color.setHex(0xff3030);
+        if(seekerLightRef)seekerLightRef.intensity=1.5;
+        if(!huntStartedAnnounced){huntStartedAnnounced=true;showAnnounce('JAKTEN STARTER!');playHuntStart()}
+        if(seekerDist<1.4){loseGame();return}
+        const dangerOv=document.getElementById('gh-danger-overlay');
+        if(seekerDist<5){if(dangerOv){dangerOv.classList.remove('gh-hidden');dangerOv.classList.add('gh-danger')}}
+        else{if(dangerOv){dangerOv.classList.add('gh-hidden');dangerOv.classList.remove('gh-danger')}}
+      }else{
+        seekerState.bob+=0.02;
+        seeker.position.y=1.2+Math.sin(seekerState.bob)*0.08;
+        if(seekerEyeMat)seekerEyeMat.color.setHex(0x4a1525);
+        if(seekerLightRef)seekerLightRef.intensity=0.35;
+        const dangerOv=document.getElementById('gh-danger-overlay');
+        if(dangerOv){dangerOv.classList.add('gh-hidden');dangerOv.classList.remove('gh-danger')}
+      }
+
+      const prep=document.getElementById('gh-prep');
+      if(!hunting&&prep){
+        const remaining=Math.max(0,Math.ceil((huntStartTime-now)/1000));
+        const cd=document.getElementById('gh-prep-countdown');
+        if(cd){
+          cd.textContent=remaining;
+          if(remaining<=3)cd.style.color='#e24b4a';
+          else if(remaining<=5)cd.style.color='#efcb27';
+          else cd.style.color='#fcf9ff';
+        }
+        if(remaining<=3&&remaining>0&&remaining!==lastTickShown){lastTickShown=remaining;playTick()}
+        prep.classList.remove('gh-hidden');
+      }else if(prep){prep.classList.add('gh-hidden')}
+
+      const cD=5.5,cH=3;
+      const cX=ghostState.x-Math.sin(ghostState.angle)*cD;
+      const cZ=ghostState.z-Math.cos(ghostState.angle)*cD;
+      camera.position.set(cX,ghost.position.y+cH,cZ);
+      camera.lookAt(ghostState.x,ghost.position.y+0.3,ghostState.z);
+
+      if(targetGroup){targetGroup.rotation.y+=0.012;targetGroup.position.y=0.05+Math.sin(Date.now()*0.002)*0.04}
+
+      const dEl=document.getElementById('gh-distance');
+      if(dEl){dEl.style.display='block';document.getElementById('gh-distance-val').textContent=Math.round(seekerDist)+'m'}
+
+      const tdx=targetPos.x-ghostState.x,tdz=targetPos.z-ghostState.z;
+      if(Math.sqrt(tdx*tdx+tdz*tdz)<1.4){winGame();return}
+    }else{
+      if(ghost){ghost.rotation.y+=0.005;ghost.position.y=1.2+Math.sin(Date.now()*0.002)*0.1}
+      camera.position.set(0,5,16);camera.lookAt(0,1.4,12);
+    }
+    renderer.render(scene,camera);
+  }catch(e){console.error('animate',e)}
+}
+
+function winGame(){
+  if(!gameRunning)return;
+  gameRunning=false;clearKeys();
+  const elapsed=(Date.now()-startTime)/1000;
+  if(targetGroup){disposeGroup(targetGroup);scene.remove(targetGroup);targetGroup=null}
+  if(targetGlow){scene.remove(targetGlow);targetGlow=null}
+  player.coins+=5;savePlayer();updateCoins();
+  document.getElementById('gh-danger-overlay').classList.add('gh-hidden');
+  document.getElementById('gh-distance').style.display='none';
+  document.getElementById('gh-prep').classList.add('gh-hidden');
+  const wm=document.getElementById('gh-win-msg');if(wm)wm.textContent='Du fant '+(currentTarget?currentTarget.name.toLowerCase():'tingen')+' på '+elapsed.toFixed(1)+' sekunder';
+  const wc=document.getElementById('gh-win-coins');if(wc)wc.textContent='+5 mynter (totalt: '+player.coins+')';
+  playFound();
+  showOverlay('win');
+}
+
+function loseGame(){
+  if(!gameRunning)return;
+  gameRunning=false;clearKeys();
+  if(targetGroup){disposeGroup(targetGroup);scene.remove(targetGroup);targetGroup=null}
+  if(targetGlow){scene.remove(targetGlow);targetGlow=null}
+  document.getElementById('gh-danger-overlay').classList.add('gh-hidden');
+  document.getElementById('gh-distance').style.display='none';
+  document.getElementById('gh-prep').classList.add('gh-hidden');
+  playCaught();
+  showOverlay('lose');
+}
+
+function showOverlay(name){['name','start','win','lose','shop'].forEach(n=>{const el=document.getElementById('gh-overlay-'+n);if(el){if(n===name)el.classList.remove('gh-hidden');else el.classList.add('gh-hidden')}})}
+
+window.ghSetName=function(){const v=document.getElementById('gh-name-input').value.trim();if(!v)return;player.name=v;savePlayer();document.getElementById('gh-welcome').textContent='Hei, '+v+'!';showOverlay('start')};
+
+window.ghStart=function(){
+  try{
+    initAudio();
+    showOverlay(null);clearKeys();releaseJoy();lookTouchId=null;
+    buildLayout();
+    const ps=currentLayout.playerSpawn,ss=currentLayout.seekerSpawn;
+    ghostState.x=ps.x;ghostState.z=ps.z;ghostState.angle=ps.a;ghostState.bob=0;
+    seekerState.x=ss.x;seekerState.z=ss.z;seekerState.angle=0;seekerState.bob=0;
+    if(ghost){ghost.position.set(ps.x,1.2,ps.z);ghost.rotation.y=ps.a}
+    if(seeker)seeker.position.set(ss.x,1.2,ss.z);
+    placeTarget();
+    startTime=Date.now();
+    huntStartTime=startTime+HIDE_TIME;
+    huntStartedAnnounced=false;
+    lastTickShown=-1;
+    gameRunning=true;
+    playStartGame();
+    if('ontouchstart' in window){
+      const hint=document.getElementById('gh-touch-hint');
+      if(hint){
+        hint.classList.remove('gh-hidden');
+        hint.style.opacity='1';
+        setTimeout(()=>{if(hint)hint.style.opacity='0'},3500);
+        setTimeout(()=>{if(hint)hint.classList.add('gh-hidden')},4000);
+      }
+    }
+    try{window.focus();document.body.focus()}catch(e){}
+  }catch(e){console.error('ghStart',e)}
+};
+
+window.ghFullscreen=function(){
+  const w=document.getElementById('gh-wrap');
+  const isFs=!!(document.fullscreenElement||document.webkitFullscreenElement||document.msFullscreenElement);
+  try{
+    if(!isFs){
+      const req=w.requestFullscreen||w.webkitRequestFullscreen||w.msRequestFullscreen;
+      if(req)req.call(w);
+    }else{
+      const ex=document.exitFullscreen||document.webkitExitFullscreen||document.msExitFullscreen;
+      if(ex)ex.call(document);
+    }
+  }catch(e){console.error('fs',e)}
+};
+
+function onFsChange(){
+  const isFs=!!(document.fullscreenElement||document.webkitFullscreenElement||document.msFullscreenElement);
+  const enterIcon=document.getElementById('gh-fs-icon-enter');
+  const exitIcon=document.getElementById('gh-fs-icon-exit');
+  if(enterIcon&&exitIcon){
+    enterIcon.classList.toggle('gh-hidden',isFs);
+    exitIcon.classList.toggle('gh-hidden',!isFs);
+  }
+  setTimeout(onResize,80);
+  setTimeout(onResize,250);
+}
+
+function shopCardHtml(it){const owned=player.owned.includes(it.id);const equipped=(it.cat==='hat'&&player.equippedHat===it.id)||(it.cat==='cape'&&player.equippedCape===it.id);let btn,btnStyle='background:#ff8866;color:white';if(equipped){btn='På deg';btnStyle='background:#1d9e75;color:white'}else if(owned){btn='Bruk'}else if(player.coins>=it.price){btn='Kjøp'}else{btn='Mangler '+(it.price-player.coins);btnStyle='background:#444;color:#999'}const action=owned?`ghEquip('${it.id}')`:`ghBuy('${it.id}')`;const disabled=(!owned&&player.coins<it.price)?'disabled':'';return `<div class="gh-card" style="background:#13223a;border:1px solid #2c4a72;border-radius:8px;padding:10px;display:flex;flex-direction:column;align-items:center;text-align:center"><div style="width:60px;height:60px;background:#fcf9ff;border-radius:6px;display:flex;align-items:center;justify-content:center;margin-bottom:6px">${it.icon.replace('<svg ','<svg width="44" height="44" ')}</div><div style="color:#f0e9ff;font-size:13px;font-weight:500;margin-bottom:2px">${it.name}</div><div style="color:#efcb27;font-size:12px;font-weight:500;margin-bottom:8px">${it.price} mynter</div><button onclick="${action}" ${disabled} style="${btnStyle};border:0;border-radius:6px;padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;width:100%;${disabled?'cursor:not-allowed':''}">${btn}</button></div>`}
+function renderShop(){const hats=shopItems.filter(i=>i.cat==='hat');const capes=shopItems.filter(i=>i.cat==='cape');const h=document.getElementById('gh-shop-hats');if(h)h.innerHTML=hats.map(shopCardHtml).join('');const c=document.getElementById('gh-shop-capes');if(c)c.innerHTML=capes.map(shopCardHtml).join('')}
+
+window.ghOpenShop=function(){gameRunning=false;clearKeys();updateCoins();renderShop();showOverlay('shop')};
+window.ghCloseShop=function(){showOverlay(player.name?'start':'name')};
+window.ghBuy=function(id){const it=shopItems.find(i=>i.id===id);if(!it||player.owned.includes(id)||player.coins<it.price)return;player.coins-=it.price;player.owned.push(id);if(it.cat==='hat')player.equippedHat=id;else player.equippedCape=id;applyEquipped(it.cat);savePlayer();updateCoins();renderShop()};
+window.ghEquip=function(id){const it=shopItems.find(i=>i.id===id);if(!it||!player.owned.includes(id))return;if(it.cat==='hat'){player.equippedHat=player.equippedHat===id?null:id;applyEquipped('hat')}else{player.equippedCape=player.equippedCape===id?null:id;applyEquipped('cape')}savePlayer();renderShop()};
+
+function setupInputs(){
+  const initOnFirst=()=>initAudio();
+  window.addEventListener('keydown',(e)=>{const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();keys[k]=true;initOnFirst()});
+  window.addEventListener('keyup',(e)=>{keys[e.key.toLowerCase()]=false});
+  window.addEventListener('blur',()=>{clearKeys();releaseJoy();lookTouchId=null});
+  document.addEventListener('click',initOnFirst,{once:true});
+  document.addEventListener('touchstart',initOnFirst,{once:true,passive:true});
+  document.addEventListener('fullscreenchange',onFsChange);
+  document.addEventListener('webkitfullscreenchange',onFsChange);
+  document.addEventListener('msfullscreenchange',onFsChange);
+
+  const cv=document.getElementById('gh-canvas');
+  const joyEl=document.getElementById('gh-joy');
+  const stickEl=document.getElementById('gh-joy-stick');
+  if(cv&&joyEl&&stickEl){
+    const wrapEl=cv.parentElement;
+    const showJoyAt=(x,y)=>{
+      joyOriginX=x;joyOriginY=y;
+      joyCurrentX=x;joyCurrentY=y;
+      joyActive=true;
+      joyEl.style.left=x+'px';joyEl.style.top=y+'px';
+      stickEl.style.transform='translate(-50%,-50%)';
+      joyEl.classList.remove('gh-hidden');
+    };
+    const updateJoyAt=(x,y)=>{
+      joyCurrentX=x;joyCurrentY=y;
+      let dx=x-joyOriginX,dy=y-joyOriginY;
+      const mag=Math.hypot(dx,dy);
+      if(mag>JOY_RADIUS){dx=dx/mag*JOY_RADIUS;dy=dy/mag*JOY_RADIUS}
+      stickEl.style.transform='translate(calc(-50% + '+dx+'px),calc(-50% + '+dy+'px))';
+    };
+    const hideHint=()=>{
+      const hint=document.getElementById('gh-touch-hint');
+      if(hint)hint.classList.add('gh-hidden');
+    };
+
+    cv.addEventListener('touchstart',(e)=>{
+      e.preventDefault();initOnFirst();
+      const r=wrapEl.getBoundingClientRect();
+      const mid=r.width/2;
+      for(let i=0;i<e.changedTouches.length;i++){
+        const t=e.changedTouches[i];
+        const lx=t.clientX-r.left,ly=t.clientY-r.top;
+        if(lx<mid&&joyTouchId===null){
+          joyTouchId=t.identifier;
+          showJoyAt(lx,ly);
+          hideHint();
+        }else if(lx>=mid&&lookTouchId===null){
+          lookTouchId=t.identifier;
+          lookLastX=lx;
+          hideHint();
+        }
+      }
+    },{passive:false});
+    cv.addEventListener('touchmove',(e)=>{
+      e.preventDefault();
+      const r=wrapEl.getBoundingClientRect();
+      for(let i=0;i<e.changedTouches.length;i++){
+        const t=e.changedTouches[i];
+        const lx=t.clientX-r.left,ly=t.clientY-r.top;
+        if(t.identifier===joyTouchId){
+          updateJoyAt(lx,ly);
+        }else if(t.identifier===lookTouchId){
+          const dx=lx-lookLastX;
+          lookLastX=lx;
+          if(gameRunning)ghostState.angle-=dx*LOOK_SENS;
+        }
+      }
+    },{passive:false});
+    const endTouch=(e)=>{
+      for(let i=0;i<e.changedTouches.length;i++){
+        const id=e.changedTouches[i].identifier;
+        if(id===joyTouchId)releaseJoy();
+        else if(id===lookTouchId)lookTouchId=null;
+      }
+    };
+    cv.addEventListener('touchend',endTouch);
+    cv.addEventListener('touchcancel',endTouch);
+  }
+
+  const ni=document.getElementById('gh-name-input');if(ni)ni.addEventListener('keydown',(e)=>{if(e.key==='Enter')ghSetName()});
+}
+
+function releaseJoy(){
+  joyTouchId=null;joyActive=false;
+  const joyEl=document.getElementById('gh-joy');
+  if(joyEl)joyEl.classList.add('gh-hidden');
+}
+
+function boot(){
+  if(typeof THREE==='undefined'){setTimeout(boot,100);return}
+  loadPlayer();
+  initThree();setupInputs();animate();
+  applyEquipped('hat');applyEquipped('cape');updateCoins();
+  // Set mute icon to match saved state
+  document.getElementById('gh-sound-on').classList.toggle('gh-hidden',masterMuted);
+  document.getElementById('gh-sound-off').classList.toggle('gh-hidden',!masterMuted);
+  if(!player.name)showOverlay('name');
+  else{document.getElementById('gh-welcome').textContent='Hei, '+player.name+'!';showOverlay('start')}
+}
+boot();
+})();
+</script>
+</body>
+</html>

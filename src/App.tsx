@@ -24,6 +24,7 @@ import NewsletterModal from './components/shared/NewsletterModal/NewsletterModal
 import ProdukterPage from './components/pages/Produkter/ProdukterPage'
 import ProduktDetailPage from './components/pages/Produkter/ProduktDetailPage'
 import UnderholdningPage from './components/pages/Underholdning/UnderholdningPage'
+import LeahNoellePage from './components/pages/LeahNoelle/LeahNoellePage'
 import HandlekurvPage from './components/pages/Handlekurv/HandlekurvPage'
 import SkiltOgGraveringPage from './components/pages/SkiltOgGravering/SkiltOgGraveringPage'
 import MineBestillingerPage from './components/pages/MineBestillinger/MineBestillingerPage'
@@ -38,6 +39,7 @@ const VarmepumpehusPage = lazy(() => import('./components/pages/Varmepumpehus/Va
 const SoppelboderPage = lazy(() => import('./components/pages/Soppelboder/SoppelboderPage'))
 const VedskjulPage = lazy(() => import('./components/pages/Vedskjul/VedskjulPage'))
 const PostkasseStativPage = lazy(() => import('./components/pages/Postkassestativ/PostkasseStativPage'))
+const PlantekassePage = lazy(() => import('./components/pages/Plantekasse/PlantekassePage'))
 
 
 function HomePage() {
@@ -82,9 +84,11 @@ export default function App() {
                 <Route path="/produkter/soppelboder" element={<Suspense fallback={<PageLoadingFallback />}><SoppelboderPage /></Suspense>} />
                 <Route path="/produkter/vedskjul" element={<Suspense fallback={<PageLoadingFallback />}><VedskjulPage /></Suspense>} />
                 <Route path="/produkter/postkassestativer" element={<Suspense fallback={<PageLoadingFallback />}><PostkasseStativPage /></Suspense>} />
+                <Route path="/produkter/plantekasser" element={<Suspense fallback={<PageLoadingFallback />}><PlantekassePage /></Suspense>} />
                 <Route path="/produkter/:slug" element={<ProduktDetailPage />} />
                 <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
                 <Route path="/underholdning" element={<UnderholdningPage />} />
+                <Route path="/spill-av-leah-noelle" element={<LeahNoellePage />} />
                 <Route path="/handlekurv" element={<HandlekurvPage />} />
 
                 <Route path="/mine-design" element={<MineDesignPage />} />

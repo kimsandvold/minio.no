@@ -7,9 +7,9 @@
     "price": "Pris fra 3490,-",
     "regularPrice": "Ordinær pris fra 4990,-",
     "images": [
-      { "src": "/images/products/minio_vps.webp", "alt": "Elegant varmepumpehus i hvitmalt tre som beskytter varmepumpe" },
-      { "src": "/images/products/minio_vph1.webp", "alt": "Varmepumpehus montert på husvegg med ventilasjonsspalter" },
-      { "src": "/images/products/minio_vph2.webp", "alt": "Detaljert varmepumpehus i naturlig tre som matcher husets stil" }
+      { "src": "/images/products/varm_hus.webp", "alt": "Skreddersydd varmepumpehus tilpasset varmepumpen din" },
+      { "src": "/images/products/varm_hus_v3.webp", "alt": "Varmepumpehus i tre med tilpasset design" },
+      { "src": "/images/products/minio_vps.webp", "alt": "Elegant varmepumpehus i hvitmalt tre som beskytter varmepumpe" }
     ],
     "detailsHtml": "<h3>Varmepumpehus – tilpasset ditt hjem</h3><p>Gi varmepumpen din den beskyttelsen den fortjener med et solid og stilrent <strong>varmepumpehus laget på bestilling</strong>. Vi tilpasser huset etter dine mål, fargeønsker og omgivelser – slik at det både <strong>beskytter og forskjønner</strong>.</p><h4>Hvorfor velge et varmepumpehus?</h4><ul><li>Skjermer mot <strong>regn, snø, is og vind</strong></li><li>Forhindrer løv, smuss og rusk i å tette ventilene</li><li>Beskytter mot <strong>mekanisk skade</strong> fra hagearbeid og lek</li><li><strong>Reduserer støy</strong> og forbedrer inntrykket av uteområdet</li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – perfekt for deg som vil sette ditt eget preg</li><li><strong>Grunnet</strong> – klart for maling i din farge</li><li><strong>Beiset eller malt</strong> – ferdig monteringsklar og tilpasset hjemmet ditt</li></ul><p><strong>Ta kontakt i dag</strong> for å få et tilbud på ditt spesialtilpassede varmepumpehus!</p>",
     "category": "primary",
@@ -110,15 +110,19 @@
     "slug": "plantekasser",
     "title": "Håndlaget plantekasse i tre",
     "shortDescription": "Fra urter og blomster til grønnsaker – en solid plantekasse bygget etter dine mål gir terrassen, balkongen eller hagen et grønt løft.",
-    "price": "Pris fra 6 900,-",
+    "price": "Kampanjepris fra 1 260,-",
+    "regularPrice": "Ordinær pris fra 1 800,-",
     "images": [
+      { "src": "/images/products/plantekasser_2.webp", "alt": "Plantekasse i tre med lavendel og rosa blomster på terrasse" },
+      { "src": "/images/products/plantekasser_3.webp", "alt": "Plantekasse i tre med pyntegress og blomster på terrasse" },
       { "src": "/images/products/plantekasser_1.webp", "alt": "Plantekasse i tre med blomster og grønne planter" }
     ],
     "detailsHtml": "<h3>Håndlaget plantekasse i tre</h3><p>Dyrk blomster, urter eller grønnsaker i en <strong>solid og pen plantekasse laget på bestilling</strong>. Vi tilpasser kassen etter dine mål og ønsker – perfekt for terrassen, balkongen eller hagen.</p><h4>Hvorfor velge en skreddersydd plantekasse?</h4><ul><li>Tilpasset <strong>nøyaktig den plassen du har</strong></li><li>Solid konstruksjon i <strong>holdbart treverk</strong></li><li>Perfekt for <strong>urter, blomster eller grønnsaker</strong></li><li>Løfter uteområdet med et <strong>naturlig og varmt uttrykk</strong></li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for et naturlig uttrykk</li><li><strong>Grunnet</strong> – klart til å males i ønsket farge</li><li><strong>Beiset eller malt</strong> – ferdig levert og klar til bruk</li></ul><p><strong>Ta kontakt i dag</strong> for et uforpliktende tilbud!</p>",
     "category": "secondary",
-    "showOnFrontPage": false,
-    "isFeatured": false,
-    "hasPromoRibbon": false,
-    "hasConfigurator": false
+    "showOnFrontPage": true,
+    "isFeatured": true,
+    "hasPromoRibbon": true,
+    "hasConfigurator": true,
+    "basePrice": 1260
   }
 ]
