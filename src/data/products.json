@@ -124,7 +124,8 @@
     "showOnFrontPage": true,
     "isFeatured": false,
     "hasPromoRibbon": false,
-    "hasConfigurator": false
+    "hasConfigurator": true,
+    "basePrice": 3900
   },
   {
     "id": "pidestallkrakk",

@@ -41,6 +41,7 @@ const VedskjulPage = lazy(() => import('./components/pages/Vedskjul/VedskjulPage
 const PostkasseStativPage = lazy(() => import('./components/pages/Postkassestativ/PostkasseStativPage'))
 const PlantekassePage = lazy(() => import('./components/pages/Plantekasse/PlantekassePage'))
 const PidestallKrakkPage = lazy(() => import('./components/pages/PidestallKrakk/PidestallKrakkPage'))
+const LeveggerPage = lazy(() => import('./components/pages/Levegger/LeveggerPage'))
 
 
 function HomePage() {
@@ -140,6 +141,7 @@ export default function App() {
                 <Route path="/produkter/postkassestativer" element={<Suspense fallback={<PageLoadingFallback />}><PostkasseStativPage /></Suspense>} />
                 <Route path="/produkter/plantekasser" element={<Suspense fallback={<PageLoadingFallback />}><PlantekassePage /></Suspense>} />
                 <Route path="/produkter/pidestall-krakk" element={<Suspense fallback={<PageLoadingFallback />}><PidestallKrakkPage /></Suspense>} />
+                <Route path="/produkter/levegger" element={<Suspense fallback={<PageLoadingFallback />}><LeveggerPage /></Suspense>} />
                 <Route path="/produkter/:slug" element={<ProduktDetailPage />} />
                 <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
                 <Route path="/underholdning" element={<UnderholdningPage />} />

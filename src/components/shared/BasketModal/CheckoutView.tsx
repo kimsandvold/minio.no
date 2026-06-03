@@ -122,9 +122,14 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
       message += `Antall: ${item.quantity} stk\n`
       if (item.shape) message += `Form: ${item.shape}\n`
       if (item.slotDimensions && item.slotDimensions.length > 0) {
-        message += `Pidestaller i settet:\n`
+        message += `${item.setLabel ?? 'Pidestaller i settet'}:\n`
         item.slotDimensions.forEach((s, idx) => {
-          message += `  #${idx + 1}: Bredde ${s.width} × Dybde ${s.depth} × Høyde ${s.height} cm`
+          const typePrefix = s.type ? `${s.type} – ` : ''
+          const dims = s.widthB
+            ? `Side A ${s.width} + Side B ${s.widthB} × Høyde ${s.height} cm`
+            : `Bredde ${s.width} × Dybde ${s.depth} × Høyde ${s.height} cm`
+          message += `  #${idx + 1}: ${typePrefix}${dims}`
+          if (s.orientation) message += ` · ${s.orientation}`
           if (s.unitPrice) message += ` – ${s.unitPrice}`
           message += `\n`
         })
@@ -137,6 +142,7 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
       if (item.angle) message += `Vinkel: ${item.angle}°\n`
       if (item.size) message += `Størrelse: ${item.size}\n`
       if (item.complexity) message += `Tilvalg: ${item.complexity}\n`
+      if (item.orientation) message += `Spilretning: ${item.orientation}\n`
       message += `Overflatebehandling: ${item.finish}\n`
       if (item.quality) message += `Kvalitet: ${item.quality}\n`
       if (item.roof) message += `Tak: ${item.roof}\n`
@@ -234,11 +240,13 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
                 <strong>{i + 1}. {item.type}</strong>{item.quantity > 1 ? ` (${item.quantity} stk)` : ''}<br />
                 {item.slotDimensions && item.slotDimensions.length > 0 ? (
                   <>
-                    Pidestaller i settet:
+                    {item.setLabel ?? 'Pidestaller i settet'}:
                     <ul style={{ margin: '0.25rem 0 0.5rem', paddingLeft: '1.25rem' }}>
                       {item.slotDimensions.map((s, idx) => (
                         <li key={idx}>
-                          #{idx + 1}: {s.width}×{s.height}×{s.depth} cm
+                          #{idx + 1}: {s.type && <>{s.type} – </>}
+                          {s.widthB ? `${s.width}+${s.widthB}×${s.height}` : `${s.width}×${s.height}×${s.depth}`} cm
+                          {s.orientation && <> · {s.orientation}</>}
                           {s.unitPrice && <> ({s.unitPrice})</>}
                         </li>
                       ))}
@@ -251,6 +259,7 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
                 {item.angle && <>Vinkel: {item.angle}°<br /></>}
                 {item.size && <>Størrelse: {item.size}<br /></>}
                 {item.complexity && <>Tilvalg: {item.complexity}<br /></>}
+                {item.orientation && <>Spilretning: {item.orientation}<br /></>}
                 Overflatebehandling: {item.finish}<br />
                 {item.quality && <>Kvalitet: {item.quality}<br /></>}
                 {item.roof && <>Tak: {item.roof}<br /></>}

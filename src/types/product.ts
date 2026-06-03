@@ -49,7 +49,17 @@ export interface BasketItem {
   signHeightCm?: number
   signDesignId?: string
   discount?: string
-  slotDimensions?: Array<{ width: number; height: number; depth: number; unitPrice?: string }>
+  orientation?: string
+  setLabel?: string
+  slotDimensions?: Array<{
+    width: number
+    height: number
+    depth: number
+    widthB?: number
+    type?: string
+    orientation?: string
+    unitPrice?: string
+  }>
   lockQuantity?: boolean
 }
 

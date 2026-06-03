@@ -220,11 +220,13 @@ export default function BasketView({ onCheckout }: BasketViewProps) {
               <Details>
                 {item.slotDimensions && item.slotDimensions.length > 0 ? (
                   <>
-                    <strong>Pidestaller i settet:</strong>
+                    <strong>{item.setLabel ?? 'Pidestaller i settet'}:</strong>
                     <ul style={{ margin: '0.25rem 0 0.5rem', paddingLeft: '1.25rem' }}>
                       {item.slotDimensions.map((s, idx) => (
                         <li key={idx}>
-                          #{idx + 1}: {s.width}×{s.height}×{s.depth} cm
+                          #{idx + 1}: {s.type && <>{s.type} – </>}
+                          {s.widthB ? `${s.width}+${s.widthB}×${s.height}` : `${s.width}×${s.height}×${s.depth}`} cm
+                          {s.orientation && <> · {s.orientation}</>}
                           {s.unitPrice && <> ({s.unitPrice})</>}
                         </li>
                       ))}
@@ -237,6 +239,7 @@ export default function BasketView({ onCheckout }: BasketViewProps) {
                 {item.angle && <><strong>Vinkel:</strong> {item.angle}°<br /></>}
                 {item.size && <><strong>Størrelse:</strong> {item.size}<br /></>}
                 {item.complexity && <><strong>Tilvalg:</strong> {item.complexity}<br /></>}
+                {item.orientation && <><strong>Spilretning:</strong> {item.orientation}<br /></>}
                 <strong>Overflatebehandling:</strong> {item.finish}<br />
                 {item.quality && <><strong>Kvalitet:</strong> {item.quality}<br /></>}
                 {item.roof && <><strong>Tak:</strong> {item.roof}<br /></>}
