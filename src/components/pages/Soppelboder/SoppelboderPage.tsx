@@ -9,6 +9,7 @@ import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import { useSEO } from '../../../hooks/useSEO'
 import { useProductBySlug } from '../../../hooks/useProducts'
+import { productJsonLd } from '../../../utils/productJsonLd'
 import RelatedProducts from '../../shared/RelatedProducts'
 
 const Hero = styled.section`
@@ -302,6 +303,7 @@ export default function SoppelboderPage() {
     title: 'Skreddersydd søppelbod – Minio',
     description: 'Konfigurer og bestill skreddersydd søppelbod i tre. Velg antall dunker, dørtype, finish og tak. Levering fra Lillehammer.',
     ogImage: '/images/products/garbage_house_4.webp',
+    jsonLd: product ? productJsonLd(product, '/produkter/soppelboder') : undefined,
   })
 
   return (

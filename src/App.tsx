@@ -7,11 +7,10 @@ import { ModalProvider } from './context/ModalContext'
 import { AuthProvider } from './context/AuthContext'
 import { BasketProvider } from './context/BasketContext'
 
-import { useCookieConsent } from './hooks/useCookieConsent'
 import { useHashNavigation } from './hooks/useHashNavigation'
 import { useSEO } from './hooks/useSEO'
+import { allProducts } from './data/products'
 import SkipLink from './components/shared/SkipLink'
-import LoadingOverlay from './components/shared/LoadingOverlay'
 import Navbar from './components/layout/Navbar'
 import Hero from './components/sections/Hero/Hero'
 import Portfolio from './components/sections/Portfolio/Portfolio'
@@ -34,25 +33,80 @@ import AdminPollsPage from './components/pages/Admin/AdminPollsPage'
 import DesignViewPage from './components/pages/DesignView/DesignViewPage'
 import NotFoundPage from './components/pages/NotFound/NotFoundPage'
 import PageLoadingFallback from './components/shared/PageLoadingFallback'
+import ContactBadge from './components/shared/ContactBadge'
 
 const VarmepumpehusPage = lazy(() => import('./components/pages/Varmepumpehus/VarmepumpehusPage'))
 const SoppelboderPage = lazy(() => import('./components/pages/Soppelboder/SoppelboderPage'))
 const VedskjulPage = lazy(() => import('./components/pages/Vedskjul/VedskjulPage'))
 const PostkasseStativPage = lazy(() => import('./components/pages/Postkassestativ/PostkasseStativPage'))
 const PlantekassePage = lazy(() => import('./components/pages/Plantekasse/PlantekassePage'))
+const PidestallKrakkPage = lazy(() => import('./components/pages/PidestallKrakk/PidestallKrakkPage'))
 
 
 function HomePage() {
-  const { hasConsented, acceptCookies } = useCookieConsent()
   useHashNavigation()
   useSEO({
-    title: 'Minio – Skreddersydd i tre, etter dine mål',
-    description: 'Minio lager utendørs treprodukter tilpasset dine mål – varmepumpehus, søppelboder, postkassestativer, levegger og mer. Håndlaget i Lillehammer.',
+    title: 'Minio – Hageprodukter i tre, skreddersydd etter dine mål',
+    description: 'Hage- og utendørsprodukter i tre, skreddersydd etter dine mål. Plantekasser, varmepumpehus, søppelboder, postkassestativer og mer. Håndlaget i Lillehammer.',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'LocalBusiness',
+        '@id': 'https://minio.no/#business',
+        name: 'Minio',
+        url: 'https://minio.no/',
+        logo: 'https://minio.no/images/branding/logo_dark.svg',
+        image: 'https://minio.no/images/hero/forside_8.webp',
+        description:
+          'Hage- og utendørsprodukter i tre, skreddersydd etter dine mål. Plantekasser, varmepumpehus, søppelboder, postkassestativer og mer. Håndlaget i Lillehammer.',
+        address: {
+          '@type': 'PostalAddress',
+          addressLocality: 'Lillehammer',
+          addressRegion: 'Innlandet',
+          addressCountry: 'NO',
+        },
+        areaServed: {
+          '@type': 'GeoCircle',
+          geoMidpoint: {
+            '@type': 'GeoCoordinates',
+            latitude: 61.1153,
+            longitude: 10.4663,
+          },
+          geoRadius: 200000,
+        },
+        sameAs: [
+          'https://www.facebook.com/profile.php?id=61576010648640',
+          'https://www.instagram.com/minio2624',
+        ],
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        '@id': 'https://minio.no/#website',
+        url: 'https://minio.no/',
+        name: 'Minio',
+        inLanguage: 'nb-NO',
+        publisher: { '@id': 'https://minio.no/#business' },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'ItemList',
+        '@id': 'https://minio.no/#products',
+        name: 'Hage- og utendørsprodukter fra Minio',
+        itemListElement: allProducts
+          .filter(p => p.showOnFrontPage)
+          .map((p, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            url: `https://minio.no/produkter/${p.slug}`,
+            name: p.title,
+          })),
+      },
+    ],
   })
 
   return (
     <>
-      <LoadingOverlay hasConsented={hasConsented} onAccept={acceptCookies} />
       <SkipLink />
       <Navbar />
       <main id="main-content">
@@ -85,6 +139,7 @@ export default function App() {
                 <Route path="/produkter/vedskjul" element={<Suspense fallback={<PageLoadingFallback />}><VedskjulPage /></Suspense>} />
                 <Route path="/produkter/postkassestativer" element={<Suspense fallback={<PageLoadingFallback />}><PostkasseStativPage /></Suspense>} />
                 <Route path="/produkter/plantekasser" element={<Suspense fallback={<PageLoadingFallback />}><PlantekassePage /></Suspense>} />
+                <Route path="/produkter/pidestall-krakk" element={<Suspense fallback={<PageLoadingFallback />}><PidestallKrakkPage /></Suspense>} />
                 <Route path="/produkter/:slug" element={<ProduktDetailPage />} />
                 <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
                 <Route path="/underholdning" element={<UnderholdningPage />} />
@@ -98,6 +153,7 @@ export default function App() {
                 <Route path="/design/:designId" element={<DesignViewPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
+              <ContactBadge />
             </ModalProvider>
           </BasketProvider>
         </AuthProvider>

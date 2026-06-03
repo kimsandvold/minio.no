@@ -25,9 +25,9 @@ const theme = {
     wideDesktop: '1400px',
   },
   spacing: {
-    sectionPadding: '5rem 2rem 4rem',
-    sectionPaddingMobile: '4rem 1rem 3rem',
-    sectionPaddingWide: '6rem 2rem 5rem',
+    sectionPadding: '5rem 0 4rem',
+    sectionPaddingMobile: '4rem 0 3rem',
+    sectionPaddingWide: '6rem 0 5rem',
     containerMax: '1200px',
   },
   zIndex: {

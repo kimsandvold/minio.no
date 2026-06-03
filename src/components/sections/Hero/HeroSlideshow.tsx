@@ -32,8 +32,8 @@ export default function HeroSlideshow() {
 
   return (
     <>
-      <HeroBgImg src={layer1Src} alt="" $opacity={layer1Opacity} style={{ zIndex: 1 }} />
-      <Layer2 src={layer2Src} alt="" $opacity={layer2Opacity} />
+      {layer1Src && <HeroBgImg src={layer1Src} alt="" $opacity={layer1Opacity} style={{ zIndex: 1 }} />}
+      {layer2Src && <Layer2 src={layer2Src} alt="" $opacity={layer2Opacity} />}
     </>
   )
 }

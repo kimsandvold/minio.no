@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 
 const HERO_IMAGES = [
-  '/images/hero/forside_1.webp',
-  '/images/hero/forside_3.webp',
+  '/images/hero/forside_8.webp',
+  '/images/hero/forside_9.webp',
   '/images/hero/forside_4.webp',
   '/images/hero/forside_5.webp',
   '/images/hero/forside_6.webp',

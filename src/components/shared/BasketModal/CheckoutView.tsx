@@ -120,7 +120,19 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
     items.forEach((item, index) => {
       message += `Produkt ${index + 1}: ${item.type}\n`
       message += `Antall: ${item.quantity} stk\n`
-      message += `Mål: ${item.dimensions.width}×${item.dimensions.height}×${item.dimensions.depth} cm\n`
+      if (item.shape) message += `Form: ${item.shape}\n`
+      if (item.slotDimensions && item.slotDimensions.length > 0) {
+        message += `Pidestaller i settet:\n`
+        item.slotDimensions.forEach((s, idx) => {
+          message += `  #${idx + 1}: Bredde ${s.width} × Dybde ${s.depth} × Høyde ${s.height} cm`
+          if (s.unitPrice) message += ` – ${s.unitPrice}`
+          message += `\n`
+        })
+      } else if (item.armThickness !== undefined) {
+        message += `Mål: A ${item.dimensions.width} × B ${item.dimensions.depth} × Dybde ${item.armThickness} × Høyde ${item.dimensions.height} cm\n`
+      } else {
+        message += `Mål: Bredde ${item.dimensions.width} × Dybde ${item.dimensions.depth} × Høyde ${item.dimensions.height} cm\n`
+      }
       if (item.mounting) message += `Konstruksjon: ${item.mounting}\n`
       if (item.angle) message += `Vinkel: ${item.angle}°\n`
       if (item.size) message += `Størrelse: ${item.size}\n`
@@ -129,12 +141,14 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
       if (item.quality) message += `Kvalitet: ${item.quality}\n`
       if (item.roof) message += `Tak: ${item.roof}\n`
       if (item.lighting) message += `Belysning: ${item.lighting}\n`
+      if (item.espalier) message += `Espalier: ${item.espalier}\n`
       if (item.signRequested) {
         message += `Skilt: Ja (${item.signWidthCm}×${item.signHeightCm} cm) — pris kommer separat. Kunde har brukt skiltdesigneren.\n`
         if (item.signDesignId) message += `Se skiltdesign: ${window.location.origin}/design/${item.signDesignId}\n`
       }
       message += `Levering: ${item.delivery}\n`
       if (item.installation) message += `Montering: ${item.installation}\n`
+      if (item.discount) message += `Rabatt: ${item.discount}\n`
       message += `Estimert pris per stk: ${item.price}\n`
       if (item.quantity > 1) message += `Total: ${formatPrice(item.price, item.quantity)}\n`
       message += '\n'
@@ -218,7 +232,21 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
             {items.map((item, i) => (
               <SummaryItem key={item.id}>
                 <strong>{i + 1}. {item.type}</strong>{item.quantity > 1 ? ` (${item.quantity} stk)` : ''}<br />
-                Mål: {item.dimensions.width}×{item.dimensions.height}×{item.dimensions.depth} cm<br />
+                {item.slotDimensions && item.slotDimensions.length > 0 ? (
+                  <>
+                    Pidestaller i settet:
+                    <ul style={{ margin: '0.25rem 0 0.5rem', paddingLeft: '1.25rem' }}>
+                      {item.slotDimensions.map((s, idx) => (
+                        <li key={idx}>
+                          #{idx + 1}: {s.width}×{s.height}×{s.depth} cm
+                          {s.unitPrice && <> ({s.unitPrice})</>}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <>Mål: {item.dimensions.width}×{item.dimensions.height}×{item.dimensions.depth} cm<br /></>
+                )}
                 {item.mounting && <>Konstruksjon: {item.mounting}<br /></>}
                 {item.angle && <>Vinkel: {item.angle}°<br /></>}
                 {item.size && <>Størrelse: {item.size}<br /></>}
@@ -237,6 +265,7 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
                 )}
                 Levering: {item.delivery}<br />
                 {item.installation && <>Montering: {item.installation}<br /></>}
+                {item.discount && <>Rabatt: {item.discount}<br /></>}
                 Estimert pris: {item.price}{item.quantity > 1 ? ` × ${item.quantity} = ${formatPrice(item.price, item.quantity)}` : ''}
               </SummaryItem>
             ))}

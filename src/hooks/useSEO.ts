@@ -1,14 +1,32 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const SITE_URL = 'https://minio.no'
 const DEFAULT_OG_IMAGE = '/images/branding/logo_dark.svg'
+
+type JsonLdValue = Record<string, unknown>
 
 interface SEOOptions {
   title: string
   description: string
   ogImage?: string
   noindex?: boolean
+  jsonLd?: JsonLdValue | JsonLdValue[]
+}
+
+const JSONLD_ID = 'seo-jsonld'
+
+function setJsonLd(value: JsonLdValue | JsonLdValue[] | undefined) {
+  document.querySelectorAll(`script[data-managed="${JSONLD_ID}"]`).forEach((el) => el.remove())
+  if (!value) return
+  const items = Array.isArray(value) ? value : [value]
+  items.forEach((item) => {
+    const script = document.createElement('script')
+    script.type = 'application/ld+json'
+    script.dataset.managed = JSONLD_ID
+    script.text = JSON.stringify(item)
+    document.head.appendChild(script)
+  })
 }
 
 function setMeta(name: string, content: string, attribute = 'name') {
@@ -31,10 +49,12 @@ function setLink(rel: string, href: string) {
   el.href = href
 }
 
-export function useSEO({ title, description, ogImage, noindex }: SEOOptions): void {
+export function useSEO({ title, description, ogImage, noindex, jsonLd }: SEOOptions): void {
   const { pathname } = useLocation()
   const fullUrl = `${SITE_URL}${pathname}`
   const imageUrl = `${SITE_URL}${ogImage || DEFAULT_OG_IMAGE}`
+  const jsonLdKey = jsonLd ? JSON.stringify(jsonLd) : ''
+  const stableJsonLd = useMemo(() => jsonLd, [jsonLdKey])
 
   useEffect(() => {
     document.title = title
@@ -56,6 +76,8 @@ export function useSEO({ title, description, ogImage, noindex }: SEOOptions): vo
       if (robotsMeta) robotsMeta.remove()
     }
 
+    setJsonLd(stableJsonLd)
+
     // GA4 SPA page view
     if (window.gtag) {
       window.gtag('event', 'page_view', {
@@ -64,5 +86,9 @@ export function useSEO({ title, description, ogImage, noindex }: SEOOptions): vo
         page_path: pathname,
       })
     }
-  }, [title, description, fullUrl, imageUrl, noindex, pathname])
+
+    return () => {
+      setJsonLd(undefined)
+    }
+  }, [title, description, fullUrl, imageUrl, noindex, pathname, stableJsonLd])
 }

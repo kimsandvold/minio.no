@@ -202,21 +202,37 @@ export default function BasketView({ onCheckout }: BasketViewProps) {
             <Item key={item.id}>
               <ItemHeader>
                 <ItemTitle>{item.type}</ItemTitle>
-                <Quantity>
-                  <QtyBtn onClick={() => updateQuantity(item.id, item.quantity - 1)} disabled={item.quantity <= 1} aria-label="Reduser antall">
-                    <Icon name="faMinus" />
-                  </QtyBtn>
-                  <QtyValue>{item.quantity}</QtyValue>
-                  <QtyBtn onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label="Øk antall">
-                    <Icon name="faPlus" />
-                  </QtyBtn>
-                </Quantity>
+                {!item.lockQuantity && (
+                  <Quantity>
+                    <QtyBtn onClick={() => updateQuantity(item.id, item.quantity - 1)} disabled={item.quantity <= 1} aria-label="Reduser antall">
+                      <Icon name="faMinus" />
+                    </QtyBtn>
+                    <QtyValue>{item.quantity}</QtyValue>
+                    <QtyBtn onClick={() => updateQuantity(item.id, item.quantity + 1)} aria-label="Øk antall">
+                      <Icon name="faPlus" />
+                    </QtyBtn>
+                  </Quantity>
+                )}
                 <RemoveBtn onClick={() => removeItem(item.id)} aria-label="Fjern">
                   <Icon name="faTrash" />
                 </RemoveBtn>
               </ItemHeader>
               <Details>
-                <strong>Mål:</strong> {item.dimensions.width}×{item.dimensions.height}×{item.dimensions.depth} cm<br />
+                {item.slotDimensions && item.slotDimensions.length > 0 ? (
+                  <>
+                    <strong>Pidestaller i settet:</strong>
+                    <ul style={{ margin: '0.25rem 0 0.5rem', paddingLeft: '1.25rem' }}>
+                      {item.slotDimensions.map((s, idx) => (
+                        <li key={idx}>
+                          #{idx + 1}: {s.width}×{s.height}×{s.depth} cm
+                          {s.unitPrice && <> ({s.unitPrice})</>}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : (
+                  <><strong>Mål:</strong> {item.dimensions.width}×{item.dimensions.height}×{item.dimensions.depth} cm<br /></>
+                )}
                 {item.mounting && <><strong>Konstruksjon:</strong> {item.mounting}<br /></>}
                 {item.angle && <><strong>Vinkel:</strong> {item.angle}°<br /></>}
                 {item.size && <><strong>Størrelse:</strong> {item.size}<br /></>}
@@ -227,6 +243,7 @@ export default function BasketView({ onCheckout }: BasketViewProps) {
                 {item.lighting && <><strong>Belysning:</strong> {item.lighting}<br /></>}
                 {item.signRequested && <><strong>Skilt:</strong> Ja ({item.signWidthCm}×{item.signHeightCm} cm) — pris kommer separat<br /></>}
                 <strong>Levering:</strong> {item.delivery}{item.installation && <><br /><strong>Montering:</strong> {item.installation}</>}
+                {item.discount && <><br /><strong>Rabatt:</strong> {item.discount}</>}
               </Details>
               <PriceSection>
                 <PriceLabel>Estimert pris inkl. mva {item.quantity > 1 ? `(${item.quantity} stk)` : ''}</PriceLabel>

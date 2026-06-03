@@ -12,4 +12,19 @@ export default defineConfig({
       'Cross-Origin-Opener-Policy': 'same-origin-allow-popups',
     },
   },
+  build: {
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (id.includes('three')) return 'three'
+          if (id.includes('firebase')) return 'firebase'
+          if (id.includes('@splidejs')) return 'splide'
+          if (id.includes('react-router')) return 'react-router'
+          if (id.includes('react') || id.includes('scheduler')) return 'react-vendor'
+        },
+      },
+    },
+  },
 })

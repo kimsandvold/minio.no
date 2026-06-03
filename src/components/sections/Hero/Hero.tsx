@@ -3,9 +3,6 @@ import Section from '../../layout/Section'
 import HeroSlideshow from './HeroSlideshow'
 import ShareButtons from '../../shared/ShareButtons'
 
-import Icon from '../../shared/Icon'
-import { useModalContext } from '../../../context/ModalContext'
-
 const HeroOverlay = styled.div`
   position: absolute;
   top: 0;
@@ -54,54 +51,25 @@ const HeroText = styled.p`
   }
 `
 
-const NewsletterFab = styled.button`
+const VisuallyHiddenH1 = styled.h1`
   position: absolute;
-  bottom: 2rem;
-  right: 2rem;
-  z-index: ${({ theme }) => theme.zIndex.heroContent};
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  color: #fff;
-  font-size: 1.15rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.25s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  }
-
-  &:active {
-    transform: translateY(0);
-  }
-
-  @media (max-width: 768px) {
-    bottom: 1.5rem;
-    right: 1.5rem;
-    width: 46px;
-    height: 46px;
-    font-size: 1rem;
-  }
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 `
 
 export default function Hero() {
-  const { openNewsletter } = useModalContext()
-
   return (
     <Section id="hjem" variant="hero">
       <HeroSlideshow />
       <HeroOverlay />
       <HeroContent>
+        <VisuallyHiddenH1>Hageprodukter i tre, skreddersydd etter dine mål</VisuallyHiddenH1>
         <HeroLogo src="/images/branding/logo_icon_white.svg" alt="Minio logo" />
         <HeroText>
           Drømmer du om et uteprodukt som er helt unikt for ditt hjem? Vi bygger det etter dine mål og preferanser.
@@ -110,9 +78,6 @@ export default function Hero() {
           <ShareButtons variant="hero" context="hero" />
         </div>
       </HeroContent>
-      <NewsletterFab onClick={openNewsletter} aria-label="Abonner på nyhetsbrev">
-        <Icon name="faEnvelope" />
-      </NewsletterFab>
     </Section>
   )
 }

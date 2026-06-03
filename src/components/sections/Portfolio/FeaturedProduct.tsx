@@ -8,7 +8,7 @@ import { useFeaturedProducts } from '../../../hooks/useProducts'
 const Stack = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 `
 
 const Wrapper = styled.div`
@@ -37,7 +37,7 @@ const CAMPAIGN_RED = '#c0392b'
 const ImageWrap = styled.div`
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 4 / 3;
 
   .splide {
     height: 100%;
@@ -52,6 +52,10 @@ const ImageWrap = styled.div`
     height: 100%;
     object-fit: cover;
     display: block;
+  }
+
+  @media (max-width: 1024px) {
+    aspect-ratio: 16 / 10;
   }
 `
 
@@ -86,81 +90,51 @@ const CornerRibbon = styled.div`
   }
 `
 
-const Badge = styled.span`
-  display: inline-block;
-  align-self: flex-start;
-  background: ${CAMPAIGN_RED};
-  color: #fff;
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  padding: 0.35rem 0.9rem;
-  border-radius: 3px;
-  margin-bottom: 0.25rem;
-`
-
 const Info = styled.div`
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  padding: 2.5rem;
-  gap: 0.75rem;
+  justify-content: center;
+  padding: 1.75rem 1.75rem 1.75rem 2rem;
+  gap: 0.5rem;
 
   h3 {
-    font-size: 1.65rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: ${({ theme }) => theme.colors.textDark};
     margin: 0;
-    line-height: 1.25;
+    line-height: 1.2;
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    padding: 1.75rem;
-    h3 { font-size: 1.3rem; }
+    padding: 0.9rem 0.6rem 1rem;
+    h3 { font-size: 1.2rem; }
   }
 `
 
 const Description = styled.p`
-  font-size: 0.95rem;
-  line-height: 1.7;
+  font-size: 0.9rem;
+  line-height: 1.55;
   color: #555;
   margin: 0;
-`
-
-const FeatureList = styled.ul`
-  list-style: none;
-  padding: 0;
-  margin: 0.5rem 0 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`
-
-const FeatureItem = styled.li`
-  display: flex;
-  align-items: flex-start;
-  gap: 0.6rem;
-  font-size: 0.9rem;
-  line-height: 1.5;
-  color: #444;
-
-  svg {
-    color: ${({ theme }) => theme.colors.accent};
-    margin-top: 0.2rem;
-    flex-shrink: 0;
-  }
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 `
 
 const PriceBlock = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  margin-top: 0.75rem;
-  padding: 0.9rem 1rem;
+  gap: 0.25rem;
+  margin-top: 0.4rem;
+  padding: 0.6rem 0.8rem;
   background: #fdf6f4;
   border-left: 3px solid ${CAMPAIGN_RED};
   border-radius: 4px;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    padding: 0.55rem 0.65rem;
+  }
 `
 
 const PriceRow = styled.div`
@@ -171,11 +145,16 @@ const PriceRow = styled.div`
 `
 
 const Price = styled.span`
-  font-size: 1.9rem;
+  font-size: 1.55rem;
   font-weight: 700;
   color: ${CAMPAIGN_RED};
   letter-spacing: -0.02em;
-  line-height: 1;
+  line-height: 1.1;
+  white-space: nowrap;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    font-size: 1.3rem;
+  }
 `
 
 const RegularPrice = styled.span`
@@ -188,9 +167,10 @@ const ReadMoreLink = styled(Link)`
   align-self: flex-start;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.8rem 2rem;
-  font-size: 0.9rem;
+  padding: 0.7rem 1.6rem;
+  font-size: 0.85rem;
   background: ${({ theme }) => theme.colors.textDark};
   color: #fff;
   border: 0;
@@ -200,12 +180,18 @@ const ReadMoreLink = styled(Link)`
   letter-spacing: 0.5px;
   text-decoration: none;
   transition: all 0.3s ease;
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
 
   &:hover {
     background: #333;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    align-self: stretch;
+    width: 100%;
+    padding: 0.9rem 1.6rem;
   }
 `
 
@@ -232,20 +218,8 @@ export default function FeaturedProduct() {
               </SplideCarousel>
             </ImageWrap>
             <Info>
-              <Badge>Kampanjepris</Badge>
               <h3>{p.title}</h3>
               <Description>{p.shortDescription}</Description>
-              <FeatureList>
-                <FeatureItem>
-                  <Icon name="faRulerCombined" /> Skreddersydd etter dine mål
-                </FeatureItem>
-                <FeatureItem>
-                  <Icon name="faPalette" /> Velg finish: ubehandlet, grunnet eller malt
-                </FeatureItem>
-                <FeatureItem>
-                  <Icon name="faTruck" /> Levering inntil 200 km fra Lillehammer
-                </FeatureItem>
-              </FeatureList>
               <PriceBlock>
                 <PriceRow>
                   <Price>{p.price}</Price>

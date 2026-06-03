@@ -1,5 +1,26 @@
 [
   {
+    "id": "plantekasse",
+    "slug": "plantekasser",
+    "title": "Håndlaget plantekasse i tre",
+    "shortDescription": "Fra urter og blomster til grønnsaker – en solid plantekasse bygget etter dine mål gir terrassen, balkongen eller hagen et grønt løft.",
+    "price": "Pris fra 1 260,-",
+    "regularPrice": "Ordinær pris fra 1 800,-",
+    "images": [
+      { "src": "/images/products/plantekasser_4.webp", "alt": "Plantekasse i tre med oliventre, hortensia og lavendel på terrasse i kveldslys" },
+      { "src": "/images/products/plantekasser_2.webp", "alt": "Plantekasse i tre med lavendel og rosa blomster på terrasse" },
+      { "src": "/images/products/plantekasser_3.webp", "alt": "Plantekasse i tre med pyntegress og blomster på terrasse" },
+      { "src": "/images/products/plantekasser_1.webp", "alt": "Plantekasse i tre med blomster og grønne planter" }
+    ],
+    "detailsHtml": "<h3>Håndlaget plantekasse i tre</h3><p>Dyrk blomster, urter eller grønnsaker i en <strong>solid og pen plantekasse laget på bestilling</strong>. Vi tilpasser kassen etter dine mål og ønsker – perfekt for terrassen, balkongen eller hagen.</p><h4>Hvorfor velge en skreddersydd plantekasse?</h4><ul><li>Tilpasset <strong>nøyaktig den plassen du har</strong></li><li>Solid konstruksjon i <strong>holdbart treverk</strong></li><li>Perfekt for <strong>urter, blomster eller grønnsaker</strong></li><li>Løfter uteområdet med et <strong>naturlig og varmt uttrykk</strong></li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for et naturlig uttrykk</li><li><strong>Grunnet</strong> – klart til å males i ønsket farge</li><li><strong>Beiset eller malt</strong> – ferdig levert og klar til bruk</li></ul><p><strong>Ta kontakt i dag</strong> for et uforpliktende tilbud!</p>",
+    "category": "primary",
+    "showOnFrontPage": true,
+    "isFeatured": true,
+    "hasPromoRibbon": true,
+    "hasConfigurator": true,
+    "basePrice": 1260
+  },
+  {
     "id": "varmepumpehus",
     "slug": "varmepumpehus",
     "title": "Varmepumpehus – tilpasset ditt hjem",
@@ -106,23 +127,21 @@
     "hasConfigurator": false
   },
   {
-    "id": "plantekasse",
-    "slug": "plantekasser",
-    "title": "Håndlaget plantekasse i tre",
-    "shortDescription": "Fra urter og blomster til grønnsaker – en solid plantekasse bygget etter dine mål gir terrassen, balkongen eller hagen et grønt løft.",
-    "price": "Kampanjepris fra 1 260,-",
-    "regularPrice": "Ordinær pris fra 1 800,-",
+    "id": "pidestallkrakk",
+    "slug": "pidestall-krakk",
+    "title": "Pidestall krakk – plantestativ i tre",
+    "shortDescription": "Løft plantene og skap høyder på terrassen eller balkongen med en håndlaget pidestall i solid treverk. Skreddersydd i mål fra 30×30×30 cm til 60×60×80 cm.",
+    "price": "Pris fra 1 500,-",
     "images": [
-      { "src": "/images/products/plantekasser_2.webp", "alt": "Plantekasse i tre med lavendel og rosa blomster på terrasse" },
-      { "src": "/images/products/plantekasser_3.webp", "alt": "Plantekasse i tre med pyntegress og blomster på terrasse" },
-      { "src": "/images/products/plantekasser_1.webp", "alt": "Plantekasse i tre med blomster og grønne planter" }
+      { "src": "/images/products/pidestall_krakk_1.webp", "alt": "Tre pidestall krakker i tre med blomster i potter på terrasse i kveldslys" },
+      { "src": "/images/products/pidestall_krakk_2.webp", "alt": "Pidestall krakker i tre med pelargonia og bregne på terrasse" }
     ],
-    "detailsHtml": "<h3>Håndlaget plantekasse i tre</h3><p>Dyrk blomster, urter eller grønnsaker i en <strong>solid og pen plantekasse laget på bestilling</strong>. Vi tilpasser kassen etter dine mål og ønsker – perfekt for terrassen, balkongen eller hagen.</p><h4>Hvorfor velge en skreddersydd plantekasse?</h4><ul><li>Tilpasset <strong>nøyaktig den plassen du har</strong></li><li>Solid konstruksjon i <strong>holdbart treverk</strong></li><li>Perfekt for <strong>urter, blomster eller grønnsaker</strong></li><li>Løfter uteområdet med et <strong>naturlig og varmt uttrykk</strong></li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for et naturlig uttrykk</li><li><strong>Grunnet</strong> – klart til å males i ønsket farge</li><li><strong>Beiset eller malt</strong> – ferdig levert og klar til bruk</li></ul><p><strong>Ta kontakt i dag</strong> for et uforpliktende tilbud!</p>",
+    "detailsHtml": "<h3>Pidestall krakk – plantestativ i tre</h3><p>Skap liv og høyder på terrassen, balkongen eller i hagen med en <strong>håndlaget pidestall i solid treverk</strong>. Perfekt for å løfte frem yndlingsplanten, krukken eller en stemningsfull lykt.</p><h4>Hvorfor velge en skreddersydd pidestall?</h4><ul><li>Gir plantene <strong>fortjent oppmerksomhet</strong> ved å løfte dem i blikkfanget</li><li>Skap <strong>variasjon og høyder</strong> i krukkesamlingen</li><li>Solid konstruksjon i <strong>holdbart treverk</strong></li><li>Tilpasset <strong>nøyaktig den plassen og høyden du ønsker</strong></li></ul><h4>Tilgjengelige mål:</h4><ul><li><strong>Bredde og dybde:</strong> 30–60 cm</li><li><strong>Høyde:</strong> 30–80 cm</li><li><strong>Pris fra 1 500,-</strong> for minste størrelse</li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for et naturlig, rustikt uttrykk</li><li><strong>Beiset</strong> – fremhever treets struktur</li><li><strong>Malt</strong> – ferdig levert i ønsket farge</li></ul><p><strong>Bruk konfiguratoren</strong> for å se 3D-modellen med dine mål og få estimert pris!</p>",
     "category": "secondary",
     "showOnFrontPage": true,
-    "isFeatured": true,
-    "hasPromoRibbon": true,
+    "isFeatured": false,
+    "hasPromoRibbon": false,
     "hasConfigurator": true,
-    "basePrice": 1260
+    "basePrice": 1500
   }
 ]

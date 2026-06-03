@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react'
 import styled from 'styled-components'
 import PlantekassePriceCalculator from './PlantekassePriceCalculator'
+import ThreeVisualizer from './ThreeVisualizer'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
@@ -9,10 +10,50 @@ import PageTransition from '../../shared/PageTransition'
 import SplideCarousel from '../../shared/SplideCarousel'
 import { useSEO } from '../../../hooks/useSEO'
 import { useProductBySlug } from '../../../hooks/useProducts'
+import { productJsonLd } from '../../../utils/productJsonLd'
 import RelatedProducts from '../../shared/RelatedProducts'
 
+const PLANTEKASSE_FAQ = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'Hvilke former kommer plantekassen i?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Plantekassen kommer i fire former: kvadratisk, rektangulær, utvendig hjørne (L) og innvendig hjørne (L). Bruk konfiguratoren for å se 3D-modellen med dine mål.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Hva er forskjellen på trehvitt og impregnert tre?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Trehvitt er ubehandlet furu med et lyst, naturlig uttrykk. Trykkimpregnert tre har en grønnlig tone og tåler jord, fukt og frost vesentlig bedre over tid – anbefalt for plantekasser som står ute hele året.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Kan jeg legge til espalier?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ja, du kan legge til espalier (vertikalt klatregitter) på baksiden av kassen. På L-formene monteres espalier på begge armene. Tillegg fra 800,-.',
+      },
+    },
+    {
+      '@type': 'Question',
+      name: 'Leverer dere plantekassen?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Ja, vi leverer ferdig montert plantekasse inntil 200 km fra Lillehammer. Avstanden bestemmer leveringsprisen, og du kan også velge å hente selv.',
+      },
+    },
+  ],
+}
+
 const Hero = styled.section`
-  min-height: 50vh;
+  min-height: 28vh;
   background-image: url('/images/products/plantekasser_2.webp');
   background-size: cover;
   background-position: center;
@@ -23,7 +64,7 @@ const Hero = styled.section`
   position: relative;
   color: ${({ theme }) => theme.colors.textLight};
   text-align: center;
-  padding: 6rem 2rem 4rem;
+  padding: 4rem 2rem 2rem;
 
   &::before {
     content: '';
@@ -34,8 +75,8 @@ const Hero = styled.section`
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    min-height: 40vh;
-    padding: 5rem 1.5rem 3rem;
+    min-height: 0;
+    padding: 5rem 1rem 1rem;
   }
 `
 
@@ -46,11 +87,12 @@ const HeroContent = styled.div`
 
   h1 {
     font-size: 2.5rem;
-    margin-bottom: 1rem;
+    margin: 0 0 1rem;
     font-weight: 700;
 
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
+      margin: 0;
     }
   }
 
@@ -58,9 +100,10 @@ const HeroContent = styled.div`
     font-size: 1.2rem;
     opacity: 0.95;
     color: white;
+    margin: 0;
 
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1rem;
+      display: none;
     }
   }
 `
@@ -82,18 +125,24 @@ const Container = styled.div`
   margin: 0 auto;
   display: grid;
   grid-template-columns: 1fr 420px;
-  gap: 2rem;
+  grid-template-areas:
+    'viz sidebar'
+    'article sidebar';
+  gap: 0 2rem;
   align-items: start;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     grid-template-columns: 1fr;
-    gap: 2rem;
-    display: flex;
-    flex-direction: column;
+    grid-template-areas:
+      'viz'
+      'sidebar'
+      'article';
+    gap: 0.5rem;
   }
 `
 
 const Article = styled.article`
+  grid-area: article;
   padding: 0;
 
   h2 {
@@ -136,7 +185,27 @@ const Article = styled.article`
     padding: 0;
     padding-bottom: 2rem;
     border-bottom: 1px solid #e0e0e0;
-    order: 2;
+  }
+`
+
+const VisualizerWrap = styled.div`
+  grid-area: viz;
+  margin-bottom: 2rem;
+  animation: fadeInVisualizer 0.4s ease-out;
+
+  @keyframes fadeInVisualizer {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    margin-bottom: 0;
   }
 `
 
@@ -170,6 +239,7 @@ const ImageWrap = styled.div`
 `
 
 const Sidebar = styled.aside`
+  grid-area: sidebar;
   padding: 0 0 0 2rem;
   height: fit-content;
   position: sticky;
@@ -181,7 +251,6 @@ const Sidebar = styled.aside`
     padding: 0 0 2rem;
     border-left: none;
     border-bottom: 1px solid #e0e0e0;
-    order: 1;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -189,8 +258,9 @@ const Sidebar = styled.aside`
 `
 
 const SidebarTitle = styled.h3`
-  font-size: 1.3rem;
-  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
   color: ${({ theme }) => theme.colors.textDark};
 `
 
@@ -227,35 +297,48 @@ const ReviewNote = styled.p`
   margin-top: 1rem;
 `
 
+type PlantekasseShape = 'square' | 'rect' | 'outside-corner' | 'inside-corner'
+
 interface PlantekasseConfig {
+  shape: PlantekasseShape
   width: number
   height: number
   depth: number
+  thickness: number
   construction: string
   finish: string
+  espalier: boolean
 }
 
 const DEFAULT_BASE_PRICE = 1260
 
+const INITIAL_CONFIG: PlantekasseConfig = {
+  shape: 'rect',
+  width: 80,
+  depth: 40,
+  height: 40,
+  thickness: 40,
+  construction: 'impregnated',
+  finish: '0',
+  espalier: true,
+}
+
 export default function PlantekassePage() {
   const { data: product } = useProductBySlug('plantekasser')
-  const [config, setConfig] = useState<PlantekasseConfig>({
-    width: 60,
-    depth: 40,
-    height: 40,
-    construction: 'whitewood',
-    finish: '0',
-  })
+  const [config, setConfig] = useState<PlantekasseConfig>(INITIAL_CONFIG)
 
   const handleConfigChange = useCallback((newConfig: PlantekasseConfig) => {
     setConfig(newConfig)
   }, [])
 
   useSEO({
-    title: 'Plantekasse i tre – skreddersydd og kampanjepris | Minio',
+    title: 'Plantekasse i tre – kvadratisk, rektangulær og hjørnemodell | Minio',
     description:
-      'Skreddersydd plantekasse i tre med justerbare innvendige mål fra 30×30×30 cm til 200×200×80 cm. Velg mellom impregnert tre eller trehvitt. Kampanjepris fra 1 260,-.',
+      'Skreddersydd plantekasse i tre i fire former: kvadratisk, rektangulær og som hjørneløsning (utvendig/innvendig L). Velg mål, trehvitt eller impregnert, espalier og levering. Pris fra 1 260,- – håndlaget i Lillehammer.',
     ogImage: product?.images[0]?.src ?? '/images/products/plantekasser_2.webp',
+    jsonLd: product
+      ? [...productJsonLd(product, '/produkter/plantekasser'), PLANTEKASSE_FAQ]
+      : [PLANTEKASSE_FAQ],
   })
 
   return (
@@ -266,33 +349,60 @@ export default function PlantekassePage() {
           <Hero>
             <HeroContent>
               <h1>Plantekasse i tre</h1>
-              <p>Skreddersydd etter dine mål – kampanjepris akkurat nå</p>
+              <p>Skreddersydd etter dine mål – pris fra 1 260,-</p>
             </HeroContent>
           </Hero>
 
           <Content>
             <Container>
-              <Article>
-                {product && product.images.length > 0 && (
-                  <ImageWrap>
-                    {product.images.length > 1 ? (
-                      <SplideCarousel>
-                        {product.images.map((img, i) => (
-                          <img key={i} src={img.src} alt={img.alt} loading="lazy" />
-                        ))}
-                      </SplideCarousel>
-                    ) : (
-                      <img src={product.images[0].src} alt={product.images[0].alt} loading="lazy" />
-                    )}
-                  </ImageWrap>
-                )}
+              <VisualizerWrap>
+                <ThreeVisualizer
+                  shape={config.shape}
+                  width={config.width}
+                  height={config.height}
+                  depth={config.depth}
+                  thickness={config.thickness}
+                  construction={config.construction}
+                  finish={config.finish}
+                  espalier={config.espalier}
+                />
+              </VisualizerWrap>
 
+              <Article>
                 <h2>Solid plantekasse i tre, akkurat som du vil ha den</h2>
                 <p>
                   Fra urter og blomster til grønnsaker – en skreddersydd plantekasse i tre gir terrassen,
                   balkongen eller hagen et grønt løft. Vi bygger hver kasse for hånd i Lillehammer, og du
-                  velger målene som passer plassen din.
+                  velger både form, mål og treverk som passer plassen din.
                 </p>
+
+                <h3>Fire former – velg den som passer plassen</h3>
+                <p>
+                  Plantekassen kommer i fire former. Bruk konfiguratoren over for å se modellen i 3D
+                  med dine valgte mål, treverk og espalier.
+                </p>
+                <ul>
+                  <li>
+                    <strong>Kvadratisk plantekasse</strong> – Symmetrisk og kompakt. Fungerer som et
+                    blikkfang midt på terrassen eller som hjørnedetalj på balkongen. Standardmål 40×40×40 cm,
+                    med innvendige mål fra 30×30×30 cm til 200×200×80 cm.
+                  </li>
+                  <li>
+                    <strong>Rektangulær plantekasse</strong> – Den klassiske formen. Brukes langs vegger,
+                    rekkverk eller mellom uteområder. Standardmål 40×80×40 cm – ideelt for urtehage,
+                    krydderplanter eller grønnsaker i rekke.
+                  </li>
+                  <li>
+                    <strong>Utvendig hjørne (L-form)</strong> – Plantekassen omslutter et utvendig hjørne
+                    på huset, skuret eller pergolaen. Espalier monteres på innsiden av L-en slik at
+                    klatreplanter dekker hjørneveggene. Standardmål A 80 × B 80 cm med 40 cm dybde.
+                  </li>
+                  <li>
+                    <strong>Innvendig hjørne (L-form)</strong> – Glir tett inn i et hjørne på terrasse,
+                    balkong eller veranda. Utnytter plass som ellers blir liggende ubrukt, med espalier
+                    på de to baksidene mot vegg.
+                  </li>
+                </ul>
 
                 <h3>Slik tilpasser du kassen</h3>
                 <ul>
@@ -315,9 +425,23 @@ export default function PlantekassePage() {
                   </li>
                 </ul>
 
-                <h3>Kampanjepris akkurat nå</h3>
+                {product && product.images.length > 0 && (
+                  <ImageWrap>
+                    {product.images.length > 1 ? (
+                      <SplideCarousel>
+                        {product.images.map((img, i) => (
+                          <img key={i} src={img.src} alt={img.alt} loading="lazy" />
+                        ))}
+                      </SplideCarousel>
+                    ) : (
+                      <img src={product.images[0].src} alt={product.images[0].alt} loading="lazy" />
+                    )}
+                  </ImageWrap>
+                )}
+
+                <h3>Tilbud akkurat nå</h3>
                 <p>
-                  Plantekassen er for tiden på <strong>kampanje med 30 % rabatt</strong>. Ordinær pris fra
+                  Plantekassen er for tiden på <strong>tilbud med 30 % rabatt</strong>. Ordinær pris fra
                   1 800,- starter nå på <strong>1 260,-</strong> for minste størrelse. Bruk priskalkulatoren til
                   høyre for å se hva akkurat din kasse koster med valgte mål, treverk og tilvalg.
                 </p>

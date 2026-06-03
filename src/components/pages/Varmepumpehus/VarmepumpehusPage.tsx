@@ -9,6 +9,7 @@ import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import { useSEO } from '../../../hooks/useSEO'
 import { useProductBySlug } from '../../../hooks/useProducts'
+import { productJsonLd } from '../../../utils/productJsonLd'
 import RelatedProducts from '../../shared/RelatedProducts'
 
 const Hero = styled.section`
@@ -37,8 +38,8 @@ const Hero = styled.section`
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    min-height: 40vh;
-    padding: 5rem 1.5rem 3rem;
+    min-height: 0;
+    padding: 5rem 1rem 1rem;
   }
 `
 
@@ -49,11 +50,12 @@ const HeroContent = styled.div`
 
   h1 {
     font-size: 2.5rem;
-    margin-bottom: 1rem;
+    margin: 0 0 1rem;
     font-weight: 700;
 
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
+      margin: 0;
     }
   }
 
@@ -61,9 +63,10 @@ const HeroContent = styled.div`
     font-size: 1.2rem;
     opacity: 0.95;
     color: white;
+    margin: 0;
 
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1rem;
+      display: none;
     }
   }
 `
@@ -166,9 +169,9 @@ const Sidebar = styled.aside`
 `
 
 const SidebarTitle = styled.h3`
-  font-size: 1.3rem;
-  margin-top: 0;
-  margin-bottom: 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem;
   color: ${({ theme }) => theme.colors.textDark};
 `
 
@@ -298,6 +301,7 @@ export default function VarmepumpehusPage() {
     title: 'Skreddersydd varmepumpehus – Minio',
     description: 'Konfigurer og bestill skreddersydd varmepumpehus i tre. Velg mål, finish og tak – se 3D-modell i sanntid. Levering fra Lillehammer.',
     ogImage: '/images/products/heating-housing-top.webp',
+    jsonLd: product ? productJsonLd(product, '/produkter/varmepumpehus') : undefined,
   })
 
   return (

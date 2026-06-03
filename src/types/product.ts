@@ -33,6 +33,9 @@ export interface BasketItem {
   finish: string
   roof?: string
   quality?: string
+  shape?: string
+  armThickness?: number
+  espalier?: string
   delivery: string
   installation?: string
   price: string
@@ -45,6 +48,9 @@ export interface BasketItem {
   signWidthCm?: number
   signHeightCm?: number
   signDesignId?: string
+  discount?: string
+  slotDimensions?: Array<{ width: number; height: number; depth: number; unitPrice?: string }>
+  lockQuantity?: boolean
 }
 
 export interface ProcessStepData {

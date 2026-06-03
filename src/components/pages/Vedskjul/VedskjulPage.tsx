@@ -9,6 +9,7 @@ import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import { useSEO } from '../../../hooks/useSEO'
 import { useProductBySlug } from '../../../hooks/useProducts'
+import { productJsonLd } from '../../../utils/productJsonLd'
 import RelatedProducts from '../../shared/RelatedProducts'
 
 const Hero = styled.section`
@@ -296,6 +297,7 @@ export default function VedskjulPage() {
     title: 'Skreddersydd vedskjul – Minio',
     description: 'Konfigurer og bestill skreddersydd vedskjul i tre. Velg antall seksjoner, finish og tak. Hold veden tørr og tilgjengelig. Levering fra Lillehammer.',
     ogImage: '/images/products/fire_wood_shed_1.webp',
+    jsonLd: product ? productJsonLd(product, '/produkter/vedskjul') : undefined,
   })
 
   return (

@@ -3,27 +3,39 @@ import styled from 'styled-components'
 import Icon from '../../shared/Icon'
 import { useBasketContext } from '../../../context/BasketContext'
 
-interface VarmepumpehusConfig {
+interface PidestallConfig {
   width: number
-  height: number
   depth: number
-  angle: number
-  mounting: 'wall' | 'freestanding'
-  finish: string
-  roof: string
+  height: number
 }
 
-interface PriceCalculatorProps {
+interface Props {
   basePrice: number
-  config?: VarmepumpehusConfig
-  onDimensionsChange: (dims: VarmepumpehusConfig) => void
+  onConfigChange?: (config: PidestallConfig) => void
 }
 
-const VAT_PERCENTAGE = 0
+const PRICE_PER_CM = 20
+const MIN_DIMENSION = 30
+const MAX_SLOTS = 6
+const DELIVERY_PRICE_PER_KM = 15
 const LILLEHAMMER_LAT = 61.1153
 const LILLEHAMMER_LON = 10.4662
 
-// ── Styled components ──────────────────────────────────────────────
+function quantityDiscount(qty: number): number {
+  if (qty >= 4) return 0.1
+  if (qty === 3) return 0.08
+  if (qty === 2) return 0.05
+  return 0
+}
+
+const DISCOUNT_BY_COUNT: Record<number, number> = {
+  1: 0,
+  2: 0.05,
+  3: 0.08,
+  4: 0.1,
+  5: 0.1,
+  6: 0.1,
+}
 
 const CalculatorContainer = styled.div`
   padding: 0;
@@ -34,41 +46,108 @@ const SectionTitle = styled.h3`
   font-weight: 600;
   color: ${({ theme }) => theme.colors.textDark};
   margin: 1.25rem 0 0.5rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
 
   &:first-child {
     margin-top: 0;
   }
 `
 
-const ButtonGroup = styled.div`
-  display: flex;
-  border-radius: 6px;
-  overflow: hidden;
-  border: 1px solid #e0e0e0;
-  margin-bottom: 1rem;
+const SlotIntro = styled.p`
+  font-size: 0.72rem;
+  color: #666;
+  line-height: 1.45;
+  margin: 0 0 0.6rem;
 `
 
-const ButtonGroupBtn = styled.button<{ $active: boolean }>`
-  flex: 1;
-  padding: 0.45rem 0.3rem;
-  font-size: 0.72rem;
-  border: none;
-  background: ${({ $active }) => $active ? '#333' : '#fff'};
-  color: ${({ $active }) => $active ? '#fff' : '#555'};
-  cursor: pointer;
-  transition: all 0.15s;
-  font-weight: ${({ $active }) => $active ? '600' : '400'};
-  white-space: nowrap;
+const SlotGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.55rem;
+  margin-bottom: 0.5rem;
+`
 
-  &:not(:last-child) {
-    border-right: 1px solid #e0e0e0;
-  }
+const SlotBox = styled.button<{ $active: boolean; $focused: boolean }>`
+  position: relative;
+  min-height: 78px;
+  padding: 0.55rem 0.4rem 0.5rem;
+  border: 2px ${({ $active }) => ($active ? 'solid' : 'dashed')}
+    ${({ $focused, $active, theme }) =>
+      $focused ? theme.colors.textDark : $active ? '#bdbdbd' : '#d8d8d8'};
+  background: ${({ $focused, $active, theme }) =>
+    $focused ? theme.colors.textDark : $active ? '#fff' : '#fafafa'};
+  color: ${({ $focused, $active }) =>
+    $focused ? '#fff' : $active ? '#222' : '#9a9a9a'};
+  border-radius: ${({ theme }) => theme.borderRadius.small};
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  text-align: center;
+  transition: all 0.15s ease;
 
   &:hover {
-    background: ${({ $active }) => $active ? '#333' : '#f5f5f5'};
+    border-color: ${({ theme }) => theme.colors.textDark};
+    transform: translateY(-1px);
+  }
+`
+
+const SlotNumber = styled.span`
+  font-weight: 700;
+  font-size: 1rem;
+  line-height: 1;
+`
+
+const SlotDims = styled.span`
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  opacity: 0.9;
+`
+
+const SlotPrice = styled.span`
+  font-size: 0.62rem;
+  font-weight: 600;
+  opacity: 0.95;
+`
+
+const SlotPlaceholder = styled.span`
+  font-size: 0.6rem;
+  font-weight: 500;
+  color: inherit;
+  opacity: 0.7;
+`
+
+const SlotDiscount = styled.span<{ $focused: boolean; $active: boolean }>`
+  position: absolute;
+  top: 4px;
+  right: 5px;
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.05rem 0.3rem;
+  border-radius: 999px;
+  color: ${({ $focused, $active }) =>
+    $focused ? '#fff' : $active ? '#fff' : '#666'};
+  background: ${({ $focused, $active }) =>
+    $focused ? '#2e7d32' : $active ? '#43a047' : '#e0e0e0'};
+`
+
+const FocusBadge = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  background: #f4f4f4;
+  border-radius: ${({ theme }) => theme.borderRadius.small};
+  font-size: 0.75rem;
+  color: #444;
+  margin: 0.25rem 0 0.75rem;
+
+  strong {
+    color: ${({ theme }) => theme.colors.textDark};
   }
 `
 
@@ -139,13 +218,6 @@ const StyledSlider = styled.input`
   }
 `
 
-const VolumeDisplay = styled.div`
-  text-align: center;
-  font-size: 0.75rem;
-  color: #888;
-  margin-top: 0.25rem;
-`
-
 const CheckboxBox = styled.label<{ $checked?: boolean }>`
   display: flex;
   align-items: center;
@@ -157,11 +229,6 @@ const CheckboxBox = styled.label<{ $checked?: boolean }>`
   font-size: 0.8rem;
   color: ${({ theme }) => theme.colors.textDark};
   transition: border-color ${({ theme }) => theme.transitions.default};
-  margin-bottom: 0.5rem;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
 `
 
 const HiddenCheckbox = styled.input`
@@ -258,8 +325,6 @@ const StatusMessage = styled.div<{ $type?: 'success' | 'error' | 'warning' | 'in
         return '#f44336'
       case 'warning':
         return '#ff9800'
-      case 'info':
-        return '#888'
       default:
         return '#888'
     }
@@ -294,6 +359,54 @@ const PriceRow = styled.div`
   font-size: 0.8rem;
   color: ${({ theme }) => theme.colors.textDark};
   margin-bottom: 0.3rem;
+  gap: 0.4rem;
+`
+
+const SlotPriceLabel = styled.span`
+  flex: 1;
+  text-align: left;
+`
+
+const SlotPriceAmount = styled.span`
+  white-space: nowrap;
+`
+
+const RemoveSlotButton = styled.button`
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: #999;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+
+  &:hover {
+    background: #fde2e1;
+    color: #c0392b;
+  }
+
+  &:disabled {
+    visibility: hidden;
+    pointer-events: none;
+  }
+`
+
+const DiscountRow = styled(PriceRow)`
+  color: #2e7d32;
+  font-weight: 600;
+`
+
+const PriceTotalLabel = styled.div`
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #888;
+  margin-bottom: 0.15rem;
 `
 
 const PriceTotal = styled.div`
@@ -305,12 +418,6 @@ const PriceTotal = styled.div`
   border-top: 1px solid #e0e0e0;
 `
 
-const PriceTotalLabel = styled.div`
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: #888;
-  margin-bottom: 0.15rem;
-`
 
 const AddToBasketButton = styled.button`
   width: 100%;
@@ -348,49 +455,6 @@ const Note = styled.p`
   margin-bottom: 0;
 `
 
-const TooltipWrapper = styled.span`
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  cursor: help;
-  color: #aaa;
-  font-size: 0.75rem;
-
-  &:hover > div {
-    opacity: 1;
-    visibility: visible;
-  }
-`
-
-const TooltipContent = styled.div`
-  position: absolute;
-  bottom: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
-  background: ${({ theme }) => theme.colors.textDark};
-  color: #fff;
-  padding: 0.5rem 0.65rem;
-  border-radius: ${({ theme }) => theme.borderRadius.small};
-  font-size: 0.68rem;
-  font-weight: 400;
-  white-space: nowrap;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.2s, visibility 0.2s;
-  z-index: 10;
-  pointer-events: none;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    border: 5px solid transparent;
-    border-top-color: ${({ theme }) => theme.colors.textDark};
-  }
-`
-
 const Toast = styled.div<{ $visible: boolean }>`
   position: fixed;
   bottom: 2rem;
@@ -412,22 +476,28 @@ const Toast = styled.div<{ $visible: boolean }>`
   gap: 0.4rem;
 `
 
-// ── Component ──────────────────────────────────────────────────────
+function unitPriceFor(slot: PidestallConfig, basePrice: number): number {
+  return (
+    basePrice +
+    PRICE_PER_CM *
+      ((slot.width - MIN_DIMENSION) +
+        (slot.depth - MIN_DIMENSION) +
+        (slot.height - MIN_DIMENSION))
+  )
+}
 
-export default function PriceCalculator({ basePrice, config, onDimensionsChange }: PriceCalculatorProps) {
+const DEFAULT_SLOT: PidestallConfig = { width: 30, depth: 30, height: 30 }
+
+export default function PidestallKrakkPriceCalculator({ basePrice, onConfigChange }: Props) {
   const { addItem } = useBasketContext()
 
-  // Form state
-  const [mounting, setMounting] = useState<'wall' | 'freestanding'>('wall')
-  const [angle, setAngle] = useState(22)
-  const [width, setWidth] = useState(70)
-  const [height, setHeight] = useState(50)
-  const [depth, setDepth] = useState(40)
-  const [finish, setFinish] = useState('0')
-  const [roofType, setRoofType] = useState('0')
-  const [quality, setQuality] = useState('0')
+  const [slots, setSlots] = useState<PidestallConfig[]>(() =>
+    Array.from({ length: MAX_SLOTS }, () => ({ ...DEFAULT_SLOT })),
+  )
+  const [count, setCount] = useState(1)
+  const [focused, setFocused] = useState(0)
+  const [showToast, setShowToast] = useState(false)
   const [deliveryChecked, setDeliveryChecked] = useState(false)
-  const [installationChecked, setInstallationChecked] = useState(false)
   const [distance, setDistance] = useState(0)
   const [location, setLocation] = useState('')
   const [locationStatus, setLocationStatus] = useState<{
@@ -435,89 +505,34 @@ export default function PriceCalculator({ basePrice, config, onDimensionsChange 
     message: string
   } | null>(null)
   const [isSearching, setIsSearching] = useState(false)
-  const [showToast, setShowToast] = useState(false)
-
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const syncingFromParent = useRef(false)
 
-  // Sync internal state from external config (e.g. visualizer sidebar changes)
   useEffect(() => {
-    if (!config) return
-    syncingFromParent.current = true
-    setWidth(prev => prev !== config.width ? config.width : prev)
-    setHeight(prev => prev !== config.height ? config.height : prev)
-    setDepth(prev => prev !== config.depth ? config.depth : prev)
-    setAngle(prev => prev !== config.angle ? config.angle : prev)
-    setMounting(prev => prev !== config.mounting ? config.mounting : prev)
-    setFinish(prev => prev !== config.finish ? config.finish : prev)
-    setRoofType(prev => prev !== config.roof ? config.roof : prev)
-    queueMicrotask(() => { syncingFromParent.current = false })
-  }, [config])
+    onConfigChange?.(slots[focused])
+  }, [slots, focused, onConfigChange])
 
-  // Notify parent of dimension/option changes (skip when syncing from parent to avoid loop)
-  useEffect(() => {
-    if (syncingFromParent.current) return
-    onDimensionsChange({
-      width,
-      height,
-      depth,
-      angle,
-      mounting,
-      finish,
-      roof: roofType,
-    })
-  }, [width, height, depth, angle, mounting, finish, roofType, onDimensionsChange])
-
-  // Price calculation
-  const baseVolume = 70 * 50 * 40
-  const volumeCm3 = width * depth * height
-  const additionalVolume = Math.max(0, volumeCm3 - baseVolume)
-  let volumeCost = basePrice + additionalVolume * 0.0065
-  if (mounting === 'freestanding') volumeCost *= 1.25
-  const finishCost = parseInt(finish, 10)
-  const roofCost = parseInt(roofType, 10)
-  const qualityCost = quality === 'volume' ? volumeCm3 * 0.0022 : 0
-  const deliveryCost = deliveryChecked ? distance * 15 * 2 : 0
-  const installationCost = installationChecked ? 1000 : 0
-
-  const priceExclVat = Math.round(
-    volumeCost + finishCost + roofCost + qualityCost + deliveryCost + installationCost,
-  )
-  const vatAmount = Math.round(priceExclVat * (VAT_PERCENTAGE / 100))
-  const totalPrice = priceExclVat + vatAmount
-
-  const formatPrice = (price: number) => price.toLocaleString('nb-NO') + ',-'
-
-  // Geocoding with debounce
   const geocodeLocation = useCallback(async (query: string) => {
     if (!query.trim()) {
       setLocationStatus(null)
       return
     }
-
     setIsSearching(true)
     setLocationStatus({ type: 'info', message: 'Søker...' })
-
     try {
       const geoUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)},Norway&format=json&limit=1`
       const geoRes = await fetch(geoUrl)
       const geoData = await geoRes.json()
-
       if (!geoData || geoData.length === 0) {
         setLocationStatus({ type: 'error', message: 'Fant ikke stedet. Prøv et annet søkeord.' })
         setIsSearching(false)
         return
       }
-
       const toLat = parseFloat(geoData[0].lat)
       const toLon = parseFloat(geoData[0].lon)
-
-      // Try driving distance with OSRM
       try {
         const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${LILLEHAMMER_LON},${LILLEHAMMER_LAT};${toLon},${toLat}?overview=false`
         const osrmRes = await fetch(osrmUrl)
         const osrmData = await osrmRes.json()
-
         if (osrmData.code === 'Ok' && osrmData.routes && osrmData.routes.length > 0) {
           const distKm = Math.round(osrmData.routes[0].distance / 1000)
           setDistance(distKm)
@@ -526,13 +541,7 @@ export default function PriceCalculator({ basePrice, config, onDimensionsChange 
             message: `Fant ${geoData[0].display_name.split(',')[0]} — ${distKm} km fra Lillehammer`,
           })
         } else {
-          // Fallback to straight-line distance
-          const straightLine = haversineDistance(
-            LILLEHAMMER_LAT,
-            LILLEHAMMER_LON,
-            toLat,
-            toLon,
-          )
+          const straightLine = haversineDistance(LILLEHAMMER_LAT, LILLEHAMMER_LON, toLat, toLon)
           const estimated = Math.round(straightLine * 1.3)
           setDistance(estimated)
           setLocationStatus({
@@ -541,7 +550,6 @@ export default function PriceCalculator({ basePrice, config, onDimensionsChange 
           })
         }
       } catch {
-        // Fallback to straight-line distance
         const straightLine = haversineDistance(LILLEHAMMER_LAT, LILLEHAMMER_LON, toLat, toLon)
         const estimated = Math.round(straightLine * 1.3)
         setDistance(estimated)
@@ -553,164 +561,212 @@ export default function PriceCalculator({ basePrice, config, onDimensionsChange 
     } catch {
       setLocationStatus({ type: 'error', message: 'Fant ikke stedet. Prøv et annet søkeord.' })
     }
-
     setIsSearching(false)
   }, [])
 
   const handleLocationChange = (value: string) => {
     setLocation(value)
-
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
-    }
-
-    debounceRef.current = setTimeout(() => {
-      geocodeLocation(value)
-    }, 1000)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => geocodeLocation(value), 1000)
   }
 
-  // Cleanup debounce on unmount
   useEffect(() => {
     return () => {
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-      }
+      if (debounceRef.current) clearTimeout(debounceRef.current)
     }
   }, [])
 
-  const handleAddToBasket = () => {
-    addItem({
-      type: 'Varmepumpehus',
-      dimensions: { width, height, depth },
-      mounting,
-      angle: String(angle),
-      finish: finishLabel(finish),
-      roof: roofLabel(roofType),
-      quality: qualityLabel(quality),
-      delivery: deliveryChecked ? `${distance} km` : 'Nei',
-      installation: installationChecked ? 'Ja' : 'Nei',
-      price: formatPrice(totalPrice),
-    })
+  const updateFocusedSlot = (patch: Partial<PidestallConfig>) => {
+    setSlots((prev) => prev.map((s, i) => (i === focused ? { ...s, ...patch } : s)))
+  }
 
+  const handleRemoveSlot = (index: number) => {
+    if (count <= 1) return
+    setSlots((prev) => {
+      const next = [...prev]
+      next.splice(index, 1)
+      next.push({ ...DEFAULT_SLOT })
+      return next
+    })
+    setCount((c) => Math.max(1, c - 1))
+    setFocused((f) => {
+      if (f === index) return Math.max(0, Math.min(index, count - 2))
+      if (f > index) return f - 1
+      return f
+    })
+  }
+
+  const handleSlotClick = (index: number) => {
+    const isActive = index < count
+    const isFocused = index === focused
+    if (isActive && isFocused && count > 1) {
+      handleRemoveSlot(index)
+      return
+    }
+    setFocused(index)
+    if (index + 1 > count) setCount(index + 1)
+  }
+
+  const activeSlots = slots.slice(0, count)
+  const unitPrices = activeSlots.map((s) => unitPriceFor(s, basePrice))
+  const grossTotal = unitPrices.reduce((a, b) => a + b, 0)
+  const discountPct = quantityDiscount(count)
+  const discountAmount = Math.round(grossTotal * discountPct)
+  const productsTotal = grossTotal - discountAmount
+  const deliveryCost = deliveryChecked ? distance * DELIVERY_PRICE_PER_KM * 2 : 0
+  const totalPrice = productsTotal + deliveryCost
+
+  const formatPrice = (price: number) => price.toLocaleString('nb-NO') + ',-'
+
+  const focusedSlot = slots[focused]
+
+  const handleAddToBasket = () => {
+    const first = activeSlots[0]
+    const deliveryLabel = deliveryChecked
+      ? `${distance} km fra Lillehammer (${formatPrice(deliveryCost)})`
+      : 'Avtales separat'
+    const item: Omit<import('../../../types/product').BasketItem, 'id' | 'quantity'> = {
+      type: count > 1 ? `Pidestall krakk – sett (${count} stk)` : 'Pidestall krakk',
+      dimensions: { width: first.width, height: first.height, depth: first.depth },
+      finish: 'Trykkimpregnert',
+      delivery: deliveryLabel,
+      price: formatPrice(totalPrice),
+    }
+    if (discountPct > 0) {
+      item.discount = `Mengderabatt ${Math.round(discountPct * 100)}% (${count} stk) – sparer ${formatPrice(discountAmount)}`
+    }
+    if (count > 1) {
+      item.slotDimensions = activeSlots.map((slot) => ({
+        width: slot.width,
+        height: slot.height,
+        depth: slot.depth,
+        unitPrice: formatPrice(unitPriceFor(slot, basePrice)),
+      }))
+      item.lockQuantity = true
+    }
+    addItem(item, 1)
     setShowToast(true)
     setTimeout(() => setShowToast(false), 2000)
   }
 
   return (
     <CalculatorContainer>
-      {/* Mounting type */}
-      <ButtonGroup>
-        <ButtonGroupBtn $active={mounting === 'wall'} onClick={() => setMounting('wall')}>Vegghengt</ButtonGroupBtn>
-        <ButtonGroupBtn $active={mounting === 'freestanding'} onClick={() => setMounting('freestanding')}>Frittstående (+25%)</ButtonGroupBtn>
-      </ButtonGroup>
+      <SectionTitle>Velg antall &amp; konfigurer hver pidestall</SectionTitle>
+      <SlotIntro>
+        Klikk på en boks for å velge hvor mange du vil ha – og for å redigere målene
+        på den enkelte pidestallen. Hver boks kan ha sine egne mål.
+      </SlotIntro>
+      <SlotGrid>
+        {slots.map((slot, i) => {
+          const active = i < count
+          const isFocused = i === focused
+          const discount = DISCOUNT_BY_COUNT[i + 1]
+          const slotPrice = active ? unitPriceFor(slot, basePrice) : null
+          return (
+            <SlotBox
+              key={i}
+              type="button"
+              $active={active}
+              $focused={isFocused}
+              onClick={() => handleSlotClick(i)}
+              aria-label={`Pidestall ${i + 1}${active ? ` – ${slot.width}×${slot.depth}×${slot.height} cm` : ' (ikke valgt)'}`}
+            >
+              {discount > 0 && (
+                <SlotDiscount $focused={isFocused} $active={active}>
+                  −{Math.round(discount * 100)}%
+                </SlotDiscount>
+              )}
+              <SlotNumber>#{i + 1}</SlotNumber>
+              {active && slotPrice !== null ? (
+                <>
+                  <SlotDims>
+                    {slot.width}×{slot.depth}×{slot.height} cm
+                  </SlotDims>
+                  <SlotPrice>{formatPrice(slotPrice)}</SlotPrice>
+                </>
+              ) : (
+                <SlotPlaceholder>Legg til</SlotPlaceholder>
+              )}
+            </SlotBox>
+          )
+        })}
+      </SlotGrid>
+      <FocusBadge>
+        <span>
+          Redigerer <strong>pidestall #{focused + 1}</strong>
+          {count > 1 && <> av {count}</>}
+        </span>
+        {count > 1 && focused < count - 1 && (
+          <button
+            type="button"
+            onClick={() => setFocused(focused + 1)}
+            style={{
+              background: 'transparent',
+              border: 0,
+              padding: 0,
+              color: '#1976d2',
+              cursor: 'pointer',
+              fontSize: '0.72rem',
+              fontWeight: 600,
+            }}
+          >
+            Neste &rarr;
+          </button>
+        )}
+      </FocusBadge>
 
-      {/* Roof angle */}
-      <SliderGroup>
-        <SliderLabel>
-          <span>Takvinkel</span>
-          <SliderValue>{angle}°</SliderValue>
-        </SliderLabel>
-        <StyledSlider
-          type="range"
-          min={0}
-          max={45}
-          step={1}
-          value={angle}
-          onChange={(e) => setAngle(parseInt(e.target.value, 10))}
-        />
-      </SliderGroup>
-
-      {/* Dimensions */}
-      <SectionTitle>Innvendig mål</SectionTitle>
+      <SectionTitle>Mål for pidestall #{focused + 1}</SectionTitle>
       <SliderGroup>
         <SliderLabel>
           <span>Bredde</span>
-          <SliderValue>{width} cm</SliderValue>
+          <SliderValue>{focusedSlot.width} cm</SliderValue>
         </SliderLabel>
         <StyledSlider
           type="range"
-          min={70}
-          max={200}
-          step={1}
-          value={width}
-          onChange={(e) => setWidth(parseInt(e.target.value, 10))}
-        />
-      </SliderGroup>
-      <SliderGroup>
-        <SliderLabel>
-          <span>Høyde</span>
-          <SliderValue>{height} cm</SliderValue>
-        </SliderLabel>
-        <StyledSlider
-          type="range"
-          min={50}
-          max={200}
-          step={1}
-          value={height}
-          onChange={(e) => setHeight(parseInt(e.target.value, 10))}
+          min={30}
+          max={60}
+          step={5}
+          value={focusedSlot.width}
+          onChange={(e) => updateFocusedSlot({ width: parseInt(e.target.value, 10) })}
         />
       </SliderGroup>
       <SliderGroup>
         <SliderLabel>
           <span>Dybde</span>
-          <SliderValue>{depth} cm</SliderValue>
+          <SliderValue>{focusedSlot.depth} cm</SliderValue>
         </SliderLabel>
         <StyledSlider
           type="range"
-          min={40}
-          max={150}
-          step={1}
-          value={depth}
-          onChange={(e) => setDepth(parseInt(e.target.value, 10))}
+          min={30}
+          max={60}
+          step={5}
+          value={focusedSlot.depth}
+          onChange={(e) => updateFocusedSlot({ depth: parseInt(e.target.value, 10) })}
         />
       </SliderGroup>
-      <VolumeDisplay>
-        Volum: {(volumeCm3 / 1000000).toFixed(3)} m³
-      </VolumeDisplay>
+      <SliderGroup>
+        <SliderLabel>
+          <span>Høyde</span>
+          <SliderValue>{focusedSlot.height} cm</SliderValue>
+        </SliderLabel>
+        <StyledSlider
+          type="range"
+          min={30}
+          max={80}
+          step={5}
+          value={focusedSlot.height}
+          onChange={(e) => updateFocusedSlot({ height: parseInt(e.target.value, 10) })}
+        />
+      </SliderGroup>
 
-      {/* Surface finish */}
-      <SectionTitle>Overflatebehandling</SectionTitle>
-      <ButtonGroup>
-        <ButtonGroupBtn $active={finish === '0'} onClick={() => setFinish('0')}>Ubehandlet</ButtonGroupBtn>
-        <ButtonGroupBtn $active={finish === '800'} onClick={() => setFinish('800')}>Grunnet</ButtonGroupBtn>
-        <ButtonGroupBtn $active={finish === '1500'} onClick={() => setFinish('1500')}>Grunnet og malt</ButtonGroupBtn>
-      </ButtonGroup>
-
-      {/* Roof type */}
-      <SectionTitle>Taktype</SectionTitle>
-      <ButtonGroup>
-        <ButtonGroupBtn $active={roofType === '0'} onClick={() => setRoofType('0')}>Panel</ButtonGroupBtn>
-        <ButtonGroupBtn $active={roofType === '300'} onClick={() => setRoofType('300')}>Takpapp</ButtonGroupBtn>
-        <ButtonGroupBtn $active={roofType === '500'} onClick={() => setRoofType('500')}>Impregnert</ButtonGroupBtn>
-      </ButtonGroup>
-
-      {/* Quality */}
-      <SectionTitle>
-        Kvalitet
-        <TooltipWrapper>
-          <Icon name="faInfoCircle" />
-          <TooltipContent>
-            Forsterket utførelse bruker tykkere materialer. Pris avhenger av størrelse.
-          </TooltipContent>
-        </TooltipWrapper>
-      </SectionTitle>
-      <ButtonGroup>
-        <ButtonGroupBtn $active={quality === '0'} onClick={() => setQuality('0')}>Standard</ButtonGroupBtn>
-        <ButtonGroupBtn $active={quality === 'volume'} onClick={() => setQuality('volume')}>Forsterket</ButtonGroupBtn>
-      </ButtonGroup>
-
-      {/* Additional services */}
       <SectionTitle>Tilleggstjenester</SectionTitle>
-
       <CheckboxBox $checked={deliveryChecked}>
         <HiddenCheckbox
           type="checkbox"
           checked={deliveryChecked}
           onChange={(e) => setDeliveryChecked(e.target.checked)}
         />
-        <CheckMark $checked={deliveryChecked}>
-          {deliveryChecked && <Icon name="faCheck" />}
-        </CheckMark>
+        <CheckMark $checked={deliveryChecked}>{deliveryChecked && <Icon name="faCheck" />}</CheckMark>
         Levering
       </CheckboxBox>
 
@@ -720,11 +776,7 @@ export default function PriceCalculator({ basePrice, config, onDimensionsChange 
             <InputLabel>Sted / postnummer</InputLabel>
             <InputWrapper>
               <SearchIcon>
-                {isSearching ? (
-                  <Icon name="faSpinner" spin />
-                ) : (
-                  <Icon name="faSearch" />
-                )}
+                {isSearching ? <Icon name="faSpinner" spin /> : <Icon name="faSearch" />}
               </SearchIcon>
               <StyledInput
                 $hasIcon
@@ -766,33 +818,46 @@ export default function PriceCalculator({ basePrice, config, onDimensionsChange 
         </DeliveryDetails>
       )}
 
-      <CheckboxBox $checked={installationChecked}>
-        <HiddenCheckbox
-          type="checkbox"
-          checked={installationChecked}
-          onChange={(e) => setInstallationChecked(e.target.checked)}
-        />
-        <CheckMark $checked={installationChecked}>
-          {installationChecked && <Icon name="faCheck" />}
-        </CheckMark>
-        Montering (+1000,-)
-      </CheckboxBox>
-
-      {/* Price display */}
       <PriceSection>
-        <PriceRow>
-          <span>Pris eks. mva</span>
-          <span>{formatPrice(priceExclVat)}</span>
-        </PriceRow>
-        <PriceRow>
-          <span>MVA ({VAT_PERCENTAGE}%)</span>
-          <span>{formatPrice(vatAmount)}</span>
-        </PriceRow>
-        <PriceTotalLabel>Estimert pris inkl. mva</PriceTotalLabel>
+        {activeSlots.map((slot, i) => (
+          <PriceRow key={i}>
+            <SlotPriceLabel>
+              #{i + 1} ({slot.width}×{slot.depth}×{slot.height})
+            </SlotPriceLabel>
+            <SlotPriceAmount>{formatPrice(unitPriceFor(slot, basePrice))}</SlotPriceAmount>
+            <RemoveSlotButton
+              type="button"
+              onClick={() => handleRemoveSlot(i)}
+              disabled={count <= 1}
+              aria-label={`Fjern pidestall ${i + 1}`}
+              title="Fjern denne pidestallen"
+            >
+              <Icon name="faTimes" />
+            </RemoveSlotButton>
+          </PriceRow>
+        ))}
+        {count > 1 && (
+          <PriceRow>
+            <span>Sum {count} stk</span>
+            <span>{formatPrice(grossTotal)}</span>
+          </PriceRow>
+        )}
+        {discountPct > 0 && (
+          <DiscountRow>
+            <span>Mengderabatt ({Math.round(discountPct * 100)}%)</span>
+            <span>−{formatPrice(discountAmount)}</span>
+          </DiscountRow>
+        )}
+        {deliveryChecked && deliveryCost > 0 && (
+          <PriceRow>
+            <SlotPriceLabel>Levering ({distance} km × 2)</SlotPriceLabel>
+            <SlotPriceAmount>{formatPrice(deliveryCost)}</SlotPriceAmount>
+          </PriceRow>
+        )}
+        <PriceTotalLabel>Estimert totalpris</PriceTotalLabel>
         <PriceTotal>{formatPrice(totalPrice)}</PriceTotal>
       </PriceSection>
 
-      {/* Add to basket */}
       <AddToBasketButton onClick={handleAddToBasket}>
         <Icon name="faPaperPlane" />
         Legg til i forespørsel
@@ -800,7 +865,6 @@ export default function PriceCalculator({ basePrice, config, onDimensionsChange 
 
       <Note>* Dette er et estimat. Kontakt oss for eksakt tilbud.</Note>
 
-      {/* Toast notification */}
       <Toast $visible={showToast}>
         <Icon name="faCheck" />
         Lagt til i forespørselen!
@@ -809,14 +873,7 @@ export default function PriceCalculator({ basePrice, config, onDimensionsChange 
   )
 }
 
-// ── Helper functions ───────────────────────────────────────────────
-
-function haversineDistance(
-  lat1: number,
-  lon1: number,
-  lat2: number,
-  lon2: number,
-): number {
+function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371
   const dLat = ((lat2 - lat1) * Math.PI) / 180
   const dLon = ((lon2 - lon1) * Math.PI) / 180
@@ -828,35 +885,4 @@ function haversineDistance(
       Math.sin(dLon / 2)
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
   return R * c
-}
-
-function finishLabel(value: string): string {
-  switch (value) {
-    case '800':
-      return 'Grunnet'
-    case '1500':
-      return 'Grunnet og malt'
-    default:
-      return 'Ubehandlet'
-  }
-}
-
-function roofLabel(value: string): string {
-  switch (value) {
-    case '300':
-      return 'Takpapp'
-    case '500':
-      return 'Impregnert tak'
-    default:
-      return 'Panel tak'
-  }
-}
-
-function qualityLabel(value: string): string {
-  switch (value) {
-    case 'volume':
-      return 'Forsterket utførelse'
-    default:
-      return 'Standard utførelse'
-  }
 }

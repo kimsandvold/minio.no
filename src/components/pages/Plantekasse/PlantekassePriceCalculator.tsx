@@ -3,13 +3,20 @@ import styled from 'styled-components'
 import Icon from '../../shared/Icon'
 import { useBasketContext } from '../../../context/BasketContext'
 
+type PlantekasseShape = 'square' | 'rect' | 'outside-corner' | 'inside-corner'
+
 interface PlantekasseConfig {
+  shape: PlantekasseShape
   width: number
   height: number
   depth: number
+  thickness: number
   construction: string
   finish: string
+  espalier: boolean
 }
+
+const ESPALIER_PRICE_PER_CM = 5
 
 interface PlantekassePriceCalculatorProps {
   basePrice: number
@@ -20,8 +27,10 @@ interface PlantekassePriceCalculatorProps {
 const VAT_PERCENTAGE = 0
 const LILLEHAMMER_LAT = 61.1153
 const LILLEHAMMER_LON = 10.4662
-const MIN_VOLUME = 30 * 30 * 30
-const VOLUME_COEFFICIENT = 0.022
+// Pricing scales with board-meters of material (1 board = 10 cm × 1 m = 1000 cm² of side/bottom area).
+// 4 sides + bottom: surfaceArea = 2WH + 2DH + WD. boardMeters = surfaceArea / 1000.
+const MIN_SURFACE_AREA = 2 * 30 * 30 + 2 * 30 * 30 + 30 * 30
+const PRICE_PER_BOARD_METER = 100
 const REGULAR_MULTIPLIER = 10 / 7
 
 const CalculatorContainer = styled.div`
@@ -70,6 +79,48 @@ const ButtonGroupBtn = styled.button<{ $active: boolean }>`
   }
 `
 
+const ShapeGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+`
+
+const ShapeBtn = styled.button<{ $active: boolean }>`
+  width: 100%;
+  padding: 0.45rem 0.25rem 0.4rem;
+  font-size: 0.6rem;
+  line-height: 1.15;
+  text-align: center;
+  border: 1px solid ${({ $active }) => ($active ? '#666' : '#d8d8d8')};
+  background: #fff;
+  color: ${({ $active, theme }) => ($active ? theme.colors.textDark : '#666')};
+  border-radius: 4px;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  transition: all 0.15s;
+
+  &:hover {
+    background: #fafafa;
+  }
+
+  svg {
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    width: 26px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+`
+
 const SliderGroup = styled.div`
   margin-bottom: 0.75rem;
 `
@@ -96,6 +147,7 @@ const StyledSlider = styled.input`
   outline: none;
   appearance: none;
   cursor: pointer;
+  touch-action: none;
 
   &::-webkit-slider-thumb {
     appearance: none;
@@ -116,6 +168,23 @@ const StyledSlider = styled.input`
     cursor: pointer;
     border: 2px solid #fff;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    height: 8px;
+    border-radius: 4px;
+
+    &::-webkit-slider-thumb {
+      width: 30px;
+      height: 30px;
+      border-width: 3px;
+    }
+
+    &::-moz-range-thumb {
+      width: 30px;
+      height: 30px;
+      border-width: 3px;
+    }
   }
 `
 
@@ -456,6 +525,35 @@ const Toast = styled.div<{ $visible: boolean }>`
   gap: 0.4rem;
 `
 
+function ShapeIcon({ shape }: { shape: PlantekasseShape }) {
+  switch (shape) {
+    case 'square':
+      return (
+        <svg width="26" height="22" viewBox="0 0 26 22" aria-hidden>
+          <rect x="7" y="3" width="12" height="12" />
+        </svg>
+      )
+    case 'rect':
+      return (
+        <svg width="26" height="22" viewBox="0 0 26 22" aria-hidden>
+          <rect x="3" y="5" width="20" height="9" />
+        </svg>
+      )
+    case 'outside-corner':
+      return (
+        <svg width="26" height="22" viewBox="0 0 26 22" aria-hidden style={{ transform: 'rotate(135deg)' }}>
+          <path d="M 3 3 L 23 3 L 23 19 L 13 19 L 13 11 L 3 11 Z" />
+        </svg>
+      )
+    case 'inside-corner':
+      return (
+        <svg width="26" height="22" viewBox="0 0 26 22" aria-hidden style={{ transform: 'rotate(135deg)' }}>
+          <path d="M 3 3 L 13 3 L 13 11 L 23 11 L 23 19 L 3 19 Z" />
+        </svg>
+      )
+  }
+}
+
 export default function PlantekassePriceCalculator({
   basePrice,
   config,
@@ -463,11 +561,14 @@ export default function PlantekassePriceCalculator({
 }: PlantekassePriceCalculatorProps) {
   const { addItem } = useBasketContext()
 
-  const [width, setWidth] = useState(60)
+  const [shape, setShape] = useState<PlantekasseShape>('rect')
+  const [width, setWidth] = useState(80)
   const [depth, setDepth] = useState(40)
   const [height, setHeight] = useState(40)
-  const [construction, setConstruction] = useState('whitewood')
+  const [thickness, setThickness] = useState(40)
+  const [construction, setConstruction] = useState('impregnated')
   const [finish, setFinish] = useState('0')
+  const [espalier, setEspalier] = useState(true)
   const [quantity, setQuantity] = useState(1)
   const [deliveryChecked, setDeliveryChecked] = useState(false)
   const [distance, setDistance] = useState(0)
@@ -485,11 +586,14 @@ export default function PlantekassePriceCalculator({
   useEffect(() => {
     if (!config) return
     syncingFromParent.current = true
+    setShape((prev) => (prev !== config.shape ? config.shape : prev))
     setWidth((prev) => (prev !== config.width ? config.width : prev))
     setHeight((prev) => (prev !== config.height ? config.height : prev))
     setDepth((prev) => (prev !== config.depth ? config.depth : prev))
+    setThickness((prev) => (prev !== config.thickness ? config.thickness : prev))
     setConstruction((prev) => (prev !== config.construction ? config.construction : prev))
     setFinish((prev) => (prev !== config.finish ? config.finish : prev))
+    setEspalier((prev) => (prev !== config.espalier ? config.espalier : prev))
     queueMicrotask(() => {
       syncingFromParent.current = false
     })
@@ -497,17 +601,30 @@ export default function PlantekassePriceCalculator({
 
   useEffect(() => {
     if (syncingFromParent.current) return
-    onConfigChange?.({ width, height, depth, construction, finish })
-  }, [width, height, depth, construction, finish, onConfigChange])
+    onConfigChange?.({ shape, width, height, depth, thickness, construction, finish, espalier })
+  }, [shape, width, height, depth, thickness, construction, finish, espalier, onConfigChange])
 
-  const volumeCm3 = width * depth * height
-  const additionalVolume = Math.max(0, volumeCm3 - MIN_VOLUME)
-  const volumeCost = basePrice + additionalVolume * VOLUME_COEFFICIENT
+  const surfaceArea =
+    shape === 'square'
+      ? 4 * width * height + width * width
+      : shape === 'rect'
+        ? 2 * width * height + 2 * depth * height + width * depth
+        : 2 * (width + depth) * height + thickness * (width + depth - thickness)
+  const additionalBoardMeters = Math.max(0, (surfaceArea - MIN_SURFACE_AREA) / 1000)
+  const sizeCost = basePrice + additionalBoardMeters * PRICE_PER_BOARD_METER
   const finishCost = parseInt(finish, 10)
+  const espalierLengthCm =
+    shape === 'square' || shape === 'rect'
+      ? width
+      : shape === 'outside-corner'
+        ? (width + depth) / 2
+        : width + depth
+  const espalierFullPrice = Math.round(espalierLengthCm * ESPALIER_PRICE_PER_CM)
+  const espalierCost = espalier ? espalierFullPrice : 0
   const deliveryCost = deliveryChecked ? distance * 15 * 2 : 0
 
-  const subtotal = volumeCost + finishCost + deliveryCost
-  const constructionMultiplier = construction === 'impregnated' ? 1.2 : 1
+  const subtotal = sizeCost + finishCost + espalierCost + deliveryCost
+  const constructionMultiplier = construction === 'impregnated' ? 1 : 0.85
   const priceExclVat = Math.round(subtotal * constructionMultiplier)
   const regularPriceExclVat = Math.round(priceExclVat * REGULAR_MULTIPLIER)
   const vatAmount = Math.round(priceExclVat * (VAT_PERCENTAGE / 100))
@@ -593,13 +710,41 @@ export default function PlantekassePriceCalculator({
     if (next === 'whitewood' && finish === '1200') setFinish('0')
   }
 
+  const handleShapeChange = (next: PlantekasseShape) => {
+    setShape(next)
+    setHeight(40)
+    if (next === 'square') {
+      setWidth(40)
+      setDepth(40)
+    } else if (next === 'rect') {
+      setWidth(80)
+      setDepth(40)
+    } else {
+      setWidth(80)
+      setDepth(80)
+      setThickness(40)
+    }
+  }
+
+  const handleSquareSideChange = (side: number) => {
+    setWidth(side)
+    setDepth(side)
+  }
+
+  const isCorner = shape === 'outside-corner' || shape === 'inside-corner'
+
   const handleAddToBasket = () => {
     addItem(
       {
         type: 'Plantekasse',
         dimensions: { width, height, depth },
+        shape: shapeLabel(shape),
+        armThickness: isCorner ? thickness : undefined,
         mounting: constructionLabel(construction),
         finish: finishLabel(finish),
+        espalier: espalier
+          ? `Ja, ${espalierLengthCm} cm (+${espalierFullPrice.toLocaleString('nb-NO')},-)`
+          : 'Nei',
         delivery: deliveryChecked ? `${distance} km` : 'Nei',
         price: formatPrice(totalPrice),
       },
@@ -611,6 +756,34 @@ export default function PlantekassePriceCalculator({
 
   return (
     <CalculatorContainer>
+      <ShapeGrid>
+        <ShapeBtn $active={shape === 'square'} onClick={() => handleShapeChange('square')}>
+          <ShapeIcon shape="square" />
+          Kvadratisk
+        </ShapeBtn>
+        <ShapeBtn $active={shape === 'rect'} onClick={() => handleShapeChange('rect')}>
+          <ShapeIcon shape="rect" />
+          Rektangulær
+        </ShapeBtn>
+        <ShapeBtn $active={shape === 'outside-corner'} onClick={() => handleShapeChange('outside-corner')}>
+          <ShapeIcon shape="outside-corner" />
+          Utvendig hjørne
+        </ShapeBtn>
+        <ShapeBtn $active={shape === 'inside-corner'} onClick={() => handleShapeChange('inside-corner')}>
+          <ShapeIcon shape="inside-corner" />
+          Innvendig hjørne
+        </ShapeBtn>
+      </ShapeGrid>
+
+      <ButtonGroup>
+        <ButtonGroupBtn $active={!espalier} onClick={() => setEspalier(false)}>
+          Uten espalier
+        </ButtonGroupBtn>
+        <ButtonGroupBtn $active={espalier} onClick={() => setEspalier(true)}>
+          Med espalier (+{espalierFullPrice.toLocaleString('nb-NO')},-)
+        </ButtonGroupBtn>
+      </ButtonGroup>
+
       <SectionTitle>
         Innvendige mål
         <TooltipWrapper>
@@ -618,34 +791,100 @@ export default function PlantekassePriceCalculator({
           <TooltipContent>Innvendig plass for jord og planter. Yttermål blir noe større.</TooltipContent>
         </TooltipWrapper>
       </SectionTitle>
-      <SliderGroup>
-        <SliderLabel>
-          <span>Bredde</span>
-          <SliderValue>{width} cm</SliderValue>
-        </SliderLabel>
-        <StyledSlider
-          type="range"
-          min={30}
-          max={200}
-          step={5}
-          value={width}
-          onChange={(e) => setWidth(parseInt(e.target.value, 10))}
-        />
-      </SliderGroup>
-      <SliderGroup>
-        <SliderLabel>
-          <span>Dybde</span>
-          <SliderValue>{depth} cm</SliderValue>
-        </SliderLabel>
-        <StyledSlider
-          type="range"
-          min={30}
-          max={200}
-          step={5}
-          value={depth}
-          onChange={(e) => setDepth(parseInt(e.target.value, 10))}
-        />
-      </SliderGroup>
+      {shape === 'square' && (
+        <SliderGroup>
+          <SliderLabel>
+            <span>Side</span>
+            <SliderValue>{width} cm</SliderValue>
+          </SliderLabel>
+          <StyledSlider
+            type="range"
+            min={30}
+            max={200}
+            step={5}
+            value={width}
+            onChange={(e) => handleSquareSideChange(parseInt(e.target.value, 10))}
+          />
+        </SliderGroup>
+      )}
+      {shape === 'rect' && (
+        <>
+          <SliderGroup>
+            <SliderLabel>
+              <span>Bredde</span>
+              <SliderValue>{width} cm</SliderValue>
+            </SliderLabel>
+            <StyledSlider
+              type="range"
+              min={30}
+              max={200}
+              step={5}
+              value={width}
+              onChange={(e) => setWidth(parseInt(e.target.value, 10))}
+            />
+          </SliderGroup>
+          <SliderGroup>
+            <SliderLabel>
+              <span>Dybde</span>
+              <SliderValue>{depth} cm</SliderValue>
+            </SliderLabel>
+            <StyledSlider
+              type="range"
+              min={30}
+              max={200}
+              step={5}
+              value={depth}
+              onChange={(e) => setDepth(parseInt(e.target.value, 10))}
+            />
+          </SliderGroup>
+        </>
+      )}
+      {isCorner && (
+        <>
+          <SliderGroup>
+            <SliderLabel>
+              <span>Lengde A</span>
+              <SliderValue>{width} cm</SliderValue>
+            </SliderLabel>
+            <StyledSlider
+              type="range"
+              min={60}
+              max={200}
+              step={5}
+              value={width}
+              onChange={(e) => setWidth(parseInt(e.target.value, 10))}
+            />
+          </SliderGroup>
+          <SliderGroup>
+            <SliderLabel>
+              <span>Lengde B</span>
+              <SliderValue>{depth} cm</SliderValue>
+            </SliderLabel>
+            <StyledSlider
+              type="range"
+              min={60}
+              max={200}
+              step={5}
+              value={depth}
+              onChange={(e) => setDepth(parseInt(e.target.value, 10))}
+            />
+          </SliderGroup>
+          <SliderGroup>
+            <SliderLabel>
+              <span>Dybde</span>
+              <SliderValue>{thickness} cm</SliderValue>
+            </SliderLabel>
+            <StyledSlider
+              type="range"
+              min={30}
+              max={Math.max(30, Math.min(width, depth) - 10)}
+              step={5}
+              value={Math.min(thickness, Math.max(30, Math.min(width, depth) - 10))}
+              onChange={(e) => setThickness(parseInt(e.target.value, 10))}
+            />
+          </SliderGroup>
+        </>
+      )}
       <SliderGroup>
         <SliderLabel>
           <span>Høyde</span>
@@ -673,7 +912,7 @@ export default function PlantekassePriceCalculator({
           Trehvitt
         </ButtonGroupBtn>
         <ButtonGroupBtn $active={construction === 'impregnated'} onClick={() => handleConstructionChange('impregnated')}>
-          Impregnert (+20%)
+          Impregnert
         </ButtonGroupBtn>
       </ButtonGroup>
 
@@ -835,6 +1074,19 @@ function haversineDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 
 function constructionLabel(value: string): string {
   return value === 'impregnated' ? 'Impregnert tre' : 'Trehvitt'
+}
+
+function shapeLabel(value: PlantekasseShape): string {
+  switch (value) {
+    case 'square':
+      return 'Kvadratisk'
+    case 'rect':
+      return 'Rektangulær'
+    case 'outside-corner':
+      return 'Utvendig hjørne'
+    case 'inside-corner':
+      return 'Innvendig hjørne'
+  }
 }
 
 function finishLabel(value: string): string {

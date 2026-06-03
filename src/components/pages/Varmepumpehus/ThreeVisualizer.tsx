@@ -139,43 +139,105 @@ const FullscreenBtn = styled(ZoomButton)`
   }
 `
 
+const SLAT_DEPTH = 0.022
+
 function createSlatWall(
   wallWidth: number,
-  _wallHeight: number,
+  wallHeight: number,
   slatHeight: number,
   slatGap: number,
   material: THREE.MeshStandardMaterial,
-  tapered: boolean = false,
-  heightAtStart: number | null = null,
-  heightAtEnd: number | null = null,
 ): THREE.Group {
   const wallGroup = new THREE.Group()
-  const slatDepth = 0.02
   const totalSlatHeight = slatHeight + slatGap
-  const maxHeight = tapered ? Math.max(heightAtStart!, heightAtEnd!) : _wallHeight
-  const numSlats = Math.floor(maxHeight / totalSlatHeight)
+  const numSlats = Math.floor(wallHeight / totalSlatHeight)
   const startY = slatHeight / 2
 
   for (let i = 0; i < numSlats; i++) {
     const slatY = startY + i * totalSlatHeight
-
-    if (tapered) {
-      const minRoofHeight = Math.min(heightAtStart!, heightAtEnd!)
-      if (slatY + slatHeight / 2 > minRoofHeight) {
-        continue
-      }
-    }
-
-    const slatGeometry = new THREE.BoxGeometry(wallWidth, slatHeight, slatDepth)
+    const slatGeometry = new THREE.BoxGeometry(wallWidth, slatHeight, SLAT_DEPTH)
     const slat = new THREE.Mesh(slatGeometry, material)
-    slat.position.x = 0
-    slat.position.y = slatY
+    slat.position.set(0, slatY, 0)
     slat.castShadow = true
     slat.receiveShadow = true
     wallGroup.add(slat)
   }
 
   return wallGroup
+}
+
+// Side wall with sloped top edge (matches the lean-to roof pitch).
+// Front of wall sits at local -x with height frontHeight,
+// back sits at local +x with height backHeight.
+function createTaperedSideWall(
+  depth: number,
+  frontHeight: number,
+  backHeight: number,
+  slatHeight: number,
+  slatGap: number,
+  material: THREE.MeshStandardMaterial,
+): THREE.Group {
+  const wallGroup = new THREE.Group()
+  const totalSlatHeight = slatHeight + slatGap
+  const maxHeight = Math.max(frontHeight, backHeight)
+  const numSlats = Math.floor(maxHeight / totalSlatHeight)
+  const startY = slatHeight / 2
+
+  for (let i = 0; i < numSlats; i++) {
+    const slatY = startY + i * totalSlatHeight
+    const slatTop = slatY + slatHeight / 2
+
+    let slatLength: number
+    let slatX: number
+
+    if (slatTop <= frontHeight) {
+      slatLength = depth
+      slatX = 0
+    } else if (slatY - slatHeight / 2 >= backHeight) {
+      continue
+    } else {
+      // Where the roof slope crosses this slat height
+      const xFront = -depth / 2 + ((slatTop - frontHeight) * depth) / (backHeight - frontHeight)
+      slatLength = depth / 2 - xFront
+      if (slatLength <= 0.02) continue
+      slatX = (xFront + depth / 2) / 2
+    }
+
+    const slatGeometry = new THREE.BoxGeometry(slatLength, slatHeight, SLAT_DEPTH)
+    const slat = new THREE.Mesh(slatGeometry, material)
+    slat.position.set(slatX, slatY, 0)
+    slat.castShadow = true
+    slat.receiveShadow = true
+    wallGroup.add(slat)
+  }
+
+  return wallGroup
+}
+
+// Plank-style roof: parallel boards running front-to-back along the slope
+function createPlankRoof(
+  width: number,
+  slopeLength: number,
+  material: THREE.MeshStandardMaterial,
+): THREE.Group {
+  const group = new THREE.Group()
+  const plankWidth = 0.09
+  const plankGap = 0.004
+  const plankThickness = 0.022
+  const total = plankWidth + plankGap
+  const numPlanks = Math.max(1, Math.round(width / total))
+  const actualPlankWidth = (width - plankGap * (numPlanks - 1)) / numPlanks
+  const startX = -width / 2 + actualPlankWidth / 2
+
+  for (let i = 0; i < numPlanks; i++) {
+    const geom = new THREE.BoxGeometry(actualPlankWidth, plankThickness, slopeLength)
+    const plank = new THREE.Mesh(geom, material)
+    plank.position.x = startX + i * (actualPlankWidth + plankGap)
+    plank.castShadow = true
+    plank.receiveShadow = true
+    group.add(plank)
+  }
+  return group
 }
 
 function disposeGroup(group: THREE.Group) {
@@ -207,82 +269,112 @@ function buildHouseModel(
 
   const isFreestanding = props.mounting === 'freestanding'
 
-  let woodColor = 0xc9a66b
-  if (props.finish === '800') woodColor = 0xd4c4a8
-  else if (props.finish === '1500') woodColor = 0x4a4a4a
+  let woodColor = 0xb8a886
+  if (props.finish === '800') woodColor = 0xd6cbb5
+  else if (props.finish === '1500') woodColor = 0x6b6b6b
 
-  let roofColor = 0xc9a66b
+  let roofColor = woodColor
   if (props.roof === '300') roofColor = 0x2d2d2d
-  else if (props.roof === '500') roofColor = 0x5d4e37
+  else if (props.roof === '500') roofColor = 0x6b5942
 
   const woodMaterial = new THREE.MeshStandardMaterial({
     color: woodColor,
-    roughness: 0.8,
-    metalness: 0.1,
+    roughness: 0.85,
+    metalness: 0.05,
   })
   const roofMaterial = new THREE.MeshStandardMaterial({
     color: roofColor,
-    roughness: 0.7,
-    metalness: 0.1,
+    roughness: 0.75,
+    metalness: 0.05,
   })
+  // Slightly darker tone for frame/structure to add visual depth
+  const darken = (hex: number, factor: number) => {
+    const r = Math.max(0, Math.min(255, Math.floor(((hex >> 16) & 0xff) * factor)))
+    const g = Math.max(0, Math.min(255, Math.floor(((hex >> 8) & 0xff) * factor)))
+    const b = Math.max(0, Math.min(255, Math.floor((hex & 0xff) * factor)))
+    return (r << 16) | (g << 8) | b
+  }
   const frameMaterial = new THREE.MeshStandardMaterial({
-    color: 0x8b7355,
-    roughness: 0.6,
-    metalness: 0.1,
+    color: darken(woodColor, 0.82),
+    roughness: 0.7,
+    metalness: 0.05,
   })
 
-  const slatWidth = 0.04
-  const slatGap = 0.02
+  const slatHeight = 0.03
+  const slatGap = 0.012
 
   const roofAngle = (props.angle * Math.PI) / 180
   const frontHeight = h
   const backHeight = isFreestanding ? h : h + d * Math.tan(roofAngle)
 
-  // Front wall
-  const frontWall = createSlatWall(w, frontHeight, slatWidth, slatGap, woodMaterial)
+  // Front wall (rectangular, low side under the eave)
+  const frontWall = createSlatWall(w, frontHeight, slatHeight, slatGap, woodMaterial)
   frontWall.position.z = d / 2
   houseGroup.add(frontWall)
 
-  // Left wall
-  const leftWall = createSlatWall(d, frontHeight, slatWidth, slatGap, woodMaterial)
-  leftWall.rotation.y = Math.PI / 2
-  leftWall.position.x = -w / 2
-  houseGroup.add(leftWall)
+  // Side walls: trapezoidal for wall-mounted (matches the lean-to slope)
+  if (isFreestanding) {
+    const leftWall = createSlatWall(d, frontHeight, slatHeight, slatGap, woodMaterial)
+    leftWall.rotation.y = Math.PI / 2
+    leftWall.position.x = -w / 2
+    houseGroup.add(leftWall)
 
-  // Right wall
-  const rightWall = createSlatWall(d, frontHeight, slatWidth, slatGap, woodMaterial)
-  rightWall.rotation.y = -Math.PI / 2
-  rightWall.position.x = w / 2
-  houseGroup.add(rightWall)
+    const rightWall = createSlatWall(d, frontHeight, slatHeight, slatGap, woodMaterial)
+    rightWall.rotation.y = Math.PI / 2
+    rightWall.position.x = w / 2
+    houseGroup.add(rightWall)
+  } else {
+    const leftWall = createTaperedSideWall(d, frontHeight, backHeight, slatHeight, slatGap, woodMaterial)
+    leftWall.rotation.y = Math.PI / 2
+    leftWall.position.x = -w / 2
+    houseGroup.add(leftWall)
+
+    const rightWall = createTaperedSideWall(d, frontHeight, backHeight, slatHeight, slatGap, woodMaterial)
+    rightWall.rotation.y = Math.PI / 2
+    rightWall.position.x = w / 2
+    houseGroup.add(rightWall)
+  }
 
   // Back wall
   if (isFreestanding) {
-    const backWall = createSlatWall(w, backHeight, slatWidth, slatGap, woodMaterial)
+    const backWall = createSlatWall(w, backHeight, slatHeight, slatGap, woodMaterial)
     backWall.rotation.y = Math.PI
     backWall.position.z = -d / 2
     houseGroup.add(backWall)
   } else {
+    // Solid back panel that meets the house wall
     const backPanelGeometry = new THREE.BoxGeometry(w, backHeight, 0.02)
     const backPanel = new THREE.Mesh(backPanelGeometry, frameMaterial)
-    backPanel.position.z = -d / 2
-    backPanel.position.y = backHeight / 2
+    backPanel.position.set(0, backHeight / 2, -d / 2)
     backPanel.castShadow = true
     backPanel.receiveShadow = true
     houseGroup.add(backPanel)
+
+    // X-brace visible through the slats (decorative + structural look)
+    const braceThickness = 0.025
+    const braceDepth = 0.015
+    const braceLength = Math.sqrt(w * w + backHeight * backHeight)
+    const braceAngle = Math.atan2(backHeight, w)
+    const braceZ = -d / 2 + 0.02
+    for (const sign of [1, -1]) {
+      const braceGeom = new THREE.BoxGeometry(braceLength, braceThickness, braceDepth)
+      const brace = new THREE.Mesh(braceGeom, frameMaterial)
+      brace.position.set(0, backHeight / 2, braceZ)
+      brace.rotation.z = sign * braceAngle
+      brace.castShadow = true
+      brace.receiveShadow = true
+      houseGroup.add(brace)
+    }
   }
 
   // Corner posts
-  const postSize = 0.04
-  const frontPostHeight = frontHeight
-  const backPostHeight = backHeight
-
+  const postSize = 0.045
   const corners = [
-    { x: -w / 2 + postSize / 2, z: d / 2 - postSize / 2, h: frontPostHeight },
-    { x: w / 2 - postSize / 2, z: d / 2 - postSize / 2, h: frontPostHeight },
-    { x: -w / 2 + postSize / 2, z: -d / 2 + postSize / 2, h: backPostHeight },
-    { x: w / 2 - postSize / 2, z: -d / 2 + postSize / 2, h: backPostHeight },
+    { x: -w / 2 + postSize / 2, z: d / 2 - postSize / 2, h: frontHeight },
+    { x: w / 2 - postSize / 2, z: d / 2 - postSize / 2, h: frontHeight },
+    { x: -w / 2 + postSize / 2, z: -d / 2 + postSize / 2, h: backHeight },
+    { x: w / 2 - postSize / 2, z: -d / 2 + postSize / 2, h: backHeight },
   ]
-
   corners.forEach((corner) => {
     const postGeometry = new THREE.BoxGeometry(postSize, corner.h, postSize)
     const post = new THREE.Mesh(postGeometry, frameMaterial)
@@ -293,60 +385,41 @@ function buildHouseModel(
   })
 
   // Roof
-  const roofOverhang = 0.05
-  const roofThickness = 0.03
+  const roofOverhang = 0.06
+  const roofThickness = 0.022
 
   if (isFreestanding) {
+    // Symmetric peaked roof with equal overhang on all four sides
+    const overhang = roofOverhang
     const ridgeHeight = frontHeight + (d / 2) * Math.tan(roofAngle)
-    const roofSideLength = (d / 2 + roofOverhang) / Math.cos(roofAngle)
+    const slopeLength = (d / 2 + overhang) / Math.cos(roofAngle)
+    const roofWidth = w + overhang * 2
+    // Horizontal distance from peak to center of each half
+    const halfCenterZ = d / 4 + overhang / 2
+    const halfCenterY = ridgeHeight - halfCenterZ * Math.tan(roofAngle)
 
-    const frontRoofGeometry = new THREE.BoxGeometry(
-      w + roofOverhang * 2,
-      roofThickness,
-      roofSideLength,
-    )
-    const frontRoof = new THREE.Mesh(frontRoofGeometry, roofMaterial)
-    frontRoof.position.set(
-      0,
-      ridgeHeight - (d / 4) * Math.tan(roofAngle),
-      ((d / 4 + roofOverhang / 2) * Math.cos(roofAngle)),
-    )
-    frontRoof.rotation.x = roofAngle
-    frontRoof.castShadow = true
-    frontRoof.receiveShadow = true
-    houseGroup.add(frontRoof)
-
-    const backRoofGeometry = new THREE.BoxGeometry(
-      w + roofOverhang * 2,
-      roofThickness,
-      roofSideLength,
-    )
-    const backRoof = new THREE.Mesh(backRoofGeometry, roofMaterial)
-    backRoof.position.set(
-      0,
-      ridgeHeight - (d / 4) * Math.tan(roofAngle),
-      -((d / 4 + roofOverhang / 2) * Math.cos(roofAngle)),
-    )
-    backRoof.rotation.x = -roofAngle
-    backRoof.castShadow = true
-    backRoof.receiveShadow = true
-    houseGroup.add(backRoof)
+    const buildHalf = (sign: 1 | -1) => {
+      const half = createPlankRoof(roofWidth, slopeLength, roofMaterial)
+      half.position.set(0, halfCenterY, sign * halfCenterZ)
+      half.rotation.x = sign * roofAngle
+      houseGroup.add(half)
+    }
+    buildHalf(1)
+    buildHalf(-1)
   } else {
-    const roofDepthAdjusted = (d + roofOverhang * 2) / Math.cos(roofAngle)
-    const roofGeometry = new THREE.BoxGeometry(
-      w + roofOverhang * 2,
-      roofThickness,
-      roofDepthAdjusted,
+    // Lean-to roof: flush with back wall, overhang only at the front (and sides)
+    const frontOverhang = 0.08
+    const sideOverhang = 0.05
+    const slopeLength = (d + frontOverhang) / Math.cos(roofAngle)
+    const roofWidth = w + sideOverhang * 2
+    const roof = createPlankRoof(roofWidth, slopeLength, roofMaterial)
+    // Place geometry so its back-bottom edge sits at (z = -d/2, y = backHeight)
+    roof.position.set(
+      0,
+      backHeight + (roofThickness / 2) * Math.cos(roofAngle) - (d + frontOverhang) * Math.tan(roofAngle) / 2,
+      frontOverhang / 2 + (roofThickness / 2) * Math.sin(roofAngle),
     )
-    const roof = new THREE.Mesh(roofGeometry, roofMaterial)
-    const roofHeightAtBack = backHeight + roofThickness / 2
-    const roofHeightAtFront = frontHeight + roofThickness / 2
-    const roofCenterHeight = (roofHeightAtBack + roofHeightAtFront) / 2
-    roof.position.y = roofCenterHeight
-    roof.position.z = 0
     roof.rotation.x = roofAngle
-    roof.castShadow = true
-    roof.receiveShadow = true
     houseGroup.add(roof)
   }
 
@@ -403,6 +476,10 @@ export default function ThreeVisualizer(props: ThreeVisualizerProps) {
     controls.maxDistance = 5
     controls.maxPolarAngle = Math.PI / 2
     controls.enablePan = false
+    controls.autoRotate = true
+    controls.autoRotateSpeed = 0.8
+    const stopAutoRotate = () => { controls.autoRotate = false }
+    controls.addEventListener('start', stopAutoRotate)
 
     // Lighting
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.6)
@@ -524,6 +601,7 @@ export default function ThreeVisualizer(props: ThreeVisualizerProps) {
   const handleZoom = (direction: 'in' | 'out') => {
     if (!sceneRef.current) return
     const { camera, controls } = sceneRef.current
+    controls.autoRotate = false
     const offset = camera.position.clone().sub(controls.target)
     const factor = direction === 'in' ? 0.8 : 1.25
     const dist = Math.max(controls.minDistance, Math.min(controls.maxDistance, offset.length() * factor))

@@ -1,7 +1,7 @@
 import type { Product } from '../types/product'
 import productsData from './products.json'
 
-const allProducts: Product[] = productsData as Product[]
+export const allProducts: Product[] = productsData as Product[]
 
 const SIMULATED_DELAY = 400
 
@@ -13,10 +13,15 @@ export function fetchAllProducts(): Promise<Product[]> {
   return simulateFetch(allProducts)
 }
 
+const PINNED_FIRST_SLUG = 'pidestall-krakk'
+
 export function fetchRandomProducts(count: number, excludeSlug?: string): Promise<Product[]> {
   const pool = allProducts.filter(p => !p.isFeatured && p.slug !== excludeSlug)
-  const shuffled = [...pool].sort(() => Math.random() - 0.5)
-  return simulateFetch(shuffled.slice(0, count))
+  const pinned = pool.find(p => p.slug === PINNED_FIRST_SLUG)
+  const rest = pool.filter(p => p.slug !== PINNED_FIRST_SLUG)
+  const shuffled = [...rest].sort(() => Math.random() - 0.5)
+  const result = pinned ? [pinned, ...shuffled].slice(0, count) : shuffled.slice(0, count)
+  return simulateFetch(result)
 }
 
 export function fetchFeaturedProduct(): Promise<Product | undefined> {
