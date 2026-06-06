@@ -71,6 +71,10 @@ const Logo = styled.div`
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     margin-left: 0;
+
+    img {
+      height: 26px;
+    }
   }
 `
 

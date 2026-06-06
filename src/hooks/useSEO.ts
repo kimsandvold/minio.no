@@ -50,8 +50,8 @@ function setLink(rel: string, href: string) {
 }
 
 export function useSEO({ title, description, ogImage, noindex, jsonLd }: SEOOptions): void {
-  const { pathname } = useLocation()
-  const fullUrl = `${SITE_URL}${pathname}`
+  const { pathname, search } = useLocation()
+  const fullUrl = `${SITE_URL}${pathname}${search}`
   const imageUrl = `${SITE_URL}${ogImage || DEFAULT_OG_IMAGE}`
   const jsonLdKey = jsonLd ? JSON.stringify(jsonLd) : ''
   const stableJsonLd = useMemo(() => jsonLd, [jsonLdKey])

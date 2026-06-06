@@ -16,6 +16,7 @@ import Hero from './components/sections/Hero/Hero'
 import Portfolio from './components/sections/Portfolio/Portfolio'
 import DesignerHighlight from './components/sections/DesignerHighlight/DesignerHighlight'
 import ProsessPage from './components/pages/Prosess/ProsessPage'
+import InspirasjonOgGuiderPage from './components/pages/InspirasjonOgGuider/InspirasjonOgGuiderPage'
 import KontaktPage from './components/pages/Kontakt/KontaktPage'
 import Footer from './components/layout/Footer'
 import ProductModal from './components/shared/ProductModal/ProductModal'
@@ -42,6 +43,8 @@ const PostkasseStativPage = lazy(() => import('./components/pages/Postkassestati
 const PlantekassePage = lazy(() => import('./components/pages/Plantekasse/PlantekassePage'))
 const PidestallKrakkPage = lazy(() => import('./components/pages/PidestallKrakk/PidestallKrakkPage'))
 const LeveggerPage = lazy(() => import('./components/pages/Levegger/LeveggerPage'))
+const InspirasjonGuideDetailPage = lazy(() => import('./components/pages/InspirasjonOgGuider/InspirasjonGuideDetailPage'))
+const CourseDetailPage = lazy(() => import('./components/pages/InspirasjonOgGuider/CourseDetailPage'))
 
 
 function HomePage() {
@@ -133,6 +136,9 @@ export default function App() {
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/slik-jobber-vi" element={<ProsessPage />} />
+                <Route path="/inspirasjon-og-guider" element={<InspirasjonOgGuiderPage />} />
+                <Route path="/inspirasjon-og-guider/kurs/:courseSlug" element={<Suspense fallback={<PageLoadingFallback />}><CourseDetailPage /></Suspense>} />
+                <Route path="/inspirasjon-og-guider/:slug" element={<Suspense fallback={<PageLoadingFallback />}><InspirasjonGuideDetailPage /></Suspense>} />
                 <Route path="/kontakt" element={<KontaktPage />} />
                 <Route path="/produkter" element={<ProdukterPage />} />
                 <Route path="/produkter/varmepumpehus" element={<Suspense fallback={<PageLoadingFallback />}><VarmepumpehusPage /></Suspense>} />
