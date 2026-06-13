@@ -154,6 +154,15 @@ export const guideProjects: GuideProject[] = [
     image: '/images/byggeguider/hagebenk.webp',
     available: true,
   },
+  {
+    slug: 'pidestall-utendors',
+    title: 'Pidestall utendørs',
+    teaser: 'En klassisk søyle-pidestall i terrassebord – perfekt sokkel for en potteplante eller skulptur ute.',
+    difficulty: 'Nybegynner',
+    time: '3–4 timer',
+    image: '/images/byggeguider/pidestall.webp',
+    available: true,
+  },
 ]
 
 export const projectHref = (project: GuideProject): string =>

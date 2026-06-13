@@ -211,8 +211,12 @@ const ProjectsHeader = styled.header`
 
 const ProjectGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-template-columns: 1fr;
+  }
 `
 
 const ProjectCard = styled(Link)`
@@ -238,7 +242,9 @@ const ProjectCard = styled(Link)`
 `
 
 const ProjectThumb = styled.div`
-  aspect-ratio: 16 / 10;
+  position: relative;
+  aspect-ratio: 16 / 11;
+  overflow: hidden;
   background: linear-gradient(135deg, #efe7dd 0%, #e2d4c3 100%);
   display: flex;
   align-items: center;
@@ -249,6 +255,8 @@ const ProjectThumb = styled.div`
   letter-spacing: 0.04em;
 
   img {
+    position: absolute;
+    inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -567,8 +575,16 @@ const PhaseLabel = styled.div`
 
 const TopicGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.smallMobile}) {
+    grid-template-columns: 1fr;
+  }
 `
 
 const topicCardStyles = `
