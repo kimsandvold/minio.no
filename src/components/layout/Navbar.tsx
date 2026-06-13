@@ -41,7 +41,7 @@ const Nav = styled.nav`
 
 const NavContainer = styled.div`
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto auto 1fr auto;
   align-items: center;
   gap: 2rem;
 
@@ -49,6 +49,16 @@ const NavContainer = styled.div`
     display: flex;
     justify-content: space-between;
     gap: 1rem;
+  }
+`
+
+const VerticalDivider = styled.div`
+  width: 1px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.15);
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    display: none;
   }
 `
 
@@ -79,7 +89,7 @@ const Logo = styled.div`
 `
 
 const MenuLinks = styled.div<{ $open: boolean }>`
-  justify-self: center;
+  justify-self: start;
   display: flex;
   gap: 2rem;
   align-items: center;
@@ -580,8 +590,10 @@ export default function Navbar() {
       <Nav aria-label="Hovedmeny">
         <NavContainer>
           <Logo>
-            <Link to="/"><img src="/images/branding/logo_navbar.svg" alt="Minio" /></Link>
+            <Link to="/"><img src="/images/branding/logo_navbar.webp" alt="Minio" /></Link>
           </Logo>
+
+          <VerticalDivider />
 
           <MenuLinks $open={menuOpen}>
             {navLinks.map(link => {

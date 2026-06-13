@@ -3,13 +3,27 @@ import Section from '../../layout/Section'
 import HeroSlideshow from './HeroSlideshow'
 import ShareButtons from '../../shared/ShareButtons'
 
+const HeroBlur = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
+  z-index: 5;
+  pointer-events: none;
+`
+
 const HeroOverlay = styled.div`
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0, rgba(0, 0, 0, 0.3) 100%);
+  background: rgba(0, 0, 0, 0.55);
   z-index: ${({ theme }) => theme.zIndex.heroOverlay};
   pointer-events: none;
 `
@@ -23,14 +37,14 @@ const HeroContent = styled.div`
 `
 
 const HeroLogo = styled.img`
-  width: 64px;
+  width: 220px;
   margin-bottom: 3rem;
   margin-top: -30px;
   opacity: 0.35;
   filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.2));
 
   @media (max-width: 768px) {
-    width: 54px;
+    width: 150px;
     margin-bottom: 1.2rem;
   }
 `
@@ -67,10 +81,11 @@ export default function Hero() {
   return (
     <Section id="hjem" variant="hero">
       <HeroSlideshow />
+      <HeroBlur />
       <HeroOverlay />
       <HeroContent>
         <VisuallyHiddenH1>Hageprodukter i tre, skreddersydd etter dine mål</VisuallyHiddenH1>
-        <HeroLogo src="/images/branding/logo_icon_white.svg" alt="Minio logo" />
+        <HeroLogo src="/images/branding/logo_icon_white.webp" alt="Minio logo" />
         <HeroText>
           Drømmer du om et uteprodukt som er helt unikt for ditt hjem? Vi bygger det etter dine mål og preferanser.
         </HeroText>
