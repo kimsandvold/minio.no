@@ -9,7 +9,15 @@ import AnimatedBlock from '../../shared/AnimatedBlock'
 import Icon from '../../shared/Icon'
 import { Link } from 'react-router-dom'
 import { useSEO } from '../../../hooks/useSEO'
-import { guidePhases, guideHref, guideTopics, topicsByPhase, topicMatchesQuery } from '../../../data/byggeguider'
+import {
+  guidePhases,
+  guideHref,
+  guideTopics,
+  guideProjects,
+  projectHref,
+  topicsByPhase,
+  topicMatchesQuery,
+} from '../../../data/byggeguider'
 
 const ACCENT = '#9c6b3f'
 const SITE_URL = 'https://minio.no'
@@ -154,6 +162,287 @@ const Intro = styled.div`
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
       font-size: 1.04rem;
     }
+  }
+`
+
+/* ---------- Prosjekter ---------- */
+const Projects = styled.section`
+  background: #fff;
+  padding: 4rem 2rem 1rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    padding: 3rem 1.25rem 0.5rem;
+  }
+`
+
+const ProjectsHeader = styled.header`
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 2.5rem;
+
+  .eyebrow {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: ${ACCENT};
+    margin-bottom: 0.85rem;
+  }
+
+  h2 {
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: ${({ theme }) => theme.colors.textDark};
+    line-height: 1.15;
+    margin-bottom: 0.75rem;
+
+    @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+      font-size: 1.5rem;
+    }
+  }
+
+  p {
+    font-size: 1.05rem;
+    color: #666;
+    line-height: 1.6;
+  }
+`
+
+const ProjectGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+`
+
+const ProjectCard = styled(Link)`
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.28s ease, box-shadow 0.28s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.12);
+  }
+
+  &:hover .go {
+    gap: 0.7rem;
+  }
+`
+
+const ProjectThumb = styled.div`
+  aspect-ratio: 16 / 10;
+  background: linear-gradient(135deg, #efe7dd 0%, #e2d4c3 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(156, 107, 63, 0.55);
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`
+
+const ProjectBody = styled.div`
+  padding: 1.35rem 1.4rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: ${({ theme }) => theme.colors.textDark};
+    margin-bottom: 0.4rem;
+  }
+
+  > p {
+    font-size: 0.92rem;
+    color: #5f5f5f;
+    line-height: 1.55;
+    flex: 1;
+  }
+
+  .meta {
+    display: flex;
+    gap: 1.25rem;
+    margin: 1rem 0;
+    font-size: 0.82rem;
+    color: #777;
+
+    strong {
+      display: block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #aaa;
+      margin-bottom: 0.15rem;
+    }
+  }
+
+  .go {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: ${ACCENT};
+    transition: gap 0.25s ease;
+
+    svg {
+      font-size: 0.72rem;
+    }
+  }
+`
+
+const Featured = styled(Link)`
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 22px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.07);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.13);
+  }
+
+  &:hover .cta {
+    gap: 0.75rem;
+  }
+
+  &:hover img {
+    transform: scale(1.04);
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const FeaturedImg = styled.div`
+  overflow: hidden;
+  background: linear-gradient(135deg, #efe7dd 0%, #e2d4c3 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 340px;
+  color: rgba(156, 107, 63, 0.55);
+  font-weight: 600;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    min-height: 240px;
+  }
+`
+
+const FeaturedBody = styled.div`
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    padding: 2rem 1.5rem;
+  }
+
+  .tag {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: ${ACCENT};
+    margin-bottom: 0.9rem;
+  }
+
+  h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: ${({ theme }) => theme.colors.textDark};
+    margin-bottom: 0.75rem;
+
+    @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+      font-size: 1.6rem;
+    }
+  }
+
+  > p {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #5f5f5f;
+    margin-bottom: 1.5rem;
+  }
+
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    align-self: flex-start;
+    padding: 0.8rem 1.6rem;
+    border-radius: ${({ theme }) => theme.borderRadius.pill};
+    background: ${ACCENT};
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: gap 0.25s ease;
+
+    svg {
+      font-size: 0.78rem;
+    }
+  }
+`
+
+const FeaturedFacts = styled.div`
+  display: flex;
+  gap: 2rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+
+  div {
+    min-width: 0;
+  }
+
+  strong {
+    display: block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #aaa;
+    margin-bottom: 0.2rem;
+  }
+
+  span {
+    font-size: 1rem;
+    font-weight: 600;
+    color: ${({ theme }) => theme.colors.textDark};
   }
 `
 
@@ -472,6 +761,88 @@ export default function DIYGuiderPage() {
               </AnimatedBlock>
             </Container>
           </Content>
+
+          <Projects>
+            <Container>
+              <AnimatedBlock>
+                <ProjectsHeader>
+                  <span className="eyebrow">Prosjekter</span>
+                  <h2>Bygg et prosjekt</h2>
+                  <p>Ferdige byggeguider du kan følge fra start til slutt – med mål og materialliste.</p>
+                </ProjectsHeader>
+              </AnimatedBlock>
+              {guideProjects.length === 1 ? (
+                <AnimatedBlock>
+                  <Featured to={projectHref(guideProjects[0])}>
+                    <FeaturedImg>
+                      {guideProjects[0].image ? (
+                        <img src={guideProjects[0].image} alt={guideProjects[0].title} loading="lazy" />
+                      ) : (
+                        'Bilde kommer'
+                      )}
+                    </FeaturedImg>
+                    <FeaturedBody>
+                      <span className="tag">Prosjekt</span>
+                      <h3>{guideProjects[0].title}</h3>
+                      <p>{guideProjects[0].teaser}</p>
+                      <FeaturedFacts>
+                        <div>
+                          <strong>Vanskelighet</strong>
+                          <span>{guideProjects[0].difficulty}</span>
+                        </div>
+                        <div>
+                          <strong>Tid</strong>
+                          <span>{guideProjects[0].time}</span>
+                        </div>
+                        <div>
+                          <strong>Materiale</strong>
+                          <span>Terrassebord</span>
+                        </div>
+                      </FeaturedFacts>
+                      <span className="cta">
+                        Se hele guiden
+                        <Icon name="faArrowRight" />
+                      </span>
+                    </FeaturedBody>
+                  </Featured>
+                </AnimatedBlock>
+              ) : (
+                <ProjectGrid>
+                  {guideProjects.map((project, i) => (
+                    <AnimatedBlock key={project.slug} delay={i * 50}>
+                      <ProjectCard to={projectHref(project)}>
+                        <ProjectThumb>
+                          {project.image ? (
+                            <img src={project.image} alt={project.title} loading="lazy" />
+                          ) : (
+                            'Bilde kommer'
+                          )}
+                        </ProjectThumb>
+                        <ProjectBody>
+                          <h3>{project.title}</h3>
+                          <p>{project.teaser}</p>
+                          <div className="meta">
+                            <span>
+                              <strong>Vanskelighet</strong>
+                              {project.difficulty}
+                            </span>
+                            <span>
+                              <strong>Tid</strong>
+                              {project.time}
+                            </span>
+                          </div>
+                          <span className="go">
+                            Se guide
+                            <Icon name="faArrowRight" />
+                          </span>
+                        </ProjectBody>
+                      </ProjectCard>
+                    </AnimatedBlock>
+                  ))}
+                </ProjectGrid>
+              )}
+            </Container>
+          </Projects>
 
           <Journey>
             <Container>

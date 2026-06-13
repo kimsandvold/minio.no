@@ -408,6 +408,15 @@ export const P = styled.p`
   a {
     color: ${ACCENT};
     font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: rgba(156, 107, 63, 0.35);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+    transition: text-decoration-color 0.2s ease, color 0.2s ease;
+  }
+
+  a:hover {
+    text-decoration-color: ${ACCENT};
   }
 `
 
@@ -513,6 +522,20 @@ const CalloutBox = styled.div<{ $variant: 'tip' | 'warn' }>`
       line-height: 1.6;
       color: #444;
       margin: 0;
+    }
+
+    a {
+      color: ${ACCENT};
+      font-weight: 600;
+      text-decoration: underline;
+      text-decoration-color: rgba(156, 107, 63, 0.35);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.18em;
+      transition: text-decoration-color 0.2s ease, color 0.2s ease;
+    }
+
+    a:hover {
+      text-decoration-color: ${ACCENT};
     }
   }
 `

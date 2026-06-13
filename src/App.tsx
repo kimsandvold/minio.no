@@ -37,6 +37,7 @@ import ContactBadge from './components/shared/ContactBadge'
 
 const DIYGuiderPage = lazy(() => import('./components/pages/DIYGuider/DIYGuiderPage'))
 const PlanleggingPage = lazy(() => import('./components/pages/DIYGuider/articles/PlanleggingPage'))
+const HagebenkPage = lazy(() => import('./components/pages/DIYGuider/prosjekter/HagebenkPage'))
 const DesignTegningPage = lazy(() => import('./components/pages/DIYGuider/articles/DesignTegningPage'))
 const KonstruksjonStyrkePage = lazy(() => import('./components/pages/DIYGuider/articles/KonstruksjonStyrkePage'))
 const TrevirkePage = lazy(() => import('./components/pages/DIYGuider/articles/TrevirkePage'))
@@ -158,6 +159,7 @@ export default function App() {
                 <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
                 <Route path="/byggeguider" element={<Suspense fallback={<PageLoadingFallback />}><DIYGuiderPage /></Suspense>} />
                 <Route path="/byggeguider/planlegging" element={<Suspense fallback={<PageLoadingFallback />}><PlanleggingPage /></Suspense>} />
+                <Route path="/byggeguider/prosjekter/hagebenk" element={<Suspense fallback={<PageLoadingFallback />}><HagebenkPage /></Suspense>} />
                 <Route path="/byggeguider/design-og-tegning" element={<Suspense fallback={<PageLoadingFallback />}><DesignTegningPage /></Suspense>} />
                 <Route path="/byggeguider/konstruksjon-og-styrke" element={<Suspense fallback={<PageLoadingFallback />}><KonstruksjonStyrkePage /></Suspense>} />
                 <Route path="/byggeguider/trevirke" element={<Suspense fallback={<PageLoadingFallback />}><TrevirkePage /></Suspense>} />

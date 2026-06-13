@@ -133,6 +133,32 @@ export const guideTopics: GuideTopic[] = [
   },
 ]
 
+export interface GuideProject {
+  slug: string
+  title: string
+  teaser: string
+  difficulty: string
+  time: string
+  /** Public path under /images, or null while we wait for a photo. */
+  image: string | null
+  available: boolean
+}
+
+export const guideProjects: GuideProject[] = [
+  {
+    slug: 'hagebenk',
+    title: 'Hagebenk',
+    teaser: 'En stilren, slettet benk i trykkimpregnert terrassebord – limt og skrudd sammen.',
+    difficulty: 'Nybegynner',
+    time: '3–4 timer',
+    image: '/images/byggeguider/hagebenk.webp',
+    available: true,
+  },
+]
+
+export const projectHref = (project: GuideProject): string =>
+  `/byggeguider/prosjekter/${project.slug}`
+
 export const guideHref = (topic: GuideTopic): string => `/byggeguider/${topic.slug}`
 
 export const findTopic = (slug: string): GuideTopic | undefined =>
