@@ -35,6 +35,7 @@ import NotFoundPage from './components/pages/NotFound/NotFoundPage'
 import PageLoadingFallback from './components/shared/PageLoadingFallback'
 import ContactBadge from './components/shared/ContactBadge'
 
+const DIYGuiderPage = lazy(() => import('./components/pages/DIYGuider/DIYGuiderPage'))
 const VarmepumpehusPage = lazy(() => import('./components/pages/Varmepumpehus/VarmepumpehusPage'))
 const SoppelboderPage = lazy(() => import('./components/pages/Soppelboder/SoppelboderPage'))
 const VedskjulPage = lazy(() => import('./components/pages/Vedskjul/VedskjulPage'))
@@ -143,6 +144,7 @@ export default function App() {
                 <Route path="/produkter/levegger" element={<Suspense fallback={<PageLoadingFallback />}><LeveggerPage /></Suspense>} />
                 <Route path="/produkter/:slug" element={<ProduktDetailPage />} />
                 <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
+                <Route path="/diy-guider" element={<Suspense fallback={<PageLoadingFallback />}><DIYGuiderPage /></Suspense>} />
                 <Route path="/underholdning" element={<UnderholdningPage />} />
                 <Route path="/spill-av-leah-noelle" element={<LeahNoellePage />} />
                 <Route path="/handlekurv" element={<HandlekurvPage />} />
