@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 import theme from './styles/theme'
 import GlobalStyles from './styles/GlobalStyles'
@@ -36,6 +36,18 @@ import PageLoadingFallback from './components/shared/PageLoadingFallback'
 import ContactBadge from './components/shared/ContactBadge'
 
 const DIYGuiderPage = lazy(() => import('./components/pages/DIYGuider/DIYGuiderPage'))
+const PlanleggingPage = lazy(() => import('./components/pages/DIYGuider/articles/PlanleggingPage'))
+const DesignTegningPage = lazy(() => import('./components/pages/DIYGuider/articles/DesignTegningPage'))
+const KonstruksjonStyrkePage = lazy(() => import('./components/pages/DIYGuider/articles/KonstruksjonStyrkePage'))
+const TrevirkePage = lazy(() => import('./components/pages/DIYGuider/articles/TrevirkePage'))
+const VerktoyPage = lazy(() => import('./components/pages/DIYGuider/articles/VerktoyPage'))
+const LimFestemidlerPage = lazy(() => import('./components/pages/DIYGuider/articles/LimFestemidlerPage'))
+const SikkerhetPage = lazy(() => import('./components/pages/DIYGuider/articles/SikkerhetPage'))
+const MalingMerkingPage = lazy(() => import('./components/pages/DIYGuider/articles/MalingMerkingPage'))
+const SagingSammenfoyningPage = lazy(() => import('./components/pages/DIYGuider/articles/SagingSammenfoyningPage'))
+const SlipingPage = lazy(() => import('./components/pages/DIYGuider/articles/SlipingPage'))
+const OverflatebehandlingPage = lazy(() => import('./components/pages/DIYGuider/articles/OverflatebehandlingPage'))
+const VedlikeholdPage = lazy(() => import('./components/pages/DIYGuider/articles/VedlikeholdPage'))
 const VarmepumpehusPage = lazy(() => import('./components/pages/Varmepumpehus/VarmepumpehusPage'))
 const SoppelboderPage = lazy(() => import('./components/pages/Soppelboder/SoppelboderPage'))
 const VedskjulPage = lazy(() => import('./components/pages/Vedskjul/VedskjulPage'))
@@ -144,7 +156,20 @@ export default function App() {
                 <Route path="/produkter/levegger" element={<Suspense fallback={<PageLoadingFallback />}><LeveggerPage /></Suspense>} />
                 <Route path="/produkter/:slug" element={<ProduktDetailPage />} />
                 <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
-                <Route path="/diy-guider" element={<Suspense fallback={<PageLoadingFallback />}><DIYGuiderPage /></Suspense>} />
+                <Route path="/byggeguider" element={<Suspense fallback={<PageLoadingFallback />}><DIYGuiderPage /></Suspense>} />
+                <Route path="/byggeguider/planlegging" element={<Suspense fallback={<PageLoadingFallback />}><PlanleggingPage /></Suspense>} />
+                <Route path="/byggeguider/design-og-tegning" element={<Suspense fallback={<PageLoadingFallback />}><DesignTegningPage /></Suspense>} />
+                <Route path="/byggeguider/konstruksjon-og-styrke" element={<Suspense fallback={<PageLoadingFallback />}><KonstruksjonStyrkePage /></Suspense>} />
+                <Route path="/byggeguider/trevirke" element={<Suspense fallback={<PageLoadingFallback />}><TrevirkePage /></Suspense>} />
+                <Route path="/byggeguider/verktoy" element={<Suspense fallback={<PageLoadingFallback />}><VerktoyPage /></Suspense>} />
+                <Route path="/byggeguider/lim-og-festemidler" element={<Suspense fallback={<PageLoadingFallback />}><LimFestemidlerPage /></Suspense>} />
+                <Route path="/byggeguider/sikkerhet" element={<Suspense fallback={<PageLoadingFallback />}><SikkerhetPage /></Suspense>} />
+                <Route path="/byggeguider/maling-og-merking" element={<Suspense fallback={<PageLoadingFallback />}><MalingMerkingPage /></Suspense>} />
+                <Route path="/byggeguider/saging-og-sammenfoyning" element={<Suspense fallback={<PageLoadingFallback />}><SagingSammenfoyningPage /></Suspense>} />
+                <Route path="/byggeguider/sliping" element={<Suspense fallback={<PageLoadingFallback />}><SlipingPage /></Suspense>} />
+                <Route path="/byggeguider/overflatebehandling" element={<Suspense fallback={<PageLoadingFallback />}><OverflatebehandlingPage /></Suspense>} />
+                <Route path="/byggeguider/vedlikehold" element={<Suspense fallback={<PageLoadingFallback />}><VedlikeholdPage /></Suspense>} />
+                <Route path="/diy-guider" element={<Navigate to="/byggeguider" replace />} />
                 <Route path="/underholdning" element={<UnderholdningPage />} />
                 <Route path="/spill-av-leah-noelle" element={<LeahNoellePage />} />
                 <Route path="/handlekurv" element={<HandlekurvPage />} />
