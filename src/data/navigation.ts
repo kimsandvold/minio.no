@@ -5,6 +5,7 @@ export const navLinks: NavLink[] = [
   { href: '/produkter', label: 'Produkter', icon: 'faBriefcase', ariaLabel: 'Produkter' },
   { href: '/slik-jobber-vi', label: 'Slik jobber vi', icon: 'faGears', ariaLabel: 'Slik jobber vi' },
   { href: '/byggeguider', label: 'Byggeguider', icon: 'faTools', ariaLabel: 'Byggeguider' },
+  { href: '/terrasseplanlegger', label: 'Terrasseplanlegger', icon: 'faRulerCombined', ariaLabel: 'Terrasseplanlegger' },
   { href: '/kontakt', label: 'Kontakt', icon: 'faEnvelope', ariaLabel: 'Kontakt' },
 ]
 

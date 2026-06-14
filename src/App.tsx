@@ -14,6 +14,7 @@ import SkipLink from './components/shared/SkipLink'
 import Navbar from './components/layout/Navbar'
 import Hero from './components/sections/Hero/Hero'
 import Portfolio from './components/sections/Portfolio/Portfolio'
+import TerrassePromo from './components/sections/TerrassePromo/TerrassePromo'
 import DesignerHighlight from './components/sections/DesignerHighlight/DesignerHighlight'
 import ProsessPage from './components/pages/Prosess/ProsessPage'
 import KontaktPage from './components/pages/Kontakt/KontaktPage'
@@ -57,6 +58,7 @@ const PostkasseStativPage = lazy(() => import('./components/pages/Postkassestati
 const PlantekassePage = lazy(() => import('./components/pages/Plantekasse/PlantekassePage'))
 const PidestallKrakkPage = lazy(() => import('./components/pages/PidestallKrakk/PidestallKrakkPage'))
 const LeveggerPage = lazy(() => import('./components/pages/Levegger/LeveggerPage'))
+const TerrassePlanleggerPage = lazy(() => import('./components/pages/Terrasseplanlegger/TerrassePlanleggerPage'))
 
 function HomePage() {
   useHashNavigation()
@@ -127,6 +129,7 @@ function HomePage() {
       <main id="main-content">
         <Hero />
         <Portfolio />
+        <TerrassePromo />
         <DesignerHighlight />
       </main>
       <Footer />
@@ -157,6 +160,7 @@ export default function App() {
                 <Route path="/produkter/pidestall-krakk" element={<Suspense fallback={<PageLoadingFallback />}><PidestallKrakkPage /></Suspense>} />
                 <Route path="/produkter/levegger" element={<Suspense fallback={<PageLoadingFallback />}><LeveggerPage /></Suspense>} />
                 <Route path="/produkter/:slug" element={<ProduktDetailPage />} />
+                <Route path="/terrasseplanlegger" element={<Suspense fallback={<PageLoadingFallback />}><TerrassePlanleggerPage /></Suspense>} />
                 <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
                 <Route path="/byggeguider" element={<Suspense fallback={<PageLoadingFallback />}><DIYGuiderPage /></Suspense>} />
                 <Route path="/byggeguider/planlegging" element={<Suspense fallback={<PageLoadingFallback />}><PlanleggingPage /></Suspense>} />
