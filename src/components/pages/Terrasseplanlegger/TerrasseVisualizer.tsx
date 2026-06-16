@@ -4,6 +4,8 @@ import styled from 'styled-components'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { useScrollLock } from '../../../hooks/useScrollLock'
+import ProsjektMeny from './ProsjektMeny'
+import type { ProsjektStyring } from './useTerrasseProsjekter'
 import {
   SidebarPanel, SidebarHeader, SidebarTitle, SidebarClose, SidebarBody,
   SbSection, SbLabel, SbSliderGroup, SbSliderRow, SbSliderName, SbSliderVal, SbSlider,
@@ -35,6 +37,7 @@ type ViewMode = 'ferdig' | 'konstruksjon' | 'begge'
 interface Props {
   config: TerrasseConfig
   onConfigChange?: (config: TerrasseConfig) => void
+  prosjekt?: ProsjektStyring
 }
 
 const Wrapper = styled.div`
@@ -53,6 +56,12 @@ const Viewport = styled.div`
     display: block;
     width: 100% !important;
     height: 100% !important;
+  }
+
+  /* På mobil holdes modellen alltid synlig (sticky), så den får fast, lavere høyde. */
+  @media (max-width: 768px) {
+    aspect-ratio: auto;
+    height: 40vh;
   }
 `
 
@@ -94,6 +103,12 @@ const ModeToggle = styled.div`
   padding: 3px;
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
   z-index: 2;
+
+  /* På mobil ligger prosjektmenyen øverst – flytt modusvelgeren ned så de ikke kolliderer. */
+  @media (max-width: 768px) {
+    top: auto;
+    bottom: 12px;
+  }
 `
 
 const ModeBtn = styled.button<{ $active: boolean }>`
@@ -107,12 +122,17 @@ const ModeBtn = styled.button<{ $active: boolean }>`
   cursor: pointer;
   transition: all 0.18s ease;
   white-space: nowrap;
+
+  @media (max-width: 768px) {
+    font-size: 0.62rem;
+    padding: 0.3rem 0.55rem;
+  }
 `
 
 const FullscreenLogo = styled.img`
   position: absolute;
   top: 16px;
-  left: 16px;
+  right: 16px;
   height: 24px;
   pointer-events: none;
   z-index: 1;
@@ -132,6 +152,11 @@ const RotateHint = styled.div`
   gap: 4px;
   pointer-events: none;
   z-index: 1;
+
+  /* Skjul på mobil – modusvelgeren tar nå bunn-senter, og touch-rotasjon er selvforklarende. */
+  @media (max-width: 768px) {
+    display: none;
+  }
 `
 
 const ZoomControls = styled.div`
@@ -205,9 +230,16 @@ const TrappRemove = styled.button`
 
 // ── Materialer / mål ─────────────────────────────────────────────────────────
 
-const DECK_TOP = 0.6
+const DEFAULT_DECK_TOP = 0.6
 const BOARD_THICKNESS = 0.028
 const POST_SIZE = 0.07
+
+// Dekkhøyden bestemmes av trappa: hvert trinn har standard opptrinn (høyde), så
+// flere trinn = høyere terrasse. Uten trapp brukes en standard lav dekkhøyde.
+function deckTopFor(c: TerrasseConfig): number {
+  const maxTrinn = c.trapper.reduce((m, t) => Math.max(m, t.antallTrinn), 0)
+  return maxTrinn > 0 ? maxTrinn * c.trappOpptrinn : DEFAULT_DECK_TOP
+}
 
 function makeBox(w: number, h: number, l: number, mat: THREE.Material): THREE.Mesh {
   const geom = new THREE.BoxGeometry(Math.max(w, 0.001), Math.max(h, 0.001), Math.max(l, 0.001))
@@ -255,8 +287,9 @@ function buildModel(
   const modelH = size.height
   const rekter = modellRekter(c)
 
+  const deckTop = deckTopFor(c)
   const jh = BJELKE_INFO[c.bjelkeDimensjon].høyde / 1000
-  const boardBottom = DECK_TOP - BOARD_THICKNESS
+  const boardBottom = deckTop - BOARD_THICKNESS
   const joistTop = boardBottom
   const joistBottom = joistTop - jh
 
@@ -276,7 +309,7 @@ function buildModel(
     while (x < r.x + r.width - 0.001) {
       const wActual = Math.min(plankW, r.x + r.width - x)
       const plank = makeBox(wActual, BOARD_THICKNESS, r.height, mats.board)
-      plank.position.set(wx(x + wActual / 2), DECK_TOP - BOARD_THICKNESS / 2, wz(midY(r)))
+      plank.position.set(wx(x + wActual / 2), deckTop - BOARD_THICKNESS / 2, wz(midY(r)))
       finished.add(plank)
       x += plankW + gap
     }
@@ -310,15 +343,15 @@ function buildModel(
 
   // Gjerde / rekkverk – kun på yttersidene (ikke mot huset, ikke der trapp står)
   if (c.gjerdeType !== 'ingen') {
-    byggGjerde(finished, c, size, modelW, modelH, mats.rim)
+    byggGjerde(finished, c, size, modelW, modelH, deckTop, mats.rim)
   }
 
   // Trapper (alle moduser)
   for (const trapp of c.trapper) {
-    byggTrapp(always, c, trapp, modelW, modelH, mats.board)
+    byggTrapp(always, c, trapp, modelW, modelH, deckTop, mats.board)
   }
 
-  return { modelW, modelH }
+  return { modelW, modelH, deckTop }
 }
 
 // Kantindekser som ligger mot huset (ingen gjerde der).
@@ -351,6 +384,7 @@ function byggGjerde(
   size: { width: number; height: number },
   modelW: number,
   modelH: number,
+  deckTop: number,
   mat: THREE.Material,
 ) {
   const outline = formOutline(c) as Pt[]
@@ -401,7 +435,7 @@ function byggGjerde(
     for (const [s, e] of runs) {
       const A = lerp(a, b, s)
       const B = lerp(a, b, e)
-      byggGjerdeløp(parent, A, B, c.gjerdeHøyde, c.gjerdeType, mat, wx, wz)
+      byggGjerdeløp(parent, A, B, c.gjerdeHøyde, c.gjerdeType, deckTop, mat, wx, wz)
     }
   }
 }
@@ -412,6 +446,7 @@ function byggGjerdeløp(
   B: Pt,
   høyde: number,
   type: Gjerdetype,
+  deckTop: number,
   mat: THREE.Material,
   wx: (m: number) => number,
   wz: (m: number) => number,
@@ -427,7 +462,7 @@ function byggGjerdeløp(
   const cx = (ax + bx) / 2
   const cz = (az + bz) / 2
   const rotY = -Math.atan2(dz, dx)
-  const railY = DECK_TOP + høyde
+  const railY = deckTop + høyde
 
   // Stolper i hver ende av løpet
   for (const [px, pz] of [
@@ -435,20 +470,20 @@ function byggGjerdeløp(
     [bx, bz],
   ]) {
     const post = makeBox(0.07, høyde, 0.07, mat)
-    post.position.set(px, DECK_TOP + høyde / 2, pz)
+    post.position.set(px, deckTop + høyde / 2, pz)
     parent.add(post)
   }
 
   if (type === 'hel') {
     const panel = makeBox(len, høyde, 0.03, mat)
-    panel.position.set(cx, DECK_TOP + høyde / 2, cz)
+    panel.position.set(cx, deckTop + høyde / 2, cz)
     panel.rotation.y = rotY
     parent.add(panel)
     return
   }
 
   // Topp- og bunnrekke
-  for (const ry of [railY, DECK_TOP + 0.07]) {
+  for (const ry of [railY, deckTop + 0.07]) {
     const rail = makeBox(len, 0.05, 0.05, mat)
     rail.position.set(cx, ry, cz)
     rail.rotation.y = rotY
@@ -458,7 +493,7 @@ function byggGjerdeløp(
   if (type === 'vannrett') {
     const rows = Math.max(1, Math.round(høyde / 0.18))
     for (let rIdx = 1; rIdx < rows; rIdx++) {
-      const y = DECK_TOP + høyde * (rIdx / rows)
+      const y = deckTop + høyde * (rIdx / rows)
       const rail = makeBox(len, 0.09, 0.025, mat)
       rail.position.set(cx, y, cz)
       rail.rotation.y = rotY
@@ -473,7 +508,7 @@ function byggGjerdeløp(
       const px = ax + dx * t
       const pz = az + dz * t
       const baluster = makeBox(0.03, høyde - 0.08, 0.03, mat)
-      baluster.position.set(px, DECK_TOP + (høyde - 0.08) / 2 + 0.03, pz)
+      baluster.position.set(px, deckTop + (høyde - 0.08) / 2 + 0.03, pz)
       baluster.rotation.y = rotY
       parent.add(baluster)
     }
@@ -486,13 +521,15 @@ function byggTrapp(
   trapp: TerrasseConfig['trapper'][number],
   modelW: number,
   modelH: number,
+  deckTop: number,
   mat: THREE.Material,
 ) {
   const size = normalizedDimensions(c)
   const fr = trappRektModell(c, trapp, size)
-  const n = Math.max(1, trapp.antallTrinn)
-  // Visuelt: trappa går alltid fra dekkflate ned til bakken
-  const riser = DECK_TOP / n
+  // Antall trinn som trengs for å nå dekkhøyden med standard opptrinn. Dekkhøyden
+  // styres av trappa med flest trinn, så hver trapp får like høye, standard trinn.
+  const n = Math.max(1, Math.round(deckTop / c.trappOpptrinn))
+  const riser = c.trappOpptrinn
   const tread = c.trappInntrinn
   const width = trapp.bredde
 
@@ -500,7 +537,7 @@ function byggTrapp(
   const wz = (my: number) => my - modelH / 2
 
   for (let i = 0; i < n; i++) {
-    const topY = DECK_TOP - (i + 1) * riser
+    const topY = deckTop - (i + 1) * riser
     const centerY = topY + riser / 2
     let step: THREE.Mesh
     switch (trapp.side) {
@@ -530,19 +567,31 @@ function frameCamera(
   controls: OrbitControls,
   modelW: number,
   modelH: number,
+  deckTop: number,
   keepAngle = false,
 ) {
   const maxDim = Math.max(modelW, modelH, 2)
-  const target = new THREE.Vector3(0, DECK_TOP * 0.4, 0)
+  const target = new THREE.Vector3(0, deckTop * 0.4, 0)
+  const defaultPos = new THREE.Vector3(maxDim * 0.9, maxDim * 0.85 + deckTop, maxDim * 1.15)
+  // Avstanden som rammer inn hele modellen – klemt innenfor zoom-grensene.
+  const fitDist = Math.min(
+    controls.maxDistance,
+    Math.max(controls.minDistance, defaultPos.distanceTo(target)),
+  )
+
+  // Behold synsvinkelen brukeren har rotert til, men skaler avstanden så hele
+  // terrassen alltid får plass når mål endres eller elementer legges til.
+  const dir = camera.position.clone().sub(controls.target)
+  if (!keepAngle || dir.lengthSq() < 1e-6) dir.copy(defaultPos).sub(target)
+  dir.normalize().multiplyScalar(fitDist)
+
   controls.target.copy(target)
-  if (!keepAngle) {
-    camera.position.set(maxDim * 0.9, maxDim * 0.85 + DECK_TOP, maxDim * 1.15)
-    camera.lookAt(target)
-  }
+  camera.position.copy(target).add(dir)
+  camera.lookAt(target)
   controls.update()
 }
 
-export default function TerrasseVisualizer({ config, onConfigChange }: Props) {
+export default function TerrasseVisualizer({ config, onConfigChange, prosjekt }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const fsContainerRef = useRef<HTMLDivElement>(null)
   const [mode, setMode] = useState<ViewMode>('ferdig')
@@ -630,10 +679,10 @@ export default function TerrasseVisualizer({ config, onConfigChange }: Props) {
     const always = new THREE.Group()
     scene.add(finished, framing, always)
 
-    const { modelW, modelH } = buildModel(finished, framing, always, config, mats)
+    const { modelW, modelH, deckTop } = buildModel(finished, framing, always, config, mats)
     framing.visible = false
 
-    frameCamera(camera, controls, modelW, modelH)
+    frameCamera(camera, controls, modelW, modelH, deckTop)
 
     let animationId = 0
     const animate = () => {
@@ -680,9 +729,9 @@ export default function TerrasseVisualizer({ config, onConfigChange }: Props) {
   useEffect(() => {
     const s = sceneRef.current
     if (!s) return
-    const { modelW, modelH } = buildModel(s.finished, s.framing, s.always, config, s.mats)
+    const { modelW, modelH, deckTop } = buildModel(s.finished, s.framing, s.always, config, s.mats)
     applyMode(s, mode)
-    frameCamera(s.camera, s.controls, modelW, modelH, true)
+    frameCamera(s.camera, s.controls, modelW, modelH, deckTop, true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [config])
 
@@ -749,6 +798,7 @@ export default function TerrasseVisualizer({ config, onConfigChange }: Props) {
   const controls = (fs: boolean) => (
     <>
       {fs && <FullscreenLogo src="/images/branding/logo_icon_white.webp" alt="Minio" />}
+      {prosjekt && <ProsjektMeny prosjekt={prosjekt} />}
       <ModeToggle>
         {MODES.map(([m, label]) => (
           <ModeBtn key={m} $active={mode === m} onClick={() => setMode(m)}>

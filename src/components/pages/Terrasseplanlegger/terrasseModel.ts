@@ -39,6 +39,7 @@ export interface TerrasseConfig {
   bjelkeavstand: number // mm
   skruerPerKryss: number
   bjelkeDimensjon: Bjelkedimensjon
+  svinnProsent: number // kapp og svinn lagt til løpemeter (heltall, %)
 
   // Priser (NOK)
   prisBordPrLm: number
@@ -95,14 +96,15 @@ export const DEFAULT_CONFIG: TerrasseConfig = {
   hovedBredde: 3.0,
   fløyLengde: 2.5,
   fløyBredde: 2.0,
-  ytreLengde: 6.0,
+  ytreLengde: 3.0,
   ytreBredde: 4.0,
-  armBredde: 1.5,
+  armBredde: 1.0,
   bordbredde: 120,
   bordavstand: 3,
   bjelkeavstand: 600,
   skruerPerKryss: 2,
   bjelkeDimensjon: '48x148',
+  svinnProsent: 10,
   prisBordPrLm: 17,
   prisBjelkePrLm: 55,
   prisSkrue: 3,
@@ -149,6 +151,9 @@ export interface BeregnetResultat {
   trappTrinnAntall?: number
   trappFormattert?: string
   trappKostnad?: number
+
+  svinnProsent: number
+  svinnKostnad: number
 
   totalKostnad: number
 }
@@ -327,12 +332,21 @@ export function beregn(c: TerrasseConfig): BeregnetResultat {
     skrueAntall += boardsAcross * joists * Math.round(c.skruerPerKryss)
   }
 
+  // Kapp og svinn – legg margin på det du faktisk bestiller (løpemeter av kappet
+  // trevirke). Antall bord/bjelker er konstruksjonsbestemt og holdes eksakt;
+  // skruer og stolper kjøpes i enheter og påvirkes ikke av kapp.
+  const svinn = 1 + Math.max(0, c.svinnProsent) / 100
+  bordLøpemeter *= svinn
+  tverrBjelkeLøpemeter *= svinn
+  sideBjelkeLøpemeter *= svinn
+
   const antallBjelker = tverrBjelkeAntall + sideBjelkeAntall
   const bjelkeLøpemeter = tverrBjelkeLøpemeter + sideBjelkeLøpemeter
 
   const bordKostnad = bordLøpemeter * c.prisBordPrLm
   const bjelkeKostnad = bjelkeLøpemeter * c.prisBjelkePrLm
   const skrueKostnad = skrueAntall * c.prisSkrue
+  let svinnGrunnlag = bordKostnad + bjelkeKostnad
 
   // Gjerde
   const gjerdeLengde = c.gjerdePåAlleSider ? omkrets : omkrets / 2
@@ -370,11 +384,16 @@ export function beregn(c: TerrasseConfig): BeregnetResultat {
           return 2
       }
     })()
-    const lektLøpemeter = lektRader * gjerdeLengde
+
+    // Kapp og svinn på gjerdebord (kappes til lengde) og lekt (løpemeter)
+    gjerdeBordAntall = Math.ceil((gjerdeBordAntall ?? 0) * svinn)
+    const lektLøpemeter = lektRader * gjerdeLengde * svinn
     gjerdeLekt = lektLøpemeter
-    gjerdeFormattert = `${GJERDE_INFO[c.gjerdeType].beskrivelse}: ${gjerdeBordAntall ?? 0} bord, ${fmt1(lektLøpemeter)} lm lekt, ${gjerdeStolper ?? 0} stolper`
-    gjerdeKostnad =
-      (gjerdeBordAntall ?? 0) * c.prisGjerdeBord + lektLøpemeter * c.prisLekt + (gjerdeStolper ?? 0) * c.prisStolpe
+    gjerdeFormattert = `${GJERDE_INFO[c.gjerdeType].beskrivelse}: ${gjerdeBordAntall} bord, ${fmt1(lektLøpemeter)} lm lekt, ${gjerdeStolper ?? 0} stolper`
+    const gjerdeBordKostnad = gjerdeBordAntall * c.prisGjerdeBord
+    const gjerdeLektKostnad = lektLøpemeter * c.prisLekt
+    gjerdeKostnad = gjerdeBordKostnad + gjerdeLektKostnad + (gjerdeStolper ?? 0) * c.prisStolpe
+    svinnGrunnlag += gjerdeBordKostnad + gjerdeLektKostnad
   }
 
   // Trapp
@@ -393,6 +412,9 @@ export function beregn(c: TerrasseConfig): BeregnetResultat {
     }
     trappKostnad = totalTrinn * 500
   }
+
+  // Hvor mye av kostnaden som skyldes kapp og svinn (allerede innbakt i tallene over)
+  const svinnKostnad = svinn > 1 ? svinnGrunnlag * ((svinn - 1) / svinn) : 0
 
   const totalKostnad =
     bordKostnad + bjelkeKostnad + skrueKostnad + (gjerdeKostnad ?? 0) + (trappKostnad ?? 0)
@@ -423,6 +445,8 @@ export function beregn(c: TerrasseConfig): BeregnetResultat {
     trappTrinnAntall,
     trappFormattert,
     trappKostnad,
+    svinnProsent: c.svinnProsent,
+    svinnKostnad,
     totalKostnad,
   }
 }
@@ -447,12 +471,12 @@ export const MÅLEFELT: Record<TerrasseForm, MåleFelt[]> = {
   uForm: [
     ['ytreLengde', 'Ytre lengde', 1, 30, 0.5, 'Total lengde på U-en'],
     ['ytreBredde', 'Ytre bredde', 1, 30, 0.5, 'Total bredde på U-en'],
-    ['armBredde', 'Armbredde', 0.3, 5, 0.5, 'Bredde på hver arm'],
+    ['armBredde', 'Armbredde', 0.5, 5, 0.5, 'Bredde på hver arm'],
   ],
 }
 
 export const ALLE_FORMER: TerrasseForm[] = ['rektangel', 'lForm', 'uForm']
-export const ALLE_GJERDETYPER: Gjerdetype[] = ['ingen', 'vannrett', 'loddrett', 'spiler', 'hel']
+export const ALLE_GJERDETYPER: Gjerdetype[] = ['ingen', 'vannrett', 'loddrett', 'spiler']
 export const ALLE_SIDER: Terrasseside[] = ['front', 'bak', 'venstre', 'høyre']
 export const ALLE_BJELKEDIM: Bjelkedimensjon[] = ['48x98', '48x148', '48x198']
 
@@ -465,5 +489,101 @@ export function nyTrapp(): Trapp {
     posisjon: 0.5,
     bredde: 1.0,
     antallTrinn: 3,
+  }
+}
+
+// ── Ferdige oppsett (presets) ─────────────────────────────────────────────────
+// Startpunkter brukeren kan velge for å komme raskt i gang. Hvert oppsett er en
+// delkonfigurasjon som flettes inn i DEFAULT_CONFIG; trapper angis uten id.
+
+export interface TerrassePreset {
+  id: string
+  navn: string
+  beskrivelse: string
+  config: Partial<Omit<TerrasseConfig, 'trapper'>> & { trapper?: Omit<Trapp, 'id'>[] }
+}
+
+export const TERRASSE_PRESETS: TerrassePreset[] = [
+  {
+    id: 'liten-uteplass',
+    navn: 'Liten uteplass',
+    beskrivelse: '3 × 3 m – kompakt sittehjørne',
+    config: {
+      form: 'rektangel',
+      lengde: 3,
+      bredde: 3,
+      gjerdeType: 'ingen',
+      trapper: [{ side: 'front', posisjon: 0.5, bredde: 1.0, antallTrinn: 2 }],
+    },
+  },
+  {
+    id: 'klassisk-terrasse',
+    navn: 'Klassisk terrasse',
+    beskrivelse: '5 × 3 m – rekkverk langs ytterkant',
+    config: {
+      form: 'rektangel',
+      lengde: 5,
+      bredde: 3,
+      gjerdeType: 'spiler',
+      gjerdeHøyde: 0.9,
+      gjerdePåAlleSider: false,
+      trapper: [{ side: 'front', posisjon: 0.5, bredde: 1.2, antallTrinn: 3 }],
+    },
+  },
+  {
+    id: 'familieterrasse',
+    navn: 'Stor familieterrasse',
+    beskrivelse: '7 × 4 m – rekkverk rundt, bred trapp',
+    config: {
+      form: 'rektangel',
+      lengde: 7,
+      bredde: 4,
+      bjelkeDimensjon: '48x198',
+      gjerdeType: 'spiler',
+      gjerdeHøyde: 0.9,
+      gjerdePåAlleSider: true,
+      trapper: [{ side: 'front', posisjon: 0.5, bredde: 2.0, antallTrinn: 4 }],
+    },
+  },
+  {
+    id: 'hjorneterrasse',
+    navn: 'Hjørneterrasse',
+    beskrivelse: 'L-form rundt to vegger',
+    config: {
+      form: 'lForm',
+      hovedLengde: 6,
+      hovedBredde: 3,
+      fløyLengde: 3,
+      fløyBredde: 2.5,
+      gjerdeType: 'loddrett',
+      gjerdeHøyde: 0.9,
+      gjerdePåAlleSider: false,
+      trapper: [{ side: 'front', posisjon: 0.7, bredde: 1.2, antallTrinn: 3 }],
+    },
+  },
+  {
+    id: 'hesteskoterrasse',
+    navn: 'Hesteskoterrasse',
+    beskrivelse: 'U-form rundt tre vegger',
+    config: {
+      form: 'uForm',
+      ytreLengde: 6,
+      ytreBredde: 7,
+      armBredde: 2,
+      gjerdeType: 'spiler',
+      gjerdeHøyde: 0.9,
+      gjerdePåAlleSider: false,
+      trapper: [{ side: 'høyre', posisjon: 0.8, bredde: 1.4, antallTrinn: 3 }],
+    },
+  },
+]
+
+/** Bygg en fullstendig konfigurasjon fra et oppsett (stabile trapp-id-er). */
+export function byggPresetConfig(preset: TerrassePreset): TerrasseConfig {
+  const { trapper, ...rest } = preset.config
+  return {
+    ...DEFAULT_CONFIG,
+    ...rest,
+    trapper: (trapper ?? []).map((t, i) => ({ id: `${preset.id}-trapp-${i}`, ...t })),
   }
 }

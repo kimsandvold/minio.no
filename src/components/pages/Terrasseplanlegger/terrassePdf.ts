@@ -136,6 +136,7 @@ export function lastNedMaterialliste(config: TerrasseConfig, r: BeregnetResultat
     <div>Form<span>${FORM_INFO[config.form].navn}</span></div>
     <div>Areal<span>${r.arealFormattert}</span></div>
     <div>Sum trevirke<span>${sumLm.toFixed(1)} lm</span></div>
+    ${config.svinnProsent > 0 ? `<div>Kapp og svinn<span>inkl. ${config.svinnProsent} %</span></div>` : ''}
   </div>
 
   ${modelImg ? `<div class="model"><img src="${modelImg}" alt="3D-modell av terrassen" /></div>` : ''}
@@ -158,8 +159,9 @@ export function lastNedMaterialliste(config: TerrasseConfig, r: BeregnetResultat
   </div>
 
   <p class="note">
-    Veiledende materialliste generert med terrasseplanleggeren på minio.no. Mengder er beregnet ut fra dine valgte
-    mål og er ment som et utgangspunkt – ta høyde for kapp og svinn. Kontakt Minio for et konkret tilbud på ferdig bygget terrasse.
+    Veiledende materialliste generert med terrasseplanleggeren på minio.no. Mengder er beregnet ut fra dine valgte mål.
+    ${config.svinnProsent > 0 ? `Løpemeter inkluderer ${config.svinnProsent} % kapp og svinn.` : 'Husk å legge til kapp og svinn selv.'}
+    Kontakt Minio for et konkret tilbud på ferdig bygget terrasse.
   </p>
 
   <script>

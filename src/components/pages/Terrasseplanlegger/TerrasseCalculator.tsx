@@ -1,8 +1,7 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import Icon from '../../shared/Icon'
-import { useLocalStorage } from '../../../hooks/useLocalStorage'
 import {
   type TerrasseConfig,
   type TerrasseForm,
@@ -12,12 +11,13 @@ import {
   GJERDE_INFO,
   SIDE_INFO,
   BJELKE_INFO,
-  DEFAULT_CONFIG,
   MÅLEFELT,
   ALLE_FORMER,
   ALLE_GJERDETYPER,
   ALLE_SIDER,
   ALLE_BJELKEDIM,
+  TERRASSE_PRESETS,
+  byggPresetConfig,
   beregn,
   formatKr,
   nyTrapp,
@@ -27,13 +27,6 @@ import { lastNedMaterialliste } from './terrassePdf'
 interface Props {
   config: TerrasseConfig
   onChange: (config: TerrasseConfig) => void
-}
-
-interface LagretProsjekt {
-  id: string
-  navn: string
-  dato: string
-  config: TerrasseConfig
 }
 
 // ── Styled ───────────────────────────────────────────────────────────────────
@@ -53,6 +46,46 @@ const SectionTitle = styled.h3`
 
   &:first-child {
     margin-top: 0;
+  }
+`
+
+const PresetGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+`
+
+const PresetBtn = styled.button<{ $active: boolean }>`
+  text-align: left;
+  border: 1px solid ${({ $active }) => ($active ? '#666' : '#e0e0e0')};
+  background: ${({ $active }) => ($active ? '#fafafa' : '#fff')};
+  border-radius: 8px;
+  padding: 0.55rem 0.6rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  transition: all 0.15s;
+  -webkit-tap-highlight-color: transparent;
+
+  .navn {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: ${({ theme }) => theme.colors.textDark};
+  }
+  .desc {
+    font-size: 0.6rem;
+    color: #999;
+    line-height: 1.25;
+  }
+
+  &:hover {
+    background: #fafafa;
+  }
+
+  &:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 `
 
@@ -443,6 +476,13 @@ const CostTotal = styled.div`
   }
 `
 
+const CostNote = styled.p`
+  margin: 0.5rem 0 0;
+  font-size: 0.62rem;
+  color: #999;
+  line-height: 1.4;
+`
+
 const CtaButton = styled(Link)`
   width: 100%;
   padding: 0.85rem 1rem;
@@ -496,74 +536,6 @@ const Note = styled.p`
   margin: 0.75rem 0 0;
 `
 
-const TextInput = styled.input`
-  flex: 1;
-  padding: 0.45rem 0.6rem;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 0.78rem;
-  min-width: 0;
-
-  &:focus {
-    outline: none;
-    border-color: ${({ theme }) => theme.colors.textDark};
-  }
-`
-
-const SmallBtn = styled.button`
-  padding: 0.45rem 0.7rem;
-  border: 1px solid ${({ theme }) => theme.colors.textDark};
-  background: ${({ theme }) => theme.colors.textDark};
-  color: #fff;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-
-  &:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-`
-
-const ProjectItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
-  border-bottom: 1px solid #eee;
-  font-size: 0.78rem;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  .meta {
-    flex: 1;
-    min-width: 0;
-  }
-  .navn {
-    font-weight: 600;
-    color: ${({ theme }) => theme.colors.textDark};
-  }
-  .dato {
-    font-size: 0.62rem;
-    color: #aaa;
-  }
-`
-
-const LinkBtn = styled.button`
-  border: none;
-  background: transparent;
-  color: ${({ theme }) => theme.colors.textDark};
-  cursor: pointer;
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-decoration: underline;
-  padding: 0.2rem;
-`
-
 // ── Form-ikoner ──────────────────────────────────────────────────────────────
 
 function FormIcon({ form }: { form: TerrasseForm }) {
@@ -591,12 +563,13 @@ function FormIcon({ form }: { form: TerrasseForm }) {
 
 export default function TerrasseCalculator({ config, onChange }: Props) {
   const [advanced, setAdvanced] = useState(false)
-  const [prosjektÅpen, setProsjektÅpen] = useState(true)
-  const [navn, setNavn] = useState('')
-  const [prosjekter, setProsjekter] = useLocalStorage<LagretProsjekt[]>('terrasse-prosjekter', [])
 
   const r = beregn(config)
   const set = (patch: Partial<TerrasseConfig>) => onChange({ ...config, ...patch })
+
+  // Bygg de ferdige oppsettene én gang og marker hvilket (om noen) som er aktivt.
+  const presets = useMemo(() => TERRASSE_PRESETS.map((p) => ({ p, cfg: byggPresetConfig(p) })), [])
+  const aktivPreset = presets.find(({ cfg }) => JSON.stringify(cfg) === JSON.stringify(config))?.p.id
 
   const handleForm = (form: TerrasseForm) => set({ form })
 
@@ -609,24 +582,21 @@ export default function TerrasseCalculator({ config, onChange }: Props) {
   const leggTilTrapp = () => set({ trapper: [...config.trapper, nyTrapp()] })
   const fjernTrapp = (id: string) => set({ trapper: config.trapper.filter((t) => t.id !== id) })
 
-  const lagre = () => {
-    const trimmed = navn.trim()
-    if (!trimmed) return
-    const prosjekt: LagretProsjekt = {
-      id: `${trimmed}-${prosjekter.length}-${config.form}`,
-      navn: trimmed,
-      dato: new Date().toLocaleDateString('nb-NO'),
-      config,
-    }
-    setProsjekter([prosjekt, ...prosjekter.filter((p) => p.navn !== trimmed)])
-    setNavn('')
-  }
-
-  const lastInn = (p: LagretProsjekt) => onChange({ ...DEFAULT_CONFIG, ...p.config })
-  const slett = (id: string) => setProsjekter(prosjekter.filter((p) => p.id !== id))
-
   return (
     <Container>
+      {/* Ferdige oppsett – startpunkter */}
+      <SectionTitle>
+        <Icon name="faRocket" /> Kom raskt i gang
+      </SectionTitle>
+      <PresetGrid>
+        {presets.map(({ p, cfg }) => (
+          <PresetBtn key={p.id} $active={aktivPreset === p.id} onClick={() => onChange(cfg)}>
+            <span className="navn">{p.navn}</span>
+            <span className="desc">{p.beskrivelse}</span>
+          </PresetBtn>
+        ))}
+      </PresetGrid>
+
       {/* Form */}
       <SectionTitle>
         <Icon name="faRulerCombined" /> Velg form
@@ -788,6 +758,7 @@ export default function TerrasseCalculator({ config, onChange }: Props) {
             <NumRow label="Bordavstand" enhet="mm" value={config.bordavstand} step={1} min={2} max={20} onChange={(v) => set({ bordavstand: v })} />
             <NumRow label="Bjelkeavstand" enhet="mm" value={config.bjelkeavstand} step={100} min={300} max={1200} onChange={(v) => set({ bjelkeavstand: v })} />
             <NumRow label="Skruer per kryss" enhet="stk" value={config.skruerPerKryss} step={1} min={1} max={4} onChange={(v) => set({ skruerPerKryss: v })} />
+            <NumRow label="Kapp og svinn" enhet="%" value={config.svinnProsent} step={1} min={0} max={25} onChange={(v) => set({ svinnProsent: v })} />
 
             <SectionTitle>Priser</SectionTitle>
             <NumRow label="Terrassebord" enhet="kr/lm" value={config.prisBordPrLm} step={1} min={0} max={999} onChange={(v) => set({ prisBordPrLm: v })} />
@@ -796,47 +767,6 @@ export default function TerrasseCalculator({ config, onChange }: Props) {
             <NumRow label="Gjerdebord" enhet="kr/stk" value={config.prisGjerdeBord} step={1} min={0} max={999} onChange={(v) => set({ prisGjerdeBord: v })} />
             <NumRow label="Lekt" enhet="kr/lm" value={config.prisLekt} step={1} min={0} max={999} onChange={(v) => set({ prisLekt: v })} />
             <NumRow label="Stolper" enhet="kr/stk" value={config.prisStolpe} step={1} min={0} max={999} onChange={(v) => set({ prisStolpe: v })} />
-          </CollapsibleBody>
-        )}
-      </Collapsible>
-
-      {/* Mine prosjekter */}
-      <Collapsible>
-        <CollapsibleHead $open={prosjektÅpen} onClick={() => setProsjektÅpen((v) => !v)}>
-          <Icon name="faFolderOpen" /> Mine prosjekter {prosjekter.length > 0 && `(${prosjekter.length})`}
-          <Icon name="faChevronDown" />
-        </CollapsibleHead>
-        {prosjektÅpen && (
-          <CollapsibleBody>
-            <Row style={{ marginBottom: '0.75rem' }}>
-              <TextInput
-                type="text"
-                placeholder="F.eks. Terrasse sørvest"
-                value={navn}
-                onChange={(e) => setNavn(e.target.value)}
-              />
-              <SmallBtn onClick={lagre} disabled={!navn.trim()}>
-                <Icon name="faSave" /> Lagre
-              </SmallBtn>
-            </Row>
-            {prosjekter.length === 0 ? (
-              <EmptyNote>Lagre terrasseprosjektene dine, så finner du dem igjen her – også neste gang.</EmptyNote>
-            ) : (
-              prosjekter.map((p) => (
-                <ProjectItem key={p.id}>
-                  <div className="meta">
-                    <div className="navn">{p.navn}</div>
-                    <div className="dato">
-                      {FORM_INFO[p.config.form].navn} · {p.dato}
-                    </div>
-                  </div>
-                  <LinkBtn onClick={() => lastInn(p)}>Åpne</LinkBtn>
-                  <DeleteBtn onClick={() => slett(p.id)} aria-label="Slett prosjekt">
-                    <Icon name="faTrash" />
-                  </DeleteBtn>
-                </ProjectItem>
-              ))
-            )}
           </CollapsibleBody>
         )}
       </Collapsible>
@@ -924,6 +854,11 @@ export default function TerrasseCalculator({ config, onChange }: Props) {
           <span>Estimert materialkostnad</span>
           <span>{formatKr(r.totalKostnad)}</span>
         </CostTotal>
+        {r.svinnProsent > 0 && (
+          <CostNote>
+            Løpemeter og pris inkluderer {r.svinnProsent} % kapp og svinn (≈ {formatKr(r.svinnKostnad)}).
+          </CostNote>
+        )}
       </CostBox>
 
       <DownloadButton onClick={() => lastNedMaterialliste(config, r)}>

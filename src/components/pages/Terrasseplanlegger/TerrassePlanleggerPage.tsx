@@ -1,14 +1,13 @@
-import { useState } from 'react'
 import styled from 'styled-components'
 import TerrasseVisualizer from './TerrasseVisualizer'
 import TerrasseCalculator from './TerrasseCalculator'
+import { useTerrasseProsjekter } from './useTerrasseProsjekter'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import { useSEO } from '../../../hooks/useSEO'
-import { DEFAULT_CONFIG, type TerrasseConfig } from './terrasseModel'
 
 const TERRASSE_FAQ = {
   '@context': 'https://schema.org',
@@ -202,7 +201,14 @@ const VisualizerWrap = styled.div`
   margin-bottom: 2rem;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    margin-bottom: 0;
+    /* Hold 3D-modellen festet øverst mens parametrene under scroller. */
+    position: sticky;
+    top: 56px;
+    z-index: 5;
+    margin: 0 -1rem;
+    padding: 0.25rem 1rem 0.5rem;
+    background: ${({ theme }) => theme.colors.lightBg};
+    box-shadow: 0 6px 10px -8px rgba(0, 0, 0, 0.25);
   }
 `
 
@@ -278,7 +284,7 @@ const SidebarTitle = styled.h3`
 `
 
 export default function TerrassePlanleggerPage() {
-  const [config, setConfig] = useState<TerrasseConfig>(DEFAULT_CONFIG)
+  const { config, setConfig, prosjekt } = useTerrasseProsjekter()
 
   useSEO({
     title: 'Terrasseplanlegger – tegn terrassen i 3D og få materialliste | Minio',
@@ -303,7 +309,7 @@ export default function TerrassePlanleggerPage() {
           <Content>
             <Layout>
               <VisualizerWrap>
-                <TerrasseVisualizer config={config} onConfigChange={setConfig} />
+                <TerrasseVisualizer config={config} onConfigChange={setConfig} prosjekt={prosjekt} />
               </VisualizerWrap>
 
               <Article>
