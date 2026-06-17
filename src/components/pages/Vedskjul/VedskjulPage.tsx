@@ -272,7 +272,7 @@ interface VisualizerConfig {
   hasDoor: boolean
 }
 
-const DEFAULT_BASE_PRICE = 13900
+const DEFAULT_BASE_PRICE = 9000
 
 export default function VedskjulPage() {
   const { data: product } = useProductBySlug('vedskjul')

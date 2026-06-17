@@ -522,18 +522,23 @@ export default function VedskjulPriceCalculator({ basePrice, config, onConfigCha
     onConfigChange?.({ width, height, depth, sectionCount, finish, roof: roofType, roofShape, roofDegree, roofSlopeDirection, hasDoor })
   }, [width, height, depth, sectionCount, finish, roofType, roofShape, roofDegree, roofSlopeDirection, hasDoor, onConfigChange])
 
-  // Price calculation – per-cm cost increase beyond base dimensions
+  // Price calculation – per-cm material cost increase beyond base dimensions.
+  // Calibrated so a 200×300×200 cm build lands at ~13 000,- in materials:
+  // base 9 000 + depth (300-100) × 20 = 13 000.
   const BASE_WIDTH = 200
   const BASE_DEPTH = 100
   const BASE_HEIGHT = 200
-  const WIDTH_PER_CM = 3000 / BASE_WIDTH
-  const DEPTH_PER_CM = 3000 / BASE_DEPTH
-  const HEIGHT_PER_CM = 3000 / BASE_HEIGHT
+  const WIDTH_PER_CM = 20
+  const DEPTH_PER_CM = 20
+  const HEIGHT_PER_CM = 20
   const extraWidthCost = Math.max(0, width - BASE_WIDTH) * WIDTH_PER_CM
   const extraDepthCost = Math.max(0, depth - BASE_DEPTH) * DEPTH_PER_CM
   const extraHeightCost = Math.max(0, height - BASE_HEIGHT) * HEIGHT_PER_CM
   const volumeCm3 = width * depth * height
   const volumeCost = basePrice + extraWidthCost + extraDepthCost + extraHeightCost
+
+  // Fabrication labour: 20 work hours × 500,-/h, folded into the total.
+  const LABOR_COST = 20 * 500
 
   const finishCost = parseInt(finish, 10)
   const roofCost = parseInt(roofType, 10)
@@ -544,9 +549,12 @@ export default function VedskjulPriceCalculator({ basePrice, config, onConfigCha
   const lightingCost = lightingChecked ? 5000 : 0
 
   const sectionMultiplier = sectionCount === 2 ? 1.2 : 1
-  const subtotal = (volumeCost * sectionMultiplier) + finishCost + roofCost + qualityCost + deliveryCost + installationCost + doorCost + lightingCost
+  // Valmtak (hip roof) is sloped on all sides → significant extra fabrication
+  // labour. Scales with section count since a 2-section roof is larger.
+  const roofShapeCost = (roofShape === 'hip' ? 5000 : 0) * sectionMultiplier
+  const subtotal = (volumeCost * sectionMultiplier) + finishCost + roofCost + roofShapeCost + qualityCost + deliveryCost + installationCost + doorCost + lightingCost
   const constructionMultiplier = construction === 'impregnated' ? 1.2 : 1
-  const priceExclVat = Math.round(subtotal * constructionMultiplier)
+  const priceExclVat = Math.round(subtotal * constructionMultiplier + LABOR_COST)
   const vatAmount = Math.round(priceExclVat * (VAT_PERCENTAGE / 100))
   const totalPrice = priceExclVat + vatAmount
 

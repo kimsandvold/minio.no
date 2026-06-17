@@ -63,7 +63,7 @@
     "slug": "vedskjul",
     "title": "Vedskjul med optimal lufting",
     "shortDescription": "La veden tørke naturlig i et solid skjul designet for norske forhold. Bygget etter dine mål med god ventilasjon og enkel tilgang hele året.",
-    "price": "Pris fra 13 900,-",
+    "price": "Pris fra 19 000,-",
     "images": [
       { "src": "/images/products/fire_wood_shed_1.webp", "alt": "Vedskjul i tre med stablede vedkubber" }
     ],
@@ -73,7 +73,7 @@
     "isFeatured": false,
     "hasPromoRibbon": false,
     "hasConfigurator": true,
-    "basePrice": 13900
+    "basePrice": 9000
   },
   {
     "id": "postkassestativ",
