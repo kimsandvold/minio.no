@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type MutableRefObject } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import Icon from '../../shared/Icon'
@@ -27,6 +27,8 @@ import { lastNedMaterialliste } from './terrassePdf'
 interface Props {
   config: TerrasseConfig
   onChange: (config: TerrasseConfig) => void
+  // Fanger 3D-modellen fra standard-perspektivet til PDF-en.
+  snapshotRef?: MutableRefObject<(() => string | null) | null>
 }
 
 // ── Styled ───────────────────────────────────────────────────────────────────
@@ -552,6 +554,12 @@ function FormIcon({ form }: { form: TerrasseForm }) {
           <path d="M4 4 L16 4 L16 13 L26 13 L26 20 L4 20 Z" />
         </svg>
       )
+    case 'lFormSpeil':
+      return (
+        <svg viewBox="0 0 30 24" aria-hidden>
+          <path d="M26 4 L14 4 L14 13 L4 13 L4 20 L26 20 Z" />
+        </svg>
+      )
     case 'uForm':
       return (
         <svg viewBox="0 0 30 24" aria-hidden>
@@ -561,7 +569,7 @@ function FormIcon({ form }: { form: TerrasseForm }) {
   }
 }
 
-export default function TerrasseCalculator({ config, onChange }: Props) {
+export default function TerrasseCalculator({ config, onChange, snapshotRef }: Props) {
   const [advanced, setAdvanced] = useState(false)
 
   const r = beregn(config)
@@ -584,22 +592,9 @@ export default function TerrasseCalculator({ config, onChange }: Props) {
 
   return (
     <Container>
-      {/* Ferdige oppsett – startpunkter */}
+      {/* Ferdige oppsett – form først, deretter ferdige startpunkter */}
       <SectionTitle>
         <Icon name="faRocket" /> Kom raskt i gang
-      </SectionTitle>
-      <PresetGrid>
-        {presets.map(({ p, cfg }) => (
-          <PresetBtn key={p.id} $active={aktivPreset === p.id} onClick={() => onChange(cfg)}>
-            <span className="navn">{p.navn}</span>
-            <span className="desc">{p.beskrivelse}</span>
-          </PresetBtn>
-        ))}
-      </PresetGrid>
-
-      {/* Form */}
-      <SectionTitle>
-        <Icon name="faRulerCombined" /> Velg form
       </SectionTitle>
       <FormGrid>
         {ALLE_FORMER.map((form) => (
@@ -609,6 +604,14 @@ export default function TerrasseCalculator({ config, onChange }: Props) {
           </FormBtn>
         ))}
       </FormGrid>
+      <PresetGrid>
+        {presets.map(({ p, cfg }) => (
+          <PresetBtn key={p.id} $active={aktivPreset === p.id} onClick={() => onChange(cfg)}>
+            <span className="navn">{p.navn}</span>
+            <span className="desc">{p.beskrivelse}</span>
+          </PresetBtn>
+        ))}
+      </PresetGrid>
 
       {/* Mål */}
       <SectionTitle>Mål</SectionTitle>
@@ -861,7 +864,7 @@ export default function TerrasseCalculator({ config, onChange }: Props) {
         )}
       </CostBox>
 
-      <DownloadButton onClick={() => lastNedMaterialliste(config, r)}>
+      <DownloadButton onClick={() => lastNedMaterialliste(config, r, snapshotRef?.current?.() ?? undefined)}>
         <Icon name="faDownload" /> Last ned materialliste (PDF)
       </DownloadButton>
 

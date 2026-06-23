@@ -11,6 +11,7 @@ interface SEOOptions {
   description: string
   ogImage?: string
   noindex?: boolean
+  keywords?: string
   jsonLd?: JsonLdValue | JsonLdValue[]
 }
 
@@ -49,7 +50,7 @@ function setLink(rel: string, href: string) {
   el.href = href
 }
 
-export function useSEO({ title, description, ogImage, noindex, jsonLd }: SEOOptions): void {
+export function useSEO({ title, description, ogImage, noindex, keywords, jsonLd }: SEOOptions): void {
   const { pathname, search } = useLocation()
   const fullUrl = `${SITE_URL}${pathname}${search}`
   const imageUrl = `${SITE_URL}${ogImage || DEFAULT_OG_IMAGE}`
@@ -61,6 +62,7 @@ export function useSEO({ title, description, ogImage, noindex, jsonLd }: SEOOpti
     window.scrollTo(0, 0)
 
     setMeta('description', description)
+    if (keywords) setMeta('keywords', keywords)
     setMeta('og:title', title, 'property')
     setMeta('og:description', description, 'property')
     setMeta('og:url', fullUrl, 'property')
@@ -90,5 +92,5 @@ export function useSEO({ title, description, ogImage, noindex, jsonLd }: SEOOpti
     return () => {
       setJsonLd(undefined)
     }
-  }, [title, description, fullUrl, imageUrl, noindex, pathname, stableJsonLd])
+  }, [title, description, fullUrl, imageUrl, noindex, keywords, pathname, stableJsonLd])
 }

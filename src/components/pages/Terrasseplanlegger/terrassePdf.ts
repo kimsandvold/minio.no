@@ -11,19 +11,22 @@ interface MatRad {
  * Bygger en utskriftsvennlig materialliste (HTML) med Minio-logo og åpner
  * nettleserens utskrift/«Lagre som PDF». Kunden kan ta med listen i butikken.
  */
-export function lastNedMaterialliste(config: TerrasseConfig, r: BeregnetResultat) {
+export function lastNedMaterialliste(config: TerrasseConfig, r: BeregnetResultat, bilde?: string) {
   const origin = window.location.origin
   const logo = `${origin}/images/branding/logo_icon_white.webp`
   const dato = new Date().toLocaleDateString('nb-NO', { day: 'numeric', month: 'long', year: 'numeric' })
 
-  // Fang et bilde av 3D-modellen slik den ser ut nå
-  let modelImg = ''
-  const canvas = document.querySelector('canvas')
-  if (canvas) {
-    try {
-      modelImg = canvas.toDataURL('image/png')
-    } catch {
-      modelImg = ''
+  // Bruk helst et bilde tatt fra standard-perspektivet (sendt inn av visualiseringen).
+  // Faller tilbake til canvas slik den ser ut nå hvis ingen er gitt.
+  let modelImg = bilde ?? ''
+  if (!modelImg) {
+    const canvas = document.querySelector('canvas')
+    if (canvas) {
+      try {
+        modelImg = canvas.toDataURL('image/png')
+      } catch {
+        modelImg = ''
+      }
     }
   }
 

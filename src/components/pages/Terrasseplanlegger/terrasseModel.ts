@@ -1,7 +1,7 @@
 // Beregningsmodell for terrasseplanleggeren – portert fra TerrassePlan (iOS / SwiftUI).
 // All geometri er i meter, materialdimensjoner i mm.
 
-export type TerrasseForm = 'rektangel' | 'lForm' | 'uForm'
+export type TerrasseForm = 'rektangel' | 'lForm' | 'lFormSpeil' | 'uForm'
 
 export type Gjerdetype = 'ingen' | 'vannrett' | 'loddrett' | 'spiler' | 'hel'
 
@@ -63,7 +63,8 @@ export interface TerrasseConfig {
 
 export const FORM_INFO: Record<TerrasseForm, { navn: string; beskrivelse: string }> = {
   rektangel: { navn: 'Rektangel', beskrivelse: 'Langs én husvegg' },
-  lForm: { navn: 'L-form', beskrivelse: 'Rundt to sider' },
+  lForm: { navn: 'Hjørne høyre', beskrivelse: 'L-form rundt to sider' },
+  lFormSpeil: { navn: 'Hjørne venstre', beskrivelse: 'L-form rundt to sider' },
   uForm: { navn: 'U-form', beskrivelse: 'Hestesko – tre sider' },
 }
 
@@ -177,8 +178,9 @@ const fmt1 = (v: number) => v.toFixed(1)
 export function normalizedDimensions(c: TerrasseConfig): Size {
   switch (c.form) {
     case 'rektangel':
-      return { width: c.bredde, height: c.lengde }
+      return { width: c.lengde, height: c.bredde }
     case 'lForm':
+    case 'lFormSpeil':
       return { width: c.hovedBredde + c.fløyBredde, height: c.hovedLengde }
     case 'uForm':
       return { width: c.ytreBredde, height: c.ytreLengde }
@@ -189,11 +191,16 @@ export function normalizedDimensions(c: TerrasseConfig): Size {
 export function modellRekter(c: TerrasseConfig): Rekt[] {
   switch (c.form) {
     case 'rektangel':
-      return [{ x: 0, y: 0, width: c.bredde, height: c.lengde }]
+      return [{ x: 0, y: 0, width: c.lengde, height: c.bredde }]
     case 'lForm':
       return [
         { x: 0, y: 0, width: c.hovedBredde, height: c.hovedLengde },
         { x: c.hovedBredde, y: c.hovedLengde - c.fløyLengde, width: c.fløyBredde, height: c.fløyLengde },
+      ]
+    case 'lFormSpeil':
+      return [
+        { x: c.fløyBredde, y: 0, width: c.hovedBredde, height: c.hovedLengde },
+        { x: 0, y: c.hovedLengde - c.fløyLengde, width: c.fløyBredde, height: c.fløyLengde },
       ]
     case 'uForm': {
       const w = c.ytreBredde
@@ -214,9 +221,9 @@ export function formOutline(c: TerrasseConfig): Array<[number, number]> {
     case 'rektangel':
       return [
         [0, 0],
-        [c.bredde, 0],
-        [c.bredde, c.lengde],
-        [0, c.lengde],
+        [c.lengde, 0],
+        [c.lengde, c.bredde],
+        [0, c.bredde],
       ]
     case 'lForm': {
       const w1 = c.hovedBredde
@@ -230,6 +237,21 @@ export function formOutline(c: TerrasseConfig): Array<[number, number]> {
         [w1 + w2, h1 - h2],
         [w1 + w2, h1],
         [0, h1],
+      ]
+    }
+    case 'lFormSpeil': {
+      const w1 = c.hovedBredde
+      const h1 = c.hovedLengde
+      const w2 = c.fløyBredde
+      const h2 = c.fløyLengde
+      const W = w1 + w2
+      return [
+        [W, 0],
+        [w2, 0],
+        [w2, h1 - h2],
+        [0, h1 - h2],
+        [0, h1],
+        [W, h1],
       ]
     }
     case 'uForm': {
@@ -283,6 +305,7 @@ function beregnAreal(c: TerrasseConfig): number {
     case 'rektangel':
       return c.lengde * c.bredde
     case 'lForm':
+    case 'lFormSpeil':
       return c.hovedLengde * c.hovedBredde + c.fløyLengde * c.fløyBredde
     case 'uForm':
       return c.ytreLengde * c.ytreBredde - (c.ytreLengde - 2 * c.armBredde) * (c.ytreBredde - c.armBredde)
@@ -294,6 +317,7 @@ function beregnOmkrets(c: TerrasseConfig): number {
     case 'rektangel':
       return 2 * (c.lengde + c.bredde)
     case 'lForm':
+    case 'lFormSpeil':
       return 2 * (c.hovedLengde + c.hovedBredde + c.fløyBredde)
     case 'uForm':
       return c.ytreLengde + 2 * c.ytreBredde + (c.ytreLengde - 2 * c.armBredde)
@@ -468,6 +492,12 @@ export const MÅLEFELT: Record<TerrasseForm, MåleFelt[]> = {
     ['fløyLengde', 'Fløylengde', 1, 30, 0.5],
     ['fløyBredde', 'Fløybredde', 1, 30, 0.5],
   ],
+  lFormSpeil: [
+    ['hovedLengde', 'Hovedlengde', 1, 30, 0.5],
+    ['hovedBredde', 'Hovedbredde', 1, 30, 0.5],
+    ['fløyLengde', 'Fløylengde', 1, 30, 0.5],
+    ['fløyBredde', 'Fløybredde', 1, 30, 0.5],
+  ],
   uForm: [
     ['ytreLengde', 'Ytre lengde', 1, 30, 0.5, 'Total lengde på U-en'],
     ['ytreBredde', 'Ytre bredde', 1, 30, 0.5, 'Total bredde på U-en'],
@@ -475,7 +505,7 @@ export const MÅLEFELT: Record<TerrasseForm, MåleFelt[]> = {
   ],
 }
 
-export const ALLE_FORMER: TerrasseForm[] = ['rektangel', 'lForm', 'uForm']
+export const ALLE_FORMER: TerrasseForm[] = ['rektangel', 'lForm', 'lFormSpeil', 'uForm']
 export const ALLE_GJERDETYPER: Gjerdetype[] = ['ingen', 'vannrett', 'loddrett', 'spiler']
 export const ALLE_SIDER: Terrasseside[] = ['front', 'bak', 'venstre', 'høyre']
 export const ALLE_BJELKEDIM: Bjelkedimensjon[] = ['48x98', '48x148', '48x198']
@@ -507,11 +537,11 @@ export const TERRASSE_PRESETS: TerrassePreset[] = [
   {
     id: 'liten-uteplass',
     navn: 'Liten uteplass',
-    beskrivelse: '3 × 3 m – kompakt sittehjørne',
+    beskrivelse: 'Kompakt sittehjørne',
     config: {
       form: 'rektangel',
       lengde: 3,
-      bredde: 3,
+      bredde: 2,
       gjerdeType: 'ingen',
       trapper: [{ side: 'front', posisjon: 0.5, bredde: 1.0, antallTrinn: 2 }],
     },
@@ -519,11 +549,11 @@ export const TERRASSE_PRESETS: TerrassePreset[] = [
   {
     id: 'klassisk-terrasse',
     navn: 'Klassisk terrasse',
-    beskrivelse: '5 × 3 m – rekkverk langs ytterkant',
+    beskrivelse: 'Rekkverk langs ytterkant',
     config: {
       form: 'rektangel',
-      lengde: 5,
-      bredde: 3,
+      lengde: 4,
+      bredde: 2.5,
       gjerdeType: 'spiler',
       gjerdeHøyde: 0.9,
       gjerdePåAlleSider: false,
@@ -531,23 +561,24 @@ export const TERRASSE_PRESETS: TerrassePreset[] = [
     },
   },
   {
-    id: 'familieterrasse',
-    navn: 'Stor familieterrasse',
-    beskrivelse: '7 × 4 m – rekkverk rundt, bred trapp',
+    id: 'hjorneterrasse-venstre',
+    navn: 'Hjørneterrasse venstre',
+    beskrivelse: 'L-form rundt to vegger',
     config: {
-      form: 'rektangel',
-      lengde: 7,
-      bredde: 4,
-      bjelkeDimensjon: '48x198',
-      gjerdeType: 'spiler',
+      form: 'lFormSpeil',
+      hovedLengde: 6,
+      hovedBredde: 3,
+      fløyLengde: 3,
+      fløyBredde: 2.5,
+      gjerdeType: 'loddrett',
       gjerdeHøyde: 0.9,
-      gjerdePåAlleSider: true,
-      trapper: [{ side: 'front', posisjon: 0.5, bredde: 2.0, antallTrinn: 4 }],
+      gjerdePåAlleSider: false,
+      trapper: [{ side: 'front', posisjon: 0.3, bredde: 1.2, antallTrinn: 3 }],
     },
   },
   {
-    id: 'hjorneterrasse',
-    navn: 'Hjørneterrasse',
+    id: 'hjorneterrasse-hoyre',
+    navn: 'Hjørneterrasse høyre',
     beskrivelse: 'L-form rundt to vegger',
     config: {
       form: 'lForm',
@@ -559,6 +590,21 @@ export const TERRASSE_PRESETS: TerrassePreset[] = [
       gjerdeHøyde: 0.9,
       gjerdePåAlleSider: false,
       trapper: [{ side: 'front', posisjon: 0.7, bredde: 1.2, antallTrinn: 3 }],
+    },
+  },
+  {
+    id: 'familieterrasse',
+    navn: 'Stor familieterrasse',
+    beskrivelse: 'Rekkverk rundt, bred trapp',
+    config: {
+      form: 'rektangel',
+      lengde: 7,
+      bredde: 4,
+      bjelkeDimensjon: '48x198',
+      gjerdeType: 'spiler',
+      gjerdeHøyde: 0.9,
+      gjerdePåAlleSider: true,
+      trapper: [{ side: 'front', posisjon: 0.5, bredde: 2.0, antallTrinn: 4 }],
     },
   },
   {

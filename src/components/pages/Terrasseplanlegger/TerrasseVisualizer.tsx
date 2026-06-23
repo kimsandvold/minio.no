@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, type MutableRefObject } from 'react'
 import { createPortal } from 'react-dom'
 import styled from 'styled-components'
 import * as THREE from 'three'
@@ -38,6 +38,8 @@ interface Props {
   config: TerrasseConfig
   onConfigChange?: (config: TerrasseConfig) => void
   prosjekt?: ProsjektStyring
+  // Settes av visualiseringen: fanger modellen fra standard-perspektivet (til PDF).
+  snapshotRef?: MutableRefObject<(() => string | null) | null>
 }
 
 const Wrapper = styled.div`
@@ -358,6 +360,7 @@ function buildModel(
 const HUS_KANTER: Record<TerrasseForm, number[]> = {
   rektangel: [0], // bakkanten (mot huset)
   lForm: [1, 2], // de to innersidene i hjørnet
+  lFormSpeil: [1, 2], // de to innersidene i hjørnet (speilvendt)
   uForm: [3, 4, 5], // de tre innersidene i hesteskoen
 }
 
@@ -591,7 +594,7 @@ function frameCamera(
   controls.update()
 }
 
-export default function TerrasseVisualizer({ config, onConfigChange, prosjekt }: Props) {
+export default function TerrasseVisualizer({ config, onConfigChange, prosjekt, snapshotRef }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const fsContainerRef = useRef<HTMLDivElement>(null)
   const [mode, setMode] = useState<ViewMode>('ferdig')
@@ -607,6 +610,8 @@ export default function TerrasseVisualizer({ config, onConfigChange, prosjekt }:
     always: THREE.Group
     mats: Materials
     resizeObserver: ResizeObserver
+    scene: THREE.Scene
+    dims: { modelW: number; modelH: number; deckTop: number }
   } | null>(null)
 
   useEffect(() => {
@@ -635,6 +640,12 @@ export default function TerrasseVisualizer({ config, onConfigChange, prosjekt }:
     controls.maxDistance = 60
     controls.maxPolarAngle = Math.PI / 2.05
     controls.enablePan = false
+    // Sakte automatisk rotasjon som standard – stopper når brukeren tar tak i modellen.
+    controls.autoRotate = true
+    controls.autoRotateSpeed = 0.6
+    controls.addEventListener('start', () => {
+      controls.autoRotate = false
+    })
 
     const ambient = new THREE.AmbientLight(0xffffff, 0.6)
     scene.add(ambient)
@@ -704,7 +715,10 @@ export default function TerrasseVisualizer({ config, onConfigChange, prosjekt }:
     })
     resizeObserver.observe(container)
 
-    sceneRef.current = { renderer, camera, controls, finished, framing, always, mats, resizeObserver }
+    sceneRef.current = {
+      renderer, camera, controls, finished, framing, always, mats, resizeObserver, scene,
+      dims: { modelW, modelH, deckTop },
+    }
 
     return () => {
       resizeObserver.disconnect()
@@ -730,6 +744,7 @@ export default function TerrasseVisualizer({ config, onConfigChange, prosjekt }:
     const s = sceneRef.current
     if (!s) return
     const { modelW, modelH, deckTop } = buildModel(s.finished, s.framing, s.always, config, s.mats)
+    s.dims = { modelW, modelH, deckTop }
     applyMode(s, mode)
     frameCamera(s.camera, s.controls, modelW, modelH, deckTop, true)
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -741,6 +756,38 @@ export default function TerrasseVisualizer({ config, onConfigChange, prosjekt }:
     if (!s) return
     applyMode(s, mode)
   }, [mode])
+
+  // Eksponer en snapshot-funksjon som alltid fanger modellen fra standard-perspektivet
+  // (uavhengig av hvordan brukeren har rotert), og gjenoppretter synsvinkelen etterpå.
+  useEffect(() => {
+    if (!snapshotRef) return
+    snapshotRef.current = () => {
+      const s = sceneRef.current
+      if (!s) return null
+      const { renderer, camera, controls, scene, dims } = s
+      const savedPos = camera.position.clone()
+      const savedTarget = controls.target.clone()
+      const savedAutoRotate = controls.autoRotate
+      controls.autoRotate = false
+      frameCamera(camera, controls, dims.modelW, dims.modelH, dims.deckTop, false)
+      renderer.render(scene, camera)
+      let url: string | null = null
+      try {
+        url = renderer.domElement.toDataURL('image/png')
+      } catch {
+        url = null
+      }
+      camera.position.copy(savedPos)
+      controls.target.copy(savedTarget)
+      controls.autoRotate = savedAutoRotate
+      controls.update()
+      renderer.render(scene, camera)
+      return url
+    }
+    return () => {
+      snapshotRef.current = null
+    }
+  }, [snapshotRef])
 
   // Esc lukker fullskjerm
   useEffect(() => {

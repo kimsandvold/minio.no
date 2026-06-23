@@ -8,6 +8,7 @@ import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import { useSEO } from '../../../hooks/useSEO'
+import { useRef } from 'react'
 
 const TERRASSE_FAQ = {
   '@context': 'https://schema.org',
@@ -53,6 +54,14 @@ const TERRASSE_FAQ = {
         text: 'Ja. Planleggeren lager en materialliste med antall og løpemeter per trevirke (terrassebord, bjelker, kantbjelker, lekt, stolper) og festemateriell, med bilde av modellen og Minio-logo. Lasten ned som PDF og ta den med i byggevarehandelen.',
       },
     },
+    {
+      '@type': 'Question',
+      name: 'Heter det terrasse, veranda, platting eller altan?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Folk kaller det mange ting – terrasse, veranda, platting, altan, treplatting eller uteplass i tre. Planleggeren fungerer likt uansett hva du kaller den: tegn underlaget i 3D, sett målene og få materialliste og prisestimat. Verktøyet fungerer altså like godt som verandaplanlegger, plattingplanlegger eller terrassedesigner.',
+      },
+    },
   ],
 }
 
@@ -61,12 +70,22 @@ const TERRASSE_APP = {
   '@type': 'WebApplication',
   '@id': 'https://minio.no/terrasseplanlegger#app',
   name: 'Terrasseplanlegger',
+  alternateName: [
+    'Verandaplanlegger',
+    'Verandadesigner',
+    'Plattingplanlegger',
+    'Terrassedesigner',
+    'Altanplanlegger',
+    'Uteplassplanlegger',
+    'Terrassekalkulator',
+    'Plattingkalkulator',
+  ],
   url: 'https://minio.no/terrasseplanlegger',
   applicationCategory: 'DesignApplication',
   operatingSystem: 'Web',
   inLanguage: 'nb-NO',
   description:
-    'Gratis terrasseplanlegger som lar deg tegne terrassen i 3D, velge form (rektangel, L-form, U-form), legge til gjerde og trapp, og få komplett materialliste med prisestimat og PDF.',
+    'Gratis terrasseplanlegger og verandadesigner som lar deg tegne terrassen, verandaen eller plattingen i 3D, velge form (rektangel, L-form, U-form), legge til gjerde og trapp, og få komplett materialliste med prisestimat og PDF.',
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'NOK' },
   featureList: [
     '3D-visualisering i sanntid',
@@ -283,13 +302,66 @@ const SidebarTitle = styled.h3`
   color: ${({ theme }) => theme.colors.textDark};
 `
 
+const FaqList = styled.div`
+  margin-top: 1rem;
+
+  details {
+    border-bottom: 1px solid #e0e0e0;
+    padding: 1rem 0;
+  }
+
+  details:first-of-type {
+    border-top: 1px solid #e0e0e0;
+  }
+
+  summary {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: ${({ theme }) => theme.colors.textDark};
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::after {
+    content: '+';
+    font-size: 1.5rem;
+    font-weight: 400;
+    line-height: 1;
+    color: ${({ theme }) => theme.colors.accent};
+    transition: transform 0.2s ease;
+  }
+
+  details[open] summary::after {
+    content: '−';
+  }
+
+  details p {
+    margin: 1rem 0 0;
+    line-height: 1.8;
+    color: #333;
+  }
+`
+
 export default function TerrassePlanleggerPage() {
   const { config, setConfig, prosjekt } = useTerrasseProsjekter()
+  // Visualiseringen fyller denne med en funksjon som fanger modellen fra standard-
+  // perspektivet, slik at PDF-en alltid bruker det beste utgangsbildet.
+  const snapshotRef = useRef<(() => string | null) | null>(null)
 
   useSEO({
-    title: 'Terrasseplanlegger – tegn terrassen i 3D og få materialliste | Minio',
+    title: 'Terrasseplanlegger & verandadesigner – tegn i 3D og få materialliste | Minio',
     description:
-      'Gratis terrasseplanlegger fra Minio. Velg form (rektangel, L-form, U-form), sett målene og se terrassen i 3D med ferdig overflate og konstruksjon. Få komplett materialliste med antall bord, bjelker, skruer, gjerde og trapp, veiledende prisestimat og PDF du kan ta med i byggevarehandelen.',
+      'Gratis terrasseplanlegger, verandadesigner og plattingplanlegger fra Minio. Velg form (rektangel, L-form, U-form), sett målene og se terrassen, verandaen eller plattingen i 3D med ferdig overflate og konstruksjon. Få komplett materialliste med antall bord, bjelker, skruer, gjerde og trapp, veiledende prisestimat og PDF du kan ta med i byggevarehandelen.',
+    keywords:
+      'terrasseplanlegger, verandaplanlegger, verandadesigner, plattingplanlegger, terrassedesigner, altanplanlegger, uteplassplanlegger, terrassekalkulator, plattingkalkulator, planlegge terrasse, tegne terrasse, bygge terrasse, terrasse 3D, materialliste terrasse, treplatting, uteplass i tre',
     ogImage: '/images/terrasse/terrasseplanlegger-promo.png',
     jsonLd: [TERRASSE_APP, TERRASSE_HOWTO, TERRASSE_FAQ, TERRASSE_BREADCRUMB],
   })
@@ -302,21 +374,24 @@ export default function TerrassePlanleggerPage() {
           <Hero>
             <HeroContent>
               <h1>Terrasseplanlegger</h1>
-              <p>Tegn terrassen i 3D og få komplett materialliste med prisestimat</p>
+              <p>Planlegg terrasse, veranda eller platting i 3D – og få komplett materialliste med prisestimat</p>
             </HeroContent>
           </Hero>
 
           <Content>
             <Layout>
               <VisualizerWrap>
-                <TerrasseVisualizer config={config} onConfigChange={setConfig} prosjekt={prosjekt} />
+                <TerrasseVisualizer config={config} onConfigChange={setConfig} prosjekt={prosjekt} snapshotRef={snapshotRef} />
               </VisualizerWrap>
 
               <Article>
-                <h2>Planlegg terrassen din – ned til hvert bord</h2>
+                <h2>Planlegg terrasse, veranda eller platting – ned til hvert bord</h2>
                 <p>
                   Med terrasseplanleggeren tegner du terrassen akkurat slik du vil ha den, og ser den
-                  umiddelbart i 3D. Velg form, sett målene med skyvekontrollene, og legg til gjerde og
+                  umiddelbart i 3D. Verktøyet fungerer like godt som <strong>verandadesigner</strong>,{' '}
+                  <strong>plattingplanlegger</strong> eller <strong>altanplanlegger</strong> – kall det
+                  gjerne terrasse, veranda, platting, altan eller uteplass i tre, planleggingen er den
+                  samme. Velg form, sett målene med skyvekontrollene, og legg til gjerde og
                   trapp der du trenger det. Veksle mellom <strong>ferdig overflate</strong>,{' '}
                   <strong>konstruksjon</strong> (bjelkelag, sidebjelker og stolper) og <strong>begge samtidig</strong>,
                   der terrassebordene blir gjennomsiktige så du ser konstruksjonen under. Trykk på fullskjerm
@@ -356,11 +431,21 @@ export default function TerrassePlanleggerPage() {
                   skreddersydde terrasser og uteløsninger i tre, håndlaget i Lillehammer. Be om et tilbud,
                   så hjelper vi deg videre.
                 </p>
+
+                <h3>Vanlige spørsmål</h3>
+                <FaqList>
+                  {TERRASSE_FAQ.mainEntity.map((item) => (
+                    <details key={item.name}>
+                      <summary>{item.name}</summary>
+                      <p>{item.acceptedAnswer.text}</p>
+                    </details>
+                  ))}
+                </FaqList>
               </Article>
 
               <Sidebar>
                 <SidebarTitle>Konfigurer terrassen</SidebarTitle>
-                <TerrasseCalculator config={config} onChange={setConfig} />
+                <TerrasseCalculator config={config} onChange={setConfig} snapshotRef={snapshotRef} />
               </Sidebar>
             </Layout>
           </Content>
