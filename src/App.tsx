@@ -60,6 +60,7 @@ const PidestallKrakkPage = lazy(() => import('./components/pages/PidestallKrakk/
 const LeveggerPage = lazy(() => import('./components/pages/Levegger/LeveggerPage'))
 const TerrassePlanleggerPage = lazy(() => import('./components/pages/Terrasseplanlegger/TerrassePlanleggerPage'))
 const PergolaPlanleggerPage = lazy(() => import('./components/pages/Pergolaplanlegger/PergolaPlanleggerPage'))
+const CarportPlanleggerPage = lazy(() => import('./components/pages/Carportplanlegger/CarportPlanleggerPage'))
 const PlanleggerePage = lazy(() => import('./components/pages/Planleggere/PlanleggerePage'))
 
 function HomePage() {
@@ -67,6 +68,8 @@ function HomePage() {
   useSEO({
     title: 'Minio – Hageprodukter i tre, skreddersydd etter dine mål',
     description: 'Hage- og utendørsprodukter i tre, skreddersydd etter dine mål. Plantekasser, varmepumpehus, søppelboder, postkassestativer og mer. Håndlaget i Lillehammer.',
+    ogImage: '/images/hero/forside_8.webp',
+    ogImageAlt: 'Hage- og utendørsprodukter i tre fra Minio',
     jsonLd: [
       {
         '@context': 'https://schema.org',
@@ -165,9 +168,11 @@ export default function App() {
                 <Route path="/planleggere" element={<Suspense fallback={<PageLoadingFallback />}><PlanleggerePage /></Suspense>} />
                 <Route path="/planleggere/terrasse" element={<Suspense fallback={<PageLoadingFallback />}><TerrassePlanleggerPage /></Suspense>} />
                 <Route path="/planleggere/pergola" element={<Suspense fallback={<PageLoadingFallback />}><PergolaPlanleggerPage /></Suspense>} />
+                <Route path="/planleggere/carport" element={<Suspense fallback={<PageLoadingFallback />}><CarportPlanleggerPage /></Suspense>} />
                 {/* Gamle adresser – behold lenker som folk allerede har */}
                 <Route path="/terrasseplanlegger" element={<Navigate to="/planleggere/terrasse" replace />} />
                 <Route path="/pergolaplanlegger" element={<Navigate to="/planleggere/pergola" replace />} />
+                <Route path="/carportplanlegger" element={<Navigate to="/planleggere/carport" replace />} />
                 <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
                 <Route path="/byggeguider" element={<Suspense fallback={<PageLoadingFallback />}><DIYGuiderPage /></Suspense>} />
                 <Route path="/byggeguider/planlegging" element={<Suspense fallback={<PageLoadingFallback />}><PlanleggingPage /></Suspense>} />

@@ -157,6 +157,18 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://minio.no/byggeguider/prosjekter/hagebenk</loc>
+    <lastmod>2026-06-23</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/prosjekter/pidestall-utendors</loc>
+    <lastmod>2026-06-23</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://minio.no/planleggere</loc>
     <lastmod>2026-06-23</lastmod>
     <priority>0.9</priority>
@@ -170,6 +182,12 @@
   </url>
   <url>
     <loc>https://minio.no/planleggere/pergola</loc>
+    <lastmod>2026-06-23</lastmod>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/planleggere/carport</loc>
     <lastmod>2026-06-23</lastmod>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>

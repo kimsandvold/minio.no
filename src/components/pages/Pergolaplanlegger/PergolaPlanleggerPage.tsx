@@ -1,14 +1,17 @@
 import styled from 'styled-components'
-import { useRef } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import PergolaVisualizer from './PergolaVisualizer'
 import PergolaCalculator from './PergolaCalculator'
 import { usePergolaProsjekter } from './usePergolaProsjekter'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
+import PlannerDisclaimer from '../../shared/planlegger/PlannerDisclaimer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import { useSEO } from '../../../hooks/useSEO'
+import { MINIO_PUBLISHER } from '../../../utils/seo'
+import Icon from '../../shared/Icon'
 
 const PERGOLA_FAQ = {
   '@context': 'https://schema.org',
@@ -80,7 +83,7 @@ const PERGOLA_APP = {
     'Last ned materialliste som PDF',
     'Lagre prosjekter lokalt',
   ],
-  publisher: { '@id': 'https://minio.no/#business' },
+  publisher: MINIO_PUBLISHER,
 }
 
 const PERGOLA_HOWTO = {
@@ -218,44 +221,191 @@ const Article = styled.article`
   grid-area: article;
 
   h2 {
-    font-size: 2rem;
-    margin: 0 0 1.5rem;
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin: 0 0 1.25rem;
     color: ${({ theme }) => theme.colors.textDark};
 
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
     }
   }
 
   h3 {
-    font-size: 1.5rem;
-    margin: 2rem 0 1rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 2.25rem 0 0.85rem;
     color: ${({ theme }) => theme.colors.textDark};
 
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1.3rem;
+      font-size: 1.2rem;
     }
   }
 
   p {
-    line-height: 1.8;
-    margin-bottom: 1.5rem;
-    color: #333;
+    font-size: 1.08rem;
+    line-height: 1.75;
+    margin-bottom: 1.1rem;
+    color: #3f3f3f;
+
+    a {
+      color: ${({ theme }) => theme.colors.accent};
+      font-weight: 600;
+      text-decoration: underline;
+      text-decoration-color: rgba(0, 0, 0, 0.3);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.18em;
+      transition: text-decoration-color 0.2s ease;
+    }
+
+    a:hover {
+      text-decoration-color: ${({ theme }) => theme.colors.accent};
+    }
+  }
+
+  strong {
+    font-weight: 700;
+    color: ${({ theme }) => theme.colors.textDark};
   }
 
   ul {
-    margin: 1.5rem 0;
-    padding-left: 1.5rem;
+    margin: 0 0 1.2rem;
+    padding-left: 1.3rem;
   }
 
   li {
-    margin-bottom: 0.75rem;
-    line-height: 1.6;
+    font-size: 1.06rem;
+    line-height: 1.7;
+    color: #3f3f3f;
+    margin-bottom: 0.5rem;
+
+    &::marker {
+      color: ${({ theme }) => theme.colors.accent};
+    }
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     padding-bottom: 2rem;
     border-bottom: 1px solid #e0e0e0;
+  }
+`
+
+const ZoomButton = styled.button`
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: zoom-in;
+  line-height: 0;
+
+  & + & {
+    margin-top: 1rem;
+  }
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.4s ease, filter 0.4s ease;
+  }
+
+  &:hover img,
+  &:focus-visible img {
+    transform: scale(1.04);
+    filter: brightness(0.92);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 3px;
+  }
+`
+
+const ZoomBadge = styled.span`
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: rgba(20, 20, 20, 0.55);
+  backdrop-filter: blur(6px);
+  color: #fff;
+  font-size: 1rem;
+  opacity: 0;
+  transform: scale(0.85);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+
+  ${ZoomButton}:hover &,
+  ${ZoomButton}:focus-visible & {
+    opacity: 1;
+    transform: scale(1);
+  }
+`
+
+const Lightbox = styled.div`
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.88);
+  cursor: zoom-out;
+  animation: lightboxFade 0.2s ease;
+
+  @keyframes lightboxFade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: 8px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    padding: 1rem;
+  }
+`
+
+const LightboxClose = styled.button`
+  position: absolute;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
   }
 `
 
@@ -336,6 +486,16 @@ const FaqList = styled.div`
 export default function PergolaPlanleggerPage() {
   const { config, setConfig, prosjekt } = usePergolaProsjekter()
   const snapshotRef = useRef<(() => string | null) | null>(null)
+  const [lightbox, setLightbox] = useState<{ src: string; alt: string } | null>(null)
+
+  useEffect(() => {
+    if (!lightbox) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightbox(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [lightbox])
 
   useSEO({
     title: 'Pergolaplanlegger – tegn pergola i 3D og få materialliste | Minio',
@@ -344,6 +504,7 @@ export default function PergolaPlanleggerPage() {
     keywords:
       'pergolaplanlegger, pergola planlegger, pergoladesigner, pergolakalkulator, solskjerm pergola, planlegge pergola, tegne pergola, bygge pergola, pergola 3D, materialliste pergola, frittstående pergola, veggmontert pergola, pergola tak',
     ogImage: '/images/planleggere/pergola.webp',
+    ogImageAlt: 'Frittstående pergola i tre tegnet i Minios 3D-pergolaplanlegger',
     jsonLd: [PERGOLA_APP, PERGOLA_HOWTO, PERGOLA_FAQ, PERGOLA_BREADCRUMB],
   })
 
@@ -375,6 +536,62 @@ export default function PergolaPlanleggerPage() {
                   <strong>ferdig</strong>, <strong>konstruksjon</strong> (stolper, dragere og spær) og{' '}
                   <strong>begge samtidig</strong>, der tak og skjerm blir gjennomsiktige så du ser
                   bæringen under. Trykk på fullskjerm for å se modellen i full størrelse.
+                </p>
+
+                <ZoomButton
+                  type="button"
+                  onClick={() =>
+                    setLightbox({
+                      src: '/images/planleggere/pergola-inspirasjon.webp',
+                      alt: 'Frittstående pergola i tre over en spisegruppe på en moderne terrasse med peis og hage',
+                    })
+                  }
+                  aria-label="Forstørr bilde av pergola på moderne terrasse"
+                >
+                  <img
+                    src="/images/planleggere/pergola-inspirasjon.webp"
+                    alt="Frittstående pergola i tre over en spisegruppe på en moderne terrasse med peis og hage"
+                    loading="lazy"
+                    width={1402}
+                    height={1122}
+                  />
+                  <ZoomBadge aria-hidden="true">
+                    <Icon name="faSearch" />
+                  </ZoomBadge>
+                </ZoomButton>
+
+                <p>
+                  På en bytomt eller i en bakhage blir pergolaen en lun, frittstående uteplass –
+                  her over spisegruppen med peis og beplantning rundt. Stolpene står på alle fire
+                  hjørner, så den kan plasseres fritt der du vil samle gjestene.
+                </p>
+
+                <ZoomButton
+                  type="button"
+                  onClick={() =>
+                    setLightbox({
+                      src: '/images/planleggere/pergola-inspirasjon-2.webp',
+                      alt: 'Pergola i tre over et spisebord ved vannet med solnedgang og hytte i bakgrunnen',
+                    })
+                  }
+                  aria-label="Forstørr bilde av pergola ved vannet"
+                >
+                  <img
+                    src="/images/planleggere/pergola-inspirasjon-2.webp"
+                    alt="Pergola i tre over et spisebord ved vannet med solnedgang og hytte i bakgrunnen"
+                    loading="lazy"
+                    width={1915}
+                    height={821}
+                  />
+                  <ZoomBadge aria-hidden="true">
+                    <Icon name="faSearch" />
+                  </ZoomBadge>
+                </ZoomButton>
+
+                <p>
+                  Ved hytta eller med utsikt mot vannet rammer den samme pergolaen inn spisebordet
+                  og gir le uten å stenge for solnedgangen. Trykk på et bilde for å se det i full
+                  størrelse.
                 </p>
 
                 <h3>Velg tak etter hvor mye sol du vil ha</h3>
@@ -440,6 +657,15 @@ export default function PergolaPlanleggerPage() {
           </Content>
         </main>
       </PageTransition>
+      {lightbox && (
+        <Lightbox role="dialog" aria-modal="true" aria-label="Forstørret bilde" onClick={() => setLightbox(null)}>
+          <LightboxClose type="button" aria-label="Lukk" onClick={() => setLightbox(null)}>
+            <Icon name="faTimes" />
+          </LightboxClose>
+          <img src={lightbox.src} alt={lightbox.alt} />
+        </Lightbox>
+      )}
+      <PlannerDisclaimer />
       <Footer />
       <ProductModal />
       <NewsletterModal />

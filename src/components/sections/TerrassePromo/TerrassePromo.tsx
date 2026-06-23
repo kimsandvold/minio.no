@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { useIntersectionObserver } from '../../../hooks/useIntersectionObserver'
 import Icon from '../../shared/Icon'
+import SplideCarousel from '../../shared/SplideCarousel'
 
 const Section = styled.section`
   background: ${({ theme }) => theme.colors.darkBg};
@@ -121,13 +123,27 @@ const Visual = styled.div`
   background: linear-gradient(135deg, #f5f5f0 0%, #e8e8e0 100%);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 
-  > img {
-    width: 100%;
+  .splide,
+  .splide__track,
+  .splide__list,
+  .splide__slide {
     height: 100%;
-    object-fit: contain;
-    object-position: center;
-    display: block;
-    padding: 1rem;
+  }
+
+  .splide__slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .splide__pagination {
+    bottom: 0.75rem;
+  }
+  .splide__pagination__page {
+    background: rgba(0, 0, 0, 0.25);
+  }
+  .splide__pagination__page.is-active {
+    background: ${({ theme }) => theme.colors.textDark};
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -135,45 +151,67 @@ const Visual = styled.div`
   }
 `
 
-const FloatingThumb = styled.div`
-  position: absolute;
-  left: 1rem;
-  bottom: 1rem;
-  z-index: 2;
-  width: 38%;
-  max-width: 220px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 0.5rem 0.5rem 0.35rem;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+const Slide = styled.div<{ $contain?: boolean }>`
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: ${({ $contain }) => ($contain ? '#ffffff' : 'transparent')};
 
   img {
     width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: contain;
+    height: 100%;
+    object-fit: ${({ $contain }) => ($contain ? 'contain' : 'cover')};
+    object-position: center;
+    padding: ${({ $contain }) => ($contain ? '0.5rem' : '0')};
     display: block;
   }
+
   span {
-    display: block;
-    text-align: center;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    position: absolute;
+    left: 1rem;
+    top: 1rem;
+    background: rgba(255, 255, 255, 0.92);
     color: ${({ theme }) => theme.colors.textDark};
-    margin-top: 0.15rem;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.65rem;
+    border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 `
 
+const SLIDES = [
+  {
+    src: '/images/planleggere/terrasse.webp',
+    alt: 'L-formet terrasse i tre med rekkverk og trapp, tegnet i Minios terrasseplanlegger',
+    label: 'Terrasse',
+  },
+  {
+    src: '/images/planleggere/pergola.webp',
+    alt: 'Frittstående pergola i tre, tegnet i Minios pergolaplanlegger',
+    label: 'Pergola',
+  },
+  {
+    src: '/images/planleggere/carport.webp',
+    alt: 'Frittstående carport i tre med saltak, tegnet i Minios carportplanlegger',
+    label: 'Carport',
+    fit: 'contain' as const,
+  },
+]
+
 const FEATURES = [
   { icon: 'faCube', text: '3D-visning i sanntid' },
-  { icon: 'faRulerCombined', text: 'Terrasse og pergola' },
+  { icon: 'faRulerCombined', text: 'Terrasse, pergola og carport' },
   { icon: 'faDownload', text: 'Materialliste som PDF' },
   { icon: 'faSave', text: 'Lagre prosjektene dine' },
 ]
 
 export default function TerrassePromo() {
   const [ref, isVisible] = useIntersectionObserver()
+  // Tilfeldig startbilde ved sidelast – terrasse eller pergola vises først.
+  const [startSlide] = useState(() => Math.floor(Math.random() * SLIDES.length))
 
   return (
     <Section id="terrasseplanlegger-promo">
@@ -201,19 +239,14 @@ export default function TerrassePromo() {
         </Text>
 
         <Visual>
-          <img
-            src="/images/planleggere/terrasse.webp"
-            alt="L-formet terrasse i tre med rekkverk og trapp, tegnet i Minios terrasseplanlegger"
-            loading="lazy"
-          />
-          <FloatingThumb>
-            <img
-              src="/images/planleggere/pergola.webp"
-              alt="Frittstående pergola i tre, tegnet i Minios pergolaplanlegger"
-              loading="lazy"
-            />
-            <span>Pergola</span>
-          </FloatingThumb>
+          <SplideCarousel options={{ start: startSlide, arrows: false, interval: 5000 }}>
+            {SLIDES.map((s) => (
+              <Slide key={s.label} $contain={s.fit === 'contain'}>
+                <img src={s.src} alt={s.alt} loading="lazy" />
+                <span>{s.label}</span>
+              </Slide>
+            ))}
+          </SplideCarousel>
         </Visual>
       </Inner>
     </Section>

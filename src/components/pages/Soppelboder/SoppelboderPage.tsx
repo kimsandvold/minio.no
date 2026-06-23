@@ -4,6 +4,7 @@ import SoppelboderPriceCalculator from './SoppelboderPriceCalculator'
 import SoppelboderThreeVisualizer from './SoppelboderThreeVisualizer'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
+import PlannerDisclaimer from '../../shared/planlegger/PlannerDisclaimer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
@@ -101,41 +102,70 @@ const Article = styled.article`
   padding: 0;
 
   h2 {
-    font-size: 2rem;
-    margin-top: 0;
-    margin-bottom: 1.5rem;
+    font-size: 1.85rem;
+    font-weight: 700;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    margin: 0 0 1.25rem;
     color: ${({ theme }) => theme.colors.textDark};
 
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1.6rem;
+      font-size: 1.5rem;
     }
   }
 
   h3 {
-    font-size: 1.5rem;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.25;
+    margin: 2.25rem 0 0.85rem;
     color: ${({ theme }) => theme.colors.textDark};
 
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1.3rem;
+      font-size: 1.2rem;
     }
   }
 
   p {
-    line-height: 1.8;
-    margin-bottom: 1.5rem;
-    color: #333;
+    font-size: 1.08rem;
+    line-height: 1.75;
+    margin-bottom: 1.1rem;
+    color: #3f3f3f;
+
+    a {
+      color: ${({ theme }) => theme.colors.accent};
+      font-weight: 600;
+      text-decoration: underline;
+      text-decoration-color: rgba(0, 0, 0, 0.3);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 0.18em;
+      transition: text-decoration-color 0.2s ease;
+    }
+
+    a:hover {
+      text-decoration-color: ${({ theme }) => theme.colors.accent};
+    }
+  }
+
+  strong {
+    font-weight: 700;
+    color: ${({ theme }) => theme.colors.textDark};
   }
 
   ul {
-    margin: 1.5rem 0;
-    padding-left: 1.5rem;
+    margin: 0 0 1.2rem;
+    padding-left: 1.3rem;
   }
 
   li {
-    margin-bottom: 0.75rem;
-    line-height: 1.6;
+    font-size: 1.06rem;
+    line-height: 1.7;
+    color: #3f3f3f;
+    margin-bottom: 0.5rem;
+
+    &::marker {
+      color: ${({ theme }) => theme.colors.accent};
+    }
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -424,6 +454,7 @@ export default function SoppelboderPage() {
         </Content>
       </main>
       </PageTransition>
+      <PlannerDisclaimer />
       <Footer />
       <ProductModal />
       <NewsletterModal />

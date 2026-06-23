@@ -2,7 +2,8 @@ import { useEffect, useMemo } from 'react'
 import { useLocation } from 'react-router-dom'
 
 const SITE_URL = 'https://minio.no'
-const DEFAULT_OG_IMAGE = '/images/branding/logo_dark.svg'
+// Raster-bilde – sosiale plattformer (Facebook/X) viser ikke SVG som og:image.
+const DEFAULT_OG_IMAGE = '/images/hero/forside_8.webp'
 
 type JsonLdValue = Record<string, unknown>
 
@@ -10,6 +11,7 @@ interface SEOOptions {
   title: string
   description: string
   ogImage?: string
+  ogImageAlt?: string
   noindex?: boolean
   keywords?: string
   jsonLd?: JsonLdValue | JsonLdValue[]
@@ -50,9 +52,11 @@ function setLink(rel: string, href: string) {
   el.href = href
 }
 
-export function useSEO({ title, description, ogImage, noindex, keywords, jsonLd }: SEOOptions): void {
+export function useSEO({ title, description, ogImage, ogImageAlt, noindex, keywords, jsonLd }: SEOOptions): void {
   const { pathname, search } = useLocation()
   const fullUrl = `${SITE_URL}${pathname}${search}`
+  // Kanonisk URL skal ikke inneholde spørrestreng (?utm=…) – unngår duplikat-kanoniske.
+  const canonicalUrl = `${SITE_URL}${pathname}`
   const imageUrl = `${SITE_URL}${ogImage || DEFAULT_OG_IMAGE}`
   const jsonLdKey = jsonLd ? JSON.stringify(jsonLd) : ''
   const stableJsonLd = useMemo(() => jsonLd, [jsonLdKey])
@@ -65,11 +69,16 @@ export function useSEO({ title, description, ogImage, noindex, keywords, jsonLd 
     if (keywords) setMeta('keywords', keywords)
     setMeta('og:title', title, 'property')
     setMeta('og:description', description, 'property')
-    setMeta('og:url', fullUrl, 'property')
+    setMeta('og:url', canonicalUrl, 'property')
     setMeta('og:image', imageUrl, 'property')
     setMeta('twitter:title', title, 'name')
     setMeta('twitter:description', description, 'name')
-    setLink('canonical', fullUrl)
+    setMeta('twitter:image', imageUrl, 'name')
+    if (ogImageAlt) {
+      setMeta('og:image:alt', ogImageAlt, 'property')
+      setMeta('twitter:image:alt', ogImageAlt, 'name')
+    }
+    setLink('canonical', canonicalUrl)
 
     if (noindex) {
       setMeta('robots', 'noindex, nofollow')
@@ -92,5 +101,5 @@ export function useSEO({ title, description, ogImage, noindex, keywords, jsonLd 
     return () => {
       setJsonLd(undefined)
     }
-  }, [title, description, fullUrl, imageUrl, noindex, keywords, pathname, stableJsonLd])
+  }, [title, description, fullUrl, canonicalUrl, imageUrl, ogImageAlt, noindex, keywords, pathname, stableJsonLd])
 }

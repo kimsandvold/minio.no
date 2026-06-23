@@ -15,6 +15,8 @@ interface Planlegger {
   tagline: string
   bilde: string
   alt: string
+  /** Bruk 'contain' for modellrenders på hvit bakgrunn så hele konstruksjonen vises. */
+  bildeFit?: 'cover' | 'contain'
   punkter: { icon: string; tekst: string }[]
 }
 
@@ -47,6 +49,21 @@ const PLANLEGGERE: Planlegger[] = [
       { icon: 'faDownload', tekst: 'Materialliste som PDF' },
     ],
   },
+  {
+    slug: 'carport',
+    navn: 'Carportplanlegger',
+    tagline: 'Tak · snølast · byggeregler',
+    bilde: '/images/planleggere/carport.webp',
+    alt: 'Frittstående carport i tre med saltak og bærekonstruksjon, tegnet i Minios carportplanlegger',
+    bildeFit: 'contain',
+    ingress:
+      'Tegn carporten i 3D – velg takform og takvinkel, taktekke og vegger med akrylvinduer. Solid konstruksjon med tverrbjelker og knebånd, snølast-dimensjonering og status mot norske byggeregler.',
+    punkter: [
+      { icon: 'faSquare', tekst: 'Flatt, pulttak eller saltak' },
+      { icon: 'faClipboardList', tekst: 'Snølast og byggeregler' },
+      { icon: 'faDownload', tekst: 'Materialliste som PDF' },
+    ],
+  },
 ]
 
 const PLANLEGGERE_JSONLD = [
@@ -58,7 +75,7 @@ const PLANLEGGERE_JSONLD = [
     url: 'https://minio.no/planleggere',
     inLanguage: 'nb-NO',
     description:
-      'Minios gratis 3D-planleggere for uteprosjekter i tre: terrasse, veranda, platting og pergola. Tegn i 3D, få materialliste og prisestimat.',
+      'Minios gratis 3D-planleggere for uteprosjekter i tre: terrasse, veranda, platting, pergola og carport. Tegn i 3D, få materialliste og prisestimat.',
     isPartOf: { '@id': 'https://minio.no/#website' },
   },
   {
@@ -174,10 +191,11 @@ const Card = styled.div`
   }
 `
 
-const Thumb = styled.div`
+const Thumb = styled.div<{ $contain?: boolean }>`
   border-radius: 12px;
   overflow: hidden;
-  background: linear-gradient(135deg, #f5f5f0 0%, #e8e8e0 100%);
+  background: ${({ $contain }) =>
+    $contain ? '#ffffff' : 'linear-gradient(135deg, #f5f5f0 0%, #e8e8e0 100%)'};
   aspect-ratio: 4 / 3;
   margin-bottom: 1.25rem;
   display: flex;
@@ -187,8 +205,9 @@ const Thumb = styled.div`
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: ${({ $contain }) => ($contain ? 'contain' : 'cover')};
     object-position: center;
+    padding: ${({ $contain }) => ($contain ? '0.5rem' : '0')};
     display: block;
     transition: transform 0.3s ease;
   }
@@ -239,12 +258,13 @@ const OpenLink = styled(Link)`
 
 export default function PlanleggerePage() {
   useSEO({
-    title: 'Planleggere – tegn terrasse og pergola i 3D | Minio',
+    title: 'Planleggere – tegn terrasse, pergola og carport i 3D | Minio',
     description:
-      'Minios gratis 3D-planleggere for uteprosjekter i tre. Tegn terrasse, veranda, platting eller pergola i 3D, og få komplett materialliste med prisestimat og PDF.',
+      'Minios gratis 3D-planleggere for uteprosjekter i tre. Tegn terrasse, veranda, platting, pergola eller carport i 3D, og få komplett materialliste med prisestimat og PDF.',
     keywords:
-      'planleggere, terrasseplanlegger, pergolaplanlegger, verandaplanlegger, plattingplanlegger, 3D planlegger, materialliste, planlegge uteplass',
+      'planleggere, terrasseplanlegger, pergolaplanlegger, carportplanlegger, verandaplanlegger, plattingplanlegger, 3D planlegger, materialliste, planlegge uteplass',
     ogImage: '/images/planleggere/terrasse.webp',
+    ogImageAlt: 'L-formet terrasse i tre tegnet i Minios 3D-planlegger',
     jsonLd: PLANLEGGERE_JSONLD,
   })
 
@@ -265,7 +285,7 @@ export default function PlanleggerePage() {
             <Grid>
               {PLANLEGGERE.map((p) => (
                 <Card key={p.slug}>
-                  <Thumb className="thumb">
+                  <Thumb className="thumb" $contain={p.bildeFit === 'contain'}>
                     <img src={p.bilde} alt={p.alt} loading="lazy" />
                   </Thumb>
                   <div className="tagline">{p.tagline}</div>
