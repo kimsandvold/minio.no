@@ -118,15 +118,16 @@ const Visual = styled.div`
   border-radius: 18px;
   overflow: hidden;
   aspect-ratio: 4 / 3;
-  background: #ffffff;
+  background: linear-gradient(135deg, #f5f5f0 0%, #e8e8e0 100%);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 
-  img {
+  > img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     object-position: center;
     display: block;
+    padding: 1rem;
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -134,45 +135,39 @@ const Visual = styled.div`
   }
 `
 
-const Floating = styled.div`
+const FloatingThumb = styled.div`
   position: absolute;
   left: 1rem;
   bottom: 1rem;
   z-index: 2;
-  background: rgba(255, 255, 255, 0.95);
-  color: ${({ theme }) => theme.colors.textDark};
+  width: 38%;
+  max-width: 220px;
+  background: #fff;
   border-radius: 12px;
-  padding: 0.7rem 0.95rem;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
+  padding: 0.5rem 0.5rem 0.35rem;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
 
-  .icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 8px;
-    background: ${({ theme }) => theme.colors.darkBg};
-    color: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+  img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: contain;
+    display: block;
   }
-  .label {
+  span {
+    display: block;
+    text-align: center;
     font-size: 0.65rem;
-    color: #888;
-    line-height: 1.2;
-  }
-  .value {
-    font-size: 0.95rem;
     font-weight: 700;
-    line-height: 1.1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: ${({ theme }) => theme.colors.textDark};
+    margin-top: 0.15rem;
   }
 `
 
 const FEATURES = [
   { icon: 'faCube', text: '3D-visning i sanntid' },
-  { icon: 'faRulerCombined', text: 'Rundt 1, 2 eller 3 sider av huset' },
+  { icon: 'faRulerCombined', text: 'Terrasse og pergola' },
   { icon: 'faDownload', text: 'Materialliste som PDF' },
   { icon: 'faSave', text: 'Lagre prosjektene dine' },
 ]
@@ -185,13 +180,13 @@ export default function TerrassePromo() {
       <Inner ref={ref} $visible={isVisible}>
         <Text>
           <Badge>
-            <Icon name="faStar" /> Nytt verktøy
+            <Icon name="faStar" /> Gratis 3D-verktøy
           </Badge>
-          <h2>Planlegg drømmeterrassen i 3D</h2>
+          <h2>Planlegg uteplassen i 3D</h2>
           <p>
-            Tegn terrassen akkurat slik du vil ha den – velg form, sett målene og se den umiddelbart i 3D.
-            Få komplett materialliste med antall bord, bjelker, skruer, gjerde og trapp, og et veiledende
-            prisestimat på kjøpet.
+            Tegn terrassen eller pergolaen akkurat slik du vil ha den – velg form, sett målene og se den
+            umiddelbart i 3D. Få komplett materialliste med antall bord, bjelker, stolper og skruer, og et
+            veiledende prisestimat på kjøpet.
           </p>
           <Features>
             {FEATURES.map((f) => (
@@ -200,26 +195,25 @@ export default function TerrassePromo() {
               </li>
             ))}
           </Features>
-          <Cta to="/terrasseplanlegger">
-            Åpne terrasseplanlegger <Icon name="faArrowRight" />
+          <Cta to="/planleggere">
+            Se planleggerne <Icon name="faArrowRight" />
           </Cta>
         </Text>
 
         <Visual>
           <img
-            src="/images/terrasse/terrasseplanlegger-promo.png"
-            alt="L-formet terrasse i tre med rekkverk og trapp, planlagt i Minios terrasseplanlegger"
+            src="/images/planleggere/terrasse.webp"
+            alt="L-formet terrasse i tre med rekkverk og trapp, tegnet i Minios terrasseplanlegger"
             loading="lazy"
           />
-          <Floating>
-            <div className="icon">
-              <Icon name="faCube" />
-            </div>
-            <div>
-              <div className="label">Tegnet i 3D</div>
-              <div className="value">Med rekkverk og trapp</div>
-            </div>
-          </Floating>
+          <FloatingThumb>
+            <img
+              src="/images/planleggere/pergola.webp"
+              alt="Frittstående pergola i tre, tegnet i Minios pergolaplanlegger"
+              loading="lazy"
+            />
+            <span>Pergola</span>
+          </FloatingThumb>
         </Visual>
       </Inner>
     </Section>

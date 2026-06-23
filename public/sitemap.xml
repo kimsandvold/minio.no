@@ -157,8 +157,20 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://minio.no/terrasseplanlegger</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://minio.no/planleggere</loc>
+    <lastmod>2026-06-23</lastmod>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/planleggere/terrasse</loc>
+    <lastmod>2026-06-23</lastmod>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/planleggere/pergola</loc>
+    <lastmod>2026-06-23</lastmod>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
   </url>

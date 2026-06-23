@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import styled from 'styled-components'
-import Icon from '../../shared/Icon'
-import { FORM_INFO } from './terrasseModel'
-import type { ProsjektStyring } from './useTerrasseProsjekter'
+import Icon from '../Icon'
+import type { ProsjektStyring } from './useProsjekter'
 
 // ── Meny over 3D-modellen (øverst til venstre) ───────────────────────────────
 
@@ -255,12 +254,14 @@ function NavnDialog({
   tittel,
   bekreft,
   initial,
+  placeholder,
   onSave,
   onCancel,
 }: {
   tittel: string
   bekreft: string
   initial: string
+  placeholder: string
   onSave: (navn: string) => void
   onCancel: () => void
 }) {
@@ -280,7 +281,7 @@ function NavnDialog({
         <DlgInput
           ref={inputRef}
           value={navn}
-          placeholder="F.eks. Terrasse sørvest"
+          placeholder={placeholder}
           onChange={(e) => setNavn(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && submit()}
         />
@@ -339,7 +340,15 @@ type Dialog =
   | { kind: 'bekreft'; tittel: string; melding: string; bekreft: string; fare?: boolean; onConfirm: () => void }
   | null
 
-export default function ProsjektMeny({ prosjekt }: { prosjekt: ProsjektStyring }) {
+interface Props<T> {
+  prosjekt: ProsjektStyring<T>
+  /** Kort beskrivelse av et lagret prosjekt (f.eks. form/montering) til listen. */
+  beskriv: (config: T) => string
+  /** Plassholdertekst i navne-dialogen, f.eks. «F.eks. Pergola sørvest». */
+  navnPlaceholder?: string
+}
+
+export default function ProsjektMeny<T>({ prosjekt, beskriv, navnPlaceholder = 'F.eks. Mitt prosjekt' }: Props<T>) {
   const { prosjekter, aktivId, aktivNavn, dirty, nytt, åpne, lagre, lagreSom, giNyttNavn, slett } = prosjekt
   const [open, setOpen] = useState(false)
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null)
@@ -473,45 +482,45 @@ export default function ProsjektMeny({ prosjekt }: { prosjekt: ProsjektStyring }
           <MenuPortal ref={menuRef} style={{ top: menuPos.top, left: menuPos.left }}>
             <Dropdown role="menu">
               <StatusHead $tone={tone}>
-            <Dot $tone={tone} />
-            {statusTekst}
-          </StatusHead>
-          <Action onClick={handleLagre}>
-            <Icon name="faSave" /> {aktivId ? 'Lagre' : 'Lagre prosjekt'}
-          </Action>
-          {aktivId && (
-            <Action onClick={handleLagreSom}>
-              <Icon name="faClone" /> Lagre som…
-            </Action>
-          )}
-          <Sep />
-          <DropHead>Mine prosjekter</DropHead>
-          <List>
-            {prosjekter.length === 0 ? (
-              <Empty>Ingen lagrede prosjekter ennå.</Empty>
-            ) : (
-              prosjekter.map((p) => (
-                <Item key={p.id} $active={p.id === aktivId} onClick={() => medForkastVakt(() => åpne(p.id))}>
-                  <div className="meta">
-                    <span className="n">{p.navn}</span>
-                    <span className="d">
-                      {FORM_INFO[p.config.form].navn} · {p.dato}
-                    </span>
-                  </div>
-                  {p.id === aktivId && <Icon name="faCheck" />}
-                </Item>
-              ))
-            )}
-          </List>
-          <Sep />
-          <Action onClick={() => medForkastVakt(nytt)}>
-            <Icon name="faPlus" /> Nytt prosjekt
-          </Action>
-          {aktivId && (
-            <Action onClick={handleRename}>
-              <Icon name="faPencilRuler" /> Gi nytt navn
-            </Action>
-          )}
+                <Dot $tone={tone} />
+                {statusTekst}
+              </StatusHead>
+              <Action onClick={handleLagre}>
+                <Icon name="faSave" /> {aktivId ? 'Lagre' : 'Lagre prosjekt'}
+              </Action>
+              {aktivId && (
+                <Action onClick={handleLagreSom}>
+                  <Icon name="faClone" /> Lagre som…
+                </Action>
+              )}
+              <Sep />
+              <DropHead>Mine prosjekter</DropHead>
+              <List>
+                {prosjekter.length === 0 ? (
+                  <Empty>Ingen lagrede prosjekter ennå.</Empty>
+                ) : (
+                  prosjekter.map((p) => (
+                    <Item key={p.id} $active={p.id === aktivId} onClick={() => medForkastVakt(() => åpne(p.id))}>
+                      <div className="meta">
+                        <span className="n">{p.navn}</span>
+                        <span className="d">
+                          {beskriv(p.config)} · {p.dato}
+                        </span>
+                      </div>
+                      {p.id === aktivId && <Icon name="faCheck" />}
+                    </Item>
+                  ))
+                )}
+              </List>
+              <Sep />
+              <Action onClick={() => medForkastVakt(nytt)}>
+                <Icon name="faPlus" /> Nytt prosjekt
+              </Action>
+              {aktivId && (
+                <Action onClick={handleRename}>
+                  <Icon name="faPencilRuler" /> Gi nytt navn
+                </Action>
+              )}
               {aktivId && (
                 <Action $danger onClick={handleSlett}>
                   <Icon name="faTrash" /> Slett prosjekt
@@ -527,6 +536,7 @@ export default function ProsjektMeny({ prosjekt }: { prosjekt: ProsjektStyring }
           tittel={dialog.tittel}
           bekreft={dialog.bekreft}
           initial={dialog.initial}
+          placeholder={navnPlaceholder}
           onSave={dialog.onSave}
           onCancel={() => setDialog(null)}
         />

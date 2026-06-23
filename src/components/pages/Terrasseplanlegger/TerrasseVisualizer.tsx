@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { useScrollLock } from '../../../hooks/useScrollLock'
-import ProsjektMeny from './ProsjektMeny'
+import ProsjektMeny from '../../shared/planlegger/ProsjektMeny'
 import type { ProsjektStyring } from './useTerrasseProsjekter'
 import {
   SidebarPanel, SidebarHeader, SidebarTitle, SidebarClose, SidebarBody,
@@ -845,7 +845,9 @@ export default function TerrasseVisualizer({ config, onConfigChange, prosjekt, s
   const controls = (fs: boolean) => (
     <>
       {fs && <FullscreenLogo src="/images/branding/logo_icon_white.webp" alt="Minio" />}
-      {prosjekt && <ProsjektMeny prosjekt={prosjekt} />}
+      {prosjekt && (
+        <ProsjektMeny prosjekt={prosjekt} beskriv={(c) => FORM_INFO[c.form].navn} navnPlaceholder="F.eks. Terrasse sørvest" />
+      )}
       <ModeToggle>
         {MODES.map(([m, label]) => (
           <ModeBtn key={m} $active={mode === m} onClick={() => setMode(m)}>

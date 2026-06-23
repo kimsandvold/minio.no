@@ -1,96 +1,80 @@
 import styled from 'styled-components'
-import TerrasseVisualizer from './TerrasseVisualizer'
-import TerrasseCalculator from './TerrasseCalculator'
-import { useTerrasseProsjekter } from './useTerrasseProsjekter'
+import { useRef } from 'react'
+import PergolaVisualizer from './PergolaVisualizer'
+import PergolaCalculator from './PergolaCalculator'
+import { usePergolaProsjekter } from './usePergolaProsjekter'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import { useSEO } from '../../../hooks/useSEO'
-import { useRef } from 'react'
 
-const TERRASSE_FAQ = {
+const PERGOLA_FAQ = {
   '@context': 'https://schema.org',
   '@type': 'FAQPage',
   mainEntity: [
     {
       '@type': 'Question',
-      name: 'Hvilke terrasseformer kan jeg planlegge?',
+      name: 'Hva kan jeg planlegge med pergolaplanleggeren?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Du kan planlegge tre former etter hvordan terrassen skal ligge rundt huset: rektangel (langs én vegg), L-form (rundt to sider) og U-form / hestesko (rundt tre sider). Velg form, sett målene og se terrassen i 3D med ferdig overflate, konstruksjon eller begge samtidig.',
+        text: 'Du kan tegne en frittstående eller veggmontert pergola i 3D, velge bredde, dybde og høyde, og bestemme tak (åpne spær, lekter, skråstilte spjeld eller tett tak) og eventuelle sideskjermer eller spalér. Planleggeren regner ut stolper, dragere, spær, lekter, beslag og skruer, og gir et veiledende prisestimat.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Hva regner planleggeren ut?',
+      name: 'Hva er forskjellen på frittstående og veggmontert pergola?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Planleggeren beregner areal, antall terrassebord og løpemeter, antall bjelker, skruer, gjerde og trapp – samt et veiledende materialestimat i kroner basert på dimensjoner og priser du kan justere selv.',
+        text: 'En frittstående pergola står på egne stolper på alle fire hjørner og kan plasseres hvor som helst i hagen. En veggmontert pergola festes til husveggen med en veggdrager (ledger) på baksiden, så du sparer én stolperad – fin som solskjerm over terrassen.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Kan jeg lagre terrasseprosjektet mitt?',
+      name: 'Hvilket tak bør jeg velge?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Ja, du kan lagre flere terrasseprosjekter direkte i nettleseren og åpne dem igjen senere. Ingen innlogging er nødvendig.',
+        text: 'Åpne spær gir et lett uttrykk uten skygge. Lekter gir delvis skygge og luft, mens skråstilte spjeld (lameller) styrer hvor mye sol som slipper inn. Tett tak med plater eller takduk gir en tørr uteplass du kan bruke i regnvær.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Bygger Minio terrassen for meg?',
+      name: 'Kan jeg lagre pergolaprosjektet mitt?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Ja. Bruk planleggeren til å komme fram til ønsket løsning, og be om et konkret tilbud. Vi bygger skreddersydde terrasser og uteløsninger i tre, håndlaget i Lillehammer.',
+        text: 'Ja, du kan lagre flere pergolaprosjekter direkte i nettleseren og åpne dem igjen senere. Ingen innlogging er nødvendig.',
       },
     },
     {
       '@type': 'Question',
-      name: 'Kan jeg laste ned en materialliste?',
+      name: 'Bygger Minio pergolaen for meg?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Ja. Planleggeren lager en materialliste med antall og løpemeter per trevirke (terrassebord, bjelker, kantbjelker, lekt, stolper) og festemateriell, med bilde av modellen og Minio-logo. Lasten ned som PDF og ta den med i byggevarehandelen.',
-      },
-    },
-    {
-      '@type': 'Question',
-      name: 'Heter det terrasse, veranda, platting eller altan?',
-      acceptedAnswer: {
-        '@type': 'Answer',
-        text: 'Folk kaller det mange ting – terrasse, veranda, platting, altan, treplatting eller uteplass i tre. Planleggeren fungerer likt uansett hva du kaller den: tegn underlaget i 3D, sett målene og få materialliste og prisestimat. Verktøyet fungerer altså like godt som verandaplanlegger, plattingplanlegger eller terrassedesigner.',
+        text: 'Ja. Bruk planleggeren til å komme fram til ønsket løsning, og be om et konkret tilbud. Vi bygger skreddersydde pergolaer og uteløsninger i tre, håndlaget i Lillehammer.',
       },
     },
   ],
 }
 
-const TERRASSE_APP = {
+const PERGOLA_APP = {
   '@context': 'https://schema.org',
   '@type': 'WebApplication',
-  '@id': 'https://minio.no/planleggere/terrasse#app',
-  name: 'Terrasseplanlegger',
-  alternateName: [
-    'Verandaplanlegger',
-    'Verandadesigner',
-    'Plattingplanlegger',
-    'Terrassedesigner',
-    'Altanplanlegger',
-    'Uteplassplanlegger',
-    'Terrassekalkulator',
-    'Plattingkalkulator',
-  ],
-  url: 'https://minio.no/planleggere/terrasse',
+  '@id': 'https://minio.no/planleggere/pergola#app',
+  name: 'Pergolaplanlegger',
+  alternateName: ['Pergoladesigner', 'Pergolakalkulator', 'Solskjermplanlegger', 'Hagestueplanlegger'],
+  url: 'https://minio.no/planleggere/pergola',
   applicationCategory: 'DesignApplication',
   operatingSystem: 'Web',
   inLanguage: 'nb-NO',
   description:
-    'Gratis terrasseplanlegger og verandadesigner som lar deg tegne terrassen, verandaen eller plattingen i 3D, velge form (rektangel, L-form, U-form), legge til gjerde og trapp, og få komplett materialliste med prisestimat og PDF.',
+    'Gratis pergolaplanlegger som lar deg tegne pergolaen i 3D, velge frittstående eller veggmontert, sette mål og tak (lekter, spjeld eller tett), legge til sideskjerm og få komplett materialliste med prisestimat og PDF.',
   offers: { '@type': 'Offer', price: '0', priceCurrency: 'NOK' },
   featureList: [
     '3D-visualisering i sanntid',
-    'Rektangel, L-form og U-form rundt huset',
-    'Gjerde og trapp',
+    'Frittstående eller veggmontert',
+    'Åpne spær, lekter, spjeld eller tett tak',
+    'Sideskjerm og spalér',
     'Materialliste med løpemeter per trevirke',
     'Veiledende prisestimat',
     'Last ned materialliste som PDF',
@@ -99,35 +83,34 @@ const TERRASSE_APP = {
   publisher: { '@id': 'https://minio.no/#business' },
 }
 
-const TERRASSE_HOWTO = {
+const PERGOLA_HOWTO = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
-  name: 'Slik planlegger du terrassen i 3D',
-  description:
-    'Tegn terrassen, sett målene og få en komplett materialliste med Minios gratis terrasseplanlegger.',
+  name: 'Slik planlegger du pergolaen i 3D',
+  description: 'Tegn pergolaen, sett målene og få en komplett materialliste med Minios gratis pergolaplanlegger.',
   inLanguage: 'nb-NO',
   step: [
-    { '@type': 'HowToStep', position: 1, name: 'Velg form', text: 'Velg rektangel, L-form eller U-form etter hvordan terrassen skal ligge rundt huset.' },
-    { '@type': 'HowToStep', position: 2, name: 'Sett målene', text: 'Juster lengde, bredde og dybde med skyvekontrollene og se terrassen i 3D.' },
-    { '@type': 'HowToStep', position: 3, name: 'Legg til gjerde og trapp', text: 'Velg gjerdetype og plasser trapper på ønsket side.' },
+    { '@type': 'HowToStep', position: 1, name: 'Velg montering', text: 'Velg frittstående eller veggmontert pergola.' },
+    { '@type': 'HowToStep', position: 2, name: 'Sett målene', text: 'Juster bredde, dybde og høyde med skyvekontrollene og se pergolaen i 3D.' },
+    { '@type': 'HowToStep', position: 3, name: 'Velg tak og skjerm', text: 'Velg tak (lekter, spjeld eller tett) og legg til sideskjerm der du vil ha le.' },
     { '@type': 'HowToStep', position: 4, name: 'Få materialliste', text: 'Se materialliste og prisestimat, og last ned alt som PDF til byggevarehandelen.' },
   ],
 }
 
-const TERRASSE_BREADCRUMB = {
+const PERGOLA_BREADCRUMB = {
   '@context': 'https://schema.org',
   '@type': 'BreadcrumbList',
   itemListElement: [
     { '@type': 'ListItem', position: 1, name: 'Hjem', item: 'https://minio.no/' },
     { '@type': 'ListItem', position: 2, name: 'Planleggere', item: 'https://minio.no/planleggere' },
-    { '@type': 'ListItem', position: 3, name: 'Terrasseplanlegger', item: 'https://minio.no/planleggere/terrasse' },
+    { '@type': 'ListItem', position: 3, name: 'Pergolaplanlegger', item: 'https://minio.no/planleggere/pergola' },
   ],
 }
 
 const Hero = styled.section`
   min-height: 28vh;
-  background-color: #ffffff;
-  background-image: url('/images/terrasse/terrasseplanlegger-promo.png');
+  background-color: #e8e8e0;
+  background-image: url('/images/planleggere/pergola-hero.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -221,7 +204,6 @@ const VisualizerWrap = styled.div`
   margin-bottom: 2rem;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    /* Hold 3D-modellen festet øverst mens parametrene under scroller. */
     position: sticky;
     top: 56px;
     z-index: 5;
@@ -351,20 +333,18 @@ const FaqList = styled.div`
   }
 `
 
-export default function TerrassePlanleggerPage() {
-  const { config, setConfig, prosjekt } = useTerrasseProsjekter()
-  // Visualiseringen fyller denne med en funksjon som fanger modellen fra standard-
-  // perspektivet, slik at PDF-en alltid bruker det beste utgangsbildet.
+export default function PergolaPlanleggerPage() {
+  const { config, setConfig, prosjekt } = usePergolaProsjekter()
   const snapshotRef = useRef<(() => string | null) | null>(null)
 
   useSEO({
-    title: 'Terrasseplanlegger & verandadesigner – tegn i 3D og få materialliste | Minio',
+    title: 'Pergolaplanlegger – tegn pergola i 3D og få materialliste | Minio',
     description:
-      'Gratis terrasseplanlegger, verandadesigner og plattingplanlegger fra Minio. Velg form (rektangel, L-form, U-form), sett målene og se terrassen, verandaen eller plattingen i 3D med ferdig overflate og konstruksjon. Få komplett materialliste med antall bord, bjelker, skruer, gjerde og trapp, veiledende prisestimat og PDF du kan ta med i byggevarehandelen.',
+      'Gratis pergolaplanlegger fra Minio. Velg frittstående eller veggmontert, sett målene og se pergolaen i 3D med tak av lekter, spjeld eller tett tak og eventuell sideskjerm. Få komplett materialliste med stolper, dragere, spær, beslag og skruer, veiledende prisestimat og PDF du kan ta med i byggevarehandelen.',
     keywords:
-      'terrasseplanlegger, verandaplanlegger, verandadesigner, plattingplanlegger, terrassedesigner, altanplanlegger, uteplassplanlegger, terrassekalkulator, plattingkalkulator, planlegge terrasse, tegne terrasse, bygge terrasse, terrasse 3D, materialliste terrasse, treplatting, uteplass i tre',
-    ogImage: '/images/terrasse/terrasseplanlegger-promo.png',
-    jsonLd: [TERRASSE_APP, TERRASSE_HOWTO, TERRASSE_FAQ, TERRASSE_BREADCRUMB],
+      'pergolaplanlegger, pergola planlegger, pergoladesigner, pergolakalkulator, solskjerm pergola, planlegge pergola, tegne pergola, bygge pergola, pergola 3D, materialliste pergola, frittstående pergola, veggmontert pergola, pergola tak',
+    ogImage: '/images/planleggere/pergola.webp',
+    jsonLd: [PERGOLA_APP, PERGOLA_HOWTO, PERGOLA_FAQ, PERGOLA_BREADCRUMB],
   })
 
   return (
@@ -374,50 +354,58 @@ export default function TerrassePlanleggerPage() {
         <main id="main-content">
           <Hero>
             <HeroContent>
-              <h1>Terrasseplanlegger</h1>
-              <p>Planlegg terrasse, veranda eller platting i 3D – og få komplett materialliste med prisestimat</p>
+              <h1>Pergolaplanlegger</h1>
+              <p>Tegn pergolaen i 3D – velg tak og skjerm, og få komplett materialliste med prisestimat</p>
             </HeroContent>
           </Hero>
 
           <Content>
             <Layout>
               <VisualizerWrap>
-                <TerrasseVisualizer config={config} onConfigChange={setConfig} prosjekt={prosjekt} snapshotRef={snapshotRef} />
+                <PergolaVisualizer config={config} onConfigChange={setConfig} prosjekt={prosjekt} snapshotRef={snapshotRef} />
               </VisualizerWrap>
 
               <Article>
-                <h2>Planlegg terrasse, veranda eller platting – ned til hvert bord</h2>
+                <h2>Planlegg pergolaen – ned til hver stolpe og spær</h2>
                 <p>
-                  Med terrasseplanleggeren tegner du terrassen akkurat slik du vil ha den, og ser den
-                  umiddelbart i 3D. Verktøyet fungerer like godt som <strong>verandadesigner</strong>,{' '}
-                  <strong>plattingplanlegger</strong> eller <strong>altanplanlegger</strong> – kall det
-                  gjerne terrasse, veranda, platting, altan eller uteplass i tre, planleggingen er den
-                  samme. Velg form, sett målene med skyvekontrollene, og legg til gjerde og
-                  trapp der du trenger det. Veksle mellom <strong>ferdig overflate</strong>,{' '}
-                  <strong>konstruksjon</strong> (bjelkelag, sidebjelker og stolper) og <strong>begge samtidig</strong>,
-                  der terrassebordene blir gjennomsiktige så du ser konstruksjonen under. Trykk på fullskjerm
-                  for å se modellen i full størrelse.
+                  Med pergolaplanleggeren tegner du pergolaen akkurat slik du vil ha den, og ser den
+                  umiddelbart i 3D. Velg om den skal stå <strong>frittstående</strong> i hagen eller{' '}
+                  <strong>veggmonteres</strong> som solskjerm over terrassen, sett målene med
+                  skyvekontrollene, og bestem hvordan taket skal se ut. Veksle mellom{' '}
+                  <strong>ferdig</strong>, <strong>konstruksjon</strong> (stolper, dragere og spær) og{' '}
+                  <strong>begge samtidig</strong>, der tak og skjerm blir gjennomsiktige så du ser
+                  bæringen under. Trykk på fullskjerm for å se modellen i full størrelse.
                 </p>
 
-                <h3>Tre former – rundt én, to eller tre sider av huset</h3>
+                <h3>Velg tak etter hvor mye sol du vil ha</h3>
                 <ul>
                   <li>
-                    <strong>Rektangel</strong> – den klassiske terrassen langs én husvegg.
+                    <strong>Åpen</strong> – kun spær, et lett og luftig uttrykk.
                   </li>
                   <li>
-                    <strong>L-form</strong> – hjørneterrasse som følger to sider av huset.
+                    <strong>Lekter</strong> – jevn solskjerm med luft mellom bordene.
                   </li>
                   <li>
-                    <strong>U-form (hestesko)</strong> – terrassen omslutter huset på tre sider.
+                    <strong>Spjeld</strong> – skråstilte lameller som styrer sollyset.
+                  </li>
+                  <li>
+                    <strong>Tett tak</strong> – plater eller takduk for en tørr uteplass hele året.
                   </li>
                 </ul>
 
+                <h3>Sideskjerm og spalér for le og planter</h3>
+                <p>
+                  Legg til <strong>spalér</strong> for klatreplanter, <strong>vannrette bord</strong> eller{' '}
+                  <strong>tett panel</strong> på de sidene du vil skjerme for innsyn og vind. Velg fritt hvilke
+                  sider skjermen skal stå på.
+                </p>
+
                 <h3>Komplett materialliste og prisestimat</h3>
                 <p>
-                  For hver endring regner planleggeren ut areal, antall terrassebord og løpemeter, antall
-                  bjelker, skruer, gjerdebord og trinn – og gir deg et veiledende materialestimat i kroner.
-                  Under <strong>Materialer og priser</strong> kan du justere bordbredde, bjelkeavstand,
-                  dimensjoner og dagens priser slik at estimatet passer ditt prosjekt.
+                  For hver endring regner planleggeren ut antall stolper, dragere og spær, løpemeter trevirke,
+                  takslekter eller takflate, stolpesko og skruer – og gir deg et veiledende materialestimat i
+                  kroner. Under <strong>Materialer og priser</strong> kan du justere dimensjoner, avstander og
+                  dagens priser slik at estimatet passer ditt prosjekt.
                 </p>
 
                 <h3>Lagre prosjektene dine</h3>
@@ -429,13 +417,13 @@ export default function TerrassePlanleggerPage() {
                 <h3>Klar til å bygge?</h3>
                 <p>
                   Når du har funnet løsningen du liker, bygger vi den gjerne for deg. Minio lager
-                  skreddersydde terrasser og uteløsninger i tre, håndlaget i Lillehammer. Be om et tilbud,
+                  skreddersydde pergolaer og uteløsninger i tre, håndlaget i Lillehammer. Be om et tilbud,
                   så hjelper vi deg videre.
                 </p>
 
                 <h3>Vanlige spørsmål</h3>
                 <FaqList>
-                  {TERRASSE_FAQ.mainEntity.map((item) => (
+                  {PERGOLA_FAQ.mainEntity.map((item) => (
                     <details key={item.name}>
                       <summary>{item.name}</summary>
                       <p>{item.acceptedAnswer.text}</p>
@@ -445,8 +433,8 @@ export default function TerrassePlanleggerPage() {
               </Article>
 
               <Sidebar>
-                <SidebarTitle>Konfigurer terrassen</SidebarTitle>
-                <TerrasseCalculator config={config} onChange={setConfig} snapshotRef={snapshotRef} />
+                <SidebarTitle>Konfigurer pergolaen</SidebarTitle>
+                <PergolaCalculator config={config} onChange={setConfig} snapshotRef={snapshotRef} />
               </Sidebar>
             </Layout>
           </Content>

@@ -59,6 +59,8 @@ const PlantekassePage = lazy(() => import('./components/pages/Plantekasse/Plante
 const PidestallKrakkPage = lazy(() => import('./components/pages/PidestallKrakk/PidestallKrakkPage'))
 const LeveggerPage = lazy(() => import('./components/pages/Levegger/LeveggerPage'))
 const TerrassePlanleggerPage = lazy(() => import('./components/pages/Terrasseplanlegger/TerrassePlanleggerPage'))
+const PergolaPlanleggerPage = lazy(() => import('./components/pages/Pergolaplanlegger/PergolaPlanleggerPage'))
+const PlanleggerePage = lazy(() => import('./components/pages/Planleggere/PlanleggerePage'))
 
 function HomePage() {
   useHashNavigation()
@@ -160,7 +162,12 @@ export default function App() {
                 <Route path="/produkter/pidestall-krakk" element={<Suspense fallback={<PageLoadingFallback />}><PidestallKrakkPage /></Suspense>} />
                 <Route path="/produkter/levegger" element={<Suspense fallback={<PageLoadingFallback />}><LeveggerPage /></Suspense>} />
                 <Route path="/produkter/:slug" element={<ProduktDetailPage />} />
-                <Route path="/terrasseplanlegger" element={<Suspense fallback={<PageLoadingFallback />}><TerrassePlanleggerPage /></Suspense>} />
+                <Route path="/planleggere" element={<Suspense fallback={<PageLoadingFallback />}><PlanleggerePage /></Suspense>} />
+                <Route path="/planleggere/terrasse" element={<Suspense fallback={<PageLoadingFallback />}><TerrassePlanleggerPage /></Suspense>} />
+                <Route path="/planleggere/pergola" element={<Suspense fallback={<PageLoadingFallback />}><PergolaPlanleggerPage /></Suspense>} />
+                {/* Gamle adresser – behold lenker som folk allerede har */}
+                <Route path="/terrasseplanlegger" element={<Navigate to="/planleggere/terrasse" replace />} />
+                <Route path="/pergolaplanlegger" element={<Navigate to="/planleggere/pergola" replace />} />
                 <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
                 <Route path="/byggeguider" element={<Suspense fallback={<PageLoadingFallback />}><DIYGuiderPage /></Suspense>} />
                 <Route path="/byggeguider/planlegging" element={<Suspense fallback={<PageLoadingFallback />}><PlanleggingPage /></Suspense>} />
