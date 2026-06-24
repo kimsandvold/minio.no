@@ -7,6 +7,7 @@ import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
 import { useSEO } from '../../../hooks/useSEO'
+import { blueprintGrid, blueprintGridVignette } from '../../../styles/blueprintGrid'
 
 interface Planlegger {
   slug: string
@@ -100,16 +101,24 @@ const PLANLEGGERE_JSONLD = [
 ]
 
 const Hero = styled.section`
-  background: ${({ theme }) => theme.colors.darkBg};
+  position: relative;
+  overflow: hidden;
+  ${blueprintGrid}
   color: ${({ theme }) => theme.colors.textLight};
   text-align: center;
   padding: 6rem 2rem 3rem;
+
+  &::after {
+    ${blueprintGridVignette}
+  }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     padding: 5rem 1rem 2rem;
   }
 
   h1 {
+    position: relative;
+    z-index: 1;
     font-size: 2.6rem;
     margin: 0 0 1rem;
     font-weight: 700;
@@ -120,6 +129,8 @@ const Hero = styled.section`
   }
 
   p {
+    position: relative;
+    z-index: 1;
     font-size: 1.15rem;
     max-width: 640px;
     margin: 0 auto;

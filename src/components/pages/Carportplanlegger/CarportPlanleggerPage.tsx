@@ -10,8 +10,10 @@ import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
+import ZoomableImage from '../../shared/ZoomableImage'
 import { useSEO } from '../../../hooks/useSEO'
 import { MINIO_PUBLISHER } from '../../../utils/seo'
+import { blueprintGrid, blueprintGridVignette } from '../../../styles/blueprintGrid'
 
 const CARPORT_FAQ = {
   '@context': 'https://schema.org',
@@ -114,24 +116,14 @@ const CARPORT_BREADCRUMB = {
 
 const Hero = styled.section`
   position: relative;
-  background: #1c2530;
+  ${blueprintGrid}
   color: ${({ theme }) => theme.colors.textLight};
   text-align: center;
   padding: 5.5rem 2rem 3rem;
   overflow: hidden;
 
-  /* Blåkopi-rutenett */
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-  background-size: 28px 28px;
-
   &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(ellipse at center, transparent 30%, rgba(28, 37, 48, 0.6) 100%);
-    pointer-events: none;
+    ${blueprintGridVignette}
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -463,14 +455,6 @@ const FaqList = styled.div`
 const Figure = styled.figure`
   margin: 0 0 1.75rem;
 
-  img {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 14px;
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.16);
-  }
-
   figcaption {
     margin-top: 0.6rem;
     font-size: 0.8rem;
@@ -478,6 +462,11 @@ const Figure = styled.figure`
     line-height: 1.4;
     text-align: center;
   }
+`
+
+const FigureZoom = styled(ZoomableImage)`
+  border-radius: 14px;
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.16);
 `
 
 const TECH = [
@@ -548,10 +537,9 @@ export default function CarportPlanleggerPage() {
                 </p>
 
                 <Figure>
-                  <img
+                  <FigureZoom
                     src="/images/planleggere/carport-foto.webp"
                     alt="Frittstående carport i mørkbeiset tre med saltak og stålplatetak, bil parkert under, foran fjord og fjell i Norge"
-                    loading="lazy"
                     width={1536}
                     height={1024}
                   />

@@ -13,11 +13,14 @@ const HERO_IMAGES = [
 const INTERVAL = 15000
 
 export function useHeroSlideshow() {
-  const initialIndex = useRef(Math.floor(Math.random() * HERO_IMAGES.length))
-  const [layer1Src, setLayer1Src] = useState(HERO_IMAGES[initialIndex.current])
+  // Start alltid på det første (og forhåndslastede) bildet. Prerenderet HTML og
+  // klientens første render må vise SAMME bilde – ellers bytter helten bilde i det
+  // React monterer, og siden navbaren er gjennomsiktig med backdrop-blur synes det
+  // byttet gjennom logoen som en flimring. Lysbildene roterer videre etter montering.
+  const [layer1Src, setLayer1Src] = useState(HERO_IMAGES[0])
   const [layer2Src, setLayer2Src] = useState('')
   const [activeLayer, setActiveLayer] = useState<1 | 2>(1)
-  const indexRef = useRef(initialIndex.current)
+  const indexRef = useRef(0)
 
   const advance = useCallback(() => {
     indexRef.current = (indexRef.current + 1) % HERO_IMAGES.length

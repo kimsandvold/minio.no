@@ -12,6 +12,7 @@ import PageTransition from '../../shared/PageTransition'
 import { useSEO } from '../../../hooks/useSEO'
 import { MINIO_PUBLISHER } from '../../../utils/seo'
 import Icon from '../../shared/Icon'
+import { blueprintGrid, blueprintGridVignette } from '../../../styles/blueprintGrid'
 
 const PERGOLA_FAQ = {
   '@context': 'https://schema.org',
@@ -111,31 +112,22 @@ const PERGOLA_BREADCRUMB = {
 }
 
 const Hero = styled.section`
-  min-height: 28vh;
-  background-color: #e8e8e0;
-  background-image: url('/images/planleggere/pergola-hero.webp');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  ${blueprintGrid}
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
   color: ${({ theme }) => theme.colors.textLight};
   text-align: center;
-  padding: 4rem 2rem 2rem;
+  padding: 5.5rem 2rem 3rem;
 
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.32);
-    z-index: 1;
+  &::after {
+    ${blueprintGridVignette}
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    min-height: 0;
-    padding: 5rem 1rem 1rem;
+    padding: 5rem 1rem 2rem;
   }
 `
 

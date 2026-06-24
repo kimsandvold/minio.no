@@ -34,6 +34,7 @@ export default function LeahNoellePage() {
   useSEO({
     title: 'Spill av Leah Noelle – Minio',
     description: 'Spill morsomme spill laget av Leah Noelle. Bananashake og flere spill kommer.',
+    noindex: true,
   })
 
   return (

@@ -9,6 +9,7 @@ import AnimatedBlock from '../../shared/AnimatedBlock'
 import Icon from '../../shared/Icon'
 import { Link } from 'react-router-dom'
 import { useSEO } from '../../../hooks/useSEO'
+import { blueprintGrid, blueprintGridVignette } from '../../../styles/blueprintGrid'
 import {
   guidePhases,
   guideHref,
@@ -24,40 +25,19 @@ const SITE_URL = 'https://minio.no'
 
 const Hero = styled.section`
   position: relative;
-  min-height: 380px;
   display: flex;
   align-items: flex-end;
   color: ${({ theme }) => theme.colors.textLight};
-  padding: 8rem 2rem 3rem;
+  padding: 7rem 2rem 3rem;
   overflow: hidden;
-  background: ${({ theme }) => theme.colors.darkBg};
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image: url('/images/diy_header.png');
-    background-size: cover;
-    background-position: center;
-    opacity: 0.6;
-    transform: scale(1.02);
-  }
+  ${blueprintGrid}
 
   &::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      180deg,
-      rgba(20, 20, 20, 0.35) 0%,
-      rgba(20, 20, 20, 0.55) 55%,
-      rgba(20, 20, 20, 0.92) 100%
-    );
+    ${blueprintGridVignette}
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    min-height: 300px;
-    padding: 6.5rem 1.5rem 2.25rem;
+    padding: 6rem 1.5rem 2.25rem;
   }
 `
 

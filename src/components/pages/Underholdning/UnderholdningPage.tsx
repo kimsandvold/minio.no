@@ -40,6 +40,7 @@ export default function UnderholdningPage() {
   useSEO({
     title: 'Minio Underholdning – Spill og vinn rabattkode',
     description: 'Spill morsomme verktøy-spill og vinn 10% rabattkode på varmepumpehus! Quiz, reaksjonsspill, timing-spill og mer fra Minio i Lillehammer.',
+    noindex: true,
   })
 
   return (
