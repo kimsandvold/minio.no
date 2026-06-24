@@ -1,12 +1,13 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
 import { useLocation, Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { navLinks } from '../../data/navigation'
-import { socialLinks } from '../../data/socialLinks'
 import { useBasketContext } from '../../context/BasketContext'
 import { useAuthContext } from '../../context/AuthContext'
 import Icon from '../shared/Icon'
 import GoogleLoginButton from '../shared/GoogleLoginButton'
+
+const SearchOverlay = lazy(() => import('../shared/SearchOverlay/SearchOverlay'))
 
 const Nav = styled.nav`
   position: fixed;
@@ -228,30 +229,6 @@ const RightControls = styled.div`
   }
 `
 
-const SocialIcons = styled.div`
-  display: flex;
-  gap: 0.8rem;
-  align-items: center;
-
-  a {
-    color: ${({ theme }) => theme.colors.textLight};
-    font-size: 1.1rem;
-    opacity: 0.65;
-    transition: opacity 0.3s ease;
-    text-decoration: none;
-    &:hover { opacity: 1; }
-    &:focus-visible {
-      outline: 2px solid rgba(255, 255, 255, 0.8);
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
-  }
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    display: none;
-  }
-`
-
 const BasketLink = styled(Link)`
   position: relative;
   background: none;
@@ -262,6 +239,26 @@ const BasketLink = styled(Link)`
   padding: 0.5rem;
   transition: color 0.3s ease;
   text-decoration: none;
+
+  &:hover { color: #fff; }
+
+  &:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+`
+
+const SearchButton = styled.button`
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.3s ease;
+  display: flex;
+  align-items: center;
 
   &:hover { color: #fff; }
 
@@ -551,6 +548,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [loginOpen, setLoginOpen] = useState(false)
   const [userMenuOpen, setUserMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement>(null)
   const loginPopoverRef = useRef<HTMLDivElement>(null)
   const { totalItems } = useBasketContext()
@@ -581,6 +579,23 @@ export default function Navbar() {
     if (userMenuOpen || loginOpen) document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [userMenuOpen, loginOpen])
+
+  // Global keyboard shortcut: ⌘K / Ctrl+K, or "/" when not typing in a field.
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null
+      const isTyping = target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable
+      if ((e.key === 'k' || e.key === 'K') && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        setSearchOpen(true)
+      } else if (e.key === '/' && !isTyping && !searchOpen) {
+        e.preventDefault()
+        setSearchOpen(true)
+      }
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [searchOpen])
 
   const navHref = (hash: string) => isHome ? hash : `/${hash}`
 
@@ -654,13 +669,9 @@ export default function Navbar() {
           </MenuLinks>
 
           <RightControls>
-            <SocialIcons>
-              {socialLinks.map(link => (
-                <a key={link.platform} href={link.href} target="_blank" rel="noopener noreferrer" aria-label={link.ariaLabel}>
-                  <Icon name={link.icon} />
-                </a>
-              ))}
-            </SocialIcons>
+            <SearchButton onClick={() => setSearchOpen(true)} aria-label="Søk">
+              <Icon name="faSearch" />
+            </SearchButton>
             <BasketLink to="/handlekurv" aria-label="Handlekurv">
               <Icon name="faShoppingCart" />
               {totalItems > 0 && <BasketCount>{totalItems}</BasketCount>}
@@ -717,6 +728,11 @@ export default function Navbar() {
           </RightControls>
         </NavContainer>
       </Nav>
+      {searchOpen && (
+        <Suspense fallback={null}>
+          <SearchOverlay onClose={() => setSearchOpen(false)} />
+        </Suspense>
+      )}
     </>
   )
 }
