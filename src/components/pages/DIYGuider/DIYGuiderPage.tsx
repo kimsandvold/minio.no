@@ -579,18 +579,6 @@ const topicCardStyles = `
   overflow: hidden;
 `
 
-const Num = styled.span`
-  flex-shrink: 0;
-  min-width: 2.3rem;
-  font-size: 2.6rem;
-  font-weight: 800;
-  line-height: 0.82;
-  font-variant-numeric: tabular-nums;
-  color: transparent;
-  -webkit-text-stroke: 1.6px rgba(156, 107, 63, 0.5);
-  transition: color 0.3s ease, -webkit-text-stroke-color 0.3s ease;
-`
-
 const TopicText = styled.div`
   min-width: 0;
 
@@ -666,11 +654,6 @@ const TopicLink = styled(Link)`
     transform: scaleX(1);
   }
 
-  &:hover ${Num} {
-    color: ${ACCENT};
-    -webkit-text-stroke-color: ${ACCENT};
-  }
-
   &:hover .go {
     gap: 0.7rem;
   }
@@ -684,10 +667,6 @@ const TopicSoon = styled.div`
 
   h3 {
     color: #7d7d7d;
-  }
-
-  ${Num} {
-    -webkit-text-stroke-color: rgba(0, 0, 0, 0.16);
   }
 `
 
@@ -877,7 +856,6 @@ export default function DIYGuiderPage() {
                         <div key={topic.slug}>
                           {topic.available ? (
                             <TopicLink to={guideHref(topic)}>
-                              <Num>{String(topic.number).padStart(2, '0')}</Num>
                               <TopicText>
                                 <h3>{topic.title}</h3>
                                 <p>{topic.teaser}</p>
@@ -889,7 +867,6 @@ export default function DIYGuiderPage() {
                             </TopicLink>
                           ) : (
                             <TopicSoon>
-                              <Num>{String(topic.number).padStart(2, '0')}</Num>
                               <TopicText>
                                 <h3>{topic.title}</h3>
                                 <p>{topic.teaser}</p>

@@ -12,16 +12,23 @@ import { ProductGridCardSkeleton } from '../../shared/ProductSkeleton'
 import { useAllProducts } from '../../../hooks/useProducts'
 import PollCard from '../../sections/Portfolio/PollCard'
 import { useActivePoll } from '../../../hooks/useActivePoll'
+import { blueprintGrid, blueprintGridVignette } from '../../../styles/blueprintGrid'
 
 const Hero = styled.section`
+  position: relative;
+  overflow: hidden;
   min-height: 30vh;
-  background: ${({ theme }) => theme.colors.darkBg};
+  ${blueprintGrid}
   display: flex;
   align-items: center;
   justify-content: center;
   color: ${({ theme }) => theme.colors.textLight};
   text-align: center;
   padding: 6rem 2rem 3rem;
+
+  &::after {
+    ${blueprintGridVignette}
+  }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     min-height: 25vh;
@@ -30,6 +37,8 @@ const Hero = styled.section`
 `
 
 const HeroContent = styled.div`
+  position: relative;
+  z-index: 1;
   max-width: 800px;
 
   h1 {
@@ -50,6 +59,13 @@ const HeroContent = styled.div`
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
       font-size: 1rem;
     }
+  }
+
+  a {
+    color: #fff;
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 0.18em;
   }
 `
 
@@ -186,7 +202,10 @@ export default function ProdukterPage() {
         <Hero>
           <HeroContent>
             <h1>Alle produkter</h1>
-            <p>Utforsk hele vårt sortiment av skreddersydde produkter i tre. Alt lages på bestilling etter dine mål og ønsker.</p>
+            <p>
+              Utforsk hele vårt sortiment av skreddersydde produkter i tre. Alt lages på bestilling
+              etter dine mål og ønsker. Les mer om <Link to="/handlaget-i-tre">håndlaget i tre</Link>.
+            </p>
           </HeroContent>
         </Hero>
         <Content>

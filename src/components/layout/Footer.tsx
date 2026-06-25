@@ -230,6 +230,8 @@ export default function Footer() {
             <FooterNav>
               <FooterLink to="/">Hjem</FooterLink>
               <FooterLink to="/produkter">Produkter</FooterLink>
+              <FooterLink to="/handlaget-i-tre">Håndlaget i tre</FooterLink>
+              <FooterLink to="/byggehjelp">Byggehjelp</FooterLink>
               <FooterLink to="/slik-jobber-vi">Slik jobber vi</FooterLink>
               <FooterLink to="/kontakt">Kontakt</FooterLink>
               <FooterLink to="/underholdning">Underholdning</FooterLink>

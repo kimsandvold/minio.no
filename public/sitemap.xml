@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://minio.no/</loc>
     <lastmod>2026-05-31</lastmod>
@@ -11,6 +11,38 @@
     <lastmod>2026-05-31</lastmod>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/handlaget-i-tre</loc>
+    <lastmod>2026-06-25</lastmod>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggehjelp</loc>
+    <lastmod>2026-06-25</lastmod>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/produkter/hundehus</loc>
+    <lastmod>2026-06-25</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <image:image>
+      <image:loc>https://minio.no/images/products/hundehus.webp</image:loc>
+      <image:title>Håndlaget hundehus i tre med saltak</image:title>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://minio.no/produkter/kattehus</loc>
+    <lastmod>2026-06-25</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+    <image:image>
+      <image:loc>https://minio.no/images/products/kattehus.webp</image:loc>
+      <image:title>Håndlaget kattehus i tre på stolpe</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://minio.no/produkter/plantekasser</loc>
@@ -85,6 +117,42 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://minio.no/byggeguider/prosjekter/hagebenk</loc>
+    <lastmod>2026-06-23</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/prosjekter/pidestall-utendors</loc>
+    <lastmod>2026-06-23</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/planleggere</loc>
+    <lastmod>2026-06-23</lastmod>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/planleggere/terrasse</loc>
+    <lastmod>2026-06-23</lastmod>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/planleggere/pergola</loc>
+    <lastmod>2026-06-23</lastmod>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/planleggere/carport</loc>
+    <lastmod>2026-06-23</lastmod>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
     <loc>https://minio.no/byggeguider/planlegging</loc>
     <lastmod>2026-06-13</lastmod>
     <priority>0.6</priority>
@@ -157,39 +225,303 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://minio.no/byggeguider/prosjekter/hagebenk</loc>
-    <lastmod>2026-06-23</lastmod>
+    <loc>https://minio.no/byggeguider/trykkimpregnert-vs-royalimpregnert</loc>
+    <lastmod>2026-06-24</lastmod>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://minio.no/byggeguider/prosjekter/pidestall-utendors</loc>
-    <lastmod>2026-06-23</lastmod>
+    <loc>https://minio.no/byggeguider/kebony-lerk-furu-gran</loc>
+    <lastmod>2026-06-24</lastmod>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://minio.no/planleggere</loc>
-    <lastmod>2026-06-23</lastmod>
-    <priority>0.9</priority>
-    <changefreq>weekly</changefreq>
+    <loc>https://minio.no/byggeguider/terrassebord-guide</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://minio.no/planleggere/terrasse</loc>
-    <lastmod>2026-06-23</lastmod>
-    <priority>0.9</priority>
-    <changefreq>weekly</changefreq>
+    <loc>https://minio.no/byggeguider/konstruksjonsvirke-c24</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://minio.no/planleggere/pergola</loc>
-    <lastmod>2026-06-23</lastmod>
-    <priority>0.9</priority>
-    <changefreq>weekly</changefreq>
+    <loc>https://minio.no/byggeguider/hvorfor-sprekker-treet</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://minio.no/planleggere/carport</loc>
-    <lastmod>2026-06-23</lastmod>
-    <priority>0.9</priority>
-    <changefreq>weekly</changefreq>
+    <loc>https://minio.no/byggeguider/trelast-dimensjoner</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/riktig-skrue</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/syrefast-vs-galvanisert</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/beslag-oversikt</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/justerbar-stolpesko</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/skjult-terrassefeste</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/hvor-mange-skruer</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/sirkelsag-dykksag-stikksag</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/rette-fine-kutt</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/vater-laser-oppmaling</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/forboring-og-senkning</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/tresammenfoyninger</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/verktoyliste-nybegynner</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/telehiv</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/fundamenttyper</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/stope-punktfundament</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/frostfri-dybde</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/spennvidder-bjelker</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/stolpeavstand</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/beis-olje-maling</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/beise-ny-terrasse</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/vedlikehold-terrasse</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/granet-tre</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/mugg-alger-gronske</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/vinterklargjoring</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/soknadsplikt-terrasse</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/carport-uten-soknad</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/bod-uten-soknad</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/avstand-til-nabogrense</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/levegg-gjerde-regler</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/tek17-for-privatpersoner</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/bygge-terrasse</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/bygge-pergola</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/bygge-carport</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/bygge-levegg</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/bygge-platting</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/bygge-utebod</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/bygge-utetrapp</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/bygge-rekkverk</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/materialberegning-terrasse</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/lese-byggetegning</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/hva-koster-terrasse</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/sjekkliste-for-du-starter</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/vanligste-byggefeil</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/byggeguider/ordliste-trearbeid</loc>
+    <lastmod>2026-06-24</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
   </url>
 </urlset>

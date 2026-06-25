@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
+import type { ComponentProps, ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import Navbar from '../../layout/Navbar'
@@ -460,10 +460,28 @@ export const Ol = styled.ol`
   }
 `
 
-export const DataTable = styled.table`
+const TableScroll = styled.div`
+  /* Let wide tables scroll sideways instead of crushing columns or
+     forcing the whole page to scroll on small screens. */
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 0 1.4rem;
+
+  /* Subtle fade on the right edge hints there's more to scroll. */
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    background:
+      linear-gradient(to right, #fff 30%, rgba(255, 255, 255, 0)),
+      linear-gradient(to left, #fff 30%, rgba(255, 255, 255, 0)) 100% 0;
+    background-repeat: no-repeat;
+    background-size: 24px 100%, 24px 100%;
+    background-attachment: local, local;
+  }
+`
+
+const StyledDataTable = styled.table`
   width: 100%;
   border-collapse: collapse;
-  margin: 0 0 1.4rem;
+  margin: 0;
   font-size: 0.98rem;
 
   caption {
@@ -489,7 +507,19 @@ export const DataTable = styled.table`
   td {
     color: #444;
   }
+
+  /* On phones, keep cells readable on one line and scroll instead of
+     wrapping short values into ugly stacks. */
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    min-width: 30rem;
+  }
 `
+
+export const DataTable = ({ children, ...props }: ComponentProps<typeof StyledDataTable>) => (
+  <TableScroll>
+    <StyledDataTable {...props}>{children}</StyledDataTable>
+  </TableScroll>
+)
 
 const CalloutBox = styled.div<{ $variant: 'tip' | 'warn' }>`
   display: flex;
@@ -612,6 +642,9 @@ export default function GuideArticleLayout({
             headline: topic.title,
             description: lead,
             inLanguage: 'nb-NO',
+            ...(topic.published
+              ? { datePublished: topic.published, dateModified: topic.published }
+              : {}),
             url: articleUrl,
             mainEntityOfPage: articleUrl,
             ...(Number.isFinite(minutes) ? { timeRequired: `PT${minutes}M` } : {}),

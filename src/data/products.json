@@ -144,5 +144,39 @@
     "hasPromoRibbon": false,
     "hasConfigurator": true,
     "basePrice": 1500
+  },
+  {
+    "id": "hundehus",
+    "slug": "hundehus",
+    "title": "Hundehus i tre etter mål",
+    "shortDescription": "Isolert eller uisolert hundehus i tre, bygget etter hundens mål. Tegn det i 3D, velg tak og finish, og se prisen med en gang.",
+    "price": "Pris fra 2 490,-",
+    "images": [
+      { "src": "/images/products/hundehus.webp", "alt": "Håndlaget hundehus i tre med saltak, ubehandlet furu" }
+    ],
+    "detailsHtml": "<h3>Hundehus i tre etter mål</h3><p>Et <strong>hundehus laget på bestilling</strong> i solid treverk, tilpasset hundens størrelse og plassen du har. Velg mål, tak og overflate i 3D-konfiguratoren og se prisen med en gang.</p><h4>Hvorfor velge et skreddersydd hundehus?</h4><ul><li>Tilpasset <strong>hundens mål</strong> – verken for trangt eller for stort</li><li>Solid konstruksjon i treverk dimensjonert for norsk klima</li><li>Valgfri <strong>isolasjon</strong> for bruk om vinteren</li><li>Saltak med god avrenning og tørt liggemiljø</li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for et naturlig uttrykk</li><li><strong>Grunnet</strong> – klart til å males i ønsket farge</li><li><strong>Grunnet og malt</strong> – ferdig levert og klar til bruk</li></ul><p><strong>Bruk konfiguratoren</strong> for å se 3D-modellen med dine mål og få estimert pris!</p>",
+    "category": "secondary",
+    "showOnFrontPage": false,
+    "isFeatured": false,
+    "hasPromoRibbon": false,
+    "hasConfigurator": true,
+    "basePrice": 2490
+  },
+  {
+    "id": "kattehus",
+    "slug": "kattehus",
+    "title": "Kattehus på stolpe i tre",
+    "shortDescription": "Kattehus i tre montert på stolpe – trygt og tørt over bakken. Tegn det i 3D, velg stolpehøyde, tak og finish, og se prisen med en gang.",
+    "price": "Pris fra 1 690,-",
+    "images": [
+      { "src": "/images/products/kattehus.webp", "alt": "Håndlaget kattehus i tre på stolpe med vindusåpning, ubehandlet furu" }
+    ],
+    "detailsHtml": "<h3>Kattehus på stolpe i tre</h3><p>Et <strong>kattehus laget på bestilling</strong>, montert på stolpe slik at katten får et trygt og tørt sted over bakken – unna fukt, snø og uønsket besøk. Velg mål, stolpehøyde, tak og overflate i 3D-konfiguratoren.</p><h4>Hvorfor velge et kattehus på stolpe?</h4><ul><li><strong>Hevet over bakken</strong> – tørt, trygt og med god oversikt</li><li>Rund inngang tilpasset katten</li><li>Valgfri <strong>isolasjon</strong> for bruk om vinteren</li><li>Solid stolpe og base som står stødig ute</li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for et naturlig uttrykk</li><li><strong>Grunnet</strong> – klart til å males i ønsket farge</li><li><strong>Grunnet og malt</strong> – ferdig levert og klar til bruk</li></ul><p><strong>Bruk konfiguratoren</strong> for å se 3D-modellen med dine mål og få estimert pris!</p>",
+    "category": "secondary",
+    "showOnFrontPage": false,
+    "isFeatured": false,
+    "hasPromoRibbon": false,
+    "hasConfigurator": true,
+    "basePrice": 1690
   }
 ]

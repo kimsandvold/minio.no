@@ -43,6 +43,56 @@ const PidestallUtendorsPage = lazy(() => import('./components/pages/DIYGuider/pr
 const DesignTegningPage = lazy(() => import('./components/pages/DIYGuider/articles/DesignTegningPage'))
 const KonstruksjonStyrkePage = lazy(() => import('./components/pages/DIYGuider/articles/KonstruksjonStyrkePage'))
 const TrevirkePage = lazy(() => import('./components/pages/DIYGuider/articles/TrevirkePage'))
+const TrykkimpregnertRoyalPage = lazy(() => import('./components/pages/DIYGuider/articles/TrykkimpregnertRoyalPage'))
+const KebonyLerkFuruGranPage = lazy(() => import('./components/pages/DIYGuider/articles/KebonyLerkFuruGranPage'))
+const TerrassebordGuidePage = lazy(() => import('./components/pages/DIYGuider/articles/TerrassebordGuidePage'))
+const KonstruksjonsvirkeC24Page = lazy(() => import('./components/pages/DIYGuider/articles/KonstruksjonsvirkeC24Page'))
+const HvorforSprekkerTreetPage = lazy(() => import('./components/pages/DIYGuider/articles/HvorforSprekkerTreetPage'))
+const TrelastDimensjonerPage = lazy(() => import('./components/pages/DIYGuider/articles/TrelastDimensjonerPage'))
+const RiktigSkruePage = lazy(() => import('./components/pages/DIYGuider/articles/RiktigSkruePage'))
+const SyrefastVsGalvanisertPage = lazy(() => import('./components/pages/DIYGuider/articles/SyrefastVsGalvanisertPage'))
+const BeslagOversiktPage = lazy(() => import('./components/pages/DIYGuider/articles/BeslagOversiktPage'))
+const JusterbarStolpeskoPage = lazy(() => import('./components/pages/DIYGuider/articles/JusterbarStolpeskoPage'))
+const SkjultTerrassefestePage = lazy(() => import('./components/pages/DIYGuider/articles/SkjultTerrassefestePage'))
+const HvorMangeSkruerPage = lazy(() => import('./components/pages/DIYGuider/articles/HvorMangeSkruerPage'))
+const SirkelsagDykksagStikksagPage = lazy(() => import('./components/pages/DIYGuider/articles/SirkelsagDykksagStikksagPage'))
+const RetteFineKuttPage = lazy(() => import('./components/pages/DIYGuider/articles/RetteFineKuttPage'))
+const VaterLaserOppmalingPage = lazy(() => import('./components/pages/DIYGuider/articles/VaterLaserOppmalingPage'))
+const ForboringOgSenkningPage = lazy(() => import('./components/pages/DIYGuider/articles/ForboringOgSenkningPage'))
+const TresammenfoyningerPage = lazy(() => import('./components/pages/DIYGuider/articles/TresammenfoyningerPage'))
+const VerktoylisteNybegynnerPage = lazy(() => import('./components/pages/DIYGuider/articles/VerktoylisteNybegynnerPage'))
+const TelehivPage = lazy(() => import('./components/pages/DIYGuider/articles/TelehivPage'))
+const FundamenttyperPage = lazy(() => import('./components/pages/DIYGuider/articles/FundamenttyperPage'))
+const StopePunktfundamentPage = lazy(() => import('./components/pages/DIYGuider/articles/StopePunktfundamentPage'))
+const FrostfriDybdePage = lazy(() => import('./components/pages/DIYGuider/articles/FrostfriDybdePage'))
+const SpennvidderBjelkerPage = lazy(() => import('./components/pages/DIYGuider/articles/SpennvidderBjelkerPage'))
+const StolpeavstandPage = lazy(() => import('./components/pages/DIYGuider/articles/StolpeavstandPage'))
+const BeisOljeMalingPage = lazy(() => import('./components/pages/DIYGuider/articles/BeisOljeMalingPage'))
+const BeiseNyTerrassePage = lazy(() => import('./components/pages/DIYGuider/articles/BeiseNyTerrassePage'))
+const VedlikeholdTerrassePage = lazy(() => import('./components/pages/DIYGuider/articles/VedlikeholdTerrassePage'))
+const GranetTrePage = lazy(() => import('./components/pages/DIYGuider/articles/GranetTrePage'))
+const MuggAlgerGronskePage = lazy(() => import('./components/pages/DIYGuider/articles/MuggAlgerGronskePage'))
+const VinterklargjoringPage = lazy(() => import('./components/pages/DIYGuider/articles/VinterklargjoringPage'))
+const SoknadspliktTerrassePage = lazy(() => import('./components/pages/DIYGuider/articles/SoknadspliktTerrassePage'))
+const CarportUtenSoknadPage = lazy(() => import('./components/pages/DIYGuider/articles/CarportUtenSoknadPage'))
+const BodUtenSoknadPage = lazy(() => import('./components/pages/DIYGuider/articles/BodUtenSoknadPage'))
+const AvstandTilNabogrensePage = lazy(() => import('./components/pages/DIYGuider/articles/AvstandTilNabogrensePage'))
+const LeveggGjerdeReglerPage = lazy(() => import('./components/pages/DIYGuider/articles/LeveggGjerdeReglerPage'))
+const Tek17ForPrivatpersonerPage = lazy(() => import('./components/pages/DIYGuider/articles/Tek17ForPrivatpersonerPage'))
+const ByggeTerrassePage = lazy(() => import('./components/pages/DIYGuider/articles/ByggeTerrassePage'))
+const ByggePergolaPage = lazy(() => import('./components/pages/DIYGuider/articles/ByggePergolaPage'))
+const ByggeCarportPage = lazy(() => import('./components/pages/DIYGuider/articles/ByggeCarportPage'))
+const ByggeLeveggPage = lazy(() => import('./components/pages/DIYGuider/articles/ByggeLeveggPage'))
+const ByggePlattingPage = lazy(() => import('./components/pages/DIYGuider/articles/ByggePlattingPage'))
+const ByggeUtebodPage = lazy(() => import('./components/pages/DIYGuider/articles/ByggeUtebodPage'))
+const ByggeUtetrappPage = lazy(() => import('./components/pages/DIYGuider/articles/ByggeUtetrappPage'))
+const ByggeRekkverkPage = lazy(() => import('./components/pages/DIYGuider/articles/ByggeRekkverkPage'))
+const MaterialberegningTerrassePage = lazy(() => import('./components/pages/DIYGuider/articles/MaterialberegningTerrassePage'))
+const LeseByggetegningPage = lazy(() => import('./components/pages/DIYGuider/articles/LeseByggetegningPage'))
+const HvaKosterTerrassePage = lazy(() => import('./components/pages/DIYGuider/articles/HvaKosterTerrassePage'))
+const SjekklisteForDuStarterPage = lazy(() => import('./components/pages/DIYGuider/articles/SjekklisteForDuStarterPage'))
+const VanligsteByggefeilPage = lazy(() => import('./components/pages/DIYGuider/articles/VanligsteByggefeilPage'))
+const OrdlisteTrearbeidPage = lazy(() => import('./components/pages/DIYGuider/articles/OrdlisteTrearbeidPage'))
 const VerktoyPage = lazy(() => import('./components/pages/DIYGuider/articles/VerktoyPage'))
 const LimFestemidlerPage = lazy(() => import('./components/pages/DIYGuider/articles/LimFestemidlerPage'))
 const SikkerhetPage = lazy(() => import('./components/pages/DIYGuider/articles/SikkerhetPage'))
@@ -62,6 +112,10 @@ const TerrassePlanleggerPage = lazy(() => import('./components/pages/Terrassepla
 const PergolaPlanleggerPage = lazy(() => import('./components/pages/Pergolaplanlegger/PergolaPlanleggerPage'))
 const CarportPlanleggerPage = lazy(() => import('./components/pages/Carportplanlegger/CarportPlanleggerPage'))
 const PlanleggerePage = lazy(() => import('./components/pages/Planleggere/PlanleggerePage'))
+const HandlagetITrePage = lazy(() => import('./components/pages/HandlagetITre/HandlagetITrePage'))
+const ByggehjelpPage = lazy(() => import('./components/pages/Byggehjelp/ByggehjelpPage'))
+const HundehusPage = lazy(() => import('./components/pages/Hundehus/HundehusPage'))
+const KattehusPage = lazy(() => import('./components/pages/Kattehus/KattehusPage'))
 
 function HomePage() {
   useHashNavigation()
@@ -157,6 +211,8 @@ export default function App() {
                 <Route path="/slik-jobber-vi" element={<ProsessPage />} />
                 <Route path="/kontakt" element={<KontaktPage />} />
                 <Route path="/produkter" element={<ProdukterPage />} />
+                <Route path="/handlaget-i-tre" element={<Suspense fallback={<PageLoadingFallback />}><HandlagetITrePage /></Suspense>} />
+                <Route path="/byggehjelp" element={<Suspense fallback={<PageLoadingFallback />}><ByggehjelpPage /></Suspense>} />
                 <Route path="/produkter/varmepumpehus" element={<Suspense fallback={<PageLoadingFallback />}><VarmepumpehusPage /></Suspense>} />
                 <Route path="/produkter/soppelboder" element={<Suspense fallback={<PageLoadingFallback />}><SoppelboderPage /></Suspense>} />
                 <Route path="/produkter/vedskjul" element={<Suspense fallback={<PageLoadingFallback />}><VedskjulPage /></Suspense>} />
@@ -164,6 +220,8 @@ export default function App() {
                 <Route path="/produkter/plantekasser" element={<Suspense fallback={<PageLoadingFallback />}><PlantekassePage /></Suspense>} />
                 <Route path="/produkter/pidestall-krakk" element={<Suspense fallback={<PageLoadingFallback />}><PidestallKrakkPage /></Suspense>} />
                 <Route path="/produkter/levegger" element={<Suspense fallback={<PageLoadingFallback />}><LeveggerPage /></Suspense>} />
+                <Route path="/produkter/hundehus" element={<Suspense fallback={<PageLoadingFallback />}><HundehusPage /></Suspense>} />
+                <Route path="/produkter/kattehus" element={<Suspense fallback={<PageLoadingFallback />}><KattehusPage /></Suspense>} />
                 <Route path="/produkter/:slug" element={<ProduktDetailPage />} />
                 <Route path="/planleggere" element={<Suspense fallback={<PageLoadingFallback />}><PlanleggerePage /></Suspense>} />
                 <Route path="/planleggere/terrasse" element={<Suspense fallback={<PageLoadingFallback />}><TerrassePlanleggerPage /></Suspense>} />
@@ -181,6 +239,56 @@ export default function App() {
                 <Route path="/byggeguider/design-og-tegning" element={<Suspense fallback={<PageLoadingFallback />}><DesignTegningPage /></Suspense>} />
                 <Route path="/byggeguider/konstruksjon-og-styrke" element={<Suspense fallback={<PageLoadingFallback />}><KonstruksjonStyrkePage /></Suspense>} />
                 <Route path="/byggeguider/trevirke" element={<Suspense fallback={<PageLoadingFallback />}><TrevirkePage /></Suspense>} />
+                <Route path="/byggeguider/trykkimpregnert-vs-royalimpregnert" element={<Suspense fallback={<PageLoadingFallback />}><TrykkimpregnertRoyalPage /></Suspense>} />
+                <Route path="/byggeguider/kebony-lerk-furu-gran" element={<Suspense fallback={<PageLoadingFallback />}><KebonyLerkFuruGranPage /></Suspense>} />
+                <Route path="/byggeguider/terrassebord-guide" element={<Suspense fallback={<PageLoadingFallback />}><TerrassebordGuidePage /></Suspense>} />
+                <Route path="/byggeguider/konstruksjonsvirke-c24" element={<Suspense fallback={<PageLoadingFallback />}><KonstruksjonsvirkeC24Page /></Suspense>} />
+                <Route path="/byggeguider/hvorfor-sprekker-treet" element={<Suspense fallback={<PageLoadingFallback />}><HvorforSprekkerTreetPage /></Suspense>} />
+                <Route path="/byggeguider/trelast-dimensjoner" element={<Suspense fallback={<PageLoadingFallback />}><TrelastDimensjonerPage /></Suspense>} />
+                <Route path="/byggeguider/riktig-skrue" element={<Suspense fallback={<PageLoadingFallback />}><RiktigSkruePage /></Suspense>} />
+                <Route path="/byggeguider/syrefast-vs-galvanisert" element={<Suspense fallback={<PageLoadingFallback />}><SyrefastVsGalvanisertPage /></Suspense>} />
+                <Route path="/byggeguider/beslag-oversikt" element={<Suspense fallback={<PageLoadingFallback />}><BeslagOversiktPage /></Suspense>} />
+                <Route path="/byggeguider/justerbar-stolpesko" element={<Suspense fallback={<PageLoadingFallback />}><JusterbarStolpeskoPage /></Suspense>} />
+                <Route path="/byggeguider/skjult-terrassefeste" element={<Suspense fallback={<PageLoadingFallback />}><SkjultTerrassefestePage /></Suspense>} />
+                <Route path="/byggeguider/hvor-mange-skruer" element={<Suspense fallback={<PageLoadingFallback />}><HvorMangeSkruerPage /></Suspense>} />
+                <Route path="/byggeguider/sirkelsag-dykksag-stikksag" element={<Suspense fallback={<PageLoadingFallback />}><SirkelsagDykksagStikksagPage /></Suspense>} />
+                <Route path="/byggeguider/rette-fine-kutt" element={<Suspense fallback={<PageLoadingFallback />}><RetteFineKuttPage /></Suspense>} />
+                <Route path="/byggeguider/vater-laser-oppmaling" element={<Suspense fallback={<PageLoadingFallback />}><VaterLaserOppmalingPage /></Suspense>} />
+                <Route path="/byggeguider/forboring-og-senkning" element={<Suspense fallback={<PageLoadingFallback />}><ForboringOgSenkningPage /></Suspense>} />
+                <Route path="/byggeguider/tresammenfoyninger" element={<Suspense fallback={<PageLoadingFallback />}><TresammenfoyningerPage /></Suspense>} />
+                <Route path="/byggeguider/verktoyliste-nybegynner" element={<Suspense fallback={<PageLoadingFallback />}><VerktoylisteNybegynnerPage /></Suspense>} />
+                <Route path="/byggeguider/telehiv" element={<Suspense fallback={<PageLoadingFallback />}><TelehivPage /></Suspense>} />
+                <Route path="/byggeguider/fundamenttyper" element={<Suspense fallback={<PageLoadingFallback />}><FundamenttyperPage /></Suspense>} />
+                <Route path="/byggeguider/stope-punktfundament" element={<Suspense fallback={<PageLoadingFallback />}><StopePunktfundamentPage /></Suspense>} />
+                <Route path="/byggeguider/frostfri-dybde" element={<Suspense fallback={<PageLoadingFallback />}><FrostfriDybdePage /></Suspense>} />
+                <Route path="/byggeguider/spennvidder-bjelker" element={<Suspense fallback={<PageLoadingFallback />}><SpennvidderBjelkerPage /></Suspense>} />
+                <Route path="/byggeguider/stolpeavstand" element={<Suspense fallback={<PageLoadingFallback />}><StolpeavstandPage /></Suspense>} />
+                <Route path="/byggeguider/beis-olje-maling" element={<Suspense fallback={<PageLoadingFallback />}><BeisOljeMalingPage /></Suspense>} />
+                <Route path="/byggeguider/beise-ny-terrasse" element={<Suspense fallback={<PageLoadingFallback />}><BeiseNyTerrassePage /></Suspense>} />
+                <Route path="/byggeguider/vedlikehold-terrasse" element={<Suspense fallback={<PageLoadingFallback />}><VedlikeholdTerrassePage /></Suspense>} />
+                <Route path="/byggeguider/granet-tre" element={<Suspense fallback={<PageLoadingFallback />}><GranetTrePage /></Suspense>} />
+                <Route path="/byggeguider/mugg-alger-gronske" element={<Suspense fallback={<PageLoadingFallback />}><MuggAlgerGronskePage /></Suspense>} />
+                <Route path="/byggeguider/vinterklargjoring" element={<Suspense fallback={<PageLoadingFallback />}><VinterklargjoringPage /></Suspense>} />
+                <Route path="/byggeguider/soknadsplikt-terrasse" element={<Suspense fallback={<PageLoadingFallback />}><SoknadspliktTerrassePage /></Suspense>} />
+                <Route path="/byggeguider/carport-uten-soknad" element={<Suspense fallback={<PageLoadingFallback />}><CarportUtenSoknadPage /></Suspense>} />
+                <Route path="/byggeguider/bod-uten-soknad" element={<Suspense fallback={<PageLoadingFallback />}><BodUtenSoknadPage /></Suspense>} />
+                <Route path="/byggeguider/avstand-til-nabogrense" element={<Suspense fallback={<PageLoadingFallback />}><AvstandTilNabogrensePage /></Suspense>} />
+                <Route path="/byggeguider/levegg-gjerde-regler" element={<Suspense fallback={<PageLoadingFallback />}><LeveggGjerdeReglerPage /></Suspense>} />
+                <Route path="/byggeguider/tek17-for-privatpersoner" element={<Suspense fallback={<PageLoadingFallback />}><Tek17ForPrivatpersonerPage /></Suspense>} />
+                <Route path="/byggeguider/bygge-terrasse" element={<Suspense fallback={<PageLoadingFallback />}><ByggeTerrassePage /></Suspense>} />
+                <Route path="/byggeguider/bygge-pergola" element={<Suspense fallback={<PageLoadingFallback />}><ByggePergolaPage /></Suspense>} />
+                <Route path="/byggeguider/bygge-carport" element={<Suspense fallback={<PageLoadingFallback />}><ByggeCarportPage /></Suspense>} />
+                <Route path="/byggeguider/bygge-levegg" element={<Suspense fallback={<PageLoadingFallback />}><ByggeLeveggPage /></Suspense>} />
+                <Route path="/byggeguider/bygge-platting" element={<Suspense fallback={<PageLoadingFallback />}><ByggePlattingPage /></Suspense>} />
+                <Route path="/byggeguider/bygge-utebod" element={<Suspense fallback={<PageLoadingFallback />}><ByggeUtebodPage /></Suspense>} />
+                <Route path="/byggeguider/bygge-utetrapp" element={<Suspense fallback={<PageLoadingFallback />}><ByggeUtetrappPage /></Suspense>} />
+                <Route path="/byggeguider/bygge-rekkverk" element={<Suspense fallback={<PageLoadingFallback />}><ByggeRekkverkPage /></Suspense>} />
+                <Route path="/byggeguider/materialberegning-terrasse" element={<Suspense fallback={<PageLoadingFallback />}><MaterialberegningTerrassePage /></Suspense>} />
+                <Route path="/byggeguider/lese-byggetegning" element={<Suspense fallback={<PageLoadingFallback />}><LeseByggetegningPage /></Suspense>} />
+                <Route path="/byggeguider/hva-koster-terrasse" element={<Suspense fallback={<PageLoadingFallback />}><HvaKosterTerrassePage /></Suspense>} />
+                <Route path="/byggeguider/sjekkliste-for-du-starter" element={<Suspense fallback={<PageLoadingFallback />}><SjekklisteForDuStarterPage /></Suspense>} />
+                <Route path="/byggeguider/vanligste-byggefeil" element={<Suspense fallback={<PageLoadingFallback />}><VanligsteByggefeilPage /></Suspense>} />
+                <Route path="/byggeguider/ordliste-trearbeid" element={<Suspense fallback={<PageLoadingFallback />}><OrdlisteTrearbeidPage /></Suspense>} />
                 <Route path="/byggeguider/verktoy" element={<Suspense fallback={<PageLoadingFallback />}><VerktoyPage /></Suspense>} />
                 <Route path="/byggeguider/lim-og-festemidler" element={<Suspense fallback={<PageLoadingFallback />}><LimFestemidlerPage /></Suspense>} />
                 <Route path="/byggeguider/sikkerhet" element={<Suspense fallback={<PageLoadingFallback />}><SikkerhetPage /></Suspense>} />

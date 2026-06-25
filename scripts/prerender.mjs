@@ -133,6 +133,22 @@ async function main() {
       // Liten margin så resten av JSON-LD/meta rekker å settes.
       await new Promise((r) => setTimeout(r, 300))
 
+      // styled-components bruker CSSOM insertRule i produksjon ("speedy mode"),
+      // så <style data-styled> står tom i outerHTML. Da lastes den statiske HTML-en
+      // helt ustilt (kjempelogo, synlig skip-link, rå login-knapp) til JS-bunten
+      // rekker å re-injisere stilene → hvitt blink ved lasting. Skriv reglene
+      // tilbake som tekst før snapshot, så prerendret HTML er ferdig stilt.
+      await page.evaluate(() => {
+        document.querySelectorAll('style[data-styled]').forEach((tag) => {
+          const sheet = tag.sheet
+          if (!sheet || sheet.cssRules.length === 0) return
+          const css = Array.from(sheet.cssRules)
+            .map((rule) => rule.cssText)
+            .join('')
+          if (tag.textContent !== css) tag.textContent = css
+        })
+      })
+
       const html = await page.evaluate(() => '<!DOCTYPE html>\n' + document.documentElement.outerHTML)
       const outDir = route === '/' ? distDir : join(distDir, route)
       await mkdir(outDir, { recursive: true })
