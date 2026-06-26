@@ -23,6 +23,7 @@ import {
   nyTrapp,
 } from './terrasseModel'
 import { lastNedMaterialliste } from './terrassePdf'
+import { useBasketContext } from '../../../context/BasketContext'
 
 interface Props {
   config: TerrasseConfig
@@ -485,7 +486,7 @@ const CostNote = styled.p`
   line-height: 1.4;
 `
 
-const CtaButton = styled(Link)`
+const AddToBasketButton = styled.button`
   width: 100%;
   padding: 0.85rem 1rem;
   background: ${({ theme }) => theme.colors.textDark};
@@ -500,13 +501,56 @@ const CtaButton = styled(Link)`
   justify-content: center;
   gap: 0.5rem;
   margin-top: 1rem;
-  text-decoration: none;
   transition: transform 0.2s, box-shadow 0.2s;
 
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
+`
+
+const CtaButton = styled(Link)`
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: #fff;
+  color: ${({ theme }) => theme.colors.textDark};
+  border: 2px solid ${({ theme }) => theme.colors.textDark};
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  text-decoration: none;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #f3f3f3;
+  }
+`
+
+const Toast = styled.div<{ $visible: boolean }>`
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(${({ $visible }) => ($visible ? '0' : '20px')});
+  background: ${({ theme }) => theme.colors.success};
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: ${({ theme }) => theme.borderRadius.pill};
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: ${({ theme }) => theme.zIndex.modal};
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 `
 
 const DownloadButton = styled.button`
@@ -571,9 +615,30 @@ function FormIcon({ form }: { form: TerrasseForm }) {
 
 export default function TerrasseCalculator({ config, onChange, snapshotRef }: Props) {
   const [advanced, setAdvanced] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const { addItem } = useBasketContext()
 
   const r = beregn(config)
   const set = (patch: Partial<TerrasseConfig>) => onChange({ ...config, ...patch })
+
+  const handleAddToBasket = () => {
+    const tilvalg = [
+      r.gjerdeFormattert ? `Rekkverk: ${r.gjerdeFormattert}` : null,
+      r.trappFormattert ? `Trapp: ${r.trappFormattert}` : null,
+    ].filter(Boolean).join(' · ')
+    addItem({
+      type: 'Terrasse (materialpakke)',
+      dimensions: { width: 0, height: 0, depth: 0 },
+      shape: FORM_INFO[config.form].navn,
+      size: r.arealFormattert,
+      complexity: tilvalg || undefined,
+      finish: 'Ubehandlet (materialpakke)',
+      delivery: 'Hentes / avtales',
+      price: formatKr(r.totalKostnad),
+    })
+    setShowToast(true)
+    setTimeout(() => setShowToast(false), 2000)
+  }
 
   // Bygg de ferdige oppsettene én gang og marker hvilket (om noen) som er aktivt.
   const presets = useMemo(() => TERRASSE_PRESETS.map((p) => ({ p, cfg: byggPresetConfig(p) })), [])
@@ -864,6 +929,10 @@ export default function TerrasseCalculator({ config, onChange, snapshotRef }: Pr
         )}
       </CostBox>
 
+      <AddToBasketButton onClick={handleAddToBasket}>
+        <Icon name="faShoppingCart" /> Legg til i forespørsel
+      </AddToBasketButton>
+
       <DownloadButton onClick={() => lastNedMaterialliste(config, r, snapshotRef?.current?.() ?? undefined)}>
         <Icon name="faDownload" /> Last ned materialliste (PDF)
       </DownloadButton>
@@ -872,7 +941,11 @@ export default function TerrasseCalculator({ config, onChange, snapshotRef }: Pr
         <Icon name="faPaperPlane" /> Be om tilbud på bygging
       </CtaButton>
 
-      <Note>* Veiledende estimat på materialer. Ta med materiallisten i butikken. Kontakt oss for et konkret tilbud.</Note>
+      <Note>* Veiledende estimat på materialer. Legg til i forespørselen for å be om tilbud på en ferdig materialpakke, eller ta med materiallisten i butikken.</Note>
+
+      <Toast $visible={showToast}>
+        <Icon name="faCheck" /> Lagt til i forespørselen!
+      </Toast>
     </Container>
   )
 }

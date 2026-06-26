@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://minio.no/</loc>
-    <lastmod>2026-05-31</lastmod>
+    <lastmod>2026-06-26</lastmod>
     <priority>1.0</priority>
     <changefreq>weekly</changefreq>
   </url>
@@ -130,7 +130,7 @@
   </url>
   <url>
     <loc>https://minio.no/planleggere</loc>
-    <lastmod>2026-06-23</lastmod>
+    <lastmod>2026-06-26</lastmod>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
   </url>
@@ -151,6 +151,16 @@
     <lastmod>2026-06-23</lastmod>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/planleggere/utekjokken</loc>
+    <lastmod>2026-06-26</lastmod>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+    <image:image>
+      <image:loc>https://minio.no/images/planleggere/utekjokken-foto.webp</image:loc>
+      <image:title>Utekjøkken i tre med tak, grill, benk og spilervegger</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://minio.no/byggeguider/planlegging</loc>

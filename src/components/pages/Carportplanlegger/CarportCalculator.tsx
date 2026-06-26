@@ -32,6 +32,7 @@ import {
   formatKr,
 } from './carportModel'
 import { lastNedMaterialliste } from './carportPdf'
+import { useBasketContext } from '../../../context/BasketContext'
 
 interface Props {
   config: CarportConfig
@@ -500,7 +501,7 @@ const CostNote = styled.p`
   line-height: 1.4;
 `
 
-const CtaButton = styled(Link)`
+const AddToBasketButton = styled.button`
   width: 100%;
   padding: 0.85rem 1rem;
   background: ${({ theme }) => theme.colors.textDark};
@@ -515,12 +516,54 @@ const CtaButton = styled(Link)`
   justify-content: center;
   gap: 0.5rem;
   margin-top: 1rem;
-  text-decoration: none;
   transition: transform 0.2s, box-shadow 0.2s;
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   }
+`
+
+const CtaButton = styled(Link)`
+  width: 100%;
+  padding: 0.8rem 1rem;
+  background: #fff;
+  color: ${({ theme }) => theme.colors.textDark};
+  border: 2px solid ${({ theme }) => theme.colors.textDark};
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+  text-decoration: none;
+  transition: background 0.2s;
+  &:hover {
+    background: #f3f3f3;
+  }
+`
+
+const Toast = styled.div<{ $visible: boolean }>`
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%) translateY(${({ $visible }) => ($visible ? '0' : '20px')});
+  background: ${({ theme }) => theme.colors.success};
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: ${({ theme }) => theme.borderRadius.pill};
+  font-size: 0.85rem;
+  font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  z-index: ${({ theme }) => theme.zIndex.modal};
+  opacity: ${({ $visible }) => ($visible ? 1 : 0)};
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 `
 
 const DownloadButton = styled.button`
@@ -553,11 +596,36 @@ const Note = styled.p`
 
 export default function CarportCalculator({ config, onChange, snapshotRef }: Props) {
   const [advanced, setAdvanced] = useState(false)
+  const [showToast, setShowToast] = useState(false)
+  const { addItem } = useBasketContext()
 
   const r = beregn(config)
   const reg = byggeregler(config)
   const dim = dimensjonering(config)
   const set = (patch: Partial<CarportConfig>) => onChange({ ...config, ...patch })
+
+  const handleAddToBasket = () => {
+    const vegger = config.veggtype !== 'ingen' && config.veggSider.length > 0
+      ? `${VEGG_INFO[config.veggtype].navn} på ${config.veggSider.map((s) => SIDE_INFO[s]).join(', ')}`
+      : 'Åpen'
+    addItem({
+      type: 'Carport (materialpakke)',
+      dimensions: {
+        width: Math.round(config.bredde * 100),
+        height: Math.round(config.høyde * 100),
+        depth: Math.round(config.lengde * 100),
+      },
+      mounting: MONTERING_INFO[config.montering].navn,
+      roof: `${TAK_INFO[config.taktype].navn}, ${config.takvinkel}°, ${TAKTEKKE_INFO[config.taktekke].navn}`,
+      size: r.arealFormattert,
+      complexity: `Vegger: ${vegger} · Snølast ${config.snølast} kN/m²`,
+      finish: 'Ubehandlet (materialpakke)',
+      delivery: 'Hentes / avtales',
+      price: formatKr(r.totalKostnad),
+    })
+    setShowToast(true)
+    setTimeout(() => setShowToast(false), 2000)
+  }
 
   const presets = useMemo(() => CARPORT_PRESETS.map((p) => ({ p, cfg: byggPresetConfig(p) })), [])
   const aktivPreset = presets.find(({ cfg }) => JSON.stringify(cfg) === JSON.stringify(config))?.p.id
@@ -856,6 +924,10 @@ export default function CarportCalculator({ config, onChange, snapshotRef }: Pro
         )}
       </CostBox>
 
+      <AddToBasketButton onClick={handleAddToBasket}>
+        <Icon name="faShoppingCart" /> Legg til i forespørsel
+      </AddToBasketButton>
+
       <DownloadButton onClick={() => lastNedMaterialliste(config, r, reg, snapshotRef?.current?.() ?? undefined)}>
         <Icon name="faDownload" /> Last ned materialliste (PDF)
       </DownloadButton>
@@ -864,7 +936,11 @@ export default function CarportCalculator({ config, onChange, snapshotRef }: Pro
         <Icon name="faPaperPlane" /> Be om tilbud på bygging
       </CtaButton>
 
-      <Note>* Veiledende estimat og forenklet dimensjonering. Få alltid statisk beregning ved store spenn/snølaster. Kontakt oss for et konkret tilbud.</Note>
+      <Note>* Veiledende estimat og forenklet dimensjonering. Få alltid statisk beregning ved store spenn/snølaster. Legg til i forespørselen for å be om tilbud på en ferdig materialpakke.</Note>
+
+      <Toast $visible={showToast}>
+        <Icon name="faCheck" /> Lagt til i forespørselen!
+      </Toast>
     </Container>
   )
 }

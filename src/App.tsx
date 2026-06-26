@@ -111,6 +111,7 @@ const LeveggerPage = lazy(() => import('./components/pages/Levegger/LeveggerPage
 const TerrassePlanleggerPage = lazy(() => import('./components/pages/Terrasseplanlegger/TerrassePlanleggerPage'))
 const PergolaPlanleggerPage = lazy(() => import('./components/pages/Pergolaplanlegger/PergolaPlanleggerPage'))
 const CarportPlanleggerPage = lazy(() => import('./components/pages/Carportplanlegger/CarportPlanleggerPage'))
+const UtekjokkenPlanleggerPage = lazy(() => import('./components/pages/Utekjokkenplanlegger/UtekjokkenPlanleggerPage'))
 const PlanleggerePage = lazy(() => import('./components/pages/Planleggere/PlanleggerePage'))
 const HandlagetITrePage = lazy(() => import('./components/pages/HandlagetITre/HandlagetITrePage'))
 const ByggehjelpPage = lazy(() => import('./components/pages/Byggehjelp/ByggehjelpPage'))
@@ -227,6 +228,7 @@ export default function App() {
                 <Route path="/planleggere/terrasse" element={<Suspense fallback={<PageLoadingFallback />}><TerrassePlanleggerPage /></Suspense>} />
                 <Route path="/planleggere/pergola" element={<Suspense fallback={<PageLoadingFallback />}><PergolaPlanleggerPage /></Suspense>} />
                 <Route path="/planleggere/carport" element={<Suspense fallback={<PageLoadingFallback />}><CarportPlanleggerPage /></Suspense>} />
+                <Route path="/planleggere/utekjokken" element={<Suspense fallback={<PageLoadingFallback />}><UtekjokkenPlanleggerPage /></Suspense>} />
                 {/* Gamle adresser – behold lenker som folk allerede har */}
                 <Route path="/terrasseplanlegger" element={<Navigate to="/planleggere/terrasse" replace />} />
                 <Route path="/pergolaplanlegger" element={<Navigate to="/planleggere/pergola" replace />} />

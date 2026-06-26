@@ -232,9 +232,10 @@ export default function BasketView({ onCheckout }: BasketViewProps) {
                       ))}
                     </ul>
                   </>
-                ) : (
+                ) : (item.dimensions.width || item.dimensions.height || item.dimensions.depth) ? (
                   <><strong>Mål:</strong> {item.dimensions.width}×{item.dimensions.height}×{item.dimensions.depth} cm<br /></>
-                )}
+                ) : null}
+                {item.shape && <><strong>Form:</strong> {item.shape}<br /></>}
                 {item.mounting && <><strong>Konstruksjon:</strong> {item.mounting}<br /></>}
                 {item.angle && <><strong>Vinkel:</strong> {item.angle}°<br /></>}
                 {item.size && <><strong>Størrelse:</strong> {item.size}<br /></>}

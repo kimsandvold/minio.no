@@ -65,6 +65,21 @@ const PLANLEGGERE: Planlegger[] = [
       { icon: 'faDownload', tekst: 'Materialliste som PDF' },
     ],
   },
+  {
+    slug: 'utekjokken',
+    navn: 'Utekjøkkenplanlegger',
+    tagline: 'Tak · benk · vask',
+    bilde: '/images/planleggere/utekjokken.webp',
+    alt: 'Utekjøkken i tre med tak, benk og vask, tegnet i Minios utekjøkkenplanlegger',
+    bildeFit: 'contain',
+    ingress:
+      'Tegn utekjøkkenet i 3D – tak på stolper over en hevet platting, med benk, vask, underskap og sittebenk. Velg benkeplate og få komplett materialliste med bæring, platting og innredning.',
+    punkter: [
+      { icon: 'faTools', tekst: 'Benk, vask, skap og sittebenk' },
+      { icon: 'faHammer', tekst: 'Tak og hevet platting' },
+      { icon: 'faDownload', tekst: 'Materialliste som PDF' },
+    ],
+  },
 ]
 
 const PLANLEGGERE_JSONLD = [
@@ -156,8 +171,12 @@ const Grid = styled.div`
   max-width: 1000px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 1.5rem;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-template-columns: 1fr;
+  }
 `
 
 const Card = styled.div`

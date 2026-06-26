@@ -135,7 +135,7 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
         })
       } else if (item.armThickness !== undefined) {
         message += `Mål: A ${item.dimensions.width} × B ${item.dimensions.depth} × Dybde ${item.armThickness} × Høyde ${item.dimensions.height} cm\n`
-      } else {
+      } else if (item.dimensions.width || item.dimensions.height || item.dimensions.depth) {
         message += `Mål: Bredde ${item.dimensions.width} × Dybde ${item.dimensions.depth} × Høyde ${item.dimensions.height} cm\n`
       }
       if (item.mounting) message += `Konstruksjon: ${item.mounting}\n`
@@ -252,9 +252,10 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
                       ))}
                     </ul>
                   </>
-                ) : (
+                ) : (item.dimensions.width || item.dimensions.height || item.dimensions.depth) ? (
                   <>Mål: {item.dimensions.width}×{item.dimensions.height}×{item.dimensions.depth} cm<br /></>
-                )}
+                ) : null}
+                {item.shape && <>Form: {item.shape}<br /></>}
                 {item.mounting && <>Konstruksjon: {item.mounting}<br /></>}
                 {item.angle && <>Vinkel: {item.angle}°<br /></>}
                 {item.size && <>Størrelse: {item.size}<br /></>}

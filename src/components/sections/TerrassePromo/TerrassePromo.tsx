@@ -199,11 +199,17 @@ const SLIDES = [
     label: 'Carport',
     fit: 'contain' as const,
   },
+  {
+    src: '/images/planleggere/utekjokken.webp',
+    alt: 'Utekjøkken i tre med tak, benk og vask, tegnet i Minios utekjøkkenplanlegger',
+    label: 'Utekjøkken',
+    fit: 'contain' as const,
+  },
 ]
 
 const FEATURES = [
   { icon: 'faCube', text: '3D-visning i sanntid' },
-  { icon: 'faRulerCombined', text: 'Terrasse, pergola og carport' },
+  { icon: 'faRulerCombined', text: 'Terrasse, pergola, carport og utekjøkken' },
   { icon: 'faDownload', text: 'Materialliste som PDF' },
   { icon: 'faSave', text: 'Lagre prosjektene dine' },
 ]
