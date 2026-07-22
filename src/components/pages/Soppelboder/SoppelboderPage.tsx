@@ -1,6 +1,7 @@
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import SoppelboderPriceCalculator from './SoppelboderPriceCalculator'
+import Icon from '../../shared/Icon'
 import SoppelboderThreeVisualizer from './SoppelboderThreeVisualizer'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
@@ -203,6 +204,47 @@ const SidebarTitle = styled.h3`
   color: ${({ theme }) => theme.colors.textDark};
 `
 
+const AdvancedCta = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background: #16181d;
+  color: #e9e7e1;
+  text-decoration: none;
+  transition: transform 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    background: #202329;
+    transform: translateY(-2px);
+  }
+
+  .ac-ico {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: rgba(123, 195, 156, 0.16);
+    color: #7bc39c;
+    font-size: 0.9rem;
+  }
+
+  .ac-txt {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    strong { font-size: 0.9rem; font-weight: 700; color: #fff; }
+    em { font-style: normal; font-size: 0.76rem; line-height: 1.4; color: #a8a49b; }
+  }
+
+  > svg:last-child { color: #8b877e; font-size: 0.85rem; flex-shrink: 0; }
+`
+
 const ReviewsSection = styled.section`
   max-width: 1200px;
   margin: 4rem auto 0;
@@ -311,8 +353,6 @@ interface VisualizerConfig {
   roof: string
 }
 
-const DEFAULT_BASE_PRICE = 7900
-
 export default function SoppelboderPage() {
   const { data: product } = useProductBySlug('soppelboder')
   const [config, setConfig] = useState<VisualizerConfig>({
@@ -324,10 +364,6 @@ export default function SoppelboderPage() {
     finish: '0',
     roof: '0',
   })
-
-  const handleConfigChange = useCallback((newConfig: VisualizerConfig) => {
-    setConfig(newConfig)
-  }, [])
 
   useSEO({
     title: 'Skreddersydd søppelbod – Minio',
@@ -426,8 +462,15 @@ export default function SoppelboderPage() {
                 roof={config.roof}
                 onConfigChange={setConfig}
               />
-              <SidebarTitle>Pris kalkulator</SidebarTitle>
-              <SoppelboderPriceCalculator basePrice={product?.basePrice ?? DEFAULT_BASE_PRICE} config={config} onConfigChange={handleConfigChange} />
+              <SidebarTitle>Design selv i 3D</SidebarTitle>
+              <AdvancedCta to="/designverktoy/soppelboder">
+                <span className="ac-ico"><Icon name="faCube" /></span>
+                <span className="ac-txt">
+                  <strong>Design søppelboden din</strong>
+                  <em>Åpne 3D-designverktøyet – dra i målene, velg antall dunker, mal hver del og se byggeplan med materialliste.</em>
+                </span>
+                <Icon name="faArrowRight" />
+              </AdvancedCta>
             </Sidebar>
           </Container>
 

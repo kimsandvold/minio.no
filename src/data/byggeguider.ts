@@ -690,6 +690,15 @@ export const guideProjects: GuideProject[] = [
     image: '/images/byggeguider/pidestall.webp',
     available: true,
   },
+  {
+    slug: 'fuglehus',
+    title: 'Fuglehus',
+    teaser: 'Et klassisk fuglehus med saltak, innflygningshull og sittepinne – et lite prosjekt du bygger på en ettermiddag.',
+    difficulty: 'Nybegynner',
+    time: '2–3 timer',
+    image: '/images/byggeguider/fuglehus.webp',
+    available: true,
+  },
 ]
 
 export const projectHref = (project: GuideProject): string =>

@@ -14,7 +14,8 @@ import SkipLink from './components/shared/SkipLink'
 import Navbar from './components/layout/Navbar'
 import Hero from './components/sections/Hero/Hero'
 import Portfolio from './components/sections/Portfolio/Portfolio'
-import TerrassePromo from './components/sections/TerrassePromo/TerrassePromo'
+import DesignerToolPromo from './components/sections/DesignerToolPromo/DesignerToolPromo'
+import DesignPromo from './components/sections/DesignPromo/DesignPromo'
 import DesignerHighlight from './components/sections/DesignerHighlight/DesignerHighlight'
 import ProsessPage from './components/pages/Prosess/ProsessPage'
 import KontaktPage from './components/pages/Kontakt/KontaktPage'
@@ -29,7 +30,10 @@ import HandlekurvPage from './components/pages/Handlekurv/HandlekurvPage'
 import SkiltOgGraveringPage from './components/pages/SkiltOgGravering/SkiltOgGraveringPage'
 import MineBestillingerPage from './components/pages/MineBestillinger/MineBestillingerPage'
 import MineDesignPage from './components/pages/MineDesign/MineDesignPage'
+import AdminLayout from './components/pages/Admin/AdminLayout'
+import AdminDashboardPage from './components/pages/Admin/AdminDashboardPage'
 import AdminBestillingerPage from './components/pages/Admin/AdminBestillingerPage'
+import AdminForesporslerPage from './components/pages/Admin/AdminForesporslerPage'
 import AdminPollsPage from './components/pages/Admin/AdminPollsPage'
 import DesignViewPage from './components/pages/DesignView/DesignViewPage'
 import NotFoundPage from './components/pages/NotFound/NotFoundPage'
@@ -40,6 +44,7 @@ const DIYGuiderPage = lazy(() => import('./components/pages/DIYGuider/DIYGuiderP
 const PlanleggingPage = lazy(() => import('./components/pages/DIYGuider/articles/PlanleggingPage'))
 const HagebenkPage = lazy(() => import('./components/pages/DIYGuider/prosjekter/HagebenkPage'))
 const PidestallUtendorsPage = lazy(() => import('./components/pages/DIYGuider/prosjekter/PidestallUtendorsPage'))
+const FuglehusPage = lazy(() => import('./components/pages/DIYGuider/prosjekter/FuglehusPage'))
 const DesignTegningPage = lazy(() => import('./components/pages/DIYGuider/articles/DesignTegningPage'))
 const KonstruksjonStyrkePage = lazy(() => import('./components/pages/DIYGuider/articles/KonstruksjonStyrkePage'))
 const TrevirkePage = lazy(() => import('./components/pages/DIYGuider/articles/TrevirkePage'))
@@ -115,16 +120,21 @@ const UtekjokkenPlanleggerPage = lazy(() => import('./components/pages/Utekjokke
 const PlanleggerePage = lazy(() => import('./components/pages/Planleggere/PlanleggerePage'))
 const HandlagetITrePage = lazy(() => import('./components/pages/HandlagetITre/HandlagetITrePage'))
 const ByggehjelpPage = lazy(() => import('./components/pages/Byggehjelp/ByggehjelpPage'))
+const TreDDesignPage = lazy(() => import('./components/pages/TreDDesign/TreDDesignPage'))
+const DesignerLandingPage = lazy(() => import('./components/pages/Designer/DesignerLandingPage'))
+const DesignerPage = lazy(() => import('./components/pages/Designer/DesignerPage'))
 const HundehusPage = lazy(() => import('./components/pages/Hundehus/HundehusPage'))
 const KattehusPage = lazy(() => import('./components/pages/Kattehus/KattehusPage'))
+const SalgsbetingelserPage = lazy(() => import('./components/pages/Legal/SalgsbetingelserPage'))
+const PersonvernPage = lazy(() => import('./components/pages/Legal/PersonvernPage'))
 
 function HomePage() {
   useHashNavigation()
   useSEO({
     title: 'Minio – Hageprodukter i tre, skreddersydd etter dine mål',
     description: 'Hage- og utendørsprodukter i tre, skreddersydd etter dine mål. Plantekasser, varmepumpehus, søppelboder, postkassestativer og mer. Håndlaget i Lillehammer.',
-    ogImage: '/images/hero/forside_8.webp',
-    ogImageAlt: 'Hage- og utendørsprodukter i tre fra Minio',
+    ogImage: '/images/hero/carport-elbil-forside.webp',
+    ogImageAlt: 'Skreddersydd carport i tre med elbil parkert under',
     jsonLd: [
       {
         '@context': 'https://schema.org',
@@ -133,7 +143,7 @@ function HomePage() {
         name: 'Minio',
         url: 'https://minio.no/',
         logo: 'https://minio.no/images/branding/logo_dark.svg',
-        image: 'https://minio.no/images/hero/forside_8.webp',
+        image: 'https://minio.no/images/hero/carport-elbil-forside.webp',
         description:
           'Hage- og utendørsprodukter i tre, skreddersydd etter dine mål. Plantekasser, varmepumpehus, søppelboder, postkassestativer og mer. Håndlaget i Lillehammer.',
         address: {
@@ -189,7 +199,8 @@ function HomePage() {
       <main id="main-content">
         <Hero />
         <Portfolio />
-        <TerrassePromo />
+        <DesignerToolPromo />
+        <DesignPromo />
         <DesignerHighlight />
       </main>
       <Footer />
@@ -214,6 +225,9 @@ export default function App() {
                 <Route path="/produkter" element={<ProdukterPage />} />
                 <Route path="/handlaget-i-tre" element={<Suspense fallback={<PageLoadingFallback />}><HandlagetITrePage /></Suspense>} />
                 <Route path="/byggehjelp" element={<Suspense fallback={<PageLoadingFallback />}><ByggehjelpPage /></Suspense>} />
+                <Route path="/3d-design" element={<Suspense fallback={<PageLoadingFallback />}><TreDDesignPage /></Suspense>} />
+                <Route path="/designverktoy" element={<Suspense fallback={<PageLoadingFallback />}><DesignerLandingPage /></Suspense>} />
+                <Route path="/designverktoy/:produktId" element={<Suspense fallback={<PageLoadingFallback />}><DesignerPage /></Suspense>} />
                 <Route path="/produkter/varmepumpehus" element={<Suspense fallback={<PageLoadingFallback />}><VarmepumpehusPage /></Suspense>} />
                 <Route path="/produkter/soppelboder" element={<Suspense fallback={<PageLoadingFallback />}><SoppelboderPage /></Suspense>} />
                 <Route path="/produkter/vedskjul" element={<Suspense fallback={<PageLoadingFallback />}><VedskjulPage /></Suspense>} />
@@ -238,6 +252,7 @@ export default function App() {
                 <Route path="/byggeguider/planlegging" element={<Suspense fallback={<PageLoadingFallback />}><PlanleggingPage /></Suspense>} />
                 <Route path="/byggeguider/prosjekter/hagebenk" element={<Suspense fallback={<PageLoadingFallback />}><HagebenkPage /></Suspense>} />
                 <Route path="/byggeguider/prosjekter/pidestall-utendors" element={<Suspense fallback={<PageLoadingFallback />}><PidestallUtendorsPage /></Suspense>} />
+                <Route path="/byggeguider/prosjekter/fuglehus" element={<Suspense fallback={<PageLoadingFallback />}><FuglehusPage /></Suspense>} />
                 <Route path="/byggeguider/design-og-tegning" element={<Suspense fallback={<PageLoadingFallback />}><DesignTegningPage /></Suspense>} />
                 <Route path="/byggeguider/konstruksjon-og-styrke" element={<Suspense fallback={<PageLoadingFallback />}><KonstruksjonStyrkePage /></Suspense>} />
                 <Route path="/byggeguider/trevirke" element={<Suspense fallback={<PageLoadingFallback />}><TrevirkePage /></Suspense>} />
@@ -300,14 +315,20 @@ export default function App() {
                 <Route path="/byggeguider/overflatebehandling" element={<Suspense fallback={<PageLoadingFallback />}><OverflatebehandlingPage /></Suspense>} />
                 <Route path="/byggeguider/vedlikehold" element={<Suspense fallback={<PageLoadingFallback />}><VedlikeholdPage /></Suspense>} />
                 <Route path="/diy-guider" element={<Navigate to="/byggeguider" replace />} />
+                <Route path="/salgsbetingelser" element={<Suspense fallback={<PageLoadingFallback />}><SalgsbetingelserPage /></Suspense>} />
+                <Route path="/personvern" element={<Suspense fallback={<PageLoadingFallback />}><PersonvernPage /></Suspense>} />
                 <Route path="/underholdning" element={<UnderholdningPage />} />
                 <Route path="/spill-av-leah-noelle" element={<LeahNoellePage />} />
                 <Route path="/handlekurv" element={<HandlekurvPage />} />
 
                 <Route path="/mine-design" element={<MineDesignPage />} />
                 <Route path="/mine-bestillinger" element={<MineBestillingerPage />} />
-                <Route path="/admin/bestillinger" element={<AdminBestillingerPage />} />
-                <Route path="/admin/avstemninger" element={<AdminPollsPage />} />
+                <Route path="/admin" element={<AdminLayout />}>
+                  <Route index element={<AdminDashboardPage />} />
+                  <Route path="bestillinger" element={<AdminBestillingerPage />} />
+                  <Route path="foresporsler" element={<AdminForesporslerPage />} />
+                  <Route path="avstemninger" element={<AdminPollsPage />} />
+                </Route>
                 <Route path="/design/:designId" element={<DesignViewPage />} />
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>

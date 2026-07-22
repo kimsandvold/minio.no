@@ -434,7 +434,9 @@ export default function ByggehjelpPage() {
                 ))}
               </StepGrid>
               <CrossNote>
-                Vil du heller at vi bygger hele produktet for deg? Se alt vi lager{' '}
+                Trenger du tegninger først? Få prosjektet{' '}
+                <Link to="/3d-design">tegnet og rendret i 3D</Link>. Eller la oss bygge hele
+                produktet for deg – se alt vi lager{' '}
                 <Link to="/handlaget-i-tre">håndlaget i tre</Link>.
               </CrossNote>
             </StepsInner>

@@ -1,8 +1,5 @@
 import styled from 'styled-components'
-import { useRef } from 'react'
-import CarportVisualizer from './CarportVisualizer'
-import CarportCalculator from './CarportCalculator'
-import { useCarportProsjekter } from './useCarportProsjekter'
+import { Link } from 'react-router-dom'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
 import PlannerDisclaimer from '../../shared/planlegger/PlannerDisclaimer'
@@ -154,6 +151,38 @@ const Hero = styled.section`
   }
 `
 
+const DesignerCta = styled(Link)`
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: 1.4rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 999px;
+  background: ${({ theme }) => theme.colors.accent};
+  color: #fff;
+  font-weight: 650;
+  font-size: 1.02rem;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.34);
+  }
+  span.ny {
+    background: #fff;
+    color: ${({ theme }) => theme.colors.accent};
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    padding: 0.12rem 0.45rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+  }
+`
+
 const Chips = styled.div`
   position: relative;
   z-index: 1;
@@ -199,35 +228,17 @@ const Layout = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 420px;
-  grid-template-areas:
-    'viz sidebar'
-    'article sidebar';
+  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-areas: 'article sidebar';
   gap: 0 2rem;
   align-items: start;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     grid-template-columns: 1fr;
     grid-template-areas:
-      'viz'
       'sidebar'
       'article';
     gap: 0.5rem;
-  }
-`
-
-const VisualizerWrap = styled.div`
-  grid-area: viz;
-  margin-bottom: 2rem;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    position: sticky;
-    top: 56px;
-    z-index: 5;
-    margin: 0 -1rem;
-    padding: 0.25rem 1rem 0.5rem;
-    background: ${({ theme }) => theme.colors.lightBg};
-    box-shadow: 0 6px 10px -8px rgba(0, 0, 0, 0.25);
   }
 `
 
@@ -325,11 +336,39 @@ const Sidebar = styled.aside`
   }
 `
 
-const SidebarTitle = styled.h3`
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin: 0 0 0.75rem;
-  color: ${({ theme }) => theme.colors.textDark};
+const DesignerSidebarCta = styled(Link)`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.9rem 1.4rem;
+  border-radius: 999px;
+  background: ${({ theme }) => theme.colors.accent};
+  color: #fff;
+  font-weight: 650;
+  font-size: 1rem;
+  text-align: center;
+  text-decoration: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
+  }
+
+  span.ny {
+    background: #fff;
+    color: ${({ theme }) => theme.colors.accent};
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    padding: 0.12rem 0.45rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+  }
 `
 
 // ── Teknisk feature-band («surprise») ─────────────────────────────────────────
@@ -491,9 +530,6 @@ const TECH = [
 ]
 
 export default function CarportPlanleggerPage() {
-  const { config, setConfig, prosjekt } = useCarportProsjekter()
-  const snapshotRef = useRef<(() => string | null) | null>(null)
-
   useSEO({
     title: 'Carportplanlegger – tegn carport i 3D med tak, snølast og byggeregler | Minio',
     description:
@@ -518,14 +554,13 @@ export default function CarportPlanleggerPage() {
               <span><Icon name="faCube" /> Snølast-dimensjonert</span>
               <span><Icon name="faHammer" /> Tverrbjelker & knebånd</span>
             </Chips>
+            <DesignerCta to="/designverktoy/carport">
+              Prøv den nye 3D-designeren <span className="ny">Ny</span>
+            </DesignerCta>
           </Hero>
 
           <Content>
             <Layout>
-              <VisualizerWrap>
-                <CarportVisualizer config={config} onConfigChange={setConfig} prosjekt={prosjekt} snapshotRef={snapshotRef} />
-              </VisualizerWrap>
-
               <Article>
                 <h2>Planlegg en carport som tåler norsk vinter</h2>
                 <p>
@@ -591,8 +626,11 @@ export default function CarportPlanleggerPage() {
               </Article>
 
               <Sidebar>
-                <SidebarTitle>Konfigurer carporten</SidebarTitle>
-                <CarportCalculator config={config} onChange={setConfig} snapshotRef={snapshotRef} />
+                <DesignerSidebarCta to="/designverktoy/carport">
+                  <Icon name="faCube" />
+                  Åpne carporten i 3D-designeren
+                  <span className="ny">Ny</span>
+                </DesignerSidebarCta>
               </Sidebar>
             </Layout>
           </Content>

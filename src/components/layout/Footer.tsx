@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import Icon from '../shared/Icon'
+import { company } from '../../data/company'
 
 const StyledFooter = styled.footer`
   background-color: #1a1a1a;
@@ -95,6 +96,14 @@ const ContactInfo = styled.div`
     margin: 0;
     font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.75);
+  }
+
+  a {
+    color: rgba(255, 255, 255, 0.75);
+    text-decoration: none;
+    transition: color 0.3s ease;
+
+    &:hover { color: ${({ theme }) => theme.colors.accent}; }
   }
 `
 
@@ -203,6 +212,7 @@ export default function Footer() {
         <FooterAbout>
           <h3>Håndlaget i Lillehammer</h3>
           <p>Bak Minio står jeg, Kim Sandvold – genuint opptatt av produktutvikling, godt håndverk og det å skape noe med hendene. Fra verkstedet mitt i Lillehammer lager jeg utendørs treprodukter som er bygget for å vare: varmepumpehus, søppelboder, postkassestativer, levegger, plantekasser og mer.</p>
+          <p>Til daglig jobber jeg som programvareutvikler, og den erfaringen tar jeg med meg inn i verkstedet: jeg designer og modellerer alt i 3D før det bygges. Derfor har jeg laget et gratis 3D-designverktøy her på siden, der du selv kan tegne prosjektet ditt, tilpasse mål, treslag og farge, og få en komplett byggeplan med materialliste og arbeidstegning – enten du vil bygge det selv eller la meg bygge det for deg.</p>
           <p>Hvert produkt lages på bestilling, tilpasset dine mål og ditt uterom. Det som driver meg er å ta en idé og gjøre den til virkelighet – og jeg gir meg ikke før du er fornøyd. Jeg velger riktig materiale og bygger med den omtanken som masseproduksjon aldri kan tilby. Ingen to prosjekter er like – og det er nettopp det som gjør det verdt å gjøre ordentlig.</p>
           <p>Jeg tror på kort vei mellom deg og den som bygger produktet ditt. Når du handler hos Minio, snakker du direkte med meg. Du får ærlige råd, tydelig kommunikasjon og et resultat du kan stole på.</p>
           <p>Har du et prosjekt i tankene? Ta kontakt – jeg hører gjerne fra deg.</p>
@@ -213,7 +223,8 @@ export default function Footer() {
           <FooterSection>
             <h4>Kontakt</h4>
             <ContactInfo>
-              <p>Lillehammer, Norge</p>
+              <p>{company.legalName}</p>
+              <p>Org.nr {company.orgNr}</p>
               <Socials>
                 <a href="https://www.facebook.com/profile.php?id=61576010648640&locale=nb_NO" target="_blank" rel="noopener noreferrer" aria-label="Facebook (åpnes i nytt vindu)">
                   <Icon name="faFacebookF" />
@@ -232,10 +243,13 @@ export default function Footer() {
               <FooterLink to="/produkter">Produkter</FooterLink>
               <FooterLink to="/handlaget-i-tre">Håndlaget i tre</FooterLink>
               <FooterLink to="/byggehjelp">Byggehjelp</FooterLink>
+              <FooterLink to="/3d-design">3D-design</FooterLink>
               <FooterLink to="/slik-jobber-vi">Slik jobber vi</FooterLink>
               <FooterLink to="/kontakt">Kontakt</FooterLink>
               <FooterLink to="/underholdning">Underholdning</FooterLink>
               <FooterLink to="/spill-av-leah-noelle">Spill av Leah Noelle</FooterLink>
+              <FooterLink to="/salgsbetingelser">Salgsbetingelser</FooterLink>
+              <FooterLink to="/personvern">Personvern</FooterLink>
             </FooterNav>
           </FooterSection>
 

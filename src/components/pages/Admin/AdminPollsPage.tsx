@@ -1,7 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
-import { useAuthContext } from '../../../context/AuthContext'
 import {
   getAllPolls,
   createPoll,
@@ -9,66 +7,9 @@ import {
   deletePoll,
   type PollDoc,
 } from '../../../services/pollAdminService'
-import { useSEO } from '../../../hooks/useSEO'
-import Navbar from '../../layout/Navbar'
-import Footer from '../../layout/Footer'
-import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
 import AdminPollForm from './AdminPollForm'
-
-const Hero = styled.section`
-  min-height: 20vh;
-  background: ${({ theme }) => theme.colors.darkBg};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.textLight};
-  text-align: center;
-  padding: 6rem 2rem 3rem;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    min-height: 15vh;
-    padding: 5rem 1.5rem 2rem;
-  }
-`
-
-const HeroContent = styled.div`
-  max-width: 800px;
-
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    font-weight: 700;
-
-    @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1.8rem;
-    }
-  }
-
-  p {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.8);
-    line-height: 1.6;
-  }
-`
-
-const Content = styled.section`
-  background: ${({ theme }) => theme.colors.lightBg};
-  padding: 3rem 2rem 5rem;
-  min-height: 50vh;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    padding: 1.5rem 1rem 3rem;
-  }
-`
-
-const Container = styled.div`
-  max-width: 900px;
-  margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-`
+import { AdminPageHead } from './adminUi'
 
 const TopBar = styled.div`
   display: flex;
@@ -265,19 +206,6 @@ const EmptyState = styled.div`
   font-size: 1.1rem;
 `
 
-const AccessDenied = styled.div`
-  text-align: center;
-  padding: 3rem 2rem;
-  color: #999;
-  font-size: 1.1rem;
-
-  h2 {
-    font-size: 1.5rem;
-    color: ${({ theme }) => theme.colors.textDark};
-    margin-bottom: 0.5rem;
-  }
-`
-
 function getPollStatus(poll: PollDoc): 'active' | 'planned' | 'ended' {
   const now = Date.now()
   const start = poll.startDate.toMillis()
@@ -298,19 +226,11 @@ function formatDate(ts: { toDate: () => Date }) {
 }
 
 export default function AdminPollsPage() {
-  const { isAdmin, isAuthenticated, loading: authLoading } = useAuthContext()
-  const navigate = useNavigate()
   const [polls, setPolls] = useState<PollDoc[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [formMode, setFormMode] = useState<'none' | 'create' | 'edit'>('none')
   const [editingPoll, setEditingPoll] = useState<PollDoc | undefined>()
-
-  useSEO({
-    title: 'Admin – Avstemninger – Minio',
-    description: 'Administrer avstemninger.',
-    noindex: true,
-  })
 
   const loadPolls = useCallback(async () => {
     setLoading(true)
@@ -323,12 +243,8 @@ export default function AdminPollsPage() {
   }, [])
 
   useEffect(() => {
-    if (authLoading || !isAuthenticated || !isAdmin) {
-      setLoading(false)
-      return
-    }
     loadPolls()
-  }, [isAdmin, isAuthenticated, authLoading, loadPolls])
+  }, [loadPolls])
 
   const handleCreate = async (data: {
     question: string
@@ -360,62 +276,10 @@ export default function AdminPollsPage() {
     await loadPolls()
   }
 
-  if (!authLoading && (!isAuthenticated || !isAdmin)) {
-    return (
-      <>
-        <Navbar />
-        <PageTransition>
-          <main>
-            <Hero>
-              <HeroContent>
-                <h1>Admin</h1>
-              </HeroContent>
-            </Hero>
-            <Content>
-              <Container>
-                <AccessDenied>
-                  <h2>Ingen tilgang</h2>
-                  <p>Du har ikke tilgang til denne siden.</p>
-                  <button
-                    onClick={() => navigate('/')}
-                    style={{
-                      marginTop: '1rem',
-                      padding: '0.75rem 1.5rem',
-                      background: '#1a1a1a',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      fontFamily: 'inherit',
-                      fontWeight: 600,
-                    }}
-                  >
-                    Ga til forsiden
-                  </button>
-                </AccessDenied>
-              </Container>
-            </Content>
-          </main>
-        </PageTransition>
-        <Footer />
-      </>
-    )
-  }
-
   return (
     <>
-      <Navbar />
-      <PageTransition>
-        <main>
-          <Hero>
-            <HeroContent>
-              <h1>Avstemninger</h1>
-              <p>Opprett og administrer avstemninger.</p>
-            </HeroContent>
-          </Hero>
-          <Content>
-            <Container>
-              {loading ? (
+      <AdminPageHead title="Avstemninger" subtitle="Opprett og administrer avstemninger." />
+      {loading ? (
                 <LoadingState>
                   <Icon name="faSpinner" spin /> Laster avstemninger...
                 </LoadingState>
@@ -544,11 +408,6 @@ export default function AdminPollsPage() {
                   )}
                 </>
               )}
-            </Container>
-          </Content>
-        </main>
-      </PageTransition>
-      <Footer />
     </>
   )
 }

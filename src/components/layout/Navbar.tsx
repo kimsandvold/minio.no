@@ -646,7 +646,7 @@ export default function Navbar() {
               </IconRouterLink>
             )}
             {isAdmin && (
-              <IconRouterLink to="/admin/bestillinger" aria-label="Admin" onClick={closeMenu}>
+              <IconRouterLink to="/admin" aria-label="Admin" onClick={closeMenu}>
                 <Icon name="faUserShield" />
               </IconRouterLink>
             )}
@@ -695,8 +695,14 @@ export default function Navbar() {
                     </DropdownLink>
                     {isAdmin && (
                       <>
+                        <DropdownLink to="/admin" onClick={() => setUserMenuOpen(false)}>
+                          <Icon name="faGaugeHigh" /> Dashbord
+                        </DropdownLink>
                         <DropdownLink to="/admin/bestillinger" onClick={() => setUserMenuOpen(false)}>
                           <Icon name="faUserShield" /> Bestillinger
+                        </DropdownLink>
+                        <DropdownLink to="/admin/foresporsler" onClick={() => setUserMenuOpen(false)}>
+                          <Icon name="faHammer" /> Forespørsler
                         </DropdownLink>
                         <DropdownLink to="/admin/avstemninger" onClick={() => setUserMenuOpen(false)}>
                           <Icon name="faChartBar" /> Avstemninger

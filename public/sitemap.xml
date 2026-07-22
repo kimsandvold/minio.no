@@ -25,6 +25,12 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://minio.no/3d-design</loc>
+    <lastmod>2026-06-27</lastmod>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://minio.no/produkter/hundehus</loc>
     <lastmod>2026-06-25</lastmod>
     <priority>0.8</priority>
@@ -129,6 +135,12 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://minio.no/byggeguider/prosjekter/fuglehus</loc>
+    <lastmod>2026-07-01</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://minio.no/planleggere</loc>
     <lastmod>2026-06-26</lastmod>
     <priority>0.9</priority>
@@ -161,6 +173,18 @@
       <image:loc>https://minio.no/images/planleggere/utekjokken-foto.webp</image:loc>
       <image:title>Utekjøkken i tre med tak, grill, benk og spilervegger</image:title>
     </image:image>
+  </url>
+  <url>
+    <loc>https://minio.no/salgsbetingelser</loc>
+    <lastmod>2026-07-13</lastmod>
+    <priority>0.4</priority>
+    <changefreq>yearly</changefreq>
+  </url>
+  <url>
+    <loc>https://minio.no/personvern</loc>
+    <lastmod>2026-07-13</lastmod>
+    <priority>0.4</priority>
+    <changefreq>yearly</changefreq>
   </url>
   <url>
     <loc>https://minio.no/byggeguider/planlegging</loc>

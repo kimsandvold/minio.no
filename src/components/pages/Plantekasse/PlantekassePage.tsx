@@ -1,5 +1,7 @@
 import { useState, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import Icon from '../../shared/Icon'
 import PlantekassePriceCalculator from './PlantekassePriceCalculator'
 import ThreeVisualizer from './ThreeVisualizer'
 import Navbar from '../../layout/Navbar'
@@ -296,6 +298,47 @@ const SidebarTitle = styled.h3`
   color: ${({ theme }) => theme.colors.textDark};
 `
 
+const AdvancedCta = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background: #16181d;
+  color: #e9e7e1;
+  text-decoration: none;
+  transition: transform 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    background: #202329;
+    transform: translateY(-2px);
+  }
+
+  .ac-ico {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: rgba(123, 195, 156, 0.16);
+    color: #7bc39c;
+    font-size: 0.9rem;
+  }
+
+  .ac-txt {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    strong { font-size: 0.9rem; font-weight: 700; color: #fff; }
+    em { font-style: normal; font-size: 0.76rem; line-height: 1.4; color: #a8a49b; }
+  }
+
+  > svg:last-child { color: #8b877e; font-size: 0.85rem; flex-shrink: 0; }
+`
+
 const ReviewsSection = styled.section`
   max-width: 1200px;
   margin: 4rem auto 0;
@@ -493,6 +536,15 @@ export default function PlantekassePage() {
                   config={config}
                   onConfigChange={handleConfigChange}
                 />
+
+                <AdvancedCta to="/designverktoy/plantekasse">
+                  <span className="ac-ico"><Icon name="faCube" /></span>
+                  <span className="ac-txt">
+                    <strong>Vil du ha flere valg?</strong>
+                    <em>Åpne 3D-designverktøyet for avansert design – dra i målene, mal hver del, se byggeplan.</em>
+                  </span>
+                  <Icon name="faArrowRight" />
+                </AdvancedCta>
               </Sidebar>
             </Container>
 

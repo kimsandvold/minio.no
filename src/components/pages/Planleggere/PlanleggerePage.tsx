@@ -266,23 +266,35 @@ const Punkter = styled.ul`
   }
 `
 
-const OpenLink = styled(Link)`
-  margin-top: auto;
+const DesignerBtn = styled(Link)`
+  margin-top: 0.6rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  background: ${({ theme }) => theme.colors.textDark};
+  background: ${({ theme }) => theme.colors.accent};
   color: #fff;
   font-size: 0.92rem;
-  font-weight: 600;
+  font-weight: 700;
   padding: 0.8rem 1.4rem;
   border-radius: ${({ theme }) => theme.borderRadius.pill};
   text-decoration: none;
-  transition: background 0.2s ease;
+  transition: background 0.2s ease, transform 0.15s ease;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+
+  .ny {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.22);
+    padding: 0.1rem 0.4rem;
+    border-radius: 999px;
+  }
 
   &:hover {
     background: ${({ theme }) => theme.colors.accentHover};
+    transform: translateY(-1px);
   }
 `
 
@@ -328,9 +340,9 @@ export default function PlanleggerePage() {
                       </li>
                     ))}
                   </Punkter>
-                  <OpenLink to={`/planleggere/${p.slug}`}>
+                  <DesignerBtn to={`/planleggere/${p.slug}`} style={{ marginTop: 'auto' }}>
                     Åpne {p.navn.toLowerCase()} <Icon name="faArrowRight" />
-                  </OpenLink>
+                  </DesignerBtn>
                 </Card>
               ))}
             </Grid>
