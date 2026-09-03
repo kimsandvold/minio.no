@@ -1,10 +1,15 @@
 /**
- * Forespørsel fra designverktøyet: kunden ber om å få designet bygget
- * («ferdig») eller kappet som materialpakke («materialpakke»). Lagres i
- * Firestore og varsles til admin på e-post (Formspree). Byggeplan-kjøp går
- * en annen vei (tilgangskode/betaling), ikke via forespørsel.
+ * Forespørsel fra designverktøyet. Kunden ber om å få designet bygget
+ * («ferdig»), kappet som materialpakke («materialpakke») eller om å kjøpe
+ * byggeplanen («byggeplan»).
+ *
+ * «byggeplan» er den midlertidige manuelle salgsveien i lanseringsmodus:
+ * forespørselen opprettes av api/plan/bestill.ts, som samtidig lager
+ * tilgangskoden. Koden ligger KUN på denne forespørselen (som bare admin kan
+ * lese) – aldri på designet kunden selv kan lese – helt til den er innløst.
+ * Kunden Vippser manuelt, og admin sender koden fra /admin/foresporsler.
  */
-export type ForesporselType = 'ferdig' | 'materialpakke'
+export type ForesporselType = 'ferdig' | 'materialpakke' | 'byggeplan'
 export type ForesporselStatus = 'ny' | 'besvart' | 'lukket'
 
 export interface DesignForesporsel {
@@ -27,6 +32,19 @@ export interface DesignForesporsel {
   prisEstimatKr: number
   /** Kundens fritekst til admin. */
   melding: string
+  /** Designets Firestore-id. Settes på 'byggeplan'-forespørsler. */
+  designId?: string
+  /**
+   * 6-sifret tilgangskode kunden får når betalingen er mottatt. Settes kun av
+   * serveren, og feltet er ikke lesbart for kunden (se firestore.rules).
+   */
+  tilgangskode?: string
+  /**
+   * Gikk varsel-e-posten til admin ut? Settes av api/plan/bestill.ts. false =
+   * e-posten feilet eller mangler konfigurasjon (RESEND_API_KEY / EPOST_FRA /
+   * ADMIN_EPOST); forespørselen og koden ligger uansett her.
+   */
+  adminVarslet?: boolean
   status: ForesporselStatus
   createdAt?: unknown
 }
@@ -34,6 +52,7 @@ export interface DesignForesporsel {
 export const foresporselTypeLabel: Record<ForesporselType, string> = {
   ferdig: 'Ferdig bygget',
   materialpakke: 'Materialpakke',
+  byggeplan: 'Byggeplan (kode)',
 }
 
 export const foresporselStatusLabel: Record<ForesporselStatus, string> = {

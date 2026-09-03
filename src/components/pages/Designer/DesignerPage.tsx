@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 import Icon from '../../shared/Icon'
 import { useSEO } from '../../../hooks/useSEO'
@@ -10,11 +10,11 @@ import { FARGER } from '../../../designer/materials'
 import { alleprisposter, settPris } from '../../../designer/priser'
 import { byggesoknadPdf, byggesoknadUtskrift, planPdf, planUtskrift, type PlanArgs, type SoknadArgs } from '../../../designer/pdf'
 import {
-  opprettProsjekt, oppdaterProsjekt, getBrukerProsjekter, getProsjekt, slettProsjekt, markerKjopt, MaksDesignError,
+  opprettProsjekt, oppdaterProsjekt, getBrukerProsjekter, getProsjekt, slettProsjekt, MaksDesignError,
 } from '../../../services/designerService'
-import { startVippsBetaling, sjekkVippsStatus, vippsBelopFor } from '../../../services/vippsService'
-import type { DesignerProsjekt, Vare, Kjopt } from '../../../types/designerProsjekt'
-import { MAKS_DESIGN_PER_TYPE, VARER_FOR_KJOP, entitlements } from '../../../types/designerProsjekt'
+import { startVippsBetaling, sjekkVippsStatus, losInnTilgangskode, vippsBelopFor } from '../../../services/vippsService'
+import type { DesignerProsjekt, Vare } from '../../../types/designerProsjekt'
+import { MAKS_DESIGN_PER_TYPE, entitlements, paaFrossenPlan } from '../../../types/designerProsjekt'
 import type { DesignConfig } from '../../../designer/types'
 import DesignerViewport, { type ViewApi, type PartInfo, type ViewPreset } from './DesignerViewport'
 import Tegning2DView from './Tegning2DView'
@@ -61,16 +61,33 @@ function HoldBtn({ action, title, icon, className }: { action: () => void; title
   )
 }
 
-// Midlertidig: opplåsing med 6-sifret kode i påvente av betalingsintegrasjon.
-// Koden sendes til kunden etter betaling. Demokode inntil videre: 198000.
-const DEMO_CODE = '198000'
+// Testkode som låser opp alle leveranser uten betaling. Finnes KUN når
+// VITE_DESIGNER_DEMO_CODE er satt (lokal .env og test-deploys). I produksjon
+// er variabelen utelatt, og demo-opplåsing er da helt død kode.
+const DEMO_CODE = import.meta.env.VITE_DESIGNER_DEMO_CODE ?? ''
 
-/** Slår sammen leveransene fra et kjøp inn i eksisterende entitlements. */
-const grantKjopt = (base: Kjopt | undefined, vare: Vare | 'bundle'): Kjopt => {
-  const next: Kjopt = { ...base }
-  for (const flag of VARER_FOR_KJOP[vare]) next[flag] = true
-  return next
-}
+/**
+ * Midlertidig lanseringsmodus (VITE_LANSERINGSMODUS=1).
+ *
+ * Vipps slipper ikke produksjonsnøkler før nettsiden med salgsbetingelser er
+ * publisert og salgsavtalen godkjent, så vi kan ikke ta kortbetaling i appen
+ * ved lansering. Så lenge flagget står:
+ *  - byggeplanen låses opp med den 6-sifrede koden, ikke med Vipps i appen
+ *  - «Betal med Vipps» erstattes av «Be om byggeplan», som varsler admin.
+ *    Kunden Vippser manuelt, og admin sender koden fra /admin/foresporsler.
+ * Fjern variabelen i Vercel når produksjonsnøklene virker.
+ */
+const LANSERINGSMODUS = import.meta.env.VITE_LANSERINGSMODUS === '1'
+
+/**
+ * Byggesøknad-heftet er tatt av salg inntil videre – uavhengig av
+ * lanseringsmodus. Raden er grået ut («Kommer snart»), og verken gratis-modus,
+ * testkoden eller et gammelt kjøp låser den opp. Serveren avviser samme vare i
+ * api/_lib/pricing.ts (SOKNAD_SALG), så heftet kan heller ikke kjøpes med et
+ * håndlaget API-kall. Sett VITE_SOKNAD_SALG=1 (og SOKNAD_SALG=1 på serveren)
+ * når heftet skal selges igjen.
+ */
+const SOKNAD_SALG = import.meta.env.VITE_SOKNAD_SALG === '1'
 
 // Prislogikk for «Be om å få det laget».
 const MATERIAL_PAASLAG = 1.3 // håndtering/margin på materialestimatet
@@ -88,7 +105,7 @@ function skalertTimer(stdTimer: number, estimatKr: number, refEstimat: number, m
 }
 
 // 6-sifret kode-inntasting (én boks per siffer, som 2FA).
-function CodeModal({ error, belop, onSubmit, onVipps, onClose }: { error: boolean; belop: number; onSubmit: (code: string) => void; onVipps: () => void; onClose: () => void }) {
+function CodeModal({ error, errorMsg, busy, belop, manuell, onSubmit, onVipps, onClose }: { error: boolean; errorMsg?: string; busy?: boolean; belop: number; manuell?: boolean; onSubmit: (code: string) => void; onVipps: () => void; onClose: () => void }) {
   const [digits, setDigits] = useState(['', '', '', '', '', ''])
   const refs = useRef<Array<HTMLInputElement | null>>([])
 
@@ -135,10 +152,24 @@ function CodeModal({ error, belop, onSubmit, onVipps, onClose }: { error: boolea
             />
           ))}
         </CodeDigits>
-        {error && <CodeErr>Ugyldig kode. Sjekk e-posten din.</CodeErr>}
+        {busy && <CodeErr as="p">Sjekker koden …</CodeErr>}
+        {error && !busy && <CodeErr>{errorMsg || 'Ugyldig kode. Sjekk e-posten din.'}</CodeErr>}
         <CodeDivider><span>ikke betalt ennå?</span></CodeDivider>
-        <VippsBtn onClick={onVipps}>Betal med Vipps – kr {belop.toLocaleString('nb-NO')}</VippsBtn>
-        <CodeHint>Koden sendes på e-post når betalingen er registrert.</CodeHint>
+        <VippsBtn onClick={onVipps}>
+          {manuell
+            ? `Be om byggeplan – kr ${belop.toLocaleString('nb-NO')}`
+            : `Betal med Vipps – kr ${belop.toLocaleString('nb-NO')}`}
+        </VippsBtn>
+        <FreezeNote>
+          <Icon name="faSnowflake" /> Ved kjøp fryses designet slik det er nå. Planen du
+          laster ned gjelder disse målene – endrer du designet etterpå, må du kjøpe en ny
+          plan for de nye målene.
+        </FreezeNote>
+        <CodeHint>
+          {manuell
+            ? 'Vi sender betalingsinformasjon og koden på e-post. Kortbetaling i appen kommer snart.'
+            : 'Koden sendes på e-post når betalingen er registrert.'}
+        </CodeHint>
       </CodeBox>
     </CodeOverlay>
   )
@@ -195,7 +226,7 @@ export default function DesignerPage() {
   const navigate = useNavigate()
   const { produktId } = useParams<{ produktId?: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { isAuthenticated, loading: authLoading, login, firebaseUser } = useAuthContext()
+  const { isAuthenticated, loading: authLoading, login, firebaseUser, isAdmin } = useAuthContext()
   const uid = firebaseUser?.uid
   useScrollLock(true)
 
@@ -279,7 +310,26 @@ export default function DesignerPage() {
   // Visning-innstillingene er sekundære – slått sammen/skjult som standard så
   // de kommersielle valgene (byggeplan/byggesøknad) får plass øverst i raden.
   const [viewSettingsOpen, setViewSettingsOpen] = useState(false)
+  const viewSettingsRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!viewSettingsOpen) return
+    const onDown = (e: PointerEvent) => {
+      if (!viewSettingsRef.current?.contains(e.target as Node)) setViewSettingsOpen(false)
+    }
+    document.addEventListener('pointerdown', onDown)
+    return () => document.removeEventListener('pointerdown', onDown)
+  }, [viewSettingsOpen])
   const [viewMenuOpen, setViewMenuOpen] = useState(false)
+  const [productMenuOpen, setProductMenuOpen] = useState(false)
+  const productMenuRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!productMenuOpen) return
+    const onDown = (e: PointerEvent) => {
+      if (!productMenuRef.current?.contains(e.target as Node)) setProductMenuOpen(false)
+    }
+    document.addEventListener('pointerdown', onDown)
+    return () => document.removeEventListener('pointerdown', onDown)
+  }, [productMenuOpen])
   const [overrides, setOverrides] = useState<Record<string, { treslag: string; farge: string }>>({})
   // Penselen har egen tilstand (uavhengig av modellens standardmateriale).
   const [brush, setBrush] = useState<Record<string, string>>({ treslag: 'impregnert', farge: 'ubehandlet' })
@@ -292,13 +342,24 @@ export default function DesignerPage() {
   // Kode-basert opplåsing (demo/tilgangskode) gjelder hele økten og gir tilgang
   // til alle leveranser. Betalt/kjøpt tilgang leses per leveranse fra designet.
   const [codeUnlockAll, setCodeUnlockAll] = useState(false)
+  // Admin åpnet et kundedesign via ?design=<id> fra /admin/foresporsler, og
+  // kan da laste ned byggeplanen manuelt for å sende den til kunden. Låser
+  // bare opp for økten – ingenting skrives til designet.
+  const [adminVisning, setAdminVisning] = useState(false)
   const [codeErr, setCodeErr] = useState(false)
+  const [codeErrMsg, setCodeErrMsg] = useState('')
+  const [codeBusy, setCodeBusy] = useState(false)
   // Id-en til den første seksjonen som rendres (rekkefølge: form → preset → mål).
   const forsteSeksjon = template?.former ? 'form' : template?.presets?.length ? 'preset' : 'mal'
   const [openSection, setOpenSection] = useState<string>(forsteSeksjon)
   const toggleSection = (id: string) => setOpenSection((cur) => (cur === id ? '' : id))
   const [showCode, setShowCode] = useState(false)
   const [unlockedModal, setUnlockedModal] = useState(false)
+  // Lesevisning av den kjøpte, fryste planen (rotérbar, montert/splitt) og
+  // dialogen som vises når kunden har endret designet siden kjøpet.
+  const [frozenView, setFrozenView] = useState(false)
+  const [offPlanModal, setOffPlanModal] = useState(false)
+  const preFrozenRef = useRef<{ config: DesignConfig; overrides: Record<string, { treslag: string; farge: string }> } | null>(null)
   const [prisVersjon, setPrisVersjon] = useState(0)
   const viewApi = useRef<ViewApi | null>(null)
   const pendingRef = useRef<(() => void) | null>(null)
@@ -324,16 +385,38 @@ export default function DesignerPage() {
   // Tilgang pr. leveranse (entitlements): gratis produkt, kode-opplåsing hele
   // økten, eller kjøpt tilgang lagret på designet (bakoverkompatibelt med `betalt`).
   const kjoptTilgang = currentDesign ? entitlements(currentDesign) : {}
-  const har = (vare: Vare): boolean => gratis || codeUnlockAll || kjoptTilgang[vare] === true
+  // Er det levende designet identisk med den kjøpte, fryste planen? Kun da er
+  // nedlasting åpen for et betalt design. Har kunden endret målene etter kjøp,
+  // er de «utenfor planen» og må kjøpe på nytt (den fryste planen kan fortsatt
+  // lastes ned via lesevisningen). `frosset` mangler på eldre/gratis design.
+  const frosset = currentDesign?.frosset
+  const paaPlan = paaFrossenPlan(frosset, config, overrides)
+  // Søknadsheftet er tatt av salg (se SOKNAD_SALG). Sjekken ligger FØRST i alle
+  // tilgangsreglene under, slik at verken gratis-modus, testkoden eller et
+  // gammelt kjøp kan låse det opp.
+  const avslatt = (vare: Vare): boolean => vare === 'soknad' && !SOKNAD_SALG
+  // `har` = eier kunden leveransen i det hele tatt (uavhengig av endringer).
+  const har = (vare: Vare): boolean =>
+    !avslatt(vare) && (gratis || codeUnlockAll || adminVisning || kjoptTilgang[vare] === true)
+  // `harNed` = kan leveransen lastes ned/avsløres nå (eier + på plan).
+  const harNed = (vare: Vare): boolean =>
+    !avslatt(vare) && (gratis || codeUnlockAll || adminVisning || (kjoptTilgang[vare] === true && paaPlan))
+  // Eier byggeplanen, men har endret designet siden kjøp → låst til re-kjøp.
+  const utenforPlan = (vare: Vare): boolean =>
+    !avslatt(vare) && !gratis && !codeUnlockAll && !adminVisning && kjoptTilgang[vare] === true && !paaPlan
   // «unlocked» = byggeplan-nivået (mål, kappliste, plan-PDF). Beholdt navn for
-  // å unngå churn i visningen; søknad/CNC sjekkes eksplisitt med `har()`.
-  const unlocked = har('plan')
+  // å unngå churn i visningen; søknad/CNC sjekkes eksplisitt med `harNed()`.
+  const unlocked = harNed('plan')
 
-  // Kjør handlingen hvis leveransen er låst opp, ellers be om koden/betaling
-  // først og husk handlingen til etter opplåsing.
+  // Kjør handlingen hvis leveransen kan lastes ned nå. Ellers: har kunden kjøpt
+  // men endret designet, tilby lesevisning/re-kjøp; hvis ikke kjøpt, be om
+  // koden/betaling og husk handlingen til etter opplåsing.
   const gate = (vare: Vare, action: () => void) => {
-    if (har(vare)) action()
-    else { pendingRef.current = action; setShowCode(true) }
+    if (avslatt(vare)) { flash('Byggesøknad-hefte kommer snart.'); return }
+    if (harNed(vare)) { action(); return }
+    if (utenforPlan(vare)) { pendingRef.current = action; setOffPlanModal(true); return }
+    pendingRef.current = action
+    setShowCode(true)
   }
 
   const flash = (m: string) => { setToast(m); window.setTimeout(() => setToast(''), 2200) }
@@ -352,8 +435,11 @@ export default function DesignerPage() {
   // Nullstill designet når produktet (URL-en) endres.
   useEffect(() => {
     if (!template) return
+    setFrozenView(false)
+    preFrozenRef.current = null
     setConfig({ ...template.defaultConfig })
     setCodeUnlockAll(false)
+    setAdminVisning(false)
     setCodeErr(false)
     setShowCode(false)
     setViewMode('assembled')
@@ -441,30 +527,44 @@ export default function DesignerPage() {
   // Manuell kamera-navigasjon stopper «vis frem» før den kjører kommandoen.
   const nav = (fn: () => void) => { setShowcase(false); fn() }
 
-  const verifyCode = (v: string) => {
-    const designMatch = currentDesign && v === currentDesign.tilgangskode
-    if (v === DEMO_CODE || designMatch) {
+  const verifyCode = async (v: string) => {
+    // Testkoden finnes bare når VITE_DESIGNER_DEMO_CODE er satt (aldri i
+    // produksjon) og låser opp for økten uten å skrive noe til Firestore.
+    if (DEMO_CODE !== '' && v === DEMO_CODE) {
       setCodeErr(false)
+      setCodeErrMsg('')
       setShowCode(false)
-      if (v === DEMO_CODE) {
-        // Demokode = full opplåsing av alle leveranser for økten (test).
-        setCodeUnlockAll(true)
-      } else if (designMatch && currentDesign) {
-        // Ekte design-kode = byggeplanen er betalt (plan + søknad). Persister.
-        markerKjopt(currentDesign.id, 'plan').catch(() => {})
-        setSavedList((prev) =>
-          prev.map((d) =>
-            d.id === currentDesign.id ? { ...d, betalt: true, kjopt: grantKjopt(d.kjopt, 'plan') } : d,
-          ),
-        )
-      }
-      // Ikke kjør nedlastingen automatisk: den er asynkron (html2canvas) og
-      // mister «user activation», så nettleseren blokkerer nedlastingen. Vis i
-      // stedet en bekreftelses-modal med en eksplisitt nedlastingsknapp.
+      setCodeUnlockAll(true)
       setUnlockedModal(true)
-    } else {
-      setCodeErr(true)
+      return
     }
+    if (!currentDesign) {
+      setCodeErr(true)
+      setCodeErrMsg('Åpne designet koden gjelder for, og prøv igjen.')
+      return
+    }
+
+    // Ekte kode verifiseres på serveren, som også skriver entitlements –
+    // `betalt`/`kjopt`/`frosset` er server-only i firestore.rules.
+    setCodeBusy(true)
+    const res = await losInnTilgangskode(currentDesign.id, v)
+    setCodeBusy(false)
+    if (!res.ok) {
+      setCodeErr(true)
+      setCodeErrMsg(res.message ?? '')
+      return
+    }
+
+    setCodeErr(false)
+    setCodeErrMsg('')
+    setShowCode(false)
+    // Hent designet på nytt: serveren har satt betalt, kjopt og frysningen.
+    const oppdatert = await getProsjekt(currentDesign.id)
+    if (oppdatert) setSavedList((prev) => prev.map((d) => (d.id === oppdatert.id ? oppdatert : d)))
+    // Ikke kjør nedlastingen automatisk: den er asynkron (html2canvas) og
+    // mister «user activation», så nettleseren blokkerer nedlastingen. Vis i
+    // stedet en bekreftelses-modal med en eksplisitt nedlastingsknapp.
+    setUnlockedModal(true)
   }
 
   // Kjør den ventende eksporten fra en fersk knappetrykk-gest (modalen).
@@ -476,14 +576,40 @@ export default function DesignerPage() {
   }
   const closeUnlocked = () => { pendingRef.current = null; setUnlockedModal(false) }
 
-  // Last brukerens lagrede design for gjeldende produkt.
+  // Last brukerens lagrede design for gjeldende produkt, og åpne et bestemt
+  // design hvis URL-en ber om det (?design=<id>). Sistnevnte brukes av
+  // /admin/foresporsler: admin kan lese kundens design (firestore.rules) og
+  // laste ned byggeplanen manuelt for å sende den til kunden.
+  const designParamHandtert = useRef(false)
   useEffect(() => {
     if (!uid || !produktId) { setSavedList([]); return }
+    let avbrutt = false
     setListLoading(true)
-    getBrukerProsjekter(uid, produktId)
-      .then(setSavedList)
-      .catch(() => {})
-      .finally(() => setListLoading(false))
+    ;(async () => {
+      const mine = await getBrukerProsjekter(uid, produktId).catch(() => [])
+      const onsketId = designParamHandtert.current ? null : searchParams.get('design')
+      designParamHandtert.current = true
+      // Andres design hentes separat – getBrukerProsjekter spør bare på egen uid.
+      let annet: DesignerProsjekt | null = null
+      if (onsketId && !mine.some((d) => d.id === onsketId)) {
+        annet = await getProsjekt(onsketId).catch(() => null)
+        if (annet?.templateId !== produktId) annet = null
+      }
+      if (avbrutt) return
+      setSavedList(annet ? [annet, ...mine] : mine)
+      setListLoading(false)
+      const aapne = annet ?? mine.find((d) => d.id === onsketId)
+      if (!aapne) return
+      openDesign(aapne)
+      // Fremmed design + admin = manuell nedlasting for kunden. Egne design
+      // følger vanlige tilgangsregler.
+      if (aapne.userId !== uid && isAdmin) setAdminVisning(true)
+    })()
+    return () => { avbrutt = true }
+    // searchParams/isAdmin leses bevisst uten å være avhengigheter: ?design
+    // håndteres én gang (designParamHandtert), ellers ville ?vipps-opprydding
+    // laste listen på nytt.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [uid, produktId])
 
   const beginNaming = () => {
@@ -494,6 +620,9 @@ export default function DesignerPage() {
 
   const handleSave = async () => {
     if (!uid || !template || busy) return
+    // Admin ser på kundens design – det skal ikke skrives til (og reglene
+    // ville uansett avvist skrivingen).
+    if (adminVisning) { flash('Kundens design – kan ikke lagres herfra'); return }
     if (currentDesignId) {
       setBusy(true)
       try {
@@ -534,12 +663,15 @@ export default function DesignerPage() {
 
   const openDesign = (p: DesignerProsjekt) => {
     if (!template) return
+    setFrozenView(false)
+    preFrozenRef.current = null
     setConfig({ ...template.defaultConfig, ...p.config } as DesignConfig)
     setOverrides(p.overrides ?? {})
     setCurrentDesignId(p.id)
     // Tilgang leses fra designets egne entitlements via `har()`; nullstill kun
-    // øktens kode-opplåsing så et nytt design ikke arver forrige opplåsing.
+    // øktens opplåsinger så et nytt design ikke arver forrige opplåsing.
     setCodeUnlockAll(false)
+    setAdminVisning(false)
     setViewMode('assembled')
     setPaintMode(false)
     setShowcase(false)
@@ -557,18 +689,21 @@ export default function DesignerPage() {
     ;(async () => {
       const res = await sjekkVippsStatus(prosjektId)
       if (res.betalt) {
-        // Hent det oppdaterte designet (Cloud Function har satt riktig `kjopt`).
-        const p = await getProsjekt(prosjektId)
-        if (p) {
-          openDesign(p)
+        // Hent det oppdaterte designet. Serveren har alt satt `kjopt` og fryst
+        // designet ved kapring (api/vipps/status.ts), så her leses det bare.
+        const oppdatert = await getProsjekt(prosjektId)
+        if (oppdatert) {
+          openDesign(oppdatert)
           setSavedList((prev) =>
-            prev.some((d) => d.id === p.id) ? prev.map((d) => (d.id === p.id ? p : d)) : [p, ...prev],
+            prev.some((d) => d.id === oppdatert.id) ? prev.map((d) => (d.id === oppdatert.id ? oppdatert : d)) : [oppdatert, ...prev],
           )
         }
         const navn: Record<Vare, string> = {
           plan: 'byggeplanen', soknad: 'søknadsheftet', cnc: 'maskinfilene',
         }
-        flash(`Betaling fullført – ${navn[res.vare ?? 'plan']} er låst opp!`)
+        // Koden er også sendt på e-post; vis den her i tilfelle e-posten treger.
+        const kode = res.tilgangskode ? ` Tilgangskode: ${res.tilgangskode}` : ''
+        flash(`Betaling fullført – ${navn[res.vare ?? 'plan']} er låst opp!${kode}`)
       } else {
         flash('Betalingen ble ikke fullført.')
       }
@@ -608,6 +743,8 @@ export default function DesignerPage() {
 
   const nyttDesign = () => {
     if (!template) return
+    setFrozenView(false)
+    preFrozenRef.current = null
     setConfig({ ...template.defaultConfig })
     setOverrides({})
     setCurrentDesignId(null)
@@ -616,8 +753,40 @@ export default function DesignerPage() {
     setShowMine(false)
   }
 
+  // Lesevisning av den kjøpte, fryste planen: last frysningens config inn i den
+  // levende scenen (så modellen kan roteres og vises montert/splittet), lås
+  // redigering, og vis nedlastingslenken tydelig. Den redigerbare tilstanden
+  // huskes og gjenopprettes når kunden går tilbake.
+  const enterFrozenView = () => {
+    if (!template || !currentDesign?.frosset) return
+    preFrozenRef.current = { config, overrides }
+    setConfig({ ...template.defaultConfig, ...currentDesign.frosset.config } as DesignConfig)
+    setOverrides(currentDesign.frosset.overrides ?? {})
+    setFrozenView(true)
+    setPaintMode(false)
+    setShowcase(false)
+    setViewMode('assembled')
+    setOffPlanModal(false)
+    setShowMine(false)
+  }
+  const exitFrozenView = () => {
+    if (preFrozenRef.current) {
+      setConfig(preFrozenRef.current.config)
+      setOverrides(preFrozenRef.current.overrides)
+      preFrozenRef.current = null
+    }
+    setFrozenView(false)
+  }
+
   const startVipps = async (vare: Vare | 'bundle' = 'plan') => {
     if (!currentDesign) { flash('Lagre designet først'); return }
+    // Lanseringsmodus: ingen kortbetaling i appen. Kunden ber om planen, og
+    // får betalingsinformasjon + tilgangskode på e-post fra admin.
+    if (LANSERINGSMODUS) {
+      setShowCode(false)
+      setForesporsel('byggeplan')
+      return
+    }
     flash('Starter Vipps-betaling …')
     const res = await startVippsBetaling(currentDesign, vare)
     if (res.ok && res.redirectUrl) {
@@ -670,16 +839,39 @@ export default function DesignerPage() {
     return <AuthGate><AuthCard><Icon name="faSpinner" spin /></AuthCard></AuthGate>
   }
   if (!isAuthenticated) {
+    // Hver produktside er også en landingsside fra søk. Uten dette viste alle
+    // produktsidene nøyaktig samme påloggingsvegg – tynt og identisk innhold
+    // både for besøkende og for søkemotorene (sidene ligger i sitemap.xml og
+    // prerendres). Kjenner vi produktet, viser vi hva det faktisk er først.
     return (
       <AuthGate>
         <AuthClose onClick={() => navigate('/designverktoy')} aria-label="Lukk"><Icon name="faXmark" /></AuthClose>
         <AuthCard>
-          <img src="/images/branding/logo_icon_white.webp" alt="Minio" />
-          <h2>Logg inn for å designe</h2>
-          <p>Designverktøyet er gratis å bruke – logg inn så lagrer vi designet ditt og du kan bestille byggeplan.</p>
+          {template ? (
+            <>
+              {template.bilde && (
+                <AuthShot src={template.bilde} alt={`${template.navn} tegnet i Minios 3D-designverktøy`} />
+              )}
+              {/* h1: produktsiden er en egen landingsside, og trenger én toppoverskrift. */}
+              <h1>Tegn din egen {template.navn.toLowerCase()} i 3D</h1>
+              <p>{template.beskrivelse}</p>
+              <AuthFakta>
+                <span><Icon name="faCheckCircle" /> Gratis å designe</span>
+                <span><Icon name="faFilePdf" /> Byggeplan fra {formatKr(template.fraPris)}</span>
+              </AuthFakta>
+              <p>Logg inn så lagrer vi designet ditt, og du kan bestille byggeplanen med materialliste og tegninger.</p>
+            </>
+          ) : (
+            <>
+              <img src="/images/branding/logo_icon_white.webp" alt="Minio" />
+              <h2>Logg inn for å designe</h2>
+              <p>Designverktøyet er gratis å bruke – logg inn så lagrer vi designet ditt og du kan bestille byggeplan.</p>
+            </>
+          )}
           <AuthBtn onClick={() => login()}>
             <Icon name="faGoogle" /> Logg inn med Google
           </AuthBtn>
+          <AuthLenke to="/designverktoy">Se alle produkter du kan tegne</AuthLenke>
         </AuthCard>
       </AuthGate>
     )
@@ -694,21 +886,45 @@ export default function DesignerPage() {
         <AllBtn onClick={() => navigate('/designverktoy')} title="Alle produkter">
           <Icon name="faBars" /> <span>Alle</span>
         </AllBtn>
-        <Switcher>
-          {TEMPLATES.map((t) => (
-            <Pill
-              key={t.id}
-              $active={t.id === template.id}
-              onClick={() => t.id !== template.id && chooseProduct(t.id)}
-            >
-              {t.navn}
-            </Pill>
-          ))}
-          {KOMMER_SNART.map((k) => (
-            <Pill key={k.id} as="div" $soon title={`${k.navn} – kommer snart`}>
-              {k.navn} <Soon>snart</Soon>
-            </Pill>
-          ))}
+        <Switcher ref={productMenuRef}>
+          <CurrentBtn
+            $active={productMenuOpen}
+            aria-haspopup="menu"
+            aria-expanded={productMenuOpen}
+            onClick={() => setProductMenuOpen((o) => !o)}
+          >
+            <Icon name={template.ikon} />
+            <span>{template.navn}</span>
+            <Chevron $open={productMenuOpen}><Icon name="faChevronDown" /></Chevron>
+          </CurrentBtn>
+          {productMenuOpen && (
+            <ProductMenu role="menu">
+              <ProductMenuHead>Bytt produkt</ProductMenuHead>
+              <ProductGrid>
+                {TEMPLATES.map((t) => (
+                  <ProductCard
+                    key={t.id}
+                    $active={t.id === template.id}
+                    onClick={() => {
+                      setProductMenuOpen(false)
+                      if (t.id !== template.id) chooseProduct(t.id)
+                    }}
+                  >
+                    <ProductThumb>
+                      {t.bilde ? <img src={t.bilde} alt="" loading="lazy" /> : <Icon name={t.ikon} />}
+                    </ProductThumb>
+                    <ProductName>{t.navn}</ProductName>
+                  </ProductCard>
+                ))}
+                {KOMMER_SNART.map((k) => (
+                  <ProductCard key={k.id} as="div" $soon title={`${k.navn} – kommer snart`}>
+                    <ProductThumb><Icon name={k.ikon} /></ProductThumb>
+                    <ProductName>{k.navn} <Soon>snart</Soon></ProductName>
+                  </ProductCard>
+                ))}
+              </ProductGrid>
+            </ProductMenu>
+          )}
         </Switcher>
         <CloseBtn onClick={() => navigate('/designverktoy')} aria-label="Lukk designverktøy">
           <Icon name="faXmark" />
@@ -717,7 +933,7 @@ export default function DesignerPage() {
 
       <Body>
         {bom && (
-          <SummaryRail>
+          <SummaryRail $open={configOpen}>
             <RailHead>
               <RailHeadTop>
                 <SumTitle>Ditt design</SumTitle>
@@ -765,6 +981,192 @@ export default function DesignerPage() {
                 <b>{formatKr(bom.estimatKr)}</b>
               </MatCost>
 
+              <ConfigTitle>Tilpass designet</ConfigTitle>
+              <ConfigBlock>
+                {frozenView && (
+                  <PanelLock>
+                    <Icon name="faLock" />
+                    <b>Kjøpt plan – redigering låst</b>
+                    <span>Du ser den fryste byggeplanen. Gå tilbake for å endre designet (endringer krever ny plan).</span>
+                    <PanelLockBtn onClick={exitFrozenView}><Icon name="faPen" /> Rediger design</PanelLockBtn>
+                  </PanelLock>
+                )}
+                {template.former && (
+                  <Section id="form" title="Form" open={openSection === 'form'} onToggle={toggleSection}>
+                    <ShapeGrid>
+                      {template.former.choices.map((s) => (
+                        <ShapeBtn
+                          key={s.id}
+                          $active={cfg[template.former!.key] === s.id}
+                          onClick={() => patch({ [template.former!.key]: s.id })}
+                        >
+                          <ShapeIcon shape={s.ikon ?? s.id} />
+                          <span>{s.label}</span>
+                        </ShapeBtn>
+                      ))}
+                    </ShapeGrid>
+                  </Section>
+                )}
+
+                {template.presets && template.presets.length > 0 && (
+                  <Section id="preset" title="Ferdige oppsett" open={openSection === 'preset'} onToggle={toggleSection}>
+                    <PresetGrid>
+                      {template.presets.map((pr) => {
+                        const aktiv = Object.entries(pr.config).every(([k, v]) => cfg[k] === v)
+                        return (
+                          <PresetBtn key={pr.id} $active={aktiv} onClick={() => patch(pr.config)}>
+                            <strong>{pr.navn}</strong>
+                            {pr.beskrivelse && <span>{pr.beskrivelse}</span>}
+                          </PresetBtn>
+                        )
+                      })}
+                    </PresetGrid>
+                  </Section>
+                )}
+
+                <Section id="mal" title="Mål og konstruksjon" open={openSection === 'mal'} onToggle={toggleSection}>
+                  {template.dimensjoner
+                    .filter((d) => !d.visibleWhen || d.visibleWhen(cfg))
+                    .map((d) => {
+                      const val = Number(cfg[d.key])
+                      return (
+                        <Slider key={d.key}>
+                          <SliderTop>
+                            <span>{d.label}</span>
+                            <b>{val} {d.unit ?? 'cm'}</b>
+                          </SliderTop>
+                          <input
+                            type="range"
+                            min={d.min}
+                            max={d.max}
+                            step={d.step}
+                            value={val}
+                            onChange={(e) => patch({ [d.key]: Number(e.target.value) })}
+                          />
+                          {d.markers && d.markers.length > 0 && (
+                            <MarkerRow>
+                              {d.markers.map((mk) => (
+                                <MarkerChip key={mk} type="button" $active={val === mk} onClick={() => patch({ [d.key]: mk })}>
+                                  {mk}{d.unit ?? 'cm'}
+                                </MarkerChip>
+                              ))}
+                            </MarkerRow>
+                          )}
+                        </Slider>
+                      )
+                    })}
+                  {template.alternativer && template.alternativer.length > 0 &&
+                    template.alternativer
+                      .filter((a) => a.key !== 'visning')
+                      .filter((a) => !a.visibleWhen || a.visibleWhen(cfg))
+                      .map((a) => (
+                        <SubGroup key={a.key}>
+                          <SubLabel>{a.label}</SubLabel>
+                          <SegRow>
+                            {a.choices.map((c) => (
+                              <SegBtn key={c.id} $active={cfg[a.key] === c.id} onClick={() => patch({ [a.key]: c.id, ...(c.patch ?? {}) })}>
+                                {c.label}
+                              </SegBtn>
+                            ))}
+                          </SegRow>
+                        </SubGroup>
+                      ))}
+                  {template.valg && template.valg.length > 0 &&
+                    template.valg.map((t) => (
+                      <Toggle key={t.key} $on={Boolean(cfg[t.key])} onClick={() => patch({ [t.key]: !cfg[t.key] })}>
+                        <span>
+                          {t.label}
+                          {t.note && <em>{t.note}</em>}
+                        </span>
+                        <Track $on={Boolean(cfg[t.key])}><Knob $on={Boolean(cfg[t.key])} /></Track>
+                      </Toggle>
+                    ))}
+                </Section>
+
+                <Section id="materialer" title="Materialer" open={openSection === 'materialer'} onToggle={toggleSection}>
+                  {template.materialer.map((m) => (
+                    <SubGroup key={m.key}>
+                      <SubLabel>{m.label}</SubLabel>
+                      {m.asSwatches ? (
+                        <>
+                          <Swatches>
+                            {m.choices.map((c) => {
+                              const active = cfg[m.key] === c.id
+                              const swatch = c.swatch ?? `#${c.hex.toString(16).padStart(6, '0')}`
+                              return (
+                                <SwatchBtn
+                                  key={c.id}
+                                  $active={active}
+                                  $transparent={swatch === 'transparent'}
+                                  style={swatch === 'transparent' ? undefined : { background: swatch }}
+                                  onClick={() => patch({ [m.key]: c.id })}
+                                  title={c.label}
+                                  aria-label={c.label}
+                                >
+                                  {active && <Icon name="faCheck" />}
+                                </SwatchBtn>
+                              )
+                            })}
+                          </Swatches>
+                          {cfg[m.key] && <SwatchName>{FARGER[String(cfg[m.key])]?.label ?? ''}</SwatchName>}
+                        </>
+                      ) : (
+                        <Choices>
+                          {m.choices.map((c) => (
+                            <ChoiceBtn key={c.id} $active={cfg[m.key] === c.id} onClick={() => patch({ [m.key]: c.id })}>
+                              <span>{c.label}</span>
+                              {c.note && <em>{c.note}</em>}
+                            </ChoiceBtn>
+                          ))}
+                        </Choices>
+                      )}
+                    </SubGroup>
+                  ))}
+                </Section>
+
+                {template.byggeregler && (() => {
+                  const b = template.byggeregler(cfg)
+                  return (
+                    <Section id="byggeregler" title="Byggeregler" open={openSection === 'byggeregler'} onToggle={toggleSection}>
+                      <ByggStatus $ok={b.sokfri}>
+                        <Icon name={b.sokfri ? 'faCheckCircle' : 'faExclamationTriangle'} /> {b.tittel}
+                      </ByggStatus>
+                      <ByggList>
+                        {b.punkter.map((p, i) => (
+                          <li key={i}>{p}</li>
+                        ))}
+                      </ByggList>
+                      {template.soknadTegning && SOKNAD_SALG && (
+                        <SoknadNote>
+                          Trenger du å søke? Last ned <b>byggesøknad-heftet</b> (plan, fasader &amp; snitt + situasjonsplan-veiledning) under «Hva vil du gjøre?» nedenfor. Veiledende – du er selv ansvarlig søker.
+                        </SoknadNote>
+                      )}
+                    </Section>
+                  )
+                })()}
+
+                <Section id="priser" title="Priser" open={openSection === 'priser'} onToggle={toggleSection}>
+                  <PriceNote>Veiledende ca-priser (impregnert). Juster hvis butikken din har andre priser – alle mål og kostnader oppdateres.</PriceNote>
+                  {alleprisposter().map((p) => (
+                    <PriceRow key={p.id}>
+                      <span>{p.navn}</span>
+                      <PriceInput
+                        type="number"
+                        min={0}
+                        step={0.5}
+                        defaultValue={p.pris}
+                        onChange={(e) => endrePris(p.id, Number(e.target.value))}
+                      />
+                      <em>kr/{p.enhet}</em>
+                    </PriceRow>
+                  ))}
+                </Section>
+              </ConfigBlock>
+
+              <SumFoot><Icon name="faWandMagicSparkles" /> Design selv – helt gratis</SumFoot>
+            </RailScroll>
+
+            <RailActions>
               <OptTitle>Hva vil du gjøre?</OptTitle>
               <OptList>
                 <OptRow
@@ -797,6 +1199,17 @@ export default function DesignerPage() {
                     <OptPrice>Gratis</OptPrice>
                     <OptArrow><Icon name="faChevronRight" /></OptArrow>
                   </OptRow>
+                ) : har('plan') ? (
+                  <OptRow $highlight onClick={() => (paaPlan ? exportPlan('pdf') : enterFrozenView())}>
+                    <OptBadge>{paaPlan ? 'Kjøpt' : 'Endret'}</OptBadge>
+                    <OptIco $highlight><Icon name={paaPlan ? 'faFilePdf' : 'faExclamationTriangle'} /></OptIco>
+                    <OptText>
+                      <b>Byggeplan (PDF)</b>
+                      <em>{paaPlan ? 'Materialliste + tegninger' : 'Endret siden kjøp – vis kjøpt plan'}</em>
+                    </OptText>
+                    <OptPrice>{paaPlan ? 'Last ned' : 'Vis plan'}</OptPrice>
+                    <OptArrow><Icon name="faChevronRight" /></OptArrow>
+                  </OptRow>
                 ) : (
                   <OptRow $highlight onClick={() => setShowCode(true)}>
                     <OptBadge>Kjøp</OptBadge>
@@ -807,18 +1220,26 @@ export default function DesignerPage() {
                   </OptRow>
                 )}
                 {template.soknadTegning && (
-                  <OptRow onClick={() => exportSoknad('pdf')}>
-                    {!har('soknad') && !gratis && <OptBadge>Tillegg</OptBadge>}
+                  <OptRow
+                    $disabled={avslatt('soknad')}
+                    disabled={avslatt('soknad')}
+                    onClick={() => !avslatt('soknad') && exportSoknad('pdf')}
+                  >
+                    {!har('soknad') && !gratis && !avslatt('soknad') && <OptBadge>Tillegg</OptBadge>}
                     <OptIco><Icon name="faClipboardList" /></OptIco>
                     <OptText><b>Byggesøknad-hefte (PDF)</b><em>Plan, fasader &amp; snitt + byggeregler</em></OptText>
-                    <OptPrice>{gratis || har('soknad') ? 'Låst opp' : formatKr(vippsBelopFor(template.id, 'soknad'))}</OptPrice>
-                    <OptArrow><Icon name="faChevronRight" /></OptArrow>
+                    {avslatt('soknad') ? (
+                      <OptNa>Kommer snart</OptNa>
+                    ) : (
+                      <>
+                        <OptPrice>{gratis || harNed('soknad') ? 'Låst opp' : har('soknad') ? 'Vis plan' : formatKr(vippsBelopFor(template.id, 'soknad'))}</OptPrice>
+                        <OptArrow><Icon name="faChevronRight" /></OptArrow>
+                      </>
+                    )}
                   </OptRow>
                 )}
               </OptList>
-
-              <SumFoot><Icon name="faWandMagicSparkles" /> Design selv – helt gratis</SumFoot>
-            </RailScroll>
+            </RailActions>
 
             <RailFooter>
               <RailExportBtn onClick={() => exportPlan('pdf')} title="Last ned byggeplan som PDF">
@@ -826,6 +1247,11 @@ export default function DesignerPage() {
                 Last ned byggeplan
                 <RailExportPrice>{gratis ? 'Gratis' : unlocked ? 'PDF' : formatKr(template.fraPris)}</RailExportPrice>
               </RailExportBtn>
+              {frosset && !frozenView && (
+                <FrozenLink onClick={enterFrozenView} title="Vis den kjøpte, fryste byggeplanen">
+                  <Icon name="faCubes" /> Vis kjøpt byggeplan
+                </FrozenLink>
+              )}
             </RailFooter>
           </SummaryRail>
         )}
@@ -857,7 +1283,7 @@ export default function DesignerPage() {
           />
 
           {is3D && (
-            <ViewSettings onPointerLeave={() => setViewSettingsOpen(false)}>
+            <ViewSettings ref={viewSettingsRef}>
               <NavBtn
                 $active={viewSettingsOpen}
                 title="Visning"
@@ -1155,208 +1581,72 @@ export default function DesignerPage() {
               </ToolBtn>
               <ToolDivider />
               <ToolIcon $active={showcase} onClick={() => setShowcase((v) => !v)} title={showcase ? 'Stopp visning' : 'Vis frem (roter)'}><Icon name={showcase ? 'faPause' : 'faPlay'} /></ToolIcon>
-              <ToolDivider />
-              <ToolBtn $primary onClick={() => exportPlan('pdf')} title="Last ned byggeplan som PDF">
-                <Icon name={unlocked ? 'faDownload' : 'faLock'} /> PDF
-              </ToolBtn>
-              <ToolIcon onClick={() => exportPlan('print')} title="Skriv ut byggeplan"><Icon name="faPrint" /></ToolIcon>
             </Toolbar>
           )}
 
-          <PanelToggle
+          <RailToggle
+            $open={configOpen}
             onClick={() => setConfigOpen((o) => !o)}
-            title={configOpen ? 'Skjul innstillinger' : 'Vis innstillinger'}
-            aria-label={configOpen ? 'Skjul innstillinger' : 'Vis innstillinger'}
+            title={configOpen ? 'Skjul panelet' : 'Vis panelet'}
+            aria-label={configOpen ? 'Skjul panelet' : 'Vis panelet'}
           >
-            <Icon name={configOpen ? 'faChevronRight' : 'faChevronLeft'} />
-            <ToggleLabel>{configOpen ? 'Skjul valg' : 'Vis valg'}</ToggleLabel>
-          </PanelToggle>
+            <Icon name={configOpen ? 'faChevronLeft' : 'faChevronRight'} />
+            <ToggleLabel>{configOpen ? 'Skjul' : 'Vis valg'}</ToggleLabel>
+          </RailToggle>
+
+          {frozenView && (
+            <FrozenBanner>
+              <FrozenBadge><Icon name="faCheckCircle" /> Kjøpt byggeplan</FrozenBadge>
+              <FrozenText>
+                Dette er den fryste planen du betalte for – roter og veksle mellom
+                montert og splittvisning. Nedlasting er åpen for denne versjonen.
+              </FrozenText>
+              <FrozenActions>
+                <FrozenDownload onClick={() => exportPlan('pdf')}>
+                  <Icon name="faFilePdf" /> Last ned byggeplan
+                </FrozenDownload>
+                {template.soknadTegning && har('soknad') && (
+                  <FrozenDownload $ghost onClick={() => exportSoknad('pdf')}>
+                    <Icon name="faClipboardList" /> Byggesøknad
+                  </FrozenDownload>
+                )}
+                <FrozenExit onClick={exitFrozenView} title="Tilbake til redigering">
+                  <Icon name="faPen" /> Rediger design
+                </FrozenExit>
+              </FrozenActions>
+            </FrozenBanner>
+          )}
         </Stage>
-
-        <Panel $open={configOpen}>
-          <PanelScroll $open={configOpen}>
-            {template.former && (
-              <Section id="form" title="Form" open={openSection === 'form'} onToggle={toggleSection}>
-                <ShapeGrid>
-                  {template.former.choices.map((s) => (
-                    <ShapeBtn
-                      key={s.id}
-                      $active={cfg[template.former!.key] === s.id}
-                      onClick={() => patch({ [template.former!.key]: s.id })}
-                    >
-                      <ShapeIcon shape={s.ikon ?? s.id} />
-                      <span>{s.label}</span>
-                    </ShapeBtn>
-                  ))}
-                </ShapeGrid>
-              </Section>
-            )}
-
-            {template.presets && template.presets.length > 0 && (
-              <Section id="preset" title="Ferdige oppsett" open={openSection === 'preset'} onToggle={toggleSection}>
-                <PresetGrid>
-                  {template.presets.map((pr) => {
-                    const aktiv = Object.entries(pr.config).every(([k, v]) => cfg[k] === v)
-                    return (
-                      <PresetBtn key={pr.id} $active={aktiv} onClick={() => patch(pr.config)}>
-                        <strong>{pr.navn}</strong>
-                        {pr.beskrivelse && <span>{pr.beskrivelse}</span>}
-                      </PresetBtn>
-                    )
-                  })}
-                </PresetGrid>
-              </Section>
-            )}
-
-            <Section id="mal" title="Mål og konstruksjon" open={openSection === 'mal'} onToggle={toggleSection}>
-              {template.dimensjoner
-                .filter((d) => !d.visibleWhen || d.visibleWhen(cfg))
-                .map((d) => {
-                  const val = Number(cfg[d.key])
-                  return (
-                    <Slider key={d.key}>
-                      <SliderTop>
-                        <span>{d.label}</span>
-                        <b>{val} {d.unit ?? 'cm'}</b>
-                      </SliderTop>
-                      <input
-                        type="range"
-                        min={d.min}
-                        max={d.max}
-                        step={d.step}
-                        value={val}
-                        onChange={(e) => patch({ [d.key]: Number(e.target.value) })}
-                      />
-                      {d.markers && d.markers.length > 0 && (
-                        <MarkerRow>
-                          {d.markers.map((mk) => (
-                            <MarkerChip key={mk} type="button" $active={val === mk} onClick={() => patch({ [d.key]: mk })}>
-                              {mk}{d.unit ?? 'cm'}
-                            </MarkerChip>
-                          ))}
-                        </MarkerRow>
-                      )}
-                    </Slider>
-                  )
-                })}
-              {template.alternativer && template.alternativer.length > 0 &&
-                template.alternativer
-                  .filter((a) => a.key !== 'visning')
-                  .filter((a) => !a.visibleWhen || a.visibleWhen(cfg))
-                  .map((a) => (
-                    <SubGroup key={a.key}>
-                      <SubLabel>{a.label}</SubLabel>
-                      <SegRow>
-                        {a.choices.map((c) => (
-                          <SegBtn key={c.id} $active={cfg[a.key] === c.id} onClick={() => patch({ [a.key]: c.id, ...(c.patch ?? {}) })}>
-                            {c.label}
-                          </SegBtn>
-                        ))}
-                      </SegRow>
-                    </SubGroup>
-                  ))}
-              {template.valg && template.valg.length > 0 &&
-                template.valg.map((t) => (
-                  <Toggle key={t.key} $on={Boolean(cfg[t.key])} onClick={() => patch({ [t.key]: !cfg[t.key] })}>
-                    <span>
-                      {t.label}
-                      {t.note && <em>{t.note}</em>}
-                    </span>
-                    <Track $on={Boolean(cfg[t.key])}><Knob $on={Boolean(cfg[t.key])} /></Track>
-                  </Toggle>
-                ))}
-            </Section>
-
-            <Section id="materialer" title="Materialer" open={openSection === 'materialer'} onToggle={toggleSection}>
-              {template.materialer.map((m) => (
-                <SubGroup key={m.key}>
-                  <SubLabel>{m.label}</SubLabel>
-                  {m.asSwatches ? (
-                    <>
-                      <Swatches>
-                        {m.choices.map((c) => {
-                          const active = cfg[m.key] === c.id
-                          const swatch = c.swatch ?? `#${c.hex.toString(16).padStart(6, '0')}`
-                          return (
-                            <SwatchBtn
-                              key={c.id}
-                              $active={active}
-                              $transparent={swatch === 'transparent'}
-                              style={swatch === 'transparent' ? undefined : { background: swatch }}
-                              onClick={() => patch({ [m.key]: c.id })}
-                              title={c.label}
-                              aria-label={c.label}
-                            >
-                              {active && <Icon name="faCheck" />}
-                            </SwatchBtn>
-                          )
-                        })}
-                      </Swatches>
-                      {cfg[m.key] && <SwatchName>{FARGER[String(cfg[m.key])]?.label ?? ''}</SwatchName>}
-                    </>
-                  ) : (
-                    <Choices>
-                      {m.choices.map((c) => (
-                        <ChoiceBtn key={c.id} $active={cfg[m.key] === c.id} onClick={() => patch({ [m.key]: c.id })}>
-                          <span>{c.label}</span>
-                          {c.note && <em>{c.note}</em>}
-                        </ChoiceBtn>
-                      ))}
-                    </Choices>
-                  )}
-                </SubGroup>
-              ))}
-            </Section>
-
-            {template.byggeregler && (() => {
-              const b = template.byggeregler(cfg)
-              return (
-                <Section id="byggeregler" title="Byggeregler" open={openSection === 'byggeregler'} onToggle={toggleSection}>
-                  <ByggStatus $ok={b.sokfri}>
-                    <Icon name={b.sokfri ? 'faCheckCircle' : 'faExclamationTriangle'} /> {b.tittel}
-                  </ByggStatus>
-                  <ByggList>
-                    {b.punkter.map((p, i) => (
-                      <li key={i}>{p}</li>
-                    ))}
-                  </ByggList>
-                  {template.soknadTegning && (
-                    <SoknadNote>
-                      Trenger du å søke? Last ned <b>byggesøknad-heftet</b> (plan, fasader &amp; snitt + situasjonsplan-veiledning) under «Hva vil du gjøre?» øverst. Veiledende – du er selv ansvarlig søker.
-                    </SoknadNote>
-                  )}
-                </Section>
-              )
-            })()}
-
-            <Section id="priser" title="Priser" open={openSection === 'priser'} onToggle={toggleSection}>
-              <PriceNote>Veiledende ca-priser (impregnert). Juster hvis butikken din har andre priser – alle mål og kostnader oppdateres.</PriceNote>
-              {alleprisposter().map((p) => (
-                <PriceRow key={p.id}>
-                  <span>{p.navn}</span>
-                  <PriceInput
-                    type="number"
-                    min={0}
-                    step={0.5}
-                    defaultValue={p.pris}
-                    onChange={(e) => endrePris(p.id, Number(e.target.value))}
-                  />
-                  <em>kr/{p.enhet}</em>
-                </PriceRow>
-              ))}
-            </Section>
-          </PanelScroll>
-        </Panel>
       </Body>
 
       {showCode && (
         <CodeModal
           error={codeErr}
+          errorMsg={codeErrMsg}
+          busy={codeBusy}
+          manuell={LANSERINGSMODUS}
           belop={template.fraPris}
           onSubmit={verifyCode}
           onVipps={startVipps}
-          onClose={() => { setShowCode(false); setCodeErr(false); pendingRef.current = null }}
+          onClose={() => { setShowCode(false); setCodeErr(false); setCodeErrMsg(''); pendingRef.current = null }}
         />
+      )}
+
+      {offPlanModal && (
+        <SmallOverlay onClick={() => { pendingRef.current = null; setOffPlanModal(false) }}>
+          <SmallBox onClick={(e) => e.stopPropagation()}>
+            <SmallClose onClick={() => { pendingRef.current = null; setOffPlanModal(false) }} aria-label="Lukk"><Icon name="faXmark" /></SmallClose>
+            <h3>Du har endret designet</h3>
+            <p>Byggeplanen du kjøpte gjelder målene du betalte for. Du har endret designet siden da – vis den kjøpte planen, eller kjøp en oppdatert plan for det nye designet.</p>
+            <SoknadBtn onClick={() => { pendingRef.current = null; setOffPlanModal(false); enterFrozenView() }}>
+              <Icon name="faCubes" /> Vis kjøpt byggeplan
+            </SoknadBtn>
+            <SmallActions>
+              <GhostBtn onClick={() => { pendingRef.current = null; setOffPlanModal(false) }}>Avbryt</GhostBtn>
+              <PrimaryBtn onClick={() => { setOffPlanModal(false); setShowCode(true) }}><Icon name="faArrowsRotate" /> Kjøp ny plan</PrimaryBtn>
+            </SmallActions>
+          </SmallBox>
+        </SmallOverlay>
       )}
 
       {unlockedModal && (
@@ -1438,9 +1728,16 @@ export default function DesignerPage() {
           maal={maalTekst}
           arealTekst={arealTekst}
           estimatKr={bom.estimatKr}
-          prisEstimatKr={foresporsel === 'ferdig' ? prisFerdig : prisPakke}
+          prisEstimatKr={
+            foresporsel === 'byggeplan'
+              ? template.fraPris
+              : foresporsel === 'ferdig'
+                ? prisFerdig
+                : prisPakke
+          }
           userId={uid ?? ''}
           userEmail={firebaseUser?.email ?? ''}
+          designId={currentDesign?.id}
           onClose={() => setForesporsel(null)}
         />
       )}
@@ -1452,6 +1749,28 @@ export default function DesignerPage() {
 
 /* ---------- styling: mørkt skall, lys scene ---------- */
 
+/*
+ * ── Designverktøyets UI-palett ──────────────────────────────────────────────
+ * Rolig nøytral grafitt + ÉN dempet indigo aksent. Erstattet den varme
+ * brun/oliven-paletten (matchet ikke theme.ts) og de tre konkurrerende
+ * aksentene den hadde: oliven grønn, blå på ferdige oppsett, gult merke.
+ *
+ *   Mørke flater   #101216 (shell/topplinje) · #15171b · #1a1d21 (panel)
+ *                  #212429 (hevet) · #262a30 (kort) · #333841 (kant)
+ *   Lyse flater    #f7f8fa · #f2f4f7 · #eaedf1 · #e7eaef (kant) · #dce0e6
+ *   Tekst          #1a1d21 · #626a74 (dempet) · #838b95 (svak)
+ *   Aksent indigo  #4b53b0 (mørk/hover) · #5b63c4 (PRIMÆR fyll)
+ *                  #6a72d0 (hover) · #7880dc (kant/ikon) · #b9bff0 (tekst
+ *                  på mørk flate) · #eef0fb (lys tint)
+ *   Semantisk      #e8756b (feil) · #9a6b12 (advarsel) · #ff5b24 (Vipps)
+ *
+ * Kontrasten skal holdes lav: flatene er rolige, og aksenten bærer alene.
+ * Ikke gjør primærknapper grå – en grå hovedhandling leses som deaktivert.
+ * Grønt er bevisst ute av paletten.
+ *
+ * Unntak som IKKE skal nøytraliseres: Vipps-oransje (merkevare), gizmo-aksene
+ * i DesignerViewport (rød/grønn/blå = X/Y/Z) og PartBar-gradienten (trelast).
+ */
 const RailHeadTop = styled.div`
   display: flex;
   align-items: center;
@@ -1468,12 +1787,12 @@ const FileBarBtn = styled.button`
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 7px;
+  border-radius: 8px;
   background: transparent;
-  color: #4a4842;
+  color: #a8afb9;
   font-size: 0.9rem;
   cursor: pointer;
-  &:hover { background: rgba(0, 0, 0, 0.06); }
+  &:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
 `
 
 const RailNameRow = styled.div`
@@ -1486,10 +1805,10 @@ const NameEdit = styled.input`
   flex: 1;
   min-width: 0;
   height: 38px;
-  border: 1px solid #7bc39c;
+  border: 1px solid #b9bff0;
   border-radius: 8px;
-  background: #fff;
-  color: #26251f;
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
   font-size: 0.95rem;
   font-weight: 700;
   padding: 0 0.6rem;
@@ -1503,16 +1822,16 @@ const FileNameBtn = styled.button`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: #fff;
-  color: #26251f;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #fff;
   font-size: 0.95rem;
   font-weight: 700;
   text-align: left;
   cursor: pointer;
   padding: 0 0.6rem;
   border-radius: 8px;
-  &:hover { border-color: #7bc39c; }
+  &:hover { border-color: #b9bff0; background: rgba(255, 255, 255, 0.07); }
 `
 
 const SaveState = styled.button<{ $dirty: boolean }>`
@@ -1522,13 +1841,13 @@ const SaveState = styled.button<{ $dirty: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid ${({ $dirty }) => ($dirty ? 'transparent' : 'rgba(0,0,0,0.12)')};
+  border: 1px solid ${({ $dirty }) => ($dirty ? 'transparent' : 'rgba(255,255,255,0.14)')};
   border-radius: 8px;
   font-size: 0.9rem;
   cursor: ${({ $dirty }) => ($dirty ? 'pointer' : 'default')};
-  background: ${({ $dirty }) => ($dirty ? '#1c1e22' : 'transparent')};
-  color: ${({ $dirty }) => ($dirty ? '#fff' : '#5a8f5a')};
-  &:hover { ${({ $dirty }) => ($dirty ? 'background:#000;' : '')} }
+  background: ${({ $dirty }) => ($dirty ? '#6a72d0' : 'transparent')};
+  color: ${({ $dirty }) => ($dirty ? '#fff' : '#7880dc')};
+  &:hover { ${({ $dirty }) => ($dirty ? 'background:#6a72d0;' : '')} }
 `
 
 const SmallOverlay = styled.div`
@@ -1547,14 +1866,14 @@ const SmallBox = styled.div`
   width: 100%;
   max-width: 400px;
   padding: 1.75rem;
-  background: #1b1e24;
-  color: #e9e7e1;
+  background: #15171b;
+  color: #e7eaef;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
 
   h3 { margin: 0 0 0.4rem; font-size: 1.1rem; font-weight: 700; color: #fff; }
-  p { margin: 0 0 1.1rem; font-size: 0.85rem; color: #a8a49b; line-height: 1.5; }
+  p { margin: 0 0 1.1rem; font-size: 0.85rem; color: #979fa9; line-height: 1.5; }
 `
 
 const MineBox = styled(SmallBox)`
@@ -1572,7 +1891,7 @@ const SmallClose = styled.button`
   background: rgba(255, 255, 255, 0.05);
   border: none;
   border-radius: 8px;
-  color: #cfccc4;
+  color: #ccd2d9;
   cursor: pointer;
   &:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
 `
@@ -1586,7 +1905,7 @@ const NameInput = styled.input`
   color: #fff;
   font-size: 0.95rem;
   outline: none;
-  &:focus { border-color: #7bc39c; }
+  &:focus { border-color: #b9bff0; }
 `
 
 
@@ -1599,10 +1918,10 @@ const SmallActions = styled.div`
 
 const GhostBtn = styled.button`
   padding: 0.6rem 1rem;
-  border-radius: 9px;
+  border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   background: none;
-  color: #d6d3cb;
+  color: #d9dde3;
   font-size: 0.88rem;
   font-weight: 600;
   cursor: pointer;
@@ -1614,10 +1933,10 @@ const PrimaryBtn = styled.button`
   align-items: center;
   gap: 0.45rem;
   padding: 0.6rem 1.1rem;
-  border-radius: 9px;
+  border-radius: 10px;
   border: none;
-  background: #f4f2ec;
-  color: #16181d;
+  background: #f7f8fa;
+  color: #101216;
   font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
@@ -1637,7 +1956,7 @@ const Empty = styled.div`
   padding: 1.5rem;
   text-align: center;
   font-size: 0.88rem;
-  color: #8b877e;
+  color: #7c848e;
 `
 
 const MineRow = styled.div<{ $active: boolean }>`
@@ -1645,7 +1964,7 @@ const MineRow = styled.div<{ $active: boolean }>`
   align-items: center;
   gap: 0.5rem;
   border-radius: 10px;
-  border: 1px solid ${({ $active }) => ($active ? '#7bc39c' : 'rgba(255,255,255,0.1)')};
+  border: 1px solid ${({ $active }) => ($active ? '#b9bff0' : 'rgba(255,255,255,0.1)')};
   background: rgba(255, 255, 255, 0.03);
   padding: 0.2rem 0.5rem 0.2rem 0.2rem;
 
@@ -1658,14 +1977,14 @@ const MineRow = styled.div<{ $active: boolean }>`
     gap: 0.1rem;
     background: none;
     border: none;
-    color: #e9e7e1;
+    color: #e7eaef;
     text-align: left;
     cursor: pointer;
     padding: 0.6rem 0.7rem;
     border-radius: 8px;
     &:hover { background: rgba(255, 255, 255, 0.05); }
     strong { font-size: 0.92rem; }
-    span { font-size: 0.75rem; color: #8b877e; }
+    span { font-size: 0.75rem; color: #7c848e; }
   }
   .ren, .del {
     flex-shrink: 0;
@@ -1675,12 +1994,12 @@ const MineRow = styled.div<{ $active: boolean }>`
     place-items: center;
     border: none;
     background: none;
-    color: #8b877e;
+    color: #7c848e;
     border-radius: 8px;
     cursor: pointer;
   }
   .ren:hover { color: #fff; background: rgba(255, 255, 255, 0.05); }
-  .del:hover { color: #e0928a; background: rgba(255, 255, 255, 0.05); }
+  .del:hover { color: #e8756b; background: rgba(255, 255, 255, 0.05); }
 `
 
 const PaidBadge = styled.span`
@@ -1689,8 +2008,8 @@ const PaidBadge = styled.span`
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #7bc39c;
-  background: rgba(123, 195, 156, 0.14);
+  color: #b9bff0;
+  background: rgba(120, 128, 220, 0.14);
   border-radius: 999px;
   padding: 0.15rem 0.5rem;
 `
@@ -1701,7 +2020,7 @@ const Toast = styled.div`
   left: 50%;
   transform: translateX(-50%);
   z-index: 2300;
-  background: #1c1e22;
+  background: #15171b;
   color: #fff;
   font-size: 0.88rem;
   font-weight: 600;
@@ -1715,7 +2034,7 @@ const CodeDivider = styled.div`
   align-items: center;
   gap: 0.6rem;
   margin: 1.25rem 0 0.9rem;
-  color: #6f6b63;
+  color: #626a74;
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -1726,7 +2045,7 @@ const VippsBtn = styled.button`
   width: 100%;
   padding: 0.8rem;
   border: none;
-  border-radius: 11px;
+  border-radius: 12px;
   background: #ff5b24;
   color: #fff;
   font-size: 0.92rem;
@@ -1739,7 +2058,7 @@ const VippsBtn = styled.button`
 const CodeHint = styled.p`
   margin: 0.7rem 0 0 !important;
   font-size: 0.74rem;
-  color: #8b877e !important;
+  color: #7c848e !important;
 `
 
 const AuthGate = styled.div`
@@ -1750,9 +2069,9 @@ const AuthGate = styled.div`
   place-items: center;
   padding: 1.5rem;
   background:
-    radial-gradient(120% 90% at 50% 0%, rgba(90, 120, 90, 0.16), transparent 55%),
-    #16181d;
-  color: #e9e7e1;
+    radial-gradient(120% 90% at 50% 0%, rgba(91, 99, 196, 0.16), transparent 55%),
+    #101216;
+  color: #e7eaef;
 `
 
 const AuthClose = styled.button`
@@ -1766,7 +2085,7 @@ const AuthClose = styled.button`
   background: rgba(255, 255, 255, 0.05);
   border: none;
   border-radius: 10px;
-  color: #cfccc4;
+  color: #ccd2d9;
   font-size: 1.1rem;
   cursor: pointer;
   &:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
@@ -1778,9 +2097,43 @@ const AuthCard = styled.div`
   text-align: center;
 
   img { height: 56px; margin-bottom: 1.5rem; }
-  h2 { margin: 0 0 0.6rem; font-size: 1.5rem; font-weight: 800; }
-  p { margin: 0 0 1.75rem; font-size: 0.95rem; color: #a8a49b; line-height: 1.6; }
-  svg { font-size: 1.4rem; color: #7bc39c; }
+  h1, h2 { margin: 0 0 0.6rem; font-size: 1.5rem; font-weight: 800; }
+  p { margin: 0 0 1.75rem; font-size: 0.95rem; color: #979fa9; line-height: 1.6; }
+  svg { font-size: 1.4rem; color: #b9bff0; }
+`
+
+// Produktbildet på den uinnloggede produktsiden (større enn logoen, som
+// AuthCard styrer med `img { height: 56px }`).
+const AuthShot = styled.img`
+  && {
+    height: auto;
+    width: 100%;
+    max-width: 300px;
+    margin-bottom: 1.25rem;
+    border-radius: 14px;
+  }
+`
+
+const AuthFakta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.25rem;
+  margin: 0 0 1.5rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #ccd2d9;
+  span { display: inline-flex; align-items: center; gap: 0.45rem; }
+  svg { font-size: 0.9rem; color: #b9bff0; }
+`
+
+const AuthLenke = styled(Link)`
+  display: block;
+  margin-top: 1.25rem;
+  font-size: 0.85rem;
+  color: #979fa9;
+  text-decoration: none;
+  &:hover { color: #e7eaef; text-decoration: underline; }
 `
 
 const AuthBtn = styled.button`
@@ -1790,14 +2143,14 @@ const AuthBtn = styled.button`
   padding: 0.85rem 1.5rem;
   border: none;
   border-radius: 12px;
-  background: #f4f2ec;
-  color: #16181d;
+  background: #f7f8fa;
+  color: #101216;
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s;
   &:hover { background: #fff; }
-  svg { font-size: 1rem; color: #16181d; }
+  svg { font-size: 1rem; color: #101216; }
 `
 
 const Shell = styled.div`
@@ -1806,8 +2159,8 @@ const Shell = styled.div`
   z-index: 2000;
   display: flex;
   flex-direction: column;
-  background: #16181d;
-  color: #e9e7e1;
+  background: #101216;
+  color: #eaedf1;
   font-family: ${({ theme }) => theme.fonts?.body ?? 'system-ui, sans-serif'};
 `
 
@@ -1819,8 +2172,8 @@ const TopBar = styled.header`
   align-items: center;
   gap: 0.5rem;
   padding: 0 0.75rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(20, 22, 27, 0.9);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(24, 27, 32, 0.92);
 `
 
 const AllBtn = styled.button`
@@ -1830,7 +2183,7 @@ const AllBtn = styled.button`
   gap: 0.5rem;
   background: none;
   border: none;
-  color: #b9b6ae;
+  color: #a8afb9;
   font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
@@ -1843,35 +2196,93 @@ const AllBtn = styled.button`
 `
 
 const Switcher = styled.nav`
-  display: flex;
-  align-items: stretch;
+  position: relative;
   justify-self: start;
-  height: 34px;
-  overflow-x: auto;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  scrollbar-width: none;
-  &::-webkit-scrollbar { display: none; }
 `
 
-const Pill = styled.button<{ $active?: boolean; $soon?: boolean }>`
-  flex-shrink: 0;
+const CurrentBtn = styled.button<{ $active?: boolean }>`
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0 0.85rem;
-  border: none;
-  border-radius: 0;
-  font-size: 0.82rem;
+  gap: 0.55rem;
+  height: 34px;
+  padding: 0 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  font-size: 0.85rem;
   font-weight: 600;
   white-space: nowrap;
-  cursor: ${({ $active, $soon }) => ($active || $soon ? 'default' : 'pointer')};
-  background: ${({ $active }) => ($active ? 'rgba(255,255,255,0.13)' : 'transparent')};
-  color: ${({ $active, $soon }) => ($active ? '#fff' : $soon ? '#6f6b63' : '#c8c5bd')};
-  transition: background 0.15s, color 0.15s;
+  cursor: pointer;
+  color: #fff;
+  background: ${({ $active }) => ($active ? 'rgba(255,255,255,0.13)' : 'rgba(255,255,255,0.05)')};
+  transition: background 0.15s;
+  &:hover { background: rgba(255, 255, 255, 0.13); }
+`
 
-  & + & { border-left: 1px solid rgba(255, 255, 255, 0.1); }
-  &:hover { ${({ $active, $soon }) => (!$active && !$soon ? 'background: rgba(255,255,255,0.06); color: #fff;' : '')} }
+const ProductMenu = styled.div`
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 40;
+  width: min(560px, 78vw);
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 0.85rem;
+  background: rgba(26, 29, 34, 0.98);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 12px;
+  box-shadow: 0 16px 40px rgba(12, 14, 18, 0.45);
+`
+
+const ProductMenuHead = styled.div`
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #7c848e;
+  padding: 0 0.15rem 0.6rem;
+`
+
+const ProductGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 0.5rem;
+`
+
+const ProductCard = styled.button<{ $active?: boolean; $soon?: boolean }>`
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.4rem;
+  border: 1px solid ${({ $active }) => ($active ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.08)')};
+  border-radius: 10px;
+  background: ${({ $active }) => ($active ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.03)')};
+  cursor: ${({ $soon }) => ($soon ? 'default' : 'pointer')};
+  opacity: ${({ $soon }) => ($soon ? 0.55 : 1)};
+  text-align: left;
+  transition: background 0.15s, border-color 0.15s;
+  &:hover { ${({ $soon }) => (!$soon ? 'background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25);' : '')} }
+`
+
+const ProductThumb = styled.div`
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+  color: #a8afb9;
+  font-size: 1.4rem;
+  img { width: 100%; height: 100%; object-fit: cover; }
+`
+
+const ProductName = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #e7eaef;
 `
 
 const Soon = styled.span`
@@ -1879,7 +2290,7 @@ const Soon = styled.span`
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #6f6b63;
+  color: #626a74;
   border: 1px solid rgba(255,255,255,0.14);
   border-radius: 999px;
   padding: 0.05rem 0.35rem;
@@ -1894,7 +2305,7 @@ const CloseBtn = styled.button`
   background: rgba(255,255,255,0.05);
   border: none;
   border-radius: 8px;
-  color: #cfccc4;
+  color: #ccd2d9;
   font-size: 1rem;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
@@ -1917,12 +2328,21 @@ const Stage = styled.div`
   position: relative;
   flex: 1;
   min-width: 0;
+  /* Myk «studio»-bakgrunn: lys i midten, faller mot en rolig nøytral kant som
+     smelter inn i det mørke skallet – ingen hard, lysende rektangelkant. */
   background:
-    radial-gradient(120% 120% at 50% 20%, #f7f5ef 0%, #e9e5db 55%, #d9d4c7 100%);
+    radial-gradient(118% 118% at 50% 30%, #edeff3 0%, #dce0e6 52%, #c7ced7 100%);
+  box-shadow:
+    inset 34px 0 60px -34px rgba(10, 12, 16, 0.42),
+    inset 0 28px 54px -34px rgba(10, 12, 16, 0.26),
+    inset 0 -28px 54px -34px rgba(10, 12, 16, 0.2);
 
   @media (max-width: 820px) {
     order: 1;
     min-height: 44vh;
+    box-shadow:
+      inset 0 26px 46px -34px rgba(10, 12, 16, 0.26),
+      inset 0 -26px 46px -34px rgba(10, 12, 16, 0.26);
   }
 `
 
@@ -1995,8 +2415,8 @@ const NavBtn = styled.button<{ $active?: boolean }>`
   place-items: center;
   border: none;
   border-radius: 8px;
-  background: ${({ $active }) => ($active ? '#1c1e22' : 'transparent')};
-  color: ${({ $active }) => ($active ? '#fff' : '#33322e')};
+  background: ${({ $active }) => ($active ? '#5b63c4' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#fff' : '#262a30')};
   font-size: 0.8rem;
   cursor: pointer;
   touch-action: manipulation;
@@ -2004,7 +2424,7 @@ const NavBtn = styled.button<{ $active?: boolean }>`
   transition: background 0.15s, color 0.15s;
 
   &:hover { ${({ $active }) => (!$active ? 'background: rgba(0,0,0,0.06);' : '')} }
-  &:active { background: ${({ $active }) => ($active ? '#000' : 'rgba(0,0,0,0.12)')}; }
+  &:active { background: ${({ $active }) => ($active ? '#4b53b0' : 'rgba(0,0,0,0.12)')}; }
 `
 
 const ViewMenu = styled.div`
@@ -2031,7 +2451,7 @@ const ViewMenuItem = styled.button`
   border: none;
   border-radius: 8px;
   background: transparent;
-  color: #33322e;
+  color: #262a30;
   font-size: 0.86rem;
   font-weight: 600;
   text-align: left;
@@ -2039,7 +2459,7 @@ const ViewMenuItem = styled.button`
   white-space: nowrap;
   transition: background 0.15s;
 
-  svg { width: 15px; color: #7a776e; }
+  svg { width: 15px; color: #6b7280; }
   &:hover { background: rgba(0, 0, 0, 0.06); }
 `
 
@@ -2050,8 +2470,8 @@ const ToolIcon = styled.button<{ $active?: boolean }>`
   place-items: center;
   border: none;
   border-radius: 8px;
-  background: ${({ $active }) => ($active ? '#1c1e22' : 'transparent')};
-  color: ${({ $active }) => ($active ? '#fff' : '#33322e')};
+  background: ${({ $active }) => ($active ? '#5b63c4' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#fff' : '#262a30')};
   font-size: 0.9rem;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
@@ -2070,9 +2490,9 @@ const ToolBtn = styled.button<{ $active?: boolean; $primary?: boolean }>`
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
-  background: ${({ $active, $primary }) => ($primary ? '#1c1e22' : $active ? '#1c1e22' : 'transparent')};
-  color: ${({ $active, $primary }) => ($primary || $active ? '#fff' : '#33322e')};
-  &:hover { ${({ $primary, $active }) => ($primary ? 'background:#000;' : $active ? '' : 'background: rgba(0,0,0,0.06);')} }
+  background: ${({ $active, $primary }) => ($primary ? '#5b63c4' : $active ? '#5b63c4' : 'transparent')};
+  color: ${({ $active, $primary }) => ($primary || $active ? '#fff' : '#262a30')};
+  &:hover { ${({ $primary, $active }) => ($primary ? 'background:#4b53b0;' : $active ? '' : 'background: rgba(0,0,0,0.06);')} }
 `
 
 const ToolDivider = styled.span`
@@ -2098,15 +2518,15 @@ const CodeBox = styled.div`
   width: 100%;
   max-width: 380px;
   padding: 2rem 1.75rem 1.75rem;
-  background: #1b1e24;
-  color: #e9e7e1;
+  background: #15171b;
+  color: #e7eaef;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
   text-align: center;
 
   h3 { margin: 0 0 0.4rem; font-size: 1.15rem; font-weight: 700; color: #fff; }
-  p { margin: 0 0 1.25rem; font-size: 0.85rem; color: #a8a49b; line-height: 1.5; }
+  p { margin: 0 0 1.25rem; font-size: 0.85rem; color: #979fa9; line-height: 1.5; }
 `
 
 const CodeClose = styled.button`
@@ -2120,7 +2540,7 @@ const CodeClose = styled.button`
   background: rgba(255, 255, 255, 0.05);
   border: none;
   border-radius: 8px;
-  color: #cfccc4;
+  color: #ccd2d9;
   cursor: pointer;
   &:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
 `
@@ -2133,7 +2553,7 @@ const CodeIcon = styled.div`
   place-items: center;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.06);
-  color: #7bc39c;
+  color: #b9bff0;
   font-size: 1.2rem;
 `
 
@@ -2150,11 +2570,11 @@ const CodeDigits = styled.div<{ $err: boolean }>`
     font-weight: 700;
     color: #fff;
     background: rgba(255, 255, 255, 0.04);
-    border: 1.5px solid ${({ $err }) => ($err ? '#c96a5f' : 'rgba(255,255,255,0.16)')};
+    border: 1.5px solid ${({ $err }) => ($err ? '#e8756b' : 'rgba(255,255,255,0.16)')};
     border-radius: 10px;
     outline: none;
     transition: border-color 0.15s;
-    &:focus { border-color: #7bc39c; background: rgba(255,255,255,0.07); }
+    &:focus { border-color: #b9bff0; background: rgba(255,255,255,0.07); }
   }
 
   @media (max-width: 400px) { input { width: 38px; height: 48px; } }
@@ -2204,12 +2624,12 @@ const PresetBtn = styled.button<{ $active: boolean }>`
   gap: 0.22rem;
   padding: 0.72rem 0.85rem;
   border-radius: 12px;
-  border: 1px solid ${(p) => (p.$active ? 'rgba(90,150,255,0.9)' : 'rgba(255,255,255,0.09)')};
+  border: 1px solid ${(p) => (p.$active ? 'rgba(120,128,220,0.9)' : 'rgba(255,255,255,0.09)')};
   background: ${(p) =>
     p.$active
-      ? 'linear-gradient(180deg, rgba(58,110,220,0.28), rgba(58,110,220,0.14))'
+      ? 'linear-gradient(180deg, rgba(91,99,196,0.28), rgba(91,99,196,0.14))'
       : 'rgba(255,255,255,0.045)'};
-  box-shadow: ${(p) => (p.$active ? '0 3px 14px rgba(47,110,230,0.28)' : 'none')};
+  box-shadow: ${(p) => (p.$active ? '0 3px 14px rgba(91,99,196,0.28)' : 'none')};
   cursor: pointer;
   text-align: left;
   transition: transform 0.12s ease, border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
@@ -2217,12 +2637,12 @@ const PresetBtn = styled.button<{ $active: boolean }>`
     font-size: 0.84rem;
     font-weight: 600;
     line-height: 1.15;
-    color: ${(p) => (p.$active ? '#dbe8ff' : 'rgba(255,255,255,0.92)')};
+    color: ${(p) => (p.$active ? '#e6e8fb' : 'rgba(255,255,255,0.92)')};
   }
   span {
     font-size: 0.72rem;
     line-height: 1.25;
-    color: ${(p) => (p.$active ? 'rgba(200,220,255,0.78)' : 'rgba(255,255,255,0.5)')};
+    color: ${(p) => (p.$active ? 'rgba(200,204,245,0.78)' : 'rgba(255,255,255,0.5)')};
   }
   &::after {
     content: ${(p) => (p.$active ? "'✓'" : "''")};
@@ -2237,7 +2657,7 @@ const PresetBtn = styled.button<{ $active: boolean }>`
     border-color: rgba(120,170,255,0.7);
     background: ${(p) =>
       p.$active
-        ? 'linear-gradient(180deg, rgba(58,110,220,0.32), rgba(58,110,220,0.18))'
+        ? 'linear-gradient(180deg, rgba(91,99,196,0.32), rgba(91,99,196,0.18))'
         : 'rgba(255,255,255,0.08)'};
     transform: translateY(-1px);
   }
@@ -2275,8 +2695,8 @@ const ModeBtn = styled.button<{ $active: boolean }>`
   padding: 0 0.8rem;
   border: none;
   border-radius: 999px;
-  background: ${({ $active }) => ($active ? '#1c1e22' : 'transparent')};
-  color: ${({ $active }) => ($active ? '#fff' : '#4a4842')};
+  background: ${({ $active }) => ($active ? '#5b63c4' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#fff' : '#333841')};
   font-size: 0.78rem;
   font-weight: 600;
   white-space: nowrap;
@@ -2296,7 +2716,7 @@ const BrushBar = styled.div`
   max-width: calc(100% - 2rem);
   flex-wrap: wrap;
   justify-content: center;
-  background: rgba(28, 30, 34, 0.94);
+  background: rgba(26, 29, 34, 0.94);
   color: #fff;
   padding: 0.55rem 1rem;
   border-radius: 12px;
@@ -2310,14 +2730,14 @@ const BrushTitle = styled.div`
   gap: 0.5rem;
   font-size: 0.8rem;
   font-weight: 700;
-  svg { color: #7bc39c; }
+  svg { color: #b9bff0; }
 `
 
 const BrushGroup = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  label { font-size: 0.72rem; color: #a8a49b; text-transform: uppercase; letter-spacing: 0.04em; }
+  label { font-size: 0.72rem; color: #979fa9; text-transform: uppercase; letter-spacing: 0.04em; }
 `
 
 const BrushSwatches = styled.div`
@@ -2331,9 +2751,9 @@ const BrushSwatch = styled.button<{ $active: boolean; $transparent: boolean }>`
   border-radius: 50%;
   cursor: pointer;
   border: 2px solid ${({ $active }) => ($active ? '#fff' : 'rgba(255,255,255,0.25)')};
-  box-shadow: ${({ $active }) => ($active ? '0 0 0 2px #7bc39c' : 'none')};
+  box-shadow: ${({ $active }) => ($active ? '0 0 0 2px #b9bff0' : 'none')};
   ${({ $transparent }) =>
-    $transparent && 'background: repeating-conic-gradient(#cfccc4 0% 25%, #8b877e 0% 50%) 50% / 8px 8px;'}
+    $transparent && 'background: repeating-conic-gradient(#ccd2d9 0% 25%, #7c848e 0% 50%) 50% / 8px 8px;'}
   transition: transform 0.1s;
   &:hover { transform: scale(1.12); }
 `
@@ -2355,7 +2775,7 @@ const BrushSelect = styled.select`
 const PartsView = styled.div`
   position: absolute;
   inset: 0;
-  background: #f4f2ec;
+  background: #f7f8fa;
   overflow-y: auto;
   padding: 4.5rem 2rem 2rem;
 `
@@ -2367,8 +2787,8 @@ const PartsHead = styled.div`
   align-items: center;
   justify-content: space-between;
 
-  h3 { margin: 0; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; font-weight: 700; color: #26251f; }
-  h3 svg { color: #6f6b63; }
+  h3 { margin: 0; display: inline-flex; align-items: center; gap: 0.5rem; font-size: 1.1rem; font-weight: 700; color: #1a1d21; }
+  h3 svg { color: #626a74; }
 `
 
 const PartsLock = styled.button`
@@ -2378,12 +2798,12 @@ const PartsLock = styled.button`
   padding: 0.5rem 0.9rem;
   border-radius: 8px;
   border: none;
-  background: #1c1e22;
+  background: #15171b;
   color: #fff;
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  &:hover { background: #33322e; }
+  &:hover { background: #262a30; }
 `
 
 const PartsList = styled.div`
@@ -2408,17 +2828,17 @@ const PartsExportBtn = styled.button`
   padding: 0.7rem 1.2rem;
   border: none;
   border-radius: 10px;
-  background: #1c1e22;
+  background: #15171b;
   color: #fff;
   font-size: 0.88rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s;
-  &:hover { background: #33322e; }
+  &:hover { background: #262a30; }
 `
 
 const PartRow = styled.div`
-  border-bottom: 1px dashed #d8d3c8;
+  border-bottom: 1px dashed #dce0e6;
   padding-bottom: 1rem;
 `
 
@@ -2427,16 +2847,16 @@ const PartMeta = styled.div`
   align-items: baseline;
   gap: 0.6rem;
   margin-bottom: 0.5rem;
-  strong { font-size: 0.9rem; color: #26251f; }
-  em { font-style: normal; font-size: 0.8rem; color: #6f6b63; }
+  strong { font-size: 0.9rem; color: #1a1d21; }
+  em { font-style: normal; font-size: 0.8rem; color: #626a74; }
 `
 
 const PartTag = styled.span`
   font-size: 0.68rem;
   font-weight: 600;
-  color: #7a5a2e;
-  background: #f0e4cf;
-  border: 1px solid #e0cca6;
+  color: #5b6472;
+  background: #eef1f5;
+  border: 1px solid #d7dde5;
   border-radius: 999px;
   padding: 0.1rem 0.5rem;
 `
@@ -2445,7 +2865,7 @@ const PartQty = styled.span`
   margin-left: auto;
   font-size: 0.85rem;
   font-weight: 700;
-  color: #26251f;
+  color: #1a1d21;
 `
 
 const PartDrawing = styled.div`
@@ -2457,14 +2877,14 @@ const PartDrawing = styled.div`
 const PartBar = styled.div`
   background: linear-gradient(180deg, #c69a63, #a9834f);
   border: 1px solid #8a6a3f;
-  border-radius: 2px;
+  border-radius: 4px;
   flex-shrink: 0;
 `
 
 const PartLen = styled.div`
   font-size: 0.9rem;
   font-weight: 700;
-  color: #26251f;
+  color: #1a1d21;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 `
@@ -2472,7 +2892,7 @@ const PartLen = styled.div`
 const PartBlur = styled.span`
   filter: blur(5px);
   letter-spacing: 3px;
-  color: #8b877e;
+  color: #7c848e;
 `
 
 const PartDims = styled.div`
@@ -2481,10 +2901,10 @@ const PartDims = styled.div`
   gap: 1.25rem;
   margin-top: 0.6rem;
   font-size: 0.82rem;
-  color: #4a4842;
+  color: #333841;
   font-variant-numeric: tabular-nums;
 
-  b { font-weight: 600; color: #8a857a; margin-right: 0.3rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  b { font-weight: 600; color: #838b95; margin-right: 0.3rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; }
 `
 
 const DragChip = styled.div`
@@ -2495,7 +2915,7 @@ const DragChip = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: #1c1e22;
+  background: #15171b;
   color: #fff;
   font-size: 0.82rem;
   font-weight: 700;
@@ -2522,9 +2942,9 @@ const PartChip = styled.div`
   backdrop-filter: blur(6px);
   pointer-events: none;
 
-  b { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #f4f2ec; color: #16181d; font-size: 0.75rem; }
+  b { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: #f7f8fa; color: #101216; font-size: 0.75rem; }
   span { font-weight: 700; }
-  em { font-style: normal; color: #a8a49b; }
+  em { font-style: normal; color: #979fa9; }
 `
 
 const SelectCard = styled.div`
@@ -2535,17 +2955,17 @@ const SelectCard = styled.div`
   display: flex;
   align-items: center;
   gap: 0.6rem;
-  background: #16181d;
+  background: #101216;
   color: #fff;
   padding: 0.45rem 0.5rem 0.45rem 0.5rem;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.3);
 
-  b { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #2f6d4f; color: #fff; font-size: 0.8rem; }
+  b { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: #4b53b0; color: #fff; font-size: 0.8rem; }
   div { display: flex; flex-direction: column; line-height: 1.25; }
   strong { font-size: 0.85rem; }
-  em { font-style: normal; font-size: 0.76rem; color: #a8a49b; }
+  em { font-style: normal; font-size: 0.76rem; color: #979fa9; }
 `
 
 const SelClose = styled.button`
@@ -2554,9 +2974,9 @@ const SelClose = styled.button`
   display: grid;
   place-items: center;
   border: none;
-  border-radius: 7px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, 0.08);
-  color: #cfccc4;
+  color: #ccd2d9;
   cursor: pointer;
   &:hover { background: rgba(255, 255, 255, 0.18); color: #fff; }
 `
@@ -2567,37 +2987,18 @@ const PartMerke = styled.span`
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #1c1e22;
+  background: #15171b;
   color: #fff;
   font-size: 0.75rem;
   font-weight: 700;
   flex-shrink: 0;
 `
 
-const Panel = styled.aside<{ $open: boolean }>`
-  width: ${({ $open }) => ($open ? '372px' : '38px')};
-  flex-shrink: 0;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  background: #1b1e24;
-  border-left: 1px solid rgba(255,255,255,0.07);
-  overflow: hidden;
-  transition: width 0.28s ease;
-
-  @media (max-width: 820px) {
-    order: 3;
-    width: 100%;
-    max-height: 46vh;
-    border-left: none;
-    border-top: 1px solid rgba(255,255,255,0.07);
-  }
-`
-
-const PanelToggle = styled.button`
+// Kollaps-fane for venstre panel: sitter på scenens venstrekant, inntil raden.
+const RailToggle = styled.button<{ $open: boolean }>`
   position: absolute;
   top: 50%;
-  right: 0;
+  left: 0;
   transform: translateY(-50%);
   z-index: 6;
   display: flex;
@@ -2607,44 +3008,26 @@ const PanelToggle = styled.button`
   width: 30px;
   padding: 0.85rem 0;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-right: none;
-  border-radius: 9px 0 0 9px;
-  background: #1b1e24;
-  color: #cfccc4;
+  border-left: none;
+  border-radius: 0 9px 9px 0;
+  background: #212429;
+  color: #ccd2d9;
   font-size: 0.78rem;
   cursor: pointer;
-  box-shadow: -3px 0 12px rgba(0, 0, 0, 0.18);
+  box-shadow: 3px 0 14px rgba(14, 16, 20, 0.28);
   transition: color 0.15s, background 0.15s;
-  &:hover { background: #23262d; color: #fff; }
+  &:hover { background: #2e333b; color: #fff; }
 
   @media (max-width: 820px) { display: none; }
 `
 
 const ToggleLabel = styled.span`
   writing-mode: vertical-rl;
-  transform: rotate(180deg);
   font-size: 0.7rem;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: #a8a49b;
-`
-
-const PanelScroll = styled.div<{ $open: boolean }>`
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  padding: 0.75rem;
-  width: 372px;
-  opacity: ${({ $open }) => ($open ? 1 : 0)};
-  pointer-events: ${({ $open }) => ($open ? 'auto' : 'none')};
-  transition: opacity 0.18s ease;
-
-  &::-webkit-scrollbar { width: 8px; }
-  &::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
-
-  @media (max-width: 820px) { width: 100%; }
+  color: #979fa9;
 `
 
 /* ---- accordion (kort) ---- */
@@ -2666,11 +3049,10 @@ const SectionHead = styled.button`
   background: rgba(255, 255, 255, 0.04);
   border: none;
   cursor: pointer;
-  color: #f0eee8;
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  color: #f2f4f7;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.006em;
   transition: background 0.15s;
   &:hover { background: rgba(255, 255, 255, 0.07); }
 `
@@ -2678,7 +3060,7 @@ const SectionHead = styled.button`
 const Chevron = styled.span<{ $open: boolean }>`
   display: inline-flex;
   font-size: 0.75rem;
-  color: #8b877e;
+  color: #7c848e;
   transition: transform 0.2s ease;
   transform: rotate(${({ $open }) => ($open ? '180deg' : '0deg')});
 `
@@ -2708,15 +3090,15 @@ const ShapeBtn = styled.button<{ $active: boolean }>`
   align-items: center;
   gap: 0.5rem;
   padding: 0.85rem 0.5rem;
-  border-radius: 11px;
+  border-radius: 12px;
   cursor: pointer;
-  border: 1px solid ${({ $active }) => ($active ? '#e9e7e1' : 'rgba(255,255,255,0.1)')};
+  border: 1px solid ${({ $active }) => ($active ? '#e7eaef' : 'rgba(255,255,255,0.1)')};
   background: ${({ $active }) => ($active ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.03)')};
-  color: ${({ $active }) => ($active ? '#fff' : '#c8c5bd')};
+  color: ${({ $active }) => ($active ? '#fff' : '#c1c8d1')};
   transition: border-color 0.15s, background 0.15s, color 0.15s;
-  &:hover { border-color: #e9e7e1; }
+  &:hover { border-color: #e7eaef; }
 
-  svg { width: 30px; height: 26px; color: ${({ $active }) => ($active ? '#f4f2ec' : '#a8a49b')}; }
+  svg { width: 30px; height: 26px; color: ${({ $active }) => ($active ? '#f7f8fa' : '#979fa9')}; }
   span { font-size: 0.78rem; font-weight: 600; text-align: center; line-height: 1.2; }
 `
 
@@ -2728,7 +3110,7 @@ const PriceNote = styled.p`
   margin: 0 0 0.9rem;
   font-size: 0.78rem;
   line-height: 1.5;
-  color: #918d84;
+  color: #838b95;
 `
 
 const ByggStatus = styled.div<{ $ok: boolean }>`
@@ -2740,9 +3122,9 @@ const ByggStatus = styled.div<{ $ok: boolean }>`
   font-weight: 650;
   font-size: 0.9rem;
   margin-bottom: 0.7rem;
-  color: ${(p) => (p.$ok ? '#1f7a43' : '#9a6b12')};
-  background: ${(p) => (p.$ok ? 'rgba(46,160,90,0.14)' : 'rgba(220,150,30,0.16)')};
-  border: 1px solid ${(p) => (p.$ok ? 'rgba(46,160,90,0.5)' : 'rgba(220,150,30,0.55)')};
+  color: ${(p) => (p.$ok ? '#4b53b0' : '#9a6b12')};
+  background: ${(p) => (p.$ok ? 'rgba(91,99,196,0.14)' : 'rgba(220,150,30,0.16)')};
+  border: 1px solid ${(p) => (p.$ok ? 'rgba(91,99,196,0.5)' : 'rgba(220,150,30,0.55)')};
 `
 
 const ByggList = styled.ul`
@@ -2760,7 +3142,7 @@ const ByggList = styled.ul`
 
 const UnlockBadge = styled.div`
   font-size: 2.4rem;
-  color: #52704f;
+  color: #5b63c4;
   margin-bottom: 0.4rem;
 `
 
@@ -2772,20 +3154,20 @@ const SoknadBtn = styled.button`
   padding: 0.7rem 1.1rem;
   border: none;
   border-radius: 10px;
-  background: #52704f;
+  background: #5b63c4;
   color: #fff;
   font-size: 0.86rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s;
-  &:hover { background: #3f5a3d; }
+  &:hover { background: #4b53b0; }
 `
 
 const SoknadNote = styled.p`
   margin: 0.6rem 0 0;
   font-size: 0.72rem;
   line-height: 1.5;
-  color: #8a877e;
+  color: #7c848e;
 `
 
 const PriceRow = styled.div`
@@ -2794,10 +3176,10 @@ const PriceRow = styled.div`
   gap: 0.6rem;
   padding: 0.35rem 0;
   font-size: 0.85rem;
-  color: #d6d3cb;
+  color: #d9dde3;
 
   span { flex: 1; min-width: 0; }
-  em { font-style: normal; font-size: 0.75rem; color: #8b877e; width: 3.2rem; }
+  em { font-style: normal; font-size: 0.75rem; color: #7c848e; width: 3.2rem; }
 `
 
 const PriceInput = styled.input`
@@ -2811,14 +3193,14 @@ const PriceInput = styled.input`
   text-align: right;
   font-variant-numeric: tabular-nums;
   outline: none;
-  &:focus { border-color: #e9e7e1; }
+  &:focus { border-color: #e7eaef; }
 `
 
 const SubLabel = styled.div`
   margin: 0 0 0.6rem;
   font-size: 0.78rem;
   font-weight: 600;
-  color: #b9b6ae;
+  color: #a8afb9;
 `
 
 const SegRow = styled.div`
@@ -2833,11 +3215,11 @@ const SegBtn = styled.button<{ $active: boolean }>`
   cursor: pointer;
   font-size: 0.82rem;
   font-weight: 600;
-  border: 1px solid ${({ $active }) => ($active ? '#e9e7e1' : 'rgba(255,255,255,0.12)')};
+  border: 1px solid ${({ $active }) => ($active ? '#e7eaef' : 'rgba(255,255,255,0.12)')};
   background: ${({ $active }) => ($active ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.03)')};
-  color: ${({ $active }) => ($active ? '#fff' : '#c8c5bd')};
+  color: ${({ $active }) => ($active ? '#fff' : '#c1c8d1')};
   transition: border-color 0.15s, background 0.15s;
-  &:hover { border-color: #e9e7e1; }
+  &:hover { border-color: #e7eaef; }
 `
 
 const Slider = styled.div`
@@ -2859,17 +3241,17 @@ const Slider = styled.div`
     width: 18px;
     height: 18px;
     border-radius: 50%;
-    background: var(--ui-thumb, #e9e7e1);
-    border: 3px solid var(--ui-thumb-border, #1b1e24);
-    box-shadow: 0 0 0 1px var(--ui-thumb, #e9e7e1);
+    background: var(--ui-thumb, #e7eaef);
+    border: 3px solid var(--ui-thumb-border, #15171b);
+    box-shadow: 0 0 0 1px var(--ui-thumb, #e7eaef);
     cursor: grab;
   }
   input[type='range']::-moz-range-thumb {
     width: 16px;
     height: 16px;
     border-radius: 50%;
-    background: var(--ui-thumb, #e9e7e1);
-    border: 3px solid var(--ui-thumb-border, #1b1e24);
+    background: var(--ui-thumb, #e7eaef);
+    border: 3px solid var(--ui-thumb-border, #15171b);
     cursor: grab;
   }
 `
@@ -2880,7 +3262,7 @@ const SliderTop = styled.div`
   align-items: baseline;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
-  color: var(--ui-subtext, #d6d3cb);
+  color: var(--ui-subtext, #d9dde3);
   b { color: var(--ui-strong, #fff); font-variant-numeric: tabular-nums; }
 `
 
@@ -2896,13 +3278,13 @@ const MarkerChip = styled.button<{ $active: boolean }>`
   font-size: 0.74rem;
   line-height: 1;
   border-radius: 999px;
-  border: 1px solid ${({ $active }) => ($active ? 'var(--ui-thumb, #e9e7e1)' : 'rgba(255,255,255,0.14)')};
-  background: ${({ $active }) => ($active ? 'var(--ui-thumb, #e9e7e1)' : 'transparent')};
-  color: ${({ $active }) => ($active ? 'var(--ui-thumb-border, #1b1e24)' : 'var(--ui-subtext, #d6d3cb)')};
+  border: 1px solid ${({ $active }) => ($active ? 'var(--ui-thumb, #e7eaef)' : 'rgba(255,255,255,0.14)')};
+  background: ${({ $active }) => ($active ? 'var(--ui-thumb, #e7eaef)' : 'transparent')};
+  color: ${({ $active }) => ($active ? 'var(--ui-thumb-border, #15171b)' : 'var(--ui-subtext, #d9dde3)')};
   cursor: pointer;
   font-variant-numeric: tabular-nums;
   transition: border-color 0.15s ease;
-  &:hover { border-color: var(--ui-thumb, #e9e7e1); }
+  &:hover { border-color: var(--ui-thumb, #e7eaef); }
 `
 
 const Choices = styled.div`
@@ -2915,9 +3297,9 @@ const ChoiceBtn = styled.button<{ $active: boolean }>`
   text-align: left;
   padding: 0.7rem 0.85rem;
   border-radius: 10px;
-  border: 1px solid ${({ $active }) => ($active ? '#e9e7e1' : 'rgba(255,255,255,0.1)')};
+  border: 1px solid ${({ $active }) => ($active ? '#e7eaef' : 'rgba(255,255,255,0.1)')};
   background: ${({ $active }) => ($active ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.03)')};
-  color: #e9e7e1;
+  color: #e7eaef;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
   display: flex;
@@ -2925,8 +3307,8 @@ const ChoiceBtn = styled.button<{ $active: boolean }>`
   gap: 0.15rem;
 
   span { font-size: 0.9rem; font-weight: 600; }
-  em { font-style: normal; font-size: 0.76rem; color: #918d84; line-height: 1.35; }
-  &:hover { border-color: #e9e7e1; }
+  em { font-style: normal; font-size: 0.76rem; color: #838b95; line-height: 1.35; }
+  &:hover { border-color: #e7eaef; }
 `
 
 const Swatches = styled.div`
@@ -2945,11 +3327,11 @@ const SwatchBtn = styled.button<{ $active: boolean; $transparent: boolean }>`
   color: #fff;
   font-size: 0.7rem;
   border: 2px solid ${({ $active }) => ($active ? '#fff' : 'rgba(255,255,255,0.25)')};
-  box-shadow: ${({ $active }) => ($active ? '0 0 0 2px #e9e7e1' : 'none')};
+  box-shadow: ${({ $active }) => ($active ? '0 0 0 2px #e7eaef' : 'none')};
   transition: transform 0.12s, box-shadow 0.15s;
   ${({ $transparent }) =>
     $transparent &&
-    `background: repeating-conic-gradient(#cfccc4 0% 25%, #8b877e 0% 50%) 50% / 12px 12px;`}
+    `background: repeating-conic-gradient(#ccd2d9 0% 25%, #7c848e 0% 50%) 50% / 12px 12px;`}
   &:hover { transform: scale(1.08); }
   svg { filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6)); }
 `
@@ -2957,7 +3339,7 @@ const SwatchBtn = styled.button<{ $active: boolean; $transparent: boolean }>`
 const SwatchName = styled.div`
   margin-top: 0.6rem;
   font-size: 0.82rem;
-  color: #b9b6ae;
+  color: #a8afb9;
 `
 
 const Toggle = styled.button<{ $on: boolean }>`
@@ -2970,11 +3352,11 @@ const Toggle = styled.button<{ $on: boolean }>`
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--ui-text, #e9e7e1);
+  color: var(--ui-text, #e7eaef);
   text-align: left;
 
   span { display: flex; flex-direction: column; gap: 0.15rem; font-size: 0.9rem; font-weight: 600; }
-  em { font-style: normal; font-size: 0.76rem; color: var(--ui-muted, #918d84); }
+  em { font-style: normal; font-size: 0.76rem; color: var(--ui-muted, #838b95); }
 `
 
 const Track = styled.span<{ $on: boolean }>`
@@ -2982,7 +3364,7 @@ const Track = styled.span<{ $on: boolean }>`
   width: 42px;
   height: 24px;
   border-radius: 999px;
-  background: ${({ $on }) => ($on ? 'var(--ui-track-on, #e9e7e1)' : 'var(--ui-track-off, rgba(255,255,255,0.14))')};
+  background: ${({ $on }) => ($on ? 'var(--ui-track-on, #e7eaef)' : 'var(--ui-track-off, rgba(255,255,255,0.14))')};
   position: relative;
   transition: background 0.18s;
 `
@@ -3001,52 +3383,96 @@ const Knob = styled.span<{ $on: boolean }>`
 const CodeErr = styled.p`
   margin: 0.5rem 0 0;
   font-size: 0.76rem;
-  color: #e0928a;
+  color: #e8756b;
 `
 
 /* ---- oppsummering (venstre sidepanel, lyst – kun skillelinje) ---- */
 
-const SummaryRail = styled.aside`
-  width: 316px;
+const SummaryRail = styled.aside<{ $open: boolean }>`
+  width: ${({ $open }) => ($open ? '360px' : '0')};
   flex-shrink: 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: #f4f1ea;
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
-  color: #26251f;
+  background: #1a1d21;
+  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  color: #eaedf1;
+  overflow: hidden;
+  transition: width 0.28s ease;
 
   @media (max-width: 820px) {
-    order: 2;
+    order: 3;
     width: 100%;
-    max-height: 42vh;
+    max-height: 60vh;
     border-right: none;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-top: 1px solid rgba(0, 0, 0, 0.28);
   }
 `
 
 const RailHead = styled.div`
   flex-shrink: 0;
+  min-width: 360px;
   padding: 0.9rem 1rem 0.75rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  @media (max-width: 820px) { min-width: 0; }
 `
 
 const RailScroll = styled.div`
   flex: 1 1 auto;
+  min-width: 360px;
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0.85rem 0;
 
   &::-webkit-scrollbar { width: 8px; }
-  &::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.16); border-radius: 4px; }
+  &::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
+
+  @media (max-width: 820px) { min-width: 0; }
+`
+
+/* «Hva vil du gjøre?» – festet nederst, over eksport-footeren (skroller ikke
+   med resten). Egen maks-høyde så mange valg aldri skyver footeren ut av bildet. */
+const RailActions = styled.div`
+  flex-shrink: 0;
+  min-width: 360px;
+  max-height: 46vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 0.5rem;
+  background: #1a1d21;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+
+  &::-webkit-scrollbar { width: 8px; }
+  &::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
+
+  @media (max-width: 820px) { min-width: 0; max-height: none; }
 `
 
 const RailFooter = styled.div`
   flex-shrink: 0;
+  min-width: 360px;
   padding: 0.7rem 1rem 0.85rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-  background: #f4f1ea;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  background: #1a1d21;
+
+  @media (max-width: 820px) { min-width: 0; }
+`
+
+/* Konfigblokk i venstre rail – rammer inn trekkspillet og fryse-overlegget. */
+const ConfigBlock = styled.div`
+  position: relative;
+  padding: 0.25rem 0.75rem 0.35rem;
+`
+
+const ConfigTitle = styled.div`
+  margin-top: 0.35rem;
+  padding: 0.85rem 1rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #a8afb9;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 `
 
 const RailExportBtn = styled.button`
@@ -3058,13 +3484,13 @@ const RailExportBtn = styled.button`
   padding: 0.8rem 1rem;
   border: none;
   border-radius: 12px;
-  background: #52704f;
+  background: #5b63c4;
   color: #fff;
   font-size: 0.92rem;
   font-weight: 700;
   cursor: pointer;
   transition: background 0.15s;
-  &:hover { background: #3f5a3d; }
+  &:hover { background: #4b53b0; }
 `
 
 const RailExportPrice = styled.span`
@@ -3074,12 +3500,162 @@ const RailExportPrice = styled.span`
   &::before { content: '·'; margin: 0 0.4rem; opacity: 0.6; }
 `
 
+const FrozenLink = styled.button`
+  width: 100%;
+  margin-top: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(120, 128, 220, 0.4);
+  border-radius: 10px;
+  background: transparent;
+  color: #b9bff0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  &:hover { background: rgba(120, 128, 220, 0.12); }
+`
+
+// «Frys»-notis i kjøpsmodalen: gjør det tydelig at kjøpet binder planen til
+// målene slik de er ved betaling.
+const FreezeNote = styled.p`
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  margin: 0.85rem 0 0;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  background: #eef0fb;
+  color: #4b53b0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+  text-align: left;
+  svg { margin-top: 0.15rem; flex-shrink: 0; }
+`
+
+// Nedlastings-banner over 3D-scenen i lesevisning av kjøpt plan.
+const FrozenBanner = styled.div`
+  position: absolute;
+  left: 50%;
+  bottom: 1.1rem;
+  transform: translateX(-50%);
+  z-index: 6;
+  width: min(560px, calc(100% - 2rem));
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0.9rem 1rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  backdrop-filter: blur(6px);
+`
+
+const FrozenBadge = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  align-self: flex-start;
+  padding: 0.2rem 0.6rem;
+  border-radius: 999px;
+  background: #5b63c4;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+`
+
+const FrozenText = styled.p`
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: #3a4048;
+`
+
+const FrozenActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+`
+
+const FrozenDownload = styled.button<{ $ghost?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.6rem 0.95rem;
+  border-radius: 12px;
+  border: 1px solid ${(p) => (p.$ghost ? 'rgba(91,99,196,0.4)' : 'transparent')};
+  background: ${(p) => (p.$ghost ? 'transparent' : '#5b63c4')};
+  color: ${(p) => (p.$ghost ? '#4b53b0' : '#fff')};
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s;
+  &:hover { background: ${(p) => (p.$ghost ? 'rgba(91,99,196,0.08)' : '#4b53b0')}; }
+`
+
+const FrozenExit = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-left: auto;
+  padding: 0.6rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: #fff;
+  color: #4a515a;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  &:hover { background: #f7f8fa; }
+`
+
+// Lås-overlegg over redigeringspanelet mens kjøpt plan vises.
+const PanelLock = styled.div`
+  position: absolute;
+  inset: 0;
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1.5rem;
+  text-align: center;
+  border-radius: 12px;
+  background: rgba(27, 30, 36, 0.94);
+  backdrop-filter: blur(3px);
+  color: #a8afb9;
+  svg { font-size: 1.4rem; color: #7880dc; }
+  b { font-size: 0.95rem; color: #fff; }
+  span { font-size: 0.8rem; line-height: 1.45; max-width: 22ch; }
+`
+
+const PanelLockBtn = styled.button`
+  margin-top: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1rem;
+  border: none;
+  border-radius: 10px;
+  background: #5b63c4;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  &:hover { background: #4b53b0; }
+`
+
 const SumTitle = styled.div`
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #918d84;
+  color: #838b95;
 `
 
 const FactRow = styled.div`
@@ -3094,8 +3670,8 @@ const Fact = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.18rem;
-  em { font-style: normal; font-size: 0.68rem; color: #918d84; }
-  b { font-size: 0.9rem; font-weight: 700; color: #26251f; font-variant-numeric: tabular-nums; }
+  em { font-style: normal; font-size: 0.68rem; color: #838b95; }
+  b { font-size: 0.9rem; font-weight: 700; color: #fff; font-variant-numeric: tabular-nums; }
 `
 
 const MatCost = styled.div`
@@ -3106,18 +3682,17 @@ const MatCost = styled.div`
   margin: 0 1rem 0.85rem;
   padding: 0.6rem 0.75rem;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  span { font-size: 0.76rem; font-weight: 600; color: #6b6860; }
-  b { flex-shrink: 0; white-space: nowrap; font-size: 1.15rem; font-weight: 800; color: #26251f; font-variant-numeric: tabular-nums; }
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  span { font-size: 0.76rem; font-weight: 600; color: #a8afb9; }
+  b { flex-shrink: 0; white-space: nowrap; font-size: 1.15rem; font-weight: 800; color: #fff; font-variant-numeric: tabular-nums; }
 `
 
 const OptTitle = styled.div`
   padding: 0.85rem 1rem 0.5rem;
   font-size: 0.72rem;
   font-weight: 700;
-  color: #6b6860;
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  color: #a8afb9;
 `
 
 const OptList = styled.div`
@@ -3134,17 +3709,17 @@ const OptRow = styled.button<{ $disabled?: boolean; $highlight?: boolean }>`
   gap: 0.6rem;
   width: 100%;
   padding: 0.6rem 0.55rem;
-  border: ${({ $highlight }) => ($highlight ? '1.5px solid #5a8f5a' : '1px solid rgba(0, 0, 0, 0.1)')};
+  border: ${({ $highlight }) => ($highlight ? '1.5px solid #6a72d0' : '1px solid rgba(255, 255, 255, 0.1)')};
   border-radius: 10px;
-  background: ${({ $highlight }) => ($highlight ? '#f1faf1' : '#fff')};
-  box-shadow: ${({ $highlight }) => ($highlight ? '0 2px 10px rgba(90, 143, 90, 0.18)' : 'none')};
+  background: ${({ $highlight }) => ($highlight ? 'rgba(91, 99, 196, 0.16)' : 'rgba(255, 255, 255, 0.03)')};
+  box-shadow: ${({ $highlight }) => ($highlight ? '0 2px 12px rgba(91, 99, 196, 0.22)' : 'none')};
   text-align: left;
   cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
   opacity: ${({ $disabled }) => ($disabled ? 0.5 : 1)};
   transition: border-color 0.15s, background 0.15s, transform 0.1s;
   &:hover {
     ${({ $disabled, $highlight }) =>
-      $disabled ? '' : $highlight ? 'background: #eaf6ea; border-color: #4a7f4a;' : 'border-color: #7bc39c; background: #f6fbf7;'}
+      $disabled ? '' : $highlight ? 'background: rgba(91, 99, 196, 0.24); border-color: #7880dc;' : 'border-color: rgba(120, 128, 220, 0.6); background: rgba(255, 255, 255, 0.06);'}
   }
   &:active { ${({ $disabled }) => ($disabled ? '' : 'transform: translateY(1px);')} }
 `
@@ -3155,7 +3730,7 @@ const OptBadge = styled.span`
   right: 10px;
   padding: 0.1rem 0.5rem;
   border-radius: 999px;
-  background: #5a8f5a;
+  background: #6a72d0;
   color: #fff;
   font-size: 0.6rem;
   font-weight: 800;
@@ -3167,7 +3742,7 @@ const OptNa = styled.span`
   flex-shrink: 0;
   font-size: 0.68rem;
   font-weight: 700;
-  color: #918d84;
+  color: #838b95;
   white-space: nowrap;
 `
 
@@ -3178,8 +3753,8 @@ const OptIco = styled.span<{ $highlight?: boolean }>`
   display: grid;
   place-items: center;
   border-radius: 8px;
-  background: ${({ $highlight }) => ($highlight ? '#5a8f5a' : '#eef0e9')};
-  color: ${({ $highlight }) => ($highlight ? '#fff' : '#33322e')};
+  background: ${({ $highlight }) => ($highlight ? '#6a72d0' : 'rgba(255, 255, 255, 0.08)')};
+  color: ${({ $highlight }) => ($highlight ? '#fff' : '#e7eaef')};
   font-size: 0.9rem;
 `
 
@@ -3189,8 +3764,8 @@ const OptText = styled.span`
   display: flex;
   flex-direction: column;
   line-height: 1.25;
-  b { font-size: 0.86rem; font-weight: 700; color: #26251f; }
-  em { font-style: normal; font-size: 0.72rem; color: #918d84; }
+  b { font-size: 0.86rem; font-weight: 700; color: #fff; }
+  em { font-style: normal; font-size: 0.72rem; color: #838b95; }
 `
 
 const OptPrice = styled.span`
@@ -3201,14 +3776,14 @@ const OptPrice = styled.span`
   white-space: nowrap;
   font-size: 0.88rem;
   font-weight: 700;
-  color: #26251f;
+  color: #fff;
   font-variant-numeric: tabular-nums;
-  span { font-size: 0.64rem; font-weight: 600; color: #918d84; }
+  span { font-size: 0.64rem; font-weight: 600; color: #838b95; }
 `
 
 const OptArrow = styled.span`
   flex-shrink: 0;
-  color: #b7b3aa;
+  color: rgba(255, 255, 255, 0.32);
   font-size: 0.75rem;
 `
 
@@ -3219,8 +3794,8 @@ const SumFoot = styled.div`
   padding: 0.9rem 1rem 0.4rem;
   font-size: 0.76rem;
   font-weight: 600;
-  color: #6b6860;
-  svg { color: #5a8f5a; }
+  color: #838b95;
+  svg { color: #7880dc; }
 `
 
 /* Innstillinger nederst i venstre rail – lys tematisering av delte kontroller. */
@@ -3258,13 +3833,13 @@ const ViewSettingsMenu = styled.div`
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
-  --ui-text: #33322e;
-  --ui-muted: #8a877e;
-  --ui-track-on: #33322e;
+  --ui-text: #262a30;
+  --ui-muted: #7c848e;
+  --ui-track-on: #262a30;
   --ui-track-off: rgba(0, 0, 0, 0.18);
   --ui-rail: rgba(0, 0, 0, 0.14);
-  --ui-thumb: #33322e;
-  --ui-thumb-border: #f4f1ea;
-  --ui-subtext: #5a584f;
-  --ui-strong: #26251f;
+  --ui-thumb: #262a30;
+  --ui-thumb-border: #f7f8fa;
+  --ui-subtext: #626a74;
+  --ui-strong: #1a1d21;
 `

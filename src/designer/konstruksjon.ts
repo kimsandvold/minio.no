@@ -1,4 +1,5 @@
 import * as THREE from 'three'
+import { takpappTexture } from './takpappTexture'
 
 /**
  * Konstruksjonsvirke – felles standard for designer-templatene.
@@ -105,9 +106,13 @@ function beam2D(roof: THREE.Group, mat: Mat, xc: number, thick: number, p0: [num
   add(roof, g, mat(pid, darken), pid, { navn, profil: `48 × ${Math.round(depth * 1000)} mm`, lengdeCm: Math.round(L * 100) })
 }
 
-/** Utspart hakk (lekt-hakk) i taklekt. */
+/** Taklekt. */
 export const LEKT_T = 0.048 // taklekt 48 × 48 mm
-export const LEKT_HAKK = 0.048 // lekten ligger nedfelt hele sin høyde (48 mm) i sperra
+// Lektene HVILER oppå sperrene (som i virkelig takkonstruksjon) – de felles
+// IKKE ned i sperra. `LEKT_HAKK = 0` gir derfor null hakkdybde i sperra og et
+// senter-offset (`LEKT_T/2 − LEKT_HAKK`) som legger lekten helt oppå sperra.
+// Tekkingen heves tilsvarende (LEKT_T) så den ligger oppå lektene.
+export const LEKT_HAKK = 0 // ingen nedfelling – lekten ligger oppå sperra
 
 /** Fasciebord / vindski langs raftet og gavlene (dekker sperreendene). */
 export const FASCIA_T = 0.022
@@ -126,10 +131,14 @@ export const BARGE_OVER = 0.05 // vindskien stikker litt ut forbi raftet (i leng
  */
 function rakeGeo(zStart: number, zEnd: number, undY: (z: number) => number, RH: number, xT: number): THREE.ExtrudeGeometry {
   // Vindskiens overkant står litt (TOPPBORD_LOFT) over selve tekkingen.
-  const topL = (z: number) => undY(z) + RH + TAK_PLY + TOPPBORD_LOFT
+  // Tekkingen ligger oppå lektene (LEKT_T over sperreoverkant), så vindskien
+  // gjøres LEKT_T høyere (`FASCIA_H + LEKT_T`) og beholder samme underkant –
+  // slik at den fortsatt omslutter hele gavlkanten (sperre + lekt + tekking).
+  const H = FASCIA_H + LEKT_T
+  const topL = (z: number) => undY(z) + RH + LEKT_T + TAK_PLY + TOPPBORD_LOFT
   const s = new THREE.Shape()
-  s.moveTo(zStart, topL(zStart) - FASCIA_H)
-  s.lineTo(zEnd, topL(zEnd) - FASCIA_H)
+  s.moveTo(zStart, topL(zStart) - H)
+  s.lineTo(zEnd, topL(zEnd) - H)
   s.lineTo(zEnd, topL(zEnd))
   s.lineTo(zStart, topL(zStart))
   s.closePath()
@@ -376,7 +385,7 @@ export function byggValmtak(target: THREE.Group, mat: Mat, w: number, d: number,
   const baysX = Math.max(1, Math.ceil(W / CC))
   const xs: number[] = []
   for (let i = 1; i < baysX; i++) xs.push(-W / 2 + (i * W) / baysX)
-  const profil = `48 Ã ${Math.round(MH * 1000)} mm`
+  const profil = `48 × ${Math.round(MH * 1000)} mm`
 
   // STEG 2: Stretcher + tverrbjelker med skråkuttet overkant (takvinkel), halvt-
   // i-halvt sammenføyd: nedre del (flat, hl) med spor, øvre del skråkuttet.
@@ -616,8 +625,8 @@ export function byggPulttak(target: THREE.Group, mat: Mat, w: number, d: number,
   for (let j = 0; j < nL; j++) lektZs.push(zB + LEKT / 2 + (j * (dd + 2 * oh - LEKT)) / (nL - 1))
 
   // Sperrer c/c ≤ 600 – MELLOM veggene (x innenfor bredden) så de hviler på
-  // for-/bakre toppbjelke + hevet rem. Utstikk foran/bak; endene kappes loddrett,
-  // og overkant har utsparte hakk der lektene krysser (parallellogram-profil).
+  // for-/bakre toppbjelke + hevet rem. Utstikk foran/bak; endene kappes loddrett.
+  // Overkanten er ren (LEKT_HAKK = 0) – lektene hviler oppå, ikke nedfelt.
   const nR = antallCC(ww)
   for (let i = 0; i < nR; i++) {
     const x = -ww / 2 + KV_B / 2 + (i * (ww - KV_B)) / (nR - 1)
@@ -625,11 +634,11 @@ export function byggPulttak(target: THREE.Group, mat: Mat, w: number, d: number,
     add(roof, g, mat(`sperre-${i}`, 0.84), `sperre-${i}`, { navn: 'Sperre (pulttak)', profil: raf.profil, lengdeCm: Math.round(Math.hypot(dd + 2 * oh, rise) * 100) })
   }
 
-  // Kryss-lekt 48×48 – nedfelt i sperrehakkene (LEKT_HAKK dyp), c/c ≤ 600 langs
+  // Kryss-lekt 48×48 – hviler OPPÅ sperrene (ikke nedfelt), c/c ≤ 600 langs
   // fallet, med sideutstikk. Hver lekt vippes til takvinkelen.
   const cosA = Math.cos(ang)
   const sinA = Math.sin(ang)
-  const off = LEKT / 2 - LEKT_HAKK // senter-offset langs flatenormal (nedfelt)
+  const off = LEKT / 2 - LEKT_HAKK // senter-offset langs flatenormal (oppå sperra)
   for (let j = 0; j < nL; j++) {
     const z = lektZs[j]
     const surfaceY = undY(z) + RH // sperre-overkant på denne z
@@ -666,7 +675,7 @@ export function byggPulttak(target: THREE.Group, mat: Mat, w: number, d: number,
   // Konstruksjonen (sperrer/lekt/opplenger) er 'konstruksjon' – alltid synlig.
   roof.children.forEach((ch) => (ch.userData.part = 'konstruksjon'))
   // Taktekking oppå lektene – egen 'tak'-flate som «Tak»-toggelen styrer.
-  const yS = (z: number) => undY(z) + RH + TAK_PLY
+  const yS = (z: number) => undY(z) + RH + LEKT_T + TAK_PLY
   // Gavlene (x) + fremre høykant (zF): tekkingen stopper mot vindskiens innside.
   // Bakre lave raft (zB): tekkingen lapper litt ut som dryppkant.
   const xLc = -(ww / 2 + oh - FASCIA_T / 2)
@@ -687,7 +696,7 @@ export function byggPulttak(target: THREE.Group, mat: Mat, w: number, d: number,
     m.position.set(x, y, z)
     m.userData.part = 'tak'
   }
-  const coverTopP = (z: number) => undY(z) + RH + TAK_PLY
+  const coverTopP = (z: number) => undY(z) + RH + LEKT_T + TAK_PLY
   // Sømløs ramme: side-vindskiene løper langs gavlene med utstikk BAK (lav side)
   // og butter mot den fremre vindskien FORAN. Bakre fascia legges MELLOM
   // sidevindskiene, mens fremre vindski KAPPER over sidenes ender.
@@ -707,11 +716,16 @@ export function byggPulttak(target: THREE.Group, mat: Mat, w: number, d: number,
   })
   // Bakre (lav) raft-fascia MELLOM sidevindskiene (flukt, dryppkant).
   const backLen = ww + 2 * oh - FASCIA_T
-  fasc(new THREE.BoxGeometry(backLen, FASCIA_H, FASCIA_T), 'fascia-bak', backLen, 0, undY(zB) + RH - FASCIA_H / 2, zB - FASCIA_T / 2)
+  // Overkant følger tekkingen (rafte + lekt); bordet gjøres LEKT_T høyere så det
+  // fortsatt dekker helt ned som før.
+  const backFascH = FASCIA_H + LEKT_T
+  fasc(new THREE.BoxGeometry(backLen, backFascH, FASCIA_T), 'fascia-bak', backLen, 0, undY(zB) + RH + LEKT_T - backFascH / 2, zB - FASCIA_T / 2)
   // Fremre (høy) vindski KAPPER over sidevindskienes ytterside, med kappe oppå.
   const frontTop = coverTopP(zF) + TOPPBORD_LOFT
   const frontLen = ww + 2 * oh + FASCIA_T
-  fasc(new THREE.BoxGeometry(frontLen, FASCIA_H, FASCIA_T), 'fascia-front', frontLen, 0, frontTop - FASCIA_H / 2, zF)
+  // LEKT_T høyere så vindskien fortsatt omslutter hele den (nå høyere) forkanten.
+  const frontFascH = FASCIA_H + LEKT_T
+  fasc(new THREE.BoxGeometry(frontLen, frontFascH, FASCIA_T), 'fascia-front', frontLen, 0, frontTop - frontFascH / 2, zF)
   {
     const capLen = ww + 2 * oh + TOPPBORD_B
     const g = new THREE.BoxGeometry(capLen, TOPPBORD_T, TOPPBORD_B)
@@ -880,7 +894,8 @@ export function byggSaltak(target: THREE.Group, mat: Mat, w: number, d: number, 
   }
 
   // Sperrer c/c ≤ 600 – to per x-posisjon (fram/bak fra mønet), endene kappes
-  // loddrett, overkant har lekt-hakk, og de får fugleneb-sits på toppbjelken.
+  // loddrett, overkanten er ren (ingen lekt-hakk – lektene hviler oppå), og de
+  // får fugleneb-sits på toppbjelken.
   const seatLen = Math.min(0.098, halfD * 0.6)
   const nR = antallCC(ww)
   for (let i = 0; i < nR; i++) {
@@ -916,8 +931,8 @@ export function byggSaltak(target: THREE.Group, mat: Mat, w: number, d: number, 
     }
   }
 
-  // Kryss-lekt 48×48 – nedfelt i sperrehakkene, c/c ≤ 600 langs fallet, med
-  // gavlutstikk. Hver takflate vippes til takvinkelen.
+  // Kryss-lekt 48×48 – hviler OPPÅ sperrene (ikke nedfelt), c/c ≤ 600 langs
+  // fallet, med gavlutstikk. Hver takflate vippes til takvinkelen.
   const cosA = Math.cos(ang)
   const sinA = Math.sin(ang)
   const off = LEKT / 2 - LEKT_HAKK
@@ -933,7 +948,8 @@ export function byggSaltak(target: THREE.Group, mat: Mat, w: number, d: number, 
 
   // Konstruksjonen er 'konstruksjon' – alltid synlig. Taktekking = egen 'tak'-flate.
   roof.children.forEach((ch) => (ch.userData.part = 'konstruksjon'))
-  const yS = (z: number) => undY(z) + RH + TAK_PLY
+  // Tekkingen ligger oppå lektene (LEKT_T over sperreoverkant).
+  const yS = (z: number) => undY(z) + RH + LEKT_T + TAK_PLY
   // Gavlene (x): tekkingen stopper mot vindskiens innside (ikke gjennom vindskien).
   // Raftet (z): lapper litt ut over fasciaen.
   const xL = -(ww / 2 + oh - FASCIA_T / 2)
@@ -957,10 +973,14 @@ export function byggSaltak(target: THREE.Group, mat: Mat, w: number, d: number, 
     m.position.set(x, y, z)
     m.userData.part = 'tak'
   }
-  const eY = undY(halfD + oh) + RH // raftehøyde (front/bak)
-  fasc(new THREE.BoxGeometry(ww + 2 * oh, FASCIA_H, FASCIA_T), 'fascia-front', ww + 2 * oh, 0, eY - FASCIA_H / 2, halfD + oh + FASCIA_T / 2)
-  fasc(new THREE.BoxGeometry(ww + 2 * oh, FASCIA_H, FASCIA_T), 'fascia-bak', ww + 2 * oh, 0, eY - FASCIA_H / 2, -(halfD + oh) - FASCIA_T / 2)
-  const coverTopS = (z: number) => undY(z) + RH + TAK_PLY
+  // Fascia langs raftet: overkant følger tekkingen (rafte + lekt), og bordet
+  // gjøres LEKT_T høyere så det fortsatt dekker helt ned som før (omslutter
+  // sperre- + lektenden).
+  const eY = undY(halfD + oh) + RH + LEKT_T // rafte-/tekkingsoverkant (front/bak)
+  const fascH = FASCIA_H + LEKT_T
+  fasc(new THREE.BoxGeometry(ww + 2 * oh, fascH, FASCIA_T), 'fascia-front', ww + 2 * oh, 0, eY - fascH / 2, halfD + oh + FASCIA_T / 2)
+  fasc(new THREE.BoxGeometry(ww + 2 * oh, fascH, FASCIA_T), 'fascia-bak', ww + 2 * oh, 0, eY - fascH / 2, -(halfD + oh) - FASCIA_T / 2)
+  const coverTopS = (z: number) => undY(z) + RH + LEKT_T + TAK_PLY
   const slopeLenS = (halfD + oh + BARGE_OVER) / cosA
   ;[-1, 1].forEach((sx, ix) => {
     ;[1, -1].forEach((sd) => {
@@ -1060,6 +1080,11 @@ export function byggTakplate(target: THREE.Group, mat: THREE.MeshStandardMateria
   }
   const g = new THREE.BufferGeometry()
   g.setAttribute('position', new THREE.Float32BufferAttribute(all, 3))
+  // Planar UV (topp-ned, i meter) så tekstur/granulat får samme størrelse
+  // uansett takflatens dimensjon. Bruk (x, z) direkte som UV.
+  const uvs: number[] = []
+  for (let i = 0; i < all.length; i += 3) uvs.push(all[i], all[i + 2])
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2))
   g.computeVertexNormals()
   mat.side = THREE.DoubleSide
   const m = new THREE.Mesh(g, mat)
@@ -1086,7 +1111,8 @@ export function byggTaktekke(target: THREE.Group, _mat: Mat, topVerts: number[],
   byggTakplate(target, plyMat, topVerts, `takflate${key}`, 'Taktekking (18 mm kryssfiner)')
   if (tekke === 'takpapp') {
     const pappVerts = topVerts.map((v, i) => (i % 3 === 1 ? v + TAKPAPP_T : v)) // hev y en papptykkelse
-    const pappMat = new THREE.MeshStandardMaterial({ color: 0x33333a, roughness: 0.96, metalness: 0.03 })
+    const { map, bump } = takpappTexture()
+    const pappMat = new THREE.MeshStandardMaterial({ color: 0x565660, map, bumpMap: bump, bumpScale: 0.4, roughness: 0.96, metalness: 0.03 })
     byggTakplate(target, pappMat, pappVerts, `takpapp${key}`, 'Takpapp', TAKPAPP_T, 'tak', 'takpapp')
   }
 }
@@ -1110,4 +1136,47 @@ export function sperreMellom(target: THREE.Group, mat: Mat, a: [number, number, 
     m.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(xAxis, yAxis, zAxis))
   }
   return m
+}
+
+/** Materialpost fra taket – utledet direkte fra byggern, så den matcher 3D. */
+export interface TakBomDel { navn: string; profil: string; lengdeM: number; antall: number; mat: string }
+
+/** Prisnøkkel ut fra profilstrengen (48×N → nærmeste bjelke/stolpe, ellers bord). */
+function prisForProfil(profil: string): string {
+  const m = profil.match(/48\s*[×xÃ]\s*(\d+)/i)
+  if (m) {
+    const n = parseInt(m[1], 10)
+    if (n <= 48) return 'stolpe-48x48'
+    if (n <= 98) return 'bjelke-48x98'
+    if (n <= 148) return 'bjelke-48x148'
+    if (n <= 198) return 'bjelke-48x198'
+    return 'bjelke-48x223'
+  }
+  return 'bord-19x148' // vindski/fascia/gesims/toppbord (22×170, 20×N, 22×120)
+}
+
+/**
+ * Kjører takbyggern i en kast-gruppe og henter materiallista rett fra de
+ * genererte meshene (userData.info), så BOM og 3D ALLTID stemmer overens.
+ * Tekkingen (kryssfiner/takpapp) utelates – den regnes som m² i templatet.
+ */
+export function takBomFromBuild(taktype: string, w: number, d: number, vinkel: number, oh: number, retning: string, moneretning: string, tekke: string): TakBomDel[] {
+  const g = new THREE.Group()
+  const mat: Mat = () => new THREE.MeshStandardMaterial()
+  if (taktype === 'pulttak') byggPulttak(g, mat, w, d, 2.4, vinkel, oh, retning, tekke)
+  else if (taktype === 'saltak') byggSaltak(g, mat, w, d, 2.4, vinkel, oh, moneretning, tekke)
+  else byggValmtak(g, mat, w, d, 2.4, vinkel, oh, tekke)
+  const skip = /takplate|takpapp|taktekking|kryssfiner|soffitt|undertak/i
+  const map = new Map<string, TakBomDel>()
+  g.traverse((o) => {
+    const info = (o as THREE.Object3D).userData?.info as { navn?: string; profil?: string; lengdeCm?: number } | undefined
+    if (!info?.navn || skip.test(info.navn)) return
+    const profil = info.profil || ''
+    const lengdeM = Math.max(0.02, (info.lengdeCm ?? 0) / 100)
+    const key = `${info.navn}|${profil}|${Math.round(lengdeM * 100)}`
+    const ex = map.get(key)
+    if (ex) ex.antall += 1
+    else map.set(key, { navn: info.navn, profil, lengdeM, antall: 1, mat: prisForProfil(profil) })
+  })
+  return [...map.values()]
 }

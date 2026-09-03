@@ -4,6 +4,7 @@ import Icon from '../../shared/Icon'
 import { opprettForesporsel } from '../../../services/foresporselService'
 import type { ForesporselType } from '../../../types/foresporsel'
 import { foresporselTypeLabel } from '../../../types/foresporsel'
+import { bestillByggeplan } from '../../../services/vippsService'
 
 const formatKr = (n: number) => `${n.toLocaleString('nb-NO')} kr`
 
@@ -19,6 +20,8 @@ interface Props {
   prisEstimatKr: number
   userId: string
   userEmail: string
+  /** Designets Firestore-id. Påkrevd for type 'byggeplan'. */
+  designId?: string
   onClose: () => void
 }
 
@@ -33,6 +36,11 @@ const TITLER: Record<ForesporselType, { tittel: string; ingress: string; ikon: s
     ingress: 'Vi kapper trelasten etter kapplista så du kan bygge selv. Skriv gjerne litt om ønsker eller spørsmål – så tar vi kontakt med et uforpliktende tilbud.',
     ikon: 'faBoxOpen',
   },
+  byggeplan: {
+    tittel: 'Be om byggeplan',
+    ingress: 'Vi sender deg betalingsinformasjon og en 6-sifret tilgangskode på e-post. Koden låser opp materialliste, mål og PDF for dette designet.',
+    ikon: 'faFilePdf',
+  },
 }
 
 export default function ForesporselModal(props: Props) {
@@ -44,6 +52,20 @@ export default function ForesporselModal(props: Props) {
     if (status === 'sender') return
     setStatus('sender')
     try {
+      // Byggeplan-forespørsler må gå via serveren: den lager tilgangskoden og
+      // lagrer den utenfor kundens rekkevidde (se api/plan/bestill.ts).
+      if (props.type === 'byggeplan') {
+        if (!props.designId) { setStatus('feil'); return }
+        const res = await bestillByggeplan(props.designId, {
+          melding: melding.trim(),
+          maal: props.maal,
+          sammendrag: props.sammendrag,
+          arealM2: props.arealTekst ? parseFloat(props.arealTekst.replace(',', '.')) || null : null,
+          estimatKr: props.estimatKr,
+        })
+        setStatus(res.ok ? 'ok' : 'feil')
+        return
+      }
       await opprettForesporsel({
         userId: props.userId,
         userEmail: props.userEmail,
@@ -73,7 +95,15 @@ export default function ForesporselModal(props: Props) {
           <Sent>
             <SentIcon><Icon name="faCircleCheck" /></SentIcon>
             <h3>Forespørsel sendt</h3>
-            <p>Takk! Vi har fått «{props.designNavn}» med alle mål og materialer, og tar kontakt på <strong>{props.userEmail}</strong> med et uforpliktende tilbud.</p>
+            {props.type === 'byggeplan' ? (
+              <p>
+                Takk! Vi sender betalingsinformasjon og tilgangskoden for «{props.designNavn}» til{' '}
+                <strong>{props.userEmail}</strong>. Skriv inn koden her i designverktøyet for å låse
+                opp planen.
+              </p>
+            ) : (
+              <p>Takk! Vi har fått «{props.designNavn}» med alle mål og materialer, og tar kontakt på <strong>{props.userEmail}</strong> med et uforpliktende tilbud.</p>
+            )}
             <Primary onClick={props.onClose}>Lukk</Primary>
           </Sent>
         ) : (
@@ -138,13 +168,13 @@ const Box = styled.div`
   overflow-y: auto;
   padding: 1.9rem 1.75rem 1.6rem;
   background: #1b1e24;
-  color: #e9e7e1;
+  color: #e7eaef;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
 
   h3 { margin: 0 0 0.4rem; font-size: 1.2rem; font-weight: 700; color: #fff; }
-  .ingress { margin: 0 0 1.1rem; font-size: 0.85rem; color: #a8a49b; line-height: 1.55; }
+  .ingress { margin: 0 0 1.1rem; font-size: 0.85rem; color: #979fa9; line-height: 1.55; }
 `
 
 const Close = styled.button`
@@ -158,7 +188,7 @@ const Close = styled.button`
   background: rgba(255, 255, 255, 0.05);
   border: none;
   border-radius: 8px;
-  color: #cfccc4;
+  color: #ccd2d9;
   cursor: pointer;
   &:hover { background: rgba(255, 255, 255, 0.12); color: #fff; }
 `
@@ -170,8 +200,8 @@ const IconTop = styled.div`
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: rgba(123, 195, 156, 0.14);
-  color: #7bc39c;
+  background: rgba(91, 99, 196, 0.20);
+  color: #b9bff0;
   font-size: 1.1rem;
 `
 
@@ -190,7 +220,7 @@ const CardHead = styled.div`
   padding-bottom: 0.6rem;
   margin-bottom: 0.6rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  span { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: #918d84; }
+  span { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em; color: #838b95; }
   b { font-size: 1rem; font-weight: 700; color: #fff; }
 `
 
@@ -204,8 +234,8 @@ const Row = styled.div`
   align-items: baseline;
   justify-content: space-between;
   gap: 0.75rem;
-  em { font-style: normal; font-size: 0.78rem; color: #918d84; }
-  span { font-size: 0.85rem; font-weight: 600; color: #e9e7e1; font-variant-numeric: tabular-nums; }
+  em { font-style: normal; font-size: 0.78rem; color: #838b95; }
+  span { font-size: 0.85rem; font-weight: 600; color: #e7eaef; font-variant-numeric: tabular-nums; }
 `
 
 const Spec = styled.div`
@@ -213,7 +243,7 @@ const Spec = styled.div`
   padding-top: 0.6rem;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   font-size: 0.74rem;
-  color: #918d84;
+  color: #838b95;
   line-height: 1.45;
 `
 
@@ -222,8 +252,8 @@ const Label = styled.label`
   margin-bottom: 0.4rem;
   font-size: 0.82rem;
   font-weight: 700;
-  color: #e9e7e1;
-  span { font-weight: 400; color: #918d84; }
+  color: #e7eaef;
+  span { font-weight: 400; color: #838b95; }
 `
 
 const Textarea = styled.textarea`
@@ -238,14 +268,14 @@ const Textarea = styled.textarea`
   font-family: inherit;
   line-height: 1.5;
   outline: none;
-  &:focus { border-color: #7bc39c; background: rgba(255, 255, 255, 0.06); }
-  &::placeholder { color: #6b6860; }
+  &:focus { border-color: #7880dc; background: rgba(255, 255, 255, 0.06); }
+  &::placeholder { color: #626a74; }
 `
 
 const Feil = styled.p`
   margin: 0.7rem 0 0;
   font-size: 0.8rem;
-  color: #e0928a;
+  color: #e8756b;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -265,7 +295,7 @@ const Primary = styled.button`
   font-weight: 700;
   cursor: pointer;
   color: #16181d;
-  background: #f4f2ec;
+  background: #f7f8fa;
   transition: background 0.15s;
   &:hover:not(:disabled) { background: #fff; }
   &:disabled { opacity: 0.7; cursor: default; }
@@ -274,15 +304,15 @@ const Primary = styled.button`
 const Hint = styled.p`
   margin: 0.7rem 0 0;
   font-size: 0.74rem;
-  color: #6b6860;
+  color: #626a74;
   text-align: center;
 `
 
 const Sent = styled.div`
   text-align: center;
   padding: 0.5rem 0;
-  p { font-size: 0.88rem; color: #a8a49b; line-height: 1.6; margin: 0 0 1.2rem; }
-  strong { color: #e9e7e1; }
+  p { font-size: 0.88rem; color: #979fa9; line-height: 1.6; margin: 0 0 1.2rem; }
+  strong { color: #e7eaef; }
 `
 
 const SentIcon = styled.div`
@@ -292,7 +322,7 @@ const SentIcon = styled.div`
   display: grid;
   place-items: center;
   border-radius: 50%;
-  background: rgba(123, 195, 156, 0.16);
-  color: #7bc39c;
+  background: rgba(255, 255, 255, 0.16);
+  color: #1a1d21;
   font-size: 1.6rem;
 `

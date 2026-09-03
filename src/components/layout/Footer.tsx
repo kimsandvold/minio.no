@@ -210,20 +210,17 @@ export default function Footer() {
     <StyledFooter>
       <FooterContainer>
         <FooterAbout>
-          <h3>Håndlaget i Lillehammer</h3>
-          <p>Bak Minio står jeg, Kim Sandvold – genuint opptatt av produktutvikling, godt håndverk og det å skape noe med hendene. Fra verkstedet mitt i Lillehammer lager jeg utendørs treprodukter som er bygget for å vare: varmepumpehus, søppelboder, postkassestativer, levegger, plantekasser og mer.</p>
-          <p>Til daglig jobber jeg som programvareutvikler, og den erfaringen tar jeg med meg inn i verkstedet: jeg designer og modellerer alt i 3D før det bygges. Derfor har jeg laget et gratis 3D-designverktøy her på siden, der du selv kan tegne prosjektet ditt, tilpasse mål, treslag og farge, og få en komplett byggeplan med materialliste og arbeidstegning – enten du vil bygge det selv eller la meg bygge det for deg.</p>
-          <p>Hvert produkt lages på bestilling, tilpasset dine mål og ditt uterom. Det som driver meg er å ta en idé og gjøre den til virkelighet – og jeg gir meg ikke før du er fornøyd. Jeg velger riktig materiale og bygger med den omtanken som masseproduksjon aldri kan tilby. Ingen to prosjekter er like – og det er nettopp det som gjør det verdt å gjøre ordentlig.</p>
-          <p>Jeg tror på kort vei mellom deg og den som bygger produktet ditt. Når du handler hos Minio, snakker du direkte med meg. Du får ærlige råd, tydelig kommunikasjon og et resultat du kan stole på.</p>
-          <p>Har du et prosjekt i tankene? Ta kontakt – jeg hører gjerne fra deg.</p>
-          <p><em>– Kim Sandvold</em></p>
+          <h3>Skreddersydde treprodukter – designet i 3D</h3>
+          <p>Minio er en norsk plattform for utendørs treprodukter i massivt tre: varmepumpehus, søppelboder, postkassestativer, boder, garasjer, levegger, plantekasser og mer. Alt utvikles og modelleres i 3D før det produseres.</p>
+          <p>Design produktet ditt i vårt gratis 3D-verktøy – tilpass mål, treslag og farge, og få en komplett byggeplan med materialliste og arbeidstegninger. Bygg det selv, eller la oss produsere det for deg.</p>
+          <p>Hvert produkt lages på bestilling og tilpasses ditt uterom, med kvalitetsmaterialer og presist håndverk. Kort vei fra idé til ferdig resultat – og tett oppfølging hele veien.</p>
         </FooterAbout>
 
         <FooterRight>
           <FooterSection>
             <h4>Kontakt</h4>
             <ContactInfo>
-              <p>{company.legalName}</p>
+              <p>Minio</p>
               <p>Org.nr {company.orgNr}</p>
               <Socials>
                 <a href="https://www.facebook.com/profile.php?id=61576010648640&locale=nb_NO" target="_blank" rel="noopener noreferrer" aria-label="Facebook (åpnes i nytt vindu)">

@@ -141,7 +141,7 @@ export default function DesignTegningPage() {
     <GuideArticleLayout
       slug="design-og-tegning"
       readingTime="5 min"
-      lead="En enkel tegning gjør avgjørelsene før du kapper det første bordet. Slik skisser du prosjektet – på papir eller digitalt – og gjør det om til mål du kan bygge etter."
+      lead="En enkel tegning tar avgjørelsene før du kapper første bord. Slik skisser du prosjektet – på papir eller digitalt – og får mål du kan bygge etter."
       sections={sections}
     />
   )

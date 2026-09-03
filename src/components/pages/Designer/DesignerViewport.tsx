@@ -273,12 +273,12 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
       c.width = 128
       c.height = 128
       const ctx = c.getContext('2d')!
-      ctx.fillStyle = '#edece7'
+      ctx.fillStyle = '#f2f4f7'
       ctx.fillRect(0, 0, 128, 128)
-      ctx.strokeStyle = '#c4c1b8'
+      ctx.strokeStyle = '#c7ced7'
       ctx.lineWidth = 5
       ctx.strokeRect(4, 4, 120, 120)
-      ctx.fillStyle = '#33322e'
+      ctx.fillStyle = '#262a30'
       ctx.font = '700 26px system-ui, -apple-system, sans-serif'
       ctx.textAlign = 'center'
       ctx.textBaseline = 'middle'

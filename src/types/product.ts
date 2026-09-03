@@ -12,7 +12,20 @@ export interface Product {
   detailsHtml: string
   category: 'primary' | 'secondary'
   showOnFrontPage: boolean
+  /** Hidden from product listings/carousels, but still reachable by URL and via search. */
+  unlisted?: boolean
   hasPromoRibbon?: boolean
+  /**
+   * Kampanje som er slått AV utenfor sesong. JSON tar ikke kommentarer, så
+   * verdiene parkeres her i stedet for å slettes. `aktiv: false` betyr at
+   * ingenting av dette vises – se `notat` for hva som må skrus på igjen.
+   */
+  kampanje?: {
+    aktiv: boolean
+    notat: string
+    regularPrice: string
+    rabattProsent: number
+  }
   isFeatured?: boolean
   hasConfigurator?: boolean
   basePrice?: number

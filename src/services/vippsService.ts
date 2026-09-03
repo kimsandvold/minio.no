@@ -35,6 +35,7 @@ const VIPPS_BELOP: Record<string, Partial<Record<Vare, number>>> = {
   terrasse: { plan: 349 },
   utekjokken: { plan: 349 },
   carport: { plan: 449 },
+  garasje: { plan: 990 },
   varmepumpehus: { plan: 199 },
   soppelboder: { plan: 349 },
   vedskjul: { plan: 349 },
@@ -59,12 +60,22 @@ interface StatusResp {
   vare?: Vare
 }
 
+export interface RedeemResultat {
+  ok: boolean
+  /** Feilmelding fra serveren – vises som forklaring ved feil kode. */
+  message?: string
+}
+
 /** Kaller et Vipps-endepunkt med innloggingstoken og returnerer JSON. */
-async function kallApi<T>(sti: string, body: Record<string, unknown>): Promise<T> {
+async function kallApi<T>(
+  sti: string,
+  body: Record<string, unknown>,
+  prefiks = '/api/vipps',
+): Promise<T> {
   const token = await auth.currentUser?.getIdToken()
   if (!token) throw new Error('Du må være innlogget.')
 
-  const res = await fetch(`${API_BASE}/api/vipps/${sti}`, {
+  const res = await fetch(`${API_BASE}${prefiks}/${sti}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -114,5 +125,49 @@ export async function sjekkVippsStatus(prosjektId: string): Promise<StatusResp> 
     return await kallApi<StatusResp>('status', { prosjektId })
   } catch {
     return { betalt: false, state: 'ERROR' }
+  }
+}
+
+/**
+ * Løser inn en 6-sifret tilgangskode. Koden verifiseres på serveren, som også
+ * skriver entitlements – klienten har ikke lov til å sette `betalt`/`kjopt`
+ * selv (se firestore.rules). Hent designet på nytt etter et ok-svar.
+ */
+export async function losInnTilgangskode(prosjektId: string, kode: string): Promise<RedeemResultat> {
+  try {
+    await kallApi<{ ok: boolean }>('redeem', { prosjektId, kode })
+    return { ok: true }
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : 'Ukjent feil' }
+  }
+}
+
+export interface BestillResultat {
+  ok: boolean
+  /** Planen var allerede kjøpt – ingen ny forespørsel er laget. */
+  alleredeKjopt?: boolean
+  /** Beløpet kunden skal Vippse manuelt. */
+  belopKr?: number
+  message?: string
+}
+
+/**
+ * Ber om byggeplanen den manuelle veien (lanseringsmodus, før Vipps har
+ * godkjent salgsavtalen). Serveren lager tilgangskoden, lagrer den på en
+ * forespørsel bare admin kan lese, og varsler admin på e-post.
+ */
+export async function bestillByggeplan(
+  prosjektId: string,
+  detaljer: { melding?: string; maal?: string; sammendrag?: string; arealM2?: number | null; estimatKr?: number },
+): Promise<BestillResultat> {
+  try {
+    const data = await kallApi<{ ok: boolean; alleredeKjopt: boolean; belopKr?: number }>(
+      'bestill',
+      { prosjektId, ...detaljer },
+      '/api/plan',
+    )
+    return { ok: true, alleredeKjopt: data.alleredeKjopt, belopKr: data.belopKr }
+  } catch (e) {
+    return { ok: false, message: e instanceof Error ? e.message : 'Ukjent feil' }
   }
 }

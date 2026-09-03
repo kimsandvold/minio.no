@@ -24,21 +24,53 @@ service cloud.firestore {
                   && request.auth.token.email == 'kimsandvold@gmail.com';
     }
 
-    // Designverktøy-prosjekter (samme mønster som designs).
+    // Designverktøy-prosjekter.
+    //
+    // Betalingsfeltene (betalt, kjopt, frosset, tilgangskode, kodeForsok,
+    // vipps) er SERVER-ONLY: de skrives bare av Vercel-funksjonene under
+    // /api/vipps/ via Firebase Admin SDK, som går forbi disse reglene. Uten
+    // dette kunne en innlogget kunde satt betalt=true fra nettleserkonsollen
+    // og lastet ned byggeplanen gratis.
     match /designerProsjekter/{projectId} {
+      // Nye design opprettes alltid ubetalt og uten kode.
       allow create: if request.auth != null
-                    && request.resource.data.userId == request.auth.uid;
-      allow read, update, delete: if request.auth != null
-                                  && resource.data.userId == request.auth.uid;
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.betalt == false
+                    && !request.resource.data.keys()
+                         .hasAny(['frosset', 'tilgangskode', 'kodeForsok', 'vipps'])
+                    && (!('kjopt' in request.resource.data)
+                        || request.resource.data.kjopt.keys().size() == 0);
+
+      allow read, delete: if request.auth != null
+                          && resource.data.userId == request.auth.uid;
+
+      // Kunden kan endre designet sitt (navn, config, overrides), men ingen
+      // av feltene som avgjør hva som er betalt – og kan ikke gi det bort.
+      allow update: if request.auth != null
+                    && resource.data.userId == request.auth.uid
+                    && request.resource.data.userId == resource.data.userId
+                    && !request.resource.data.diff(resource.data)
+                         .affectedKeys()
+                         .hasAny(['betalt', 'kjopt', 'frosset', 'tilgangskode',
+                                  'kodeForsok', 'vipps']);
+
       allow read: if request.auth != null
                   && request.auth.token.email == 'kimsandvold@gmail.com';
     }
 
-    // Forespørsler fra designverktøyet (bygging / materialpakke).
-    // Kunden oppretter sin egen; kun admin kan lese og oppdatere status.
+    // Forespørsler fra designverktøyet (bygging / materialpakke / byggeplan).
+    // Kunden oppretter sin egen, men får ALDRI lese noen av dem: en
+    // 'byggeplan'-forespørsel bærer tilgangskoden kunden skal betale for, og
+    // Firestore kan ikke skjule enkeltfelt i et lesbart dokument.
+    //
+    // 'byggeplan'-forespørsler opprettes bare av api/plan/bestill.ts (Admin
+    // SDK, går forbi disse reglene). Klienten kan derfor verken velge sin egen
+    // kode eller lage en byggeplan-forespørsel selv.
     match /designForesporsler/{id} {
       allow create: if request.auth != null
-                    && request.resource.data.userId == request.auth.uid;
+                    && request.resource.data.userId == request.auth.uid
+                    && request.resource.data.type in ['ferdig', 'materialpakke']
+                    && !request.resource.data.keys().hasAny(['tilgangskode', 'innlostAt']);
       allow read, update: if request.auth != null
                           && request.auth.token.email == 'kimsandvold@gmail.com';
     }

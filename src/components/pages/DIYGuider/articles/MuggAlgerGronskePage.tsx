@@ -184,7 +184,7 @@ export default function MuggAlgerGronskePage() {
     <GuideArticleLayout
       slug="mugg-alger-gronske"
       readingTime="5 min"
-      lead="Slik fjerner du grønske, alger og mugg fra terrasse og utendørs tre – riktig rensemiddel, teknikk og enkle forebyggende tiltak som holder terrassen ren lenger."
+      lead="Slik fjerner du grønske, alger og mugg fra terrasse og utendørs tre – riktig rensemiddel, teknikk og tiltak som holder terrassen ren lenger."
       sections={sections}
     />
   )

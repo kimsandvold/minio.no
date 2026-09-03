@@ -236,7 +236,7 @@ export default function KebonyLerkFuruGranPage() {
     <GuideArticleLayout
       slug="kebony-lerk-furu-gran"
       readingTime="6 min"
-      lead="Kebony, lerk, furu eller gran – hva bør du velge til terrasse og utendørsbruk? Her er en praktisk sammenligning av holdbarhet, pris, vedlikehold og bruksområde."
+      lead="Kebony, lerk, furu eller gran til terrasse og utendørs bruk? Praktisk sammenligning av holdbarhet, pris, vedlikehold og bruksområde."
       sections={sections}
     />
   )

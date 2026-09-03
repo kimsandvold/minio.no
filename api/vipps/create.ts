@@ -12,26 +12,19 @@ import { FieldValue } from 'firebase-admin/firestore'
 import { db } from '../_lib/firebaseAdmin'
 import { HttpError, postHandler } from '../_lib/http'
 import { creds } from '../_lib/creds'
-import { alleredeKjopt, normaliserVare, prisFor, type Vare } from '../_lib/pricing'
+import { kanKjopes, normaliserVare, prisFor, type Vare } from '../_lib/pricing'
+import { alleredeKjopt, eideKjopt, type ProsjektDoc } from '../_lib/entitlements'
 import { createPayment, getAccessToken } from '../_lib/vipps'
 
 const COLLECTION = 'designerProsjekter'
-
-interface ProsjektDoc {
-  userId: string
-  templateId: string
-  navn: string
-  betalt: boolean
-  kjopt?: Record<string, boolean>
-  tilgangskode: string
-  vipps?: { status: string; reference?: string; belop?: number; vare?: Vare }
-}
 
 export default postHandler(async (req: VercelRequest, uid: string) => {
   const prosjektId = String(req.body?.prosjektId ?? '')
   const returnOrigin = String(req.body?.returnOrigin ?? 'https://minio.no').replace(/\/$/, '')
   const vare = normaliserVare(req.body?.vare)
   if (!prosjektId) throw new HttpError(400, 'Mangler prosjektId.')
+  // Byggesøknad-heftet er tatt av salg (se SOKNAD_SALG i _lib/pricing.ts).
+  if (!kanKjopes(vare)) throw new HttpError(400, 'Byggesøknad-heftet er ikke til salgs for øyeblikket.')
 
   const ref = db.collection(COLLECTION).doc(prosjektId)
   const snap = await ref.get()
@@ -39,9 +32,7 @@ export default postHandler(async (req: VercelRequest, uid: string) => {
   const p = snap.data() as ProsjektDoc
   if (p.userId !== uid) throw new HttpError(403, 'Dette designet tilhører ikke deg.')
 
-  // Bakoverkompatibelt: eldre `betalt` uten `kjopt` = plan + søknad kjøpt.
-  const eideKjopt = p.kjopt ?? (p.betalt ? { plan: true, soknad: true } : {})
-  if (alleredeKjopt(eideKjopt, vare)) return { redirectUrl: null, alleredeBetalt: true }
+  if (alleredeKjopt(eideKjopt(p), vare)) return { redirectUrl: null, alleredeBetalt: true }
 
   const belopKr = prisFor(p.templateId, vare)
   // Unik referanse pr. forsøk (Vipps krever unik reference pr. betaling).

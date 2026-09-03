@@ -210,7 +210,7 @@ export default function StolpeavstandPage() {
     <GuideArticleLayout
       slug="stolpeavstand"
       readingTime="6 min"
-      lead="Veiledende stolpeavstander for pergola, carport og levegg – hva snø, vind og takvekt betyr for dimensjoneringen, og hvordan du velger riktig stolpedimensjon."
+      lead="Veiledende stolpeavstander for pergola, carport og levegg – hva snø, vind og takvekt betyr, og hvordan du velger riktig stolpedimensjon."
       sections={sections}
     />
   )

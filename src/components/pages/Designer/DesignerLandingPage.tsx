@@ -165,11 +165,11 @@ const Kicker = styled.div`
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #9bd6b3;
+  color: #c1c8d1;
   margin-bottom: 1rem;
   span {
-    background: rgba(123, 195, 156, 0.16);
-    border: 1px solid rgba(123, 195, 156, 0.4);
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 999px;
     padding: 0.2rem 0.6rem;
     letter-spacing: 0.08em;
@@ -192,13 +192,13 @@ const Chips = styled.ul`
     gap: 0.5rem;
     font-size: 0.85rem;
     font-weight: 600;
-    color: #e9e7e1;
+    color: #e7eaef;
     background: rgba(255, 255, 255, 0.07);
     border: 1px solid rgba(255, 255, 255, 0.12);
     border-radius: 999px;
     padding: 0.45rem 0.9rem;
   }
-  svg { color: #9bd6b3; font-size: 0.8rem; }
+  svg { color: #c1c8d1; font-size: 0.8rem; }
 `
 
 const Content = styled.section`
@@ -212,7 +212,7 @@ const SectionHead = styled.div`
   margin: 0 auto 1.75rem;
   text-align: center;
   h2 { font-size: 1.7rem; margin: 0 0 0.4rem; color: ${({ theme }) => theme.colors.textDark}; font-weight: 800; }
-  p { margin: 0; color: #6b6860; font-size: 1rem; }
+  p { margin: 0; color: #626a74; font-size: 1rem; }
 `
 
 const Grid = styled.div`
@@ -229,9 +229,9 @@ const Thumb = styled.div<{ $soon?: boolean }>`
   display: grid;
   place-items: center;
   overflow: hidden;
-  background: ${({ $soon }) => ($soon ? '#f0efe9' : 'linear-gradient(135deg, #f7f5ef 0%, #e8e5db 100%)')};
+  background: ${({ $soon }) => ($soon ? '#f2f4f7' : 'linear-gradient(135deg, #f7f8fa 0%, #e7eaef 100%)')};
   img { width: 100%; height: 100%; object-fit: contain; padding: 0.75rem; transition: transform 0.35s ease; }
-  svg { font-size: 2.4rem; color: #b7b3aa; }
+  svg { font-size: 2.4rem; color: #a8afb9; }
 `
 
 const Card = styled(Link)`
@@ -249,7 +249,7 @@ const Card = styled(Link)`
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.13);
-    border-color: #d7d3c8;
+    border-color: #dce0e6;
   }
   &:hover .thumb img { transform: scale(1.05); }
   &:hover a, &:hover span { }
@@ -263,16 +263,16 @@ const Free = styled.span`
   font-weight: 800;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #2f6d4f;
+  color: #1a1d21;
   background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(47, 109, 79, 0.25);
+  border: 1px solid rgba(26, 29, 33, 0.25);
   padding: 0.2rem 0.55rem;
   border-radius: 999px;
 `
 
 const Paid = styled(Free)`
-  color: #7a5a1e;
-  border-color: rgba(122, 90, 30, 0.28);
+  color: #475569;
+  border-color: rgba(71, 85, 105, 0.28);
   text-transform: none;
   letter-spacing: 0.02em;
 `
@@ -281,7 +281,7 @@ const Body = styled.div`
   flex: 1;
   padding: 1.15rem 1.25rem 0.6rem;
   h3 { margin: 0 0 0.35rem; font-size: 1.2rem; font-weight: 700; color: ${({ theme }) => theme.colors.textDark}; }
-  p { margin: 0; font-size: 0.9rem; line-height: 1.55; color: #6b6860; }
+  p { margin: 0; font-size: 0.9rem; line-height: 1.55; color: #626a74; }
 `
 
 const Start = styled.div`
@@ -291,7 +291,7 @@ const Start = styled.div`
   padding: 0.7rem 1.25rem 1.2rem;
   font-size: 0.9rem;
   font-weight: 700;
-  color: #2f6d4f;
+  color: #1a1d21;
   svg { transition: transform 0.2s ease; }
   ${Card}:hover & svg { transform: translateX(4px); }
 `
@@ -301,8 +301,8 @@ const SoonCard = styled.div`
   flex-direction: column;
   overflow: hidden;
   border-radius: 18px;
-  background: #fbfaf7;
-  border: 1px dashed #d9d6cd;
+  background: #fbfcfd;
+  border: 1px dashed #dce0e6;
 `
 
 const SoonBadge = styled.span`
@@ -312,8 +312,8 @@ const SoonBadge = styled.span`
   font-weight: 700;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #8b877e;
-  background: #eceae3;
+  color: #7c848e;
+  background: #eaedf1;
   padding: 0.25rem 0.6rem;
   border-radius: 999px;
 `
@@ -336,7 +336,7 @@ const Step = styled.div`
   border: 1px solid #ececec;
   border-radius: 16px;
   h3 { margin: 0 0 0.3rem; font-size: 1.05rem; color: ${({ theme }) => theme.colors.textDark}; }
-  p { margin: 0; font-size: 0.88rem; line-height: 1.55; color: #6b6860; }
+  p { margin: 0; font-size: 0.88rem; line-height: 1.55; color: #626a74; }
 `
 
 const StepNo = styled.span`
@@ -345,7 +345,7 @@ const StepNo = styled.span`
   right: 16px;
   font-size: 2.4rem;
   font-weight: 800;
-  color: #eef0e9;
+  color: #f2f4f7;
   line-height: 1;
 `
 
@@ -356,7 +356,7 @@ const StepIco = styled.span`
   display: grid;
   place-items: center;
   border-radius: 12px;
-  background: rgba(47, 109, 79, 0.1);
-  color: #2f6d4f;
+  background: rgba(26, 29, 33, 0.1);
+  color: #1a1d21;
   font-size: 1.05rem;
 `

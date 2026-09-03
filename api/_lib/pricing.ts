@@ -29,11 +29,25 @@ const PRISER: Record<string, Partial<Record<Vare, number>>> = {
   terrasse: { plan: 349 },
   utekjokken: { plan: 349 },
   carport: { plan: 449 },
+  garasje: { plan: 990 },
   varmepumpehus: { plan: 199 },
   soppelboder: { plan: 349 },
   vedskjul: { plan: 349 },
   postkassestativer: { plan: 249 },
   utedo: { plan: 349 },
+}
+
+/**
+ * Byggesøknad-heftet er tatt av salg inntil videre. Speiler VITE_SOKNAD_SALG i
+ * klienten (src/components/pages/Designer/DesignerPage.tsx); sett SOKNAD_SALG=1
+ * i Vercel når heftet skal selges igjen. Så lenge det står av, avvises både
+ * 'soknad' og 'bundle' (som inneholder heftet) i api/vipps/create.ts.
+ */
+const SOKNAD_SALG = process.env.SOKNAD_SALG === '1'
+
+/** Kan denne varen kjøpes nå? */
+export function kanKjopes(vare: Vare): boolean {
+  return SOKNAD_SALG || (vare !== 'soknad' && vare !== 'bundle')
 }
 
 export function normaliserVare(v: unknown): Vare {
@@ -42,9 +56,4 @@ export function normaliserVare(v: unknown): Vare {
 
 export function prisFor(templateId: string, vare: Vare): number {
   return PRISER[templateId]?.[vare] ?? DEFAULT_PRIS[vare]
-}
-
-/** Har designet allerede alle leveransene som dette kjøpet gir? */
-export function alleredeKjopt(kjopt: Record<string, boolean> | undefined, vare: Vare): boolean {
-  return VARER_FOR_KJOP[vare].every((flag) => kjopt?.[flag] === true)
 }

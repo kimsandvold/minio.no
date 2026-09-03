@@ -3,6 +3,9 @@ import productsData from './products.json'
 
 export const allProducts: Product[] = productsData as Product[]
 
+/** Products shown in listings and carousels. Unlisted ones stay reachable by URL and via search. */
+const listedProducts = allProducts.filter(p => !p.unlisted)
+
 const SIMULATED_DELAY = 400
 
 function simulateFetch<T>(data: T): Promise<T> {
@@ -10,13 +13,13 @@ function simulateFetch<T>(data: T): Promise<T> {
 }
 
 export function fetchAllProducts(): Promise<Product[]> {
-  return simulateFetch(allProducts)
+  return simulateFetch(listedProducts)
 }
 
 const PINNED_FIRST_SLUG = 'pidestall-krakk'
 
 export function fetchRandomProducts(count: number, excludeSlug?: string): Promise<Product[]> {
-  const pool = allProducts.filter(p => !p.isFeatured && p.slug !== excludeSlug)
+  const pool = listedProducts.filter(p => !p.isFeatured && p.slug !== excludeSlug)
   const pinned = pool.find(p => p.slug === PINNED_FIRST_SLUG)
   const rest = pool.filter(p => p.slug !== PINNED_FIRST_SLUG)
   const shuffled = [...rest].sort(() => Math.random() - 0.5)

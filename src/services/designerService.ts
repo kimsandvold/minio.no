@@ -11,8 +11,8 @@ import {
   serverTimestamp,
 } from 'firebase/firestore'
 import { db } from '../lib/firebase'
-import type { DesignerProsjekt, Vare } from '../types/designerProsjekt'
-import { MAKS_DESIGN_PER_TYPE, VARER_FOR_KJOP } from '../types/designerProsjekt'
+import type { DesignerProsjekt } from '../types/designerProsjekt'
+import { MAKS_DESIGN_PER_TYPE } from '../types/designerProsjekt'
 
 const COLLECTION = 'designerProsjekter'
 
@@ -21,20 +21,6 @@ export class MaksDesignError extends Error {
     super(`Du kan lagre maks ${MAKS_DESIGN_PER_TYPE} design per type.`)
     this.name = 'MaksDesignError'
   }
-}
-
-/**
- * 6-sifret tilgangskode utledet av templateId + userId + designId.
- * Deterministisk (kan reproduseres for e-post), men per design.
- */
-export function genTilgangskode(templateId: string, userId: string, designId: string): string {
-  const s = `${templateId}:${userId}:${designId}:minio-plan-v1`
-  let h = 2166136261
-  for (let i = 0; i < s.length; i++) {
-    h ^= s.charCodeAt(i)
-    h = Math.imul(h, 16777619)
-  }
-  return String((h >>> 0) % 1000000).padStart(6, '0')
 }
 
 interface NyttProsjekt {
@@ -58,13 +44,9 @@ export async function opprettProsjekt(p: NyttProsjekt): Promise<DesignerProsjekt
     overrides: p.overrides ?? {},
     betalt: false,
     kjopt: {},
-    tilgangskode: '',
-    vipps: { status: 'none' },
     createdAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   })
-  const tilgangskode = genTilgangskode(p.templateId, p.userId, ref.id)
-  await updateDoc(ref, { tilgangskode })
   return {
     id: ref.id,
     userId: p.userId,
@@ -74,8 +56,6 @@ export async function opprettProsjekt(p: NyttProsjekt): Promise<DesignerProsjekt
     overrides: p.overrides ?? {},
     betalt: false,
     kjopt: {},
-    tilgangskode,
-    vipps: { status: 'none' },
   }
 }
 
@@ -104,18 +84,10 @@ export async function slettProsjekt(id: string): Promise<void> {
   await deleteDoc(doc(db, COLLECTION, id))
 }
 
-/**
- * Låser opp leveransene som følger med et kjøp (entitlements). Setter de
- * aktuelle `kjopt.*`-flaggene + `betalt` (bakoverkompatibelt totalflagg).
- * Server-autoritativ opplåsing skjer i Cloud Function ved Vipps-kapring; denne
- * brukes for kode-basert opplåsing (tilgangskode/demo) på klienten.
+/*
+ * Opplåsing (`betalt`, `kjopt`, `frosset`, `tilgangskode`) skrives IKKE herfra.
+ * Feltene er server-only i firestore.rules, og settes av Vercel-funksjonene:
+ *  - api/vipps/status.ts – etter kapret Vipps-betaling
+ *  - api/vipps/redeem.ts – ved innløsing av tilgangskode
+ * Se losInnTilgangskode() i src/services/vippsService.ts.
  */
-export async function markerKjopt(id: string, vare: Vare | 'bundle'): Promise<void> {
-  const patch: Record<string, unknown> = {
-    betalt: true,
-    'vipps.status': 'paid',
-    updatedAt: serverTimestamp(),
-  }
-  for (const v of VARER_FOR_KJOP[vare]) patch[`kjopt.${v}`] = true
-  await updateDoc(doc(db, COLLECTION, id), patch)
-}

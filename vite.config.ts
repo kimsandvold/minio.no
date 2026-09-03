@@ -1,9 +1,11 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import apiDev from './scripts/vite-api-dev'
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  // apiDev() kjører Vercel-funksjonene under /api lokalt (kun i dev).
+  plugins: [react(), tailwindcss(), apiDev()],
   base: '/',
   server: {
     fs: {

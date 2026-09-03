@@ -230,7 +230,7 @@ const Sheet = styled.div`
   max-width: 720px;
   aspect-ratio: 210 / 297;
   padding: 10px;
-  background: #fdfcf9;
+  background: #fcfdfe;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
 `
 
@@ -291,7 +291,7 @@ const Brand = styled.div`
   padding: 0.7rem 1rem;
   border-right: 1px solid #161616;
   img { height: 20px; width: auto; object-fit: contain; }
-  em { font-style: normal; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: #6b6860; }
+  em { font-style: normal; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: #626a74; }
 `
 
 const Rows = styled.div`
@@ -307,7 +307,7 @@ const Row = styled.div`
   padding: 0.4rem 0.7rem;
   border-right: 1px solid rgba(0, 0, 0, 0.15);
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-  b { font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: #8a877e; font-weight: 700; }
+  b { font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: #7c848e; font-weight: 700; }
   span { font-size: 0.82rem; font-weight: 700; color: #161616; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 `
 
@@ -317,12 +317,12 @@ const ScaleCell = styled.div`
   gap: 0.3rem;
   padding: 0.5rem 0.9rem;
   border-left: 1px solid #161616;
-  b { font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: #8a877e; font-weight: 700; }
+  b { font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: #7c848e; font-weight: 700; }
 `
 
 const ScaleWrap = styled.div`
   display: flex;
   align-items: flex-end;
   gap: 0.35rem;
-  span { font-size: 0.62rem; color: #6b6860; }
+  span { font-size: 0.62rem; color: #626a74; }
 `

@@ -32,6 +32,13 @@ const LILLEHAMMER_LON = 10.4662
 const MIN_SURFACE_AREA = 2 * 30 * 30 + 2 * 30 * 30 + 30 * 30
 const PRICE_PER_BOARD_METER = 100
 const REGULAR_MULTIPLIER = 10 / 7
+/**
+ * Vårkampanje på plantekasser – AV utenfor sesong. Når den er false, skjules
+ * «Kampanje – 30%»-merket og raden med ordinær pris; prisen kunden betaler er
+ * uendret. Skru på igjen neste vår sammen med `kampanje.aktiv` for
+ * plantekasser i src/data/products.json.
+ */
+const KAMPANJE_AKTIV = false
 
 const CalculatorContainer = styled.div`
   padding: 0;
@@ -1020,11 +1027,15 @@ export default function PlantekassePriceCalculator({
       </QuantityRow>
 
       <PriceSection>
-        <CampaignBadge>Kampanje – 30%</CampaignBadge>
-        <RegularPriceRow>
-          <span>Ordinær pris per stk</span>
-          <span>{formatPrice(regularPriceExclVat)}</span>
-        </RegularPriceRow>
+        {KAMPANJE_AKTIV && (
+          <>
+            <CampaignBadge>Kampanje – 30%</CampaignBadge>
+            <RegularPriceRow>
+              <span>Ordinær pris per stk</span>
+              <span>{formatPrice(regularPriceExclVat)}</span>
+            </RegularPriceRow>
+          </>
+        )}
         <PriceRow>
           <span>Pris eks. mva per stk</span>
           <span>{formatPrice(priceExclVat)}</span>

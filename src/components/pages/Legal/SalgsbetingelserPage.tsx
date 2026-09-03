@@ -1,6 +1,6 @@
+import { Link } from 'react-router-dom'
 import { useSEO } from '../../../hooks/useSEO'
 import { company } from '../../../data/company'
-import ObfuscatedEmail from '../../shared/ObfuscatedEmail'
 import LegalLayout from './LegalLayout'
 
 export default function SalgsbetingelserPage() {
@@ -62,12 +62,12 @@ export default function SalgsbetingelserPage() {
         <strong>Selger</strong>
       </p>
       <address>
-        {company.legalName} ({company.orgForm})<br />
-        {company.address}, {company.postal}, {company.country}
+        {company.brand} ({company.orgForm})<br />
+        {company.postal}, {company.country}
         <br />
         Organisasjonsnummer: {company.orgNr}
         <br />
-        E-post: <ObfuscatedEmail user={company.emailUser} domain={company.emailDomain} />
+        Kontakt: <Link to="/kontakt">kontaktskjemaet</Link>
         <br />
         Nettside: {company.site}
       </address>
@@ -86,7 +86,7 @@ export default function SalgsbetingelserPage() {
         oppgitt i norske kroner (NOK).
       </p>
       <p>
-        {company.legalName} er et enkeltpersonforetak som <strong>ikke er registrert i
+        {company.brand} er et enkeltpersonforetak som <strong>ikke er registrert i
         Merverdiavgiftsregisteret</strong>. Prisene inneholder derfor ikke merverdiavgift (MVA), og
         det legges ikke MVA til den oppgitte prisen. Prisen inkluderer alle avgifter forbundet med
         kjøpet. Ettersom ytelsene leveres digitalt, tilkommer ingen frakt- eller leveringskostnader.
@@ -116,8 +116,8 @@ export default function SalgsbetingelserPage() {
         Ytelsene er digitale og leveres elektronisk. Levering anses skjedd når byggeplanen eller
         underlaget er gjort tilgjengelig for kjøperen på nettsiden og/eller som nedlastbar fil,
         normalt umiddelbart etter fullført betaling. Får du av tekniske årsaker ikke tilgang til det
-        du har kjøpt, ta kontakt på {' '}
-        <ObfuscatedEmail user={company.emailUser} domain={company.emailDomain} />, så ordner vi det så raskt som mulig.
+        du har kjøpt, ta kontakt via{' '}
+        <Link to="/kontakt">kontaktskjemaet</Link>, så ordner vi det så raskt som mulig.
       </p>
 
       <h2>7. Angrerett</h2>
@@ -148,16 +148,16 @@ export default function SalgsbetingelserPage() {
         >
           Forbrukertilsynets angrerettskjema
         </a>
-        . Melding om bruk av angreretten sendes til {' '}
-        <ObfuscatedEmail user={company.emailUser} domain={company.emailDomain} />.
+        . Melding om bruk av angreretten sendes via{' '}
+        <Link to="/kontakt">kontaktskjemaet</Link>.
       </p>
 
       <h2>8. Mangel ved ytelsen – kjøperens rettigheter og reklamasjonsfrist</h2>
       <p>
         Hvis det foreligger en mangel ved ytelsen, må kjøperen innen rimelig tid etter at mangelen
         ble oppdaget eller burde ha blitt oppdaget, gi selgeren melding om at kjøperen vil påberope
-        seg mangelen (reklamasjon). Meldingen sendes til {' '}
-        <ObfuscatedEmail user={company.emailUser} domain={company.emailDomain} />.
+        seg mangelen (reklamasjon). Meldingen sendes via{' '}
+        <Link to="/kontakt">kontaktskjemaet</Link>.
       </p>
       <p>
         Dersom ytelsen har en mangel og dette ikke skyldes kjøperen eller forhold på kjøperens side,

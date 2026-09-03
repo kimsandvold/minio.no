@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import type { Bom, BomLine, BuildOptions, Byggeregler, DesignConfig, Form2D, KapplisteDel, ProductTemplate, Riss2D, Tegning2D } from '../types'
 import { TRESLAG, resolveColor, treslagValg, fargeValg } from '../materials'
 import { PRISER, prisFor } from '../priser'
-import { antallCC, byggPulttak, byggSaltak, byggValmtak, gradSperre, settSplitt } from '../konstruksjon'
+import { byggPulttak, byggSaltak, byggValmtak, settSplitt, takBomFromBuild } from '../konstruksjon'
 
 /**
  * Garasje – bygget på samme prinsipp som vedskjulet (stenderverk, doble hjørner,
@@ -191,31 +191,10 @@ function deler(c: GarasjeConfig): Del[] {
   if (N === 2) push('Midtstolpe (dobbel)', STUD_PROFIL, H - tb.h, 2, STUD_PRIS)
   push('Bunnsvill front (mellom porter)', STUD_PROFIL, w, 1, STUD_PRIS)
 
-  // Tak.
-  if (c.taktype === 'pulttak') {
-    const sideFall = c.takretning === 'venstre' || c.takretning === 'hoyre'
-    const rw = sideFall ? d : w
-    const rd = sideFall ? w : d
-    const rise = Math.max(0, rd * Math.tan((c.takvinkel * Math.PI) / 180))
-    const rafP = gradSperre(Math.hypot(rd, rise) / 2)
-    push('Sperre (pulttak)', rafP.profil, Math.hypot(rd + 2 * oh, rise), antallCC(rw), rafP.pris)
-    push('Undergurt (takstol)', STUD_PROFIL, rd, antallCC(rw), STUD_PRIS)
-  } else if (c.taktype === 'saltak') {
-    const rad = (c.takvinkel * Math.PI) / 180
-    const rw = c.moneretning === 'dybde' ? d : w
-    const rd = c.moneretning === 'dybde' ? w : d
-    const slopeLen = (rd / 2 + oh) / Math.cos(rad)
-    const rafS = gradSperre(slopeLen)
-    push('Sperre (saltak)', rafS.profil, slopeLen, antallCC(rw) * 2, rafS.pris)
-    push('Undergurt (takstol)', STUD_PROFIL, rd, antallCC(rw), STUD_PRIS)
-  } else {
-    const W = Math.max(w, d), D = Math.min(w, d)
-    const MH = Math.max(0.05, (D / 2) * Math.tan((c.takvinkel * Math.PI) / 180))
-    const profilV = `48 × ${Math.round(MH * 1000)} mm`
-    push('Stretcher', profilV, W + 2 * oh, 1, 'bjelke-48x198')
-    push('Tverrbjelke', profilV, D + 2 * oh, Math.max(1, Math.ceil(W / CC) - 1), 'bjelke-48x198')
-    push('Hjørnebjelke', profilV, (D / 2 + oh) * Math.SQRT2, 4, 'bjelke-48x198')
-  }
+  // Tak – utledet direkte fra takbyggern (sperrer, takstoler, lekt, møne + trim),
+  // så materiallista matcher 3D-modellen.
+  takBomFromBuild(c.taktype, w, d, c.takvinkel, oh, c.takretning, c.moneretning, c.takpapp ? 'takpapp' : 'kryssfiner')
+    .forEach((p) => push(p.navn, p.profil, p.lengdeM, p.antall, p.mat))
 
   // Garasjeport(er) – seksjonsport (sandwichpanel), pris pr. stk via m².
   bays.forEach(() => push('Garasjeport (seksjonsport)', 'seksjonsport', portH, Math.max(1, Math.round((bays[0]?.openW ?? 2.5) / 0.5)), 'veggpanel'))
@@ -598,6 +577,7 @@ export const garasje: ProductTemplate<GarasjeConfig> = {
   id: 'garasje',
   navn: 'Garasje',
   ikon: 'faWarehouse',
+  bilde: '/images/products/garasje-3d.webp',
   beskrivelse: 'Tegn garasjen i 3D – enkel eller dobbel, på betongplate, med seksjonsport(er), kledning og takstoler.',
   tilgjengelig: true,
   fraPris: 990,

@@ -1,6 +1,6 @@
+import { Link } from 'react-router-dom'
 import { useSEO } from '../../../hooks/useSEO'
 import { company } from '../../../data/company'
-import ObfuscatedEmail from '../../shared/ObfuscatedEmail'
 import LegalLayout from './LegalLayout'
 
 export default function PersonvernPage() {
@@ -18,10 +18,10 @@ export default function PersonvernPage() {
     >
       <h2>1. Behandlingsansvarlig</h2>
       <p>
-        {company.legalName} ({company.orgForm}), org.nr {company.orgNr}, er behandlingsansvarlig for
+        {company.brand} ({company.orgForm}), org.nr {company.orgNr}, er behandlingsansvarlig for
         personopplysningene som samles inn gjennom nettsiden {company.site}. Har du spørsmål om
-        hvordan vi behandler personopplysninger, kan du kontakte oss på{' '}
-        <ObfuscatedEmail user={company.emailUser} domain={company.emailDomain} />.
+        hvordan vi behandler personopplysninger, kan du kontakte oss via{' '}
+        <Link to="/kontakt">kontaktskjemaet</Link>.
       </p>
 
       <h2>2. Hvilke opplysninger vi samler inn</h2>
@@ -110,8 +110,8 @@ export default function PersonvernPage() {
       <p>
         Du har rett til innsyn i, retting av og sletting av personopplysningene vi har om deg, samt
         rett til å begrense eller protestere mot behandlingen og til dataportabilitet. Du kan når som
-        helst trekke tilbake et samtykke. For å bruke rettighetene dine, kontakt oss på{' '}
-        <ObfuscatedEmail user={company.emailUser} domain={company.emailDomain} />.
+        helst trekke tilbake et samtykke. For å bruke rettighetene dine, kontakt oss via{' '}
+        <Link to="/kontakt">kontaktskjemaet</Link>.
       </p>
       <p>
         Mener du at vi behandler personopplysninger i strid med regelverket, kan du klage til{' '}

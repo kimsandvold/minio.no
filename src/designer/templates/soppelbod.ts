@@ -2,7 +2,7 @@ import * as THREE from 'three'
 import type { Bom, BomLine, BuildOptions, DesignConfig, KapplisteDel, ProductTemplate, Tegning2D } from '../types'
 import { TRESLAG, resolveColor, treslagValg, fargeValg } from '../materials'
 import { PRISER, prisFor } from '../priser'
-import { KV_BJELKE_PRIS, antallCC, byggPulttak, byggSaltak, byggValmtak, gradBjelke, gradMonebjelke, gradSperre, maksGulvSpenn, settSplitt } from '../konstruksjon'
+import { KV_BJELKE_PRIS, antallCC, byggPulttak, byggSaltak, byggValmtak, gradBjelke, maksGulvSpenn, settSplitt, takBomFromBuild } from '../konstruksjon'
 
 /**
  * Postkassestativ – bygges opp på nytt, steg for steg. STEG 1: GULV.
@@ -215,49 +215,10 @@ function deler(c: SoppelbodConfig): Del[] {
   const losholtLenBak = ((w - SW) - (baysXb - 1) * SW) / baysXb
   if (nLosholt > 0 && losholtLenBak > 0.02) push('Losholt (kryss, bak)', STUD_PROFIL, losholtLenBak, nLosholt * baysXb, KV_BJELKE_PRIS)
 
-  // Tak (pulttak): sperrer 48×148 c/c 600 + opplenger + kryss-lekt 48×48.
-  if (c.taktype === 'pulttak') {
-    const sideFall = c.takretning === 'venstre' || c.takretning === 'hoyre'
-    const rw = sideFall ? d : w // takbredde (langs lekt/mønekant)
-    const rd = sideFall ? w : d // fallretning (sperre-spenn)
-    const rise = Math.max(0, rd * Math.tan((c.takvinkel * Math.PI) / 180))
-    const rafP = gradSperre(Math.hypot(rd + 2 * oh, rise))
-    push('Sperre (pulttak)', rafP.profil, Math.hypot(rd + 2 * oh, rise), antallCC(rw), rafP.pris)
-    push('Taklekt (kryss) 48×48', '48 × 48 mm', rw + 2 * oh, antallCC(rd + 2 * oh), 'stolpe-48x48')
-    if (rise > 0.07) {
-      push('Opplenger (stender)', STUD_PROFIL, rise - 0.048, antallCC(rw), KV_BJELKE_PRIS)
-      push('Hevet rem (opplenger)', STUD_PROFIL, rw, 1, KV_BJELKE_PRIS)
-    }
-  }
-  // Tak (saltak): sperrer 48×148 c/c 600 begge takflater + bærende mønebjelke
-  // (gradert etter styrke/spenn) + kingposts + kryss-lekt 48×48.
-  if (c.taktype === 'saltak') {
-    const rad = (c.takvinkel * Math.PI) / 180
-    const rw = c.moneretning === 'dybde' ? d : w // mønelengde
-    const rd = c.moneretning === 'dybde' ? w : d // takflate-spenn (begge sider)
-    const rise = Math.max(0, (rd / 2) * Math.tan(rad))
-    const slopeLen = (rd / 2 + oh) / Math.cos(rad)
-    const g = gradMonebjelke(rw, rd)
-    const rafS = gradSperre(slopeLen)
-    push('Sperre (saltak)', rafS.profil, slopeLen, antallCC(rw) * 2, rafS.pris)
-    push('Mønebjelke (bærende)', g.boardProfil, rw, g.count, g.pris)
-    push('Taklekt (kryss) 48×48', '48 × 48 mm', rw + 2 * oh, antallCC(rd / 2 + oh) * 2, 'stolpe-48x48')
-    const kingH = rise - g.h
-    if (kingH > 0.05) push('Kingpost (møne)', STUD_PROFIL, kingH, 2, KV_BJELKE_PRIS)
-  }
-  // Tak (valmtak): stretcher + tverrbjelker (kun i møne-lengden) + grater + fascia.
-  if (c.taktype === 'valmtak') {
-    const W = Math.max(w, d)
-    const D = Math.min(w, d)
-    const MH = Math.max(0.05, (D / 2) * Math.tan((c.takvinkel * Math.PI) / 180))
-    const profilV = `48 × ${Math.round(MH * 1000)} mm`
-    const nCross = Math.max(1, Math.ceil(W / CC) - 1)
-    const hjorneLen = (D / 2 + oh) * Math.SQRT2
-    push(`Stretcher (${profilV})`, profilV, W + 2 * oh, 1, 'bjelke-48x198')
-    push('Tverrbjelke', profilV, D + 2 * oh, nCross, 'bjelke-48x198')
-    push('Hjørnebjelke', profilV, hjorneLen, 4, 'bjelke-48x198')
-    push('Fasciebord (20 × 50 mm)', '20 × 50 mm', 2 * (W + 2 * oh) + 2 * (D + 2 * oh), 1, 'stolpe-48x48')
-  }
+  // Tak – utledet direkte fra takbyggern (sperrer, takstoler, lekt, møne + trim),
+  // så materiallista matcher 3D-modellen nøyaktig.
+  takBomFromBuild(c.taktype, w, d, c.takvinkel, oh, c.takretning, c.moneretning, c.takpapp ? 'takpapp' : 'kryssfiner')
+    .forEach((p) => push(p.navn, p.profil, p.lengdeM, p.antall, p.mat))
 
   // Utvendig kledning (side-/bakvegg + fronttopp) – med valgfri åpning i bakveggen.
   const deckTopD = PAD_H + fg.h + boardSpec(c.gulvbord).t
@@ -677,7 +638,7 @@ export const soppelbod: ProductTemplate<SoppelbodConfig> = {
   navn: 'Søppelbod',
   ikon: 'faDumpster',
   beskrivelse: 'Tegn søppelboden i 3D – konstruksjon bygget opp steg for steg.',
-  bilde: '/images/products/garbage_house_1.webp',
+  bilde: '/images/products/soppelbod-3d.webp',
   tilgjengelig: true,
   fraPris: 349,
   leveranser: ['ferdig', 'plan'],

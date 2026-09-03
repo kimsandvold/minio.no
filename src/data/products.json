@@ -5,7 +5,6 @@
     "title": "Håndlaget plantekasse i tre",
     "shortDescription": "Fra urter og blomster til grønnsaker – en solid plantekasse bygget etter dine mål gir terrassen, balkongen eller hagen et grønt løft.",
     "price": "Pris fra 1 260,-",
-    "regularPrice": "Ordinær pris fra 1 800,-",
     "images": [
       { "src": "/images/products/plantekasser_4.webp", "alt": "Plantekasse i tre med oliventre, hortensia og lavendel på terrasse i kveldslys" },
       { "src": "/images/products/plantekasser_2.webp", "alt": "Plantekasse i tre med lavendel og rosa blomster på terrasse" },
@@ -15,8 +14,14 @@
     "detailsHtml": "<h3>Håndlaget plantekasse i tre</h3><p>Dyrk blomster, urter eller grønnsaker i en <strong>solid og pen plantekasse laget på bestilling</strong>. Vi tilpasser kassen etter dine mål og ønsker – perfekt for terrassen, balkongen eller hagen.</p><h4>Hvorfor velge en skreddersydd plantekasse?</h4><ul><li>Tilpasset <strong>nøyaktig den plassen du har</strong></li><li>Solid konstruksjon i <strong>holdbart treverk</strong></li><li>Perfekt for <strong>urter, blomster eller grønnsaker</strong></li><li>Løfter uteområdet med et <strong>naturlig og varmt uttrykk</strong></li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for et naturlig uttrykk</li><li><strong>Grunnet</strong> – klart til å males i ønsket farge</li><li><strong>Beiset eller malt</strong> – ferdig levert og klar til bruk</li></ul><p><strong>Ta kontakt i dag</strong> for et uforpliktende tilbud!</p>",
     "category": "primary",
     "showOnFrontPage": true,
-    "isFeatured": true,
-    "hasPromoRibbon": true,
+    "isFeatured": false,
+    "hasPromoRibbon": false,
+    "kampanje": {
+      "aktiv": false,
+      "notat": "Vårkampanje, av utenfor sesong. Slå på igjen neste vår: aktiv=true, isFeatured=true, hasPromoRibbon=true og legg regularPrice tilbake. Skru samtidig på KAMPANJE_AKTIV i src/components/pages/Plantekasse/PlantekassePriceCalculator.tsx.",
+      "regularPrice": "Ordinær pris fra 1 800,-",
+      "rabattProsent": 30
+    },
     "hasConfigurator": true,
     "basePrice": 1260
   },
@@ -157,6 +162,7 @@
     "detailsHtml": "<h3>Hundehus i tre etter mål</h3><p>Et <strong>hundehus laget på bestilling</strong> i solid treverk, tilpasset hundens størrelse og plassen du har. Velg mål, tak og overflate i 3D-konfiguratoren og se prisen med en gang.</p><h4>Hvorfor velge et skreddersydd hundehus?</h4><ul><li>Tilpasset <strong>hundens mål</strong> – verken for trangt eller for stort</li><li>Solid konstruksjon i treverk dimensjonert for norsk klima</li><li>Valgfri <strong>isolasjon</strong> for bruk om vinteren</li><li>Saltak med god avrenning og tørt liggemiljø</li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for et naturlig uttrykk</li><li><strong>Grunnet</strong> – klart til å males i ønsket farge</li><li><strong>Grunnet og malt</strong> – ferdig levert og klar til bruk</li></ul><p><strong>Bruk konfiguratoren</strong> for å se 3D-modellen med dine mål og få estimert pris!</p>",
     "category": "secondary",
     "showOnFrontPage": false,
+    "unlisted": true,
     "isFeatured": false,
     "hasPromoRibbon": false,
     "hasConfigurator": true,
@@ -174,6 +180,7 @@
     "detailsHtml": "<h3>Kattehus på stolpe i tre</h3><p>Et <strong>kattehus laget på bestilling</strong>, montert på stolpe slik at katten får et trygt og tørt sted over bakken – unna fukt, snø og uønsket besøk. Velg mål, stolpehøyde, tak og overflate i 3D-konfiguratoren.</p><h4>Hvorfor velge et kattehus på stolpe?</h4><ul><li><strong>Hevet over bakken</strong> – tørt, trygt og med god oversikt</li><li>Rund inngang tilpasset katten</li><li>Valgfri <strong>isolasjon</strong> for bruk om vinteren</li><li>Solid stolpe og base som står stødig ute</li></ul><h4>Velg finishen som passer deg:</h4><ul><li><strong>Ubehandlet</strong> – for et naturlig uttrykk</li><li><strong>Grunnet</strong> – klart til å males i ønsket farge</li><li><strong>Grunnet og malt</strong> – ferdig levert og klar til bruk</li></ul><p><strong>Bruk konfiguratoren</strong> for å se 3D-modellen med dine mål og få estimert pris!</p>",
     "category": "secondary",
     "showOnFrontPage": false,
+    "unlisted": true,
     "isFeatured": false,
     "hasPromoRibbon": false,
     "hasConfigurator": true,

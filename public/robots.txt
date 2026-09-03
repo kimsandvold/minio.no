@@ -1,4 +1,10 @@
 User-agent: *
 Allow: /
 
+# Private sider – ingen verdi i søk, og krever uansett innlogging.
+Disallow: /admin
+Disallow: /mine-design
+Disallow: /mine-bestillinger
+Disallow: /handlekurv
+
 Sitemap: https://minio.no/sitemap.xml

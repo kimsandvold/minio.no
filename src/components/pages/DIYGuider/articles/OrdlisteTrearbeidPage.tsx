@@ -225,7 +225,7 @@ export default function OrdlisteTrearbeidPage() {
     <GuideArticleLayout
       slug="ordliste-trearbeid"
       readingTime="4 min"
-      lead="Ordliste med 30 vanlige begreper innen trearbeid og bygging – fra bjelkelag og c/c-avstand til kjerneved, forsenking og frostfri dybde, forklart på enkel norsk."
+      lead="Ordliste med 30 vanlige begreper innen trearbeid – fra bjelkelag og c/c-avstand til kjerneved, forsenking og frostfri dybde, forklart på enkel norsk."
       sections={sections}
     />
   )

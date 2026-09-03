@@ -1,31 +1,26 @@
 /**
  * POST /api/vipps/status
  *
- * Sjekker Vipps-status for et design. Ved AUTHORIZED kaprer den beløpet og
- * setter betalt=true + vipps.status='paid'. Kalles fra retur-siden (polling).
+ * Sjekker Vipps-status for et design. Ved AUTHORIZED kaprer den beløpet, låser
+ * opp leveransene server-side (betalt + kjopt + frosset), lager tilgangskoden
+ * og sender den på e-post. Kalles fra retur-siden (polling).
  *
  * Body: { prosjektId: string }
  * Auth: Authorization: Bearer <Firebase ID-token>
  */
 import type { VercelRequest } from '@vercel/node'
 import { FieldValue } from 'firebase-admin/firestore'
-import { db } from '../_lib/firebaseAdmin'
+import { adminAuth, db } from '../_lib/firebaseAdmin'
 import { HttpError, postHandler } from '../_lib/http'
 import { creds } from '../_lib/creds'
-import { alleredeKjopt, normaliserVare, prisFor, VARER_FOR_KJOP, type Vare } from '../_lib/pricing'
+import { normaliserVare, prisFor, VARER_FOR_KJOP } from '../_lib/pricing'
+import { alleredeKjopt, eideKjopt, laasOppLeveranse, type ProsjektDoc } from '../_lib/entitlements'
+import { nyTilgangskode } from '../_lib/kode'
+import { sendTilgangskode } from '../_lib/email'
 import { capturePayment, getAccessToken, getPayment } from '../_lib/vipps'
 
 const COLLECTION = 'designerProsjekter'
-
-interface ProsjektDoc {
-  userId: string
-  templateId: string
-  navn: string
-  betalt: boolean
-  kjopt?: Record<string, boolean>
-  tilgangskode: string
-  vipps?: { status: string; reference?: string; belop?: number; vare?: Vare }
-}
+const SITE_URL = (process.env.SITE_URL ?? 'https://minio.no').replace(/\/$/, '')
 
 export default postHandler(async (req: VercelRequest, uid: string) => {
   const prosjektId = String(req.body?.prosjektId ?? '')
@@ -38,10 +33,9 @@ export default postHandler(async (req: VercelRequest, uid: string) => {
   if (p.userId !== uid) throw new HttpError(403, 'Dette designet tilhører ikke deg.')
 
   const vare = normaliserVare(p.vipps?.vare)
-  const eideKjopt = p.kjopt ?? (p.betalt ? { plan: true, soknad: true } : {})
   // Leveransene fra det siste betalingsforsøket er allerede låst opp.
-  if (alleredeKjopt(eideKjopt, vare)) {
-    return { betalt: true, state: 'AUTHORIZED', tilgangskode: p.tilgangskode, vare }
+  if (alleredeKjopt(eideKjopt(p), vare)) {
+    return { betalt: true, state: 'AUTHORIZED', tilgangskode: p.tilgangskode ?? '', vare }
   }
 
   const reference = p.vipps?.reference
@@ -55,15 +49,31 @@ export default postHandler(async (req: VercelRequest, uid: string) => {
     const belopKr = p.vipps?.belop ?? prisFor(p.templateId, vare)
     // Kapre beløpet (trekk pengene). Idempotent på Vipps-siden.
     await capturePayment(c, token, reference, belopKr)
-    const patch: Record<string, unknown> = {
-      betalt: true,
-      'vipps.status': 'paid',
-      updatedAt: FieldValue.serverTimestamp(),
+
+    // Koden lages her, aldri på klienten, og settes bare ved første kjøp.
+    const tilgangskode = p.tilgangskode || nyTilgangskode()
+    await laasOppLeveranse(ref, p, vare, tilgangskode)
+
+    // E-posten skal ikke kunne velte et gjennomført kjøp: feil logges i
+    // sendEpost og ignoreres her.
+    const epost = await adminAuth
+      .getUser(uid)
+      .then((u) => u.email)
+      .catch(() => undefined)
+    if (epost) {
+      await sendTilgangskode({
+        til: epost,
+        designNavn: p.navn,
+        tilgangskode,
+        leveranser: VARER_FOR_KJOP[vare],
+        belopKr,
+        designUrl: `${SITE_URL}/designverktoy/${p.templateId}`,
+      })
+    } else {
+      console.warn(`[vipps] Ingen e-postadresse på bruker ${uid} – tilgangskode ikke sendt.`)
     }
-    for (const flag of VARER_FOR_KJOP[vare]) patch[`kjopt.${flag}`] = true
-    await ref.update(patch)
-    // TODO: send tilgangskode på e-post når e-postleverandør er koblet på.
-    return { betalt: true, state: payment.state, tilgangskode: p.tilgangskode, vare }
+
+    return { betalt: true, state: payment.state, tilgangskode, vare }
   }
 
   const failed = payment.state === 'TERMINATED' || payment.state === 'ABORTED' || payment.state === 'EXPIRED'

@@ -197,7 +197,7 @@ export default function PlanleggingPage() {
     <GuideArticleLayout
       slug="planlegging"
       readingTime="6 min"
-      lead="God planlegging er forskjellen på et prosjekt som flyter, og ett som stopper opp halvveis. Slik går du fra løs idé til en konkret plan og en materialliste som stemmer."
+      lead="Planlegging er forskjellen på et prosjekt som flyter og ett som stopper opp. Slik går du fra løs idé til konkret plan og materialliste som stemmer."
       sections={sections}
     />
   )
