@@ -95,6 +95,14 @@ const MenuLinks = styled.div<{ $open: boolean }>`
   gap: 2rem;
   align-items: center;
 
+  @media (max-width: 1200px) {
+    gap: 1.25rem;
+  }
+
+  @media (max-width: 960px) {
+    gap: 0.85rem;
+  }
+
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     position: fixed;
     top: 0;
@@ -125,6 +133,7 @@ const textLinkStyles = `
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
+  white-space: nowrap;
 
   &:hover {
     opacity: 1;
@@ -160,6 +169,13 @@ const TextRouterLink = styled(Link)<{ $aktiv?: boolean }>`
     background: ${({ theme }) => theme.colors.accentLight};
     opacity: ${({ $aktiv }) => ($aktiv ? 1 : 0)};
     transition: opacity ${({ theme }) => theme.transitions.default};
+  }
+
+  /* Logoen lenker allerede hjem – gi plass til resten på smale skjermer. */
+  @media (max-width: 1000px) {
+    &[href="/"] {
+      display: none;
+    }
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {

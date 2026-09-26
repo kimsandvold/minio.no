@@ -6,6 +6,7 @@ export const navLinks: NavLink[] = [
   { href: '/designverktoy', label: 'Design selv', icon: 'faCube', ariaLabel: 'Design selv i 3D' },
   { href: '/byggeguider', label: 'Byggeguider', icon: 'faTools', ariaLabel: 'Byggeguider' },
   { href: '/tjenester', label: 'Tjenester', icon: 'faHammer', ariaLabel: 'Tjenester' },
+  { href: '/prosjekthjelp', label: 'Prosjekthjelp', icon: 'faLightbulb', ariaLabel: 'Prosjekthjelp' },
   { href: '/kontakt', label: 'Kontakt', icon: 'faEnvelope', ariaLabel: 'Kontakt' },
 ]
 
