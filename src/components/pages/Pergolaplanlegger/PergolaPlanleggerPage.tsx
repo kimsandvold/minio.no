@@ -53,7 +53,7 @@ const PERGOLA_FAQ = {
       name: 'Bygger Minio pergolaen for meg?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Ja. Bruk planleggeren til å komme fram til ønsket løsning, og be om et konkret tilbud. Vi bygger skreddersydde pergolaer og uteløsninger i tre, håndlaget i Lillehammer.',
+        text: 'Minio bygger ikke pergolaer selv i dag, men vi kan hjelpe deg å finne en snekker som bygger pergolaen etter planen din. Bruk planleggeren til å komme fram til løsningen og fortell om prosjektet under Prosjekthjelp – eller bygg selv med materialliste og byggeplan fra designverktøyet.',
       },
     },
   ],
@@ -662,9 +662,9 @@ export default function PergolaPlanleggerPage() {
 
                 <h3>Klar til å bygge?</h3>
                 <p>
-                  Når du har funnet løsningen du liker, bygger vi den gjerne for deg. Minio lager
-                  skreddersydde pergolaer og uteløsninger i tre, håndlaget i Lillehammer. Be om et tilbud,
-                  så hjelper vi deg videre.
+                  Når du har funnet løsningen du liker, kan du bygge den selv med materialliste og
+                  byggeplan fra designverktøyet. Vil du heller at noen andre bygger, hjelper vi deg å
+                  finne en snekker – fortell om prosjektet under Prosjekthjelp, så tar vi det videre.
                 </p>
 
                 <h3>Vanlige spørsmål</h3>

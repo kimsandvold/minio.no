@@ -191,9 +191,9 @@ export default function Leveringskart() {
       <Text>
         <h2 id={`${inputId}-tittel`}>Leverer dere til meg?</h2>
         <p>
-          Alt bygges i verkstedet vårt på Lillehammer og kjøres ut derfra. Vi leverer
-          innenfor {LEVERING_MAKS_KM} km kjørevei — skriv inn stedet ditt, så regner vi
-          ut avstanden og hva frakten koster.
+          Ferdige produkter kjøres ut fra Lillehammer. Vi leverer innenfor{' '}
+          {LEVERING_MAKS_KM} km kjørevei — skriv inn stedet ditt, så regner vi ut avstanden
+          og hva frakten koster.
         </p>
 
         <Form onSubmit={submit}>

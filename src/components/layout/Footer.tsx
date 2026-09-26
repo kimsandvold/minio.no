@@ -234,9 +234,9 @@ export default function Footer() {
       <FooterContainer>
         <FooterAbout>
           <h3>Skreddersydde treprodukter – designet i 3D</h3>
-          <p>Minio er en norsk plattform for utendørs treprodukter i massivt tre: varmepumpehus, søppelboder, postkassestativer, boder, garasjer, levegger, plantekasser og mer. Alt utvikles og modelleres i 3D før det produseres.</p>
-          <p>Design produktet ditt i vårt gratis 3D-verktøy – tilpass mål, treslag og farge, og få en komplett byggeplan med materialliste og arbeidstegninger. Bygg det selv, eller la oss produsere det for deg.</p>
-          <p>Hvert produkt lages på bestilling og tilpasses ditt uterom, med kvalitetsmaterialer og presist håndverk. Kort vei fra idé til ferdig resultat – og tett oppfølging hele veien.</p>
+          <p>Minio er en norsk plattform for uteprosjekter i tre. Design carport, terrasse, pergola og mer i 3D – eller bestill mindre produkter som plantekasser, varmepumpehus og søppelboder, laget på bestilling.</p>
+          <p>Tilpass mål, treslag og farge i det gratis 3D-verktøyet, og få en komplett byggeplan med materialliste og arbeidstegninger. Bygg selv – eller få hjelp til å finne en snekker.</p>
+          <p>Kort vei fra idé til ferdig resultat – og tett oppfølging hele veien.</p>
         </FooterAbout>
 
 

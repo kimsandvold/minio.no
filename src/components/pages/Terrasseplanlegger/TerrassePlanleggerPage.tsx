@@ -44,7 +44,7 @@ const TERRASSE_FAQ = {
       name: 'Bygger Minio terrassen for meg?',
       acceptedAnswer: {
         '@type': 'Answer',
-        text: 'Ja. Bruk planleggeren til å komme fram til ønsket løsning, og be om et konkret tilbud. Vi bygger skreddersydde terrasser og uteløsninger i tre, håndlaget i Lillehammer.',
+        text: 'Minio bygger ikke terrasser selv i dag, men vi kan hjelpe deg å finne en snekker som bygger terrassen etter planen din. Bruk planleggeren til å komme fram til løsningen og fortell om prosjektet under Prosjekthjelp – eller bygg selv med materialliste og byggeplan fra designverktøyet.',
       },
     },
     {
@@ -642,9 +642,9 @@ export default function TerrassePlanleggerPage() {
 
                 <h3>Klar til å bygge?</h3>
                 <p>
-                  Når du har funnet løsningen du liker, bygger vi den gjerne for deg. Minio lager
-                  skreddersydde terrasser og uteløsninger i tre, håndlaget i Lillehammer. Be om et tilbud,
-                  så hjelper vi deg videre.
+                  Når du har funnet løsningen du liker, kan du bygge den selv med materialliste og
+                  byggeplan fra designverktøyet. Vil du heller at noen andre bygger, hjelper vi deg å
+                  finne en snekker – fortell om prosjektet under Prosjekthjelp, så tar vi det videre.
                 </p>
 
                 <h3>Vanlige spørsmål</h3>
