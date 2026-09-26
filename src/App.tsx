@@ -12,14 +12,13 @@ import { useSEO } from './hooks/useSEO'
 import { allProducts } from './data/products'
 import SkipLink from './components/shared/SkipLink'
 import Navbar from './components/layout/Navbar'
-import Hero from './components/sections/Hero/Hero'
-import Portfolio from './components/sections/Portfolio/Portfolio'
-import DesignerToolPromo from './components/sections/DesignerToolPromo/DesignerToolPromo'
-import ByggeguiderPromo from './components/sections/ByggeguiderPromo/ByggeguiderPromo'
-import TjenesterPromo from './components/sections/TjenesterPromo/TjenesterPromo'
-import Section from './components/layout/Section'
-import Container from './components/layout/Container'
-import Leveringskart from './components/shared/Leveringskart/Leveringskart'
+import HomeHero from './components/home/HomeHero'
+import VeierSection from './components/home/VeierSection'
+import ProdukterSection from './components/home/ProdukterSection'
+import DesignerSection from './components/home/DesignerSection'
+import KompassSection from './components/home/KompassSection'
+import GuiderSection from './components/home/GuiderSection'
+import LeveringSection from './components/home/LeveringSection'
 import ProsessPage from './components/pages/Prosess/ProsessPage'
 import KontaktPage from './components/pages/Kontakt/KontaktPage'
 import Footer from './components/layout/Footer'
@@ -203,16 +202,13 @@ function HomePage() {
       <SkipLink />
       <Navbar />
       <main id="main-content">
-        <Hero />
-        <Portfolio />
-        <DesignerToolPromo />
-        <ByggeguiderPromo />
-        <TjenesterPromo />
-        <Section id="levering" variant="paper">
-          <Container>
-            <Leveringskart />
-          </Container>
-        </Section>
+        <HomeHero />
+        <VeierSection />
+        <ProdukterSection />
+        <DesignerSection />
+        <KompassSection />
+        <GuiderSection />
+        <LeveringSection />
       </main>
       <Footer />
       <ProductModal />

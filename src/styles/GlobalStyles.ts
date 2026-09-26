@@ -91,14 +91,12 @@ const GlobalStyles = createGlobalStyle`
   }
 
   /**
-   * Display-serif kun på de tre øverste nivåene. h4–h6 er UI-etiketter og
-   * blir mer lesbare i sans. Fraunces settes mykt og lite «wonky» — den skal
-   * gi varme og håndverk, ikke retro.
+   * Overskrifter i Geist med stram sporing – moderne og rolig. Jo større
+   * grad, jo tettere sporing; brødtekst beholder normal sporing.
    */
   h1, h2, h3 {
     font-family: ${({ theme }) => theme.fonts.display};
-    font-variation-settings: 'SOFT' 28, 'WONK' 0;
-    letter-spacing: -0.015em;
+    letter-spacing: -0.025em;
     /* Bevisst ingen farge her — overskrifter arver fra flaten de står på,
        slik at mørke seksjoner ikke må overstyre hver enkelt. */
   }
@@ -106,6 +104,8 @@ const GlobalStyles = createGlobalStyle`
   h1 {
     font-weight: 600;
     font-size: ${({ theme }) => theme.fontSizes['4xl']};
+    letter-spacing: -0.035em;
+    line-height: 1.05;
   }
 
   h2 {

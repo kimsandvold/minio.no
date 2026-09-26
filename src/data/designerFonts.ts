@@ -48,9 +48,10 @@ export function loadDesignerFonts(): void {
   if (fontsLoaded) return
   fontsLoaded = true
 
+  // Inter lastes her (ikke globalt) – dørskilt-malene bruker vektene 300 og 600.
   const googleFonts = designerFonts
-    .filter(f => f.google && f.family !== 'Inter')
-    .map(f => `family=${f.family.replace(/ /g, '+')}:wght@400;700`)
+    .filter(f => f.google)
+    .map(f => `family=${f.family.replace(/ /g, '+')}:wght@${f.family === 'Inter' ? '300;400;600;700' : '400;700'}`)
     .join('&')
 
   const link = document.createElement('link')

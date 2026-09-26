@@ -33,15 +33,6 @@ export const modalSlideIn = keyframes`
   }
 `
 
-export const heroZoom = keyframes`
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.08);
-  }
-`
-
 export const promoPulse = keyframes`
   0%, 100% {
     box-shadow: 0 0 0 0 rgba(168, 81, 44, 0.4);

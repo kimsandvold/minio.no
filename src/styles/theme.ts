@@ -102,12 +102,12 @@ const theme = {
     neutral,
   },
   fonts: {
-    /** Brødtekst og UI. */
-    body: '"Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Helvetica", "Arial", sans-serif',
-    /** Overskrifter. Gir siden håndverkskarakter; brukes kun på h1/h2/h3. */
-    display: '"Fraunces", "Iowan Old Style", "Palatino Linotype", Georgia, serif',
+    /** Brødtekst og UI. Geist – presis grotesk, samme familie som overskriftene. */
+    body: '"Geist", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Helvetica", "Arial", sans-serif',
+    /** Overskrifter (h1–h3). Samme familie som brødtekst – hierarkiet bæres av vekt og sporing. */
+    display: '"Geist", -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", sans-serif',
     /** Mål, kapplister, koder. */
-    mono: '"SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace',
+    mono: '"Geist Mono", "SF Mono", ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace',
   },
   /** Typeskala. Fluid mellom mobil og desktop der det gir mening. */
   fontSizes: {
