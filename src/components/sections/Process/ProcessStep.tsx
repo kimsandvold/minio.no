@@ -48,7 +48,7 @@ const StepContent = styled.div`
   p {
     font-size: 1rem;
     line-height: 1.7;
-    color: #555;
+    color: #5a5249;
     margin: 0;
 
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {

@@ -38,7 +38,7 @@ const IconWrap = styled.div`
 const Text = styled.div`
   font-size: 0.85rem;
   line-height: 1.6;
-  color: #555;
+  color: #5a5249;
 
   strong {
     color: ${({ theme }) => theme.colors.textDark};

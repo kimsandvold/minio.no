@@ -51,17 +51,16 @@ const BannerLink = styled(Link)`
   background: #fff;
   color: ${({ theme }) => theme.colors.textDark};
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   font-weight: 600;
   font-size: 0.85rem;
   text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
+  letter-spacing: -0.005em;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
 `

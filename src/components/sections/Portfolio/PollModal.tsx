@@ -25,7 +25,7 @@ const Title = styled.h2`
 
 const Subtitle = styled.p`
   font-size: 0.95rem;
-  color: #666;
+  color: #6b6157;
   margin: 0 0 2rem;
   line-height: 1.6;
 `
@@ -38,7 +38,7 @@ const LoginPrompt = styled.div`
 
   p {
     font-size: 0.9rem;
-    color: #888;
+    color: #7a6f61;
     margin: 0;
   }
 `
@@ -57,20 +57,20 @@ const OptionLabel = styled.label<{ $selected: boolean }>`
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  border: 2px solid ${({ $selected }) => ($selected ? '#333' : '#e2e8f0')};
+  border: 2px solid ${({ $selected }) => ($selected ? '#2e2a26' : '#e2e8f0')};
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   font-size: 0.95rem;
-  color: #333;
+  color: #2e2a26;
   background: ${({ $selected }) => ($selected ? '#f7f8fa' : '#fff')};
 
   &:hover {
-    border-color: #999;
+    border-color: #7a6f61;
   }
 
   input {
-    accent-color: #333;
+    accent-color: #2e2a26;
     width: 18px;
     height: 18px;
     flex-shrink: 0;
@@ -90,7 +90,7 @@ const OtherInput = styled.input`
   transition: border-color 0.2s ease;
 
   &:focus {
-    border-color: #333;
+    border-color: #2e2a26;
   }
 `
 
@@ -118,7 +118,7 @@ const ThankYou = styled.div`
 
   p {
     font-size: 0.9rem;
-    color: #666;
+    color: #6b6157;
     margin: 0;
     line-height: 1.6;
   }
@@ -142,14 +142,14 @@ const ResultLabel = styled.div`
   justify-content: space-between;
   font-size: 0.9rem;
   margin-bottom: 0.3rem;
-  color: #333;
+  color: #2e2a26;
   font-weight: 500;
 `
 
 const BarTrack = styled.div`
   width: 100%;
   height: 28px;
-  background: #f0f0f0;
+  background: #efe9e0;
   border-radius: 6px;
   overflow: hidden;
 `
@@ -157,7 +157,7 @@ const BarTrack = styled.div`
 const BarFill = styled.div<{ $pct: number; $highlight: boolean }>`
   height: 100%;
   width: ${({ $pct }) => $pct}%;
-  background: ${({ $highlight }) => ($highlight ? '#333' : '#a0aec0')};
+  background: ${({ $highlight }) => ($highlight ? '#2e2a26' : '#a0aec0')};
   border-radius: 6px;
   transition: width 0.5s ease;
   min-width: ${({ $pct }) => ($pct > 0 ? '4px' : '0')};
@@ -166,7 +166,7 @@ const BarFill = styled.div<{ $pct: number; $highlight: boolean }>`
 const TotalVotes = styled.p`
   text-align: center;
   font-size: 0.85rem;
-  color: #999;
+  color: #7a6f61;
   margin: 1rem 0 0;
 `
 
@@ -180,7 +180,7 @@ const OtherVotesList = styled.div`
   h4 {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #333;
+    color: #2e2a26;
     margin: 0 0 0.5rem;
   }
 
@@ -192,7 +192,7 @@ const OtherVotesList = styled.div`
 
   li {
     font-size: 0.85rem;
-    color: #666;
+    color: #6b6157;
     line-height: 1.6;
   }
 `
@@ -202,14 +202,14 @@ const ToggleLink = styled.button`
   margin-top: 1.25rem;
   background: none;
   border: none;
-  color: #666;
+  color: #6b6157;
   font-size: 0.85rem;
   cursor: pointer;
   text-decoration: underline;
   font-family: inherit;
 
   &:hover {
-    color: #333;
+    color: #2e2a26;
   }
 `
 

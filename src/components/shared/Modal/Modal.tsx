@@ -25,7 +25,7 @@ const Backdrop = styled.div`
 `
 
 const Content = styled.div<{ $maxWidth?: string; $dark?: boolean }>`
-  background: ${({ $dark }) => ($dark ? '#1a1a1a' : '#fff')};
+  background: ${({ $dark }) => ($dark ? '#1c1a18' : '#fff')};
   border-radius: ${({ theme }) => theme.borderRadius.xl};
   max-width: ${({ $maxWidth }) => $maxWidth || '800px'};
   width: 100%;
@@ -49,7 +49,7 @@ const CloseButton = styled.button<{ $dark?: boolean }>`
   background: transparent;
   border: none;
   font-size: 2rem;
-  color: ${({ $dark }) => ($dark ? 'rgba(255, 255, 255, 0.7)' : '#666')};
+  color: ${({ $dark }) => ($dark ? 'rgba(255, 255, 255, 0.7)' : '#6b6157')};
   cursor: pointer;
   width: 40px;
   height: 40px;
@@ -57,13 +57,13 @@ const CloseButton = styled.button<{ $dark?: boolean }>`
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: all 0.3s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
   z-index: 10;
 
   &:hover {
-    background: ${({ $dark }) => ($dark ? 'rgba(255, 255, 255, 0.1)' : '#f0f0f0')};
-    color: ${({ $dark }) => ($dark ? '#fff' : '#1a1a1a')};
+    background: ${({ $dark }) => ($dark ? 'rgba(255, 255, 255, 0.1)' : '#efe9e0')};
+    color: ${({ $dark }) => ($dark ? '#fff' : '#1c1a18')};
     transform: rotate(90deg);
   }
 `

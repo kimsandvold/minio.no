@@ -262,7 +262,11 @@ export interface ProductTemplate<C extends DesignConfig = DesignConfig> {
   fraPris: number
   /**
    * Hvilke leveranser tilbys i oppsummeringskortet: 'ferdig' (bygget),
-   * 'materialpakke' (kappet), 'plan' (byggeplan). Utelatt = alle tilbys.
+   * 'materialpakke' (kappet), 'plan' (byggeplan).
+   *
+   * Utelatt = ['ferdig', 'plan']. `materialpakke` må slås på eksplisitt per
+   * produkt — vi kapper ikke virke som egen vare som standard, og en default
+   * som inkluderte den gjorde at to produkter tilbød en tjeneste vi ikke selger.
    */
   leveranser?: Array<'ferdig' | 'materialpakke' | 'plan'>
   defaultConfig: C

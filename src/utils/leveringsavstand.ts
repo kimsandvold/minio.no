@@ -16,7 +16,19 @@ export interface AvstandResultat {
   distanceKm: number
   message: string
   type: 'success' | 'warning' | 'error'
+  /** Stedsnavn slik Nominatim skrev det. Mangler ved oppslagsfeil. */
+  navn?: string
+  /** Koordinater for treffet, så et kart kan markere stedet. */
+  lat?: number
+  lon?: number
 }
+
+/**
+ * Luftlinje-radius som tilsvarer LEVERING_MAKS_KM kjørte kilometer.
+ * Kjøreruter er lengre enn luftlinja (vi regner × 1.3 andre steder), så en
+ * sirkel tegnet på 200 km ville lovet mer enn vi faktisk dekker.
+ */
+export const LEVERING_RADIUS_LUFTLINJE_KM = Math.round(LEVERING_MAKS_KM / 1.3)
 
 function haversineKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 6371
@@ -52,14 +64,14 @@ export async function beregnKjoreavstand(query: string): Promise<AvstandResultat
       const osrmData = await (await fetch(osrmUrl)).json()
       if (osrmData.code === 'Ok' && osrmData.routes && osrmData.routes.length > 0) {
         const distKm = Math.round(osrmData.routes[0].distance / 1000)
-        return { distanceKm: distKm, message: `Fant ${navn} — ${distKm} km fra Lillehammer`, type: 'success' }
+        return { distanceKm: distKm, message: `Fant ${navn} — ${distKm} km fra Lillehammer`, type: 'success', navn, lat: toLat, lon: toLon }
       }
     } catch {
       // Faller gjennom til luftlinje-estimat under.
     }
 
     const estimated = Math.round(haversineKm(LILLEHAMMER_LAT, LILLEHAMMER_LON, toLat, toLon) * 1.3)
-    return { distanceKm: estimated, message: `Estimert avstand (luftlinje × 1.3): ${estimated} km`, type: 'warning' }
+    return { distanceKm: estimated, message: `Estimert avstand (luftlinje × 1.3): ${estimated} km`, type: 'warning', navn, lat: toLat, lon: toLon }
   } catch {
     return { distanceKm: 0, message: 'Fant ikke stedet. Prøv et annet søkeord.', type: 'error' }
   }

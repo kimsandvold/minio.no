@@ -73,7 +73,7 @@ const Container = styled.div`
 const Card = styled.div`
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(60, 42, 28, 0.06);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -81,7 +81,7 @@ const Card = styled.div`
 
 const Header = styled.div`
   padding: 1.5rem;
-  border-bottom: 2px solid #e0e0e0;
+  border-bottom: 2px solid #e8e1d7;
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -98,7 +98,7 @@ const Header = styled.div`
 const BackBtn = styled.button`
   background: none;
   border: none;
-  color: #666;
+  color: #6b6157;
   cursor: pointer;
   font-size: 1.5rem;
   padding: 0;
@@ -108,9 +108,9 @@ const BackBtn = styled.button`
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  transition: all 0.3s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
-  &:hover { background: #f0f0f0; }
+  &:hover { background: #efe9e0; }
 `
 
 const LoginGate = styled.div`
@@ -124,12 +124,12 @@ const LoginGate = styled.div`
 
 const LockIcon = styled.div`
   font-size: 2.5rem;
-  color: #999;
+  color: #7a6f61;
 `
 
 const LoginMessage = styled.p`
   font-size: 1.1rem;
-  color: #555;
+  color: #5a5249;
   max-width: 400px;
   line-height: 1.6;
 `

@@ -15,14 +15,18 @@ import Navbar from './components/layout/Navbar'
 import Hero from './components/sections/Hero/Hero'
 import Portfolio from './components/sections/Portfolio/Portfolio'
 import DesignerToolPromo from './components/sections/DesignerToolPromo/DesignerToolPromo'
-import DesignPromo from './components/sections/DesignPromo/DesignPromo'
-import DesignerHighlight from './components/sections/DesignerHighlight/DesignerHighlight'
+import ByggeguiderPromo from './components/sections/ByggeguiderPromo/ByggeguiderPromo'
+import TjenesterPromo from './components/sections/TjenesterPromo/TjenesterPromo'
+import Section from './components/layout/Section'
+import Container from './components/layout/Container'
+import Leveringskart from './components/shared/Leveringskart/Leveringskart'
 import ProsessPage from './components/pages/Prosess/ProsessPage'
 import KontaktPage from './components/pages/Kontakt/KontaktPage'
 import Footer from './components/layout/Footer'
 import ProductModal from './components/shared/ProductModal/ProductModal'
 import NewsletterModal from './components/shared/NewsletterModal/NewsletterModal'
 import ProdukterPage from './components/pages/Produkter/ProdukterPage'
+import TjenesterPage from './components/pages/Tjenester/TjenesterPage'
 import ProduktDetailPage from './components/pages/Produkter/ProduktDetailPage'
 import UnderholdningPage from './components/pages/Underholdning/UnderholdningPage'
 import LeahNoellePage from './components/pages/LeahNoelle/LeahNoellePage'
@@ -34,6 +38,7 @@ import AdminLayout from './components/pages/Admin/AdminLayout'
 import AdminDashboardPage from './components/pages/Admin/AdminDashboardPage'
 import AdminBestillingerPage from './components/pages/Admin/AdminBestillingerPage'
 import AdminForesporslerPage from './components/pages/Admin/AdminForesporslerPage'
+import AdminProsjektIdeerPage from './components/pages/Admin/AdminProsjektIdeerPage'
 import AdminPollsPage from './components/pages/Admin/AdminPollsPage'
 import DesignViewPage from './components/pages/DesignView/DesignViewPage'
 import NotFoundPage from './components/pages/NotFound/NotFoundPage'
@@ -120,6 +125,7 @@ const UtekjokkenPlanleggerPage = lazy(() => import('./components/pages/Utekjokke
 const PlanleggerePage = lazy(() => import('./components/pages/Planleggere/PlanleggerePage'))
 const HandlagetITrePage = lazy(() => import('./components/pages/HandlagetITre/HandlagetITrePage'))
 const ByggehjelpPage = lazy(() => import('./components/pages/Byggehjelp/ByggehjelpPage'))
+const ProsjekthjelpPage = lazy(() => import('./components/pages/Prosjekthjelp/ProsjekthjelpPage'))
 const TreDDesignPage = lazy(() => import('./components/pages/TreDDesign/TreDDesignPage'))
 const DesignerLandingPage = lazy(() => import('./components/pages/Designer/DesignerLandingPage'))
 const DesignerPage = lazy(() => import('./components/pages/Designer/DesignerPage'))
@@ -200,8 +206,13 @@ function HomePage() {
         <Hero />
         <Portfolio />
         <DesignerToolPromo />
-        <DesignPromo />
-        <DesignerHighlight />
+        <ByggeguiderPromo />
+        <TjenesterPromo />
+        <Section id="levering" variant="paper">
+          <Container>
+            <Leveringskart />
+          </Container>
+        </Section>
       </main>
       <Footer />
       <ProductModal />
@@ -224,7 +235,9 @@ export default function App() {
                 <Route path="/kontakt" element={<KontaktPage />} />
                 <Route path="/produkter" element={<ProdukterPage />} />
                 <Route path="/handlaget-i-tre" element={<Suspense fallback={<PageLoadingFallback />}><HandlagetITrePage /></Suspense>} />
+                <Route path="/tjenester" element={<Suspense fallback={<PageLoadingFallback />}><TjenesterPage /></Suspense>} />
                 <Route path="/byggehjelp" element={<Suspense fallback={<PageLoadingFallback />}><ByggehjelpPage /></Suspense>} />
+                <Route path="/prosjekthjelp" element={<Suspense fallback={<PageLoadingFallback />}><ProsjekthjelpPage /></Suspense>} />
                 <Route path="/3d-design" element={<Suspense fallback={<PageLoadingFallback />}><TreDDesignPage /></Suspense>} />
                 <Route path="/designverktoy" element={<Suspense fallback={<PageLoadingFallback />}><DesignerLandingPage /></Suspense>} />
                 <Route path="/designverktoy/:produktId" element={<Suspense fallback={<PageLoadingFallback />}><DesignerPage /></Suspense>} />
@@ -327,6 +340,7 @@ export default function App() {
                   <Route index element={<AdminDashboardPage />} />
                   <Route path="bestillinger" element={<AdminBestillingerPage />} />
                   <Route path="foresporsler" element={<AdminForesporslerPage />} />
+                  <Route path="prosjektideer" element={<AdminProsjektIdeerPage />} />
                   <Route path="avstemninger" element={<AdminPollsPage />} />
                 </Route>
                 <Route path="/design/:designId" element={<DesignViewPage />} />

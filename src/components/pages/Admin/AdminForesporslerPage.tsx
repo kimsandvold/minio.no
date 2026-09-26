@@ -56,7 +56,7 @@ export default function AdminForesporslerPage() {
 
   return (
     <>
-      <AdminPageHead title="Forespørsler" subtitle="Bygging, materialpakker og byggeplan-koder fra designverktøyet." />
+      <AdminPageHead title="Forespørsler" subtitle="Bygging og byggeplan-koder fra designverktøyet." />
 
       {loading ? (
         <Loading><Icon name="faSpinner" spin /> Laster forespørsler …</Loading>
@@ -145,11 +145,11 @@ export default function AdminForesporslerPage() {
 
 const Liste = styled.div`display: flex; flex-direction: column; gap: 1rem;`
 const Kort = styled.div`
-  background: #fff; border: 1px solid #e7e5df; border-radius: 14px; padding: 1.15rem 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  background: #fff; border: 1px solid #e7e5df; border-radius: 14px; padding: 1.15rem 1.25rem; box-shadow: 0 1px 3px rgba(60, 42, 28, 0.04);
 `
 const KortTop = styled.div`
   display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.8rem;
-  h3 { margin: 0.35rem 0 0; font-size: 1.05rem; color: #16181d; span { color: #999; font-weight: 500; } }
+  h3 { margin: 0.35rem 0 0; font-size: 1.05rem; color: #16181d; span { color: #7a6f61; font-weight: 500; } }
 `
 const TypeTag = styled.span<{ $type: string }>`
   display: inline-block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
@@ -164,16 +164,16 @@ const TypeTag = styled.span<{ $type: string }>`
         : 'rgba(189,149,99,0.18)'};
 `
 const StatusVelg = styled.select`
-  flex-shrink: 0; padding: 0.45rem 0.7rem; border: 1px solid #ddd; border-radius: 8px; background: #fff; font-family: inherit; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+  flex-shrink: 0; padding: 0.45rem 0.7rem; border: 1px solid #ddd4c7; border-radius: 8px; background: #fff; font-family: inherit; font-weight: 600; font-size: 0.85rem; cursor: pointer;
 `
 const Fakta = styled.div`
   display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; margin-bottom: 0.7rem;
-  span { font-size: 0.88rem; color: #333; b { color: #999; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-right: 0.3rem; } }
+  span { font-size: 0.88rem; color: #2e2a26; b { color: #7a6f61; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-right: 0.3rem; } }
 `
-const Spec = styled.div`font-size: 0.8rem; color: #777; line-height: 1.5; padding-top: 0.6rem; border-top: 1px solid #f0f0f0;`
-const Melding = styled.p`margin: 0.7rem 0 0; padding: 0.7rem 0.85rem; background: #f7f5ef; border-left: 3px solid #7b9c7b; border-radius: 0 8px 8px 0; font-size: 0.9rem; color: #2a2a2a; font-style: italic;`
+const Spec = styled.div`font-size: 0.8rem; color: #7a7065; line-height: 1.5; padding-top: 0.6rem; border-top: 1px solid #efe9e0;`
+const Melding = styled.p`margin: 0.7rem 0 0; padding: 0.7rem 0.85rem; background: #f7f5ef; border-left: 3px solid #7b9c7b; border-radius: 0 8px 8px 0; font-size: 0.9rem; color: #2e2a26; font-style: italic;`
 const KortBunn = styled.div`
-  margin-top: 0.9rem; padding-top: 0.7rem; border-top: 1px solid #f0f0f0;
+  margin-top: 0.9rem; padding-top: 0.7rem; border-top: 1px solid #efe9e0;
   a { display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.85rem; font-weight: 600; color: #3a5f3a; text-decoration: none; &:hover { text-decoration: underline; } }
 `
 

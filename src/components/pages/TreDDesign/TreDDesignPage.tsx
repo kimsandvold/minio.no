@@ -67,7 +67,7 @@ const PAKKER: Pakke[] = [
       'Én fotorealistisk rendering',
       'Enkel materialoversikt',
     ],
-    kreditt: 'Trekkes fra hvis du bestiller bygg eller materialpakke',
+    kreditt: 'Trekkes fra hvis du bestiller bygg etterpå',
     kontaktEmne: '3D-design – 3D-skisse',
   },
   {
@@ -115,7 +115,7 @@ const FAQ = [
   },
   {
     q: 'Trekkes designet fra hvis jeg bestiller bygget?',
-    a: 'Bestiller du bygg eller materialpakke etter en 3D-skisse, trekker jeg skisseprisen fra på fakturaen – da blir den i praksis et forskudd. Designpakke og prosjektering er mer omfattende tjenester med fast pris, og kommer i tillegg.',
+    a: 'Bestiller du bygg etter en 3D-skisse, trekker jeg skisseprisen fra på fakturaen – da blir den i praksis et forskudd. Designpakke og prosjektering er mer omfattende tjenester med fast pris, og kommer i tillegg.',
   },
   {
     q: 'Hva er forskjellen på 3D-skisse og fotorealistisk rendering?',
@@ -335,7 +335,7 @@ const Figure = styled.figure`
   figcaption {
     margin-top: 0.5rem;
     font-size: 0.85rem;
-    color: #777;
+    color: #7a7065;
     text-align: center;
   }
 `
@@ -368,7 +368,7 @@ const SectionHeading = styled.div`
 
   p {
     font-size: 1rem;
-    color: #666;
+    color: #6b6157;
     margin: 0;
   }
 `
@@ -391,7 +391,7 @@ const Card = styled.div<{ $fremhevet?: boolean }>`
   display: flex;
   flex-direction: column;
   box-shadow: ${({ $fremhevet }) =>
-    $fremhevet ? '0 12px 32px rgba(0, 0, 0, 0.12)' : '0 4px 20px rgba(0, 0, 0, 0.04)'};
+    $fremhevet ? '0 12px 32px rgba(60, 42, 28, 0.12)' : '0 4px 20px rgba(0, 0, 0, 0.04)'};
 
   .ikon {
     font-size: 1.6rem;
@@ -416,7 +416,7 @@ const Card = styled.div<{ $fremhevet?: boolean }>`
   .ingress {
     font-size: 0.96rem;
     line-height: 1.6;
-    color: #555;
+    color: #5a5249;
     margin: 0 0 1.1rem;
   }
 
@@ -450,7 +450,7 @@ const Card = styled.div<{ $fremhevet?: boolean }>`
     align-items: flex-start;
     gap: 0.55rem;
     font-size: 0.9rem;
-    color: #444;
+    color: #4a433c;
     line-height: 1.45;
 
     svg {
@@ -504,7 +504,7 @@ const CreditNote = styled.p`
   margin: 2rem auto 0;
   text-align: center;
   font-size: 0.95rem;
-  color: #555;
+  color: #5a5249;
   line-height: 1.6;
 
   strong {
@@ -552,7 +552,7 @@ const Step = styled.div`
 
   span {
     font-size: 0.92rem;
-    color: #666;
+    color: #6b6157;
     line-height: 1.55;
   }
 `
@@ -577,7 +577,7 @@ const FaqList = styled.div`
 const FaqItem = styled.div`
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 12px rgba(60, 42, 28, 0.05);
   overflow: hidden;
 `
 
@@ -611,7 +611,7 @@ const FaqQuestion = styled.button<{ $open: boolean }>`
     flex-shrink: 0;
     margin-left: 1rem;
     font-size: 0.75rem;
-    color: ${({ $open, theme }) => ($open ? theme.colors.accent : '#aaa')};
+    color: ${({ $open, theme }) => ($open ? theme.colors.accent : '#b3a797')};
     transition: color 0.2s;
   }
 `
@@ -628,7 +628,7 @@ const FaqAnswer = styled.div<{ $open: boolean }>`
   p {
     font-size: 0.92rem;
     line-height: 1.7;
-    color: #555;
+    color: #5a5249;
     margin: 0;
     padding: 0 1.75rem 1.5rem;
   }
@@ -639,7 +639,7 @@ const CrossNote = styled.p`
   margin: 3rem auto 0;
   text-align: center;
   font-size: 1rem;
-  color: #555;
+  color: #5a5249;
   line-height: 1.7;
 
   a {
@@ -741,7 +741,7 @@ export default function TreDDesignPage() {
             </Grid>
             <CreditNote>
               <strong>3D-skissen er et forskudd, ikke en ekstra kostnad.</strong> Bestiller du bygg
-              eller materialpakke etter en 3D-skisse, trekkes skisseprisen fra på fakturaen.
+              etter en 3D-skisse, trekkes skisseprisen fra på fakturaen.
               Designpakke og prosjektering er egne tjenester med fast pris.
             </CreditNote>
           </Packages>

@@ -89,7 +89,7 @@ const Intro = styled.div`
   p {
     font-size: 1.05rem;
     line-height: 1.8;
-    color: #444;
+    color: #4a433c;
   }
 `
 
@@ -109,12 +109,12 @@ const ProductCard = styled.div`
   background: #fff;
   border-radius: ${({ theme }) => theme.borderRadius.large};
   padding: 2rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(60, 42, 28, 0.06);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 20px rgba(60, 42, 28, 0.1);
   }
 `
 
@@ -134,7 +134,7 @@ const CardTitle = styled.h3`
 const CardText = styled.p`
   font-size: 0.95rem;
   line-height: 1.7;
-  color: #555;
+  color: #5a5249;
   margin: 0;
 `
 
@@ -156,7 +156,7 @@ const DetailSection = styled.div`
   p {
     font-size: 1rem;
     line-height: 1.8;
-    color: #444;
+    color: #4a433c;
     margin-bottom: 1rem;
     max-width: 760px;
   }
@@ -181,8 +181,8 @@ const FeatureItem = styled.li`
   border-radius: ${({ theme }) => theme.borderRadius.medium};
   font-size: 0.95rem;
   line-height: 1.6;
-  color: #444;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  color: #4a433c;
+  box-shadow: 0 1px 4px rgba(60, 42, 28, 0.04);
 
   strong {
     color: ${({ theme }) => theme.colors.textDark};
@@ -227,17 +227,16 @@ const CrossSellLink = styled(Link)`
   background: #fff;
   color: ${({ theme }) => theme.colors.textDark};
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   font-weight: 600;
   font-size: 0.95rem;
   text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
+  letter-spacing: -0.005em;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
 `
@@ -248,17 +247,16 @@ const CrossSellButton = styled.button`
   background: #fff;
   color: ${({ theme }) => theme.colors.textDark};
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   font-weight: 600;
   font-size: 0.95rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: -0.005em;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
 `
@@ -278,7 +276,7 @@ const Cta = styled.div`
   p {
     font-size: 1rem;
     margin-bottom: 1.5rem;
-    color: #555;
+    color: #5a5249;
   }
 `
 
@@ -288,18 +286,17 @@ const ContactButton = styled(Link)`
   background-color: ${({ theme }) => theme.colors.textDark};
   color: #fff;
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  letter-spacing: -0.005em;
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background-color: #333;
-    transform: translateY(-2px);
+    background-color: #2e2a26;
+    transform: translateY(-1px);
   }
 `
 

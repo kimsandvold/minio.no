@@ -23,7 +23,7 @@ const Button = styled.button`
   }
 
   &:active {
-    background: #eee;
+    background: #f0eae1;
   }
 `
 

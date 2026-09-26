@@ -10,18 +10,18 @@ const Body = styled.div`
 
   &::-webkit-scrollbar { width: 8px; }
   &::-webkit-scrollbar-track { background: #f1f1f1; }
-  &::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+  &::-webkit-scrollbar-thumb { background: #7a6f61; border-radius: 8px; }
 `
 
 const Empty = styled.p`
   text-align: center;
-  color: #666;
+  color: #6b6157;
   padding: 2rem;
 `
 
 const Item = styled.div`
   padding: 1rem;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e8e1d7;
   border-radius: 8px;
   margin-bottom: 1rem;
 `
@@ -44,23 +44,23 @@ const Quantity = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: #f5f5f5;
-  border-radius: 4px;
+  background: #f4efe8;
+  border-radius: 8px;
   padding: 0.25rem;
 `
 
 const QtyBtn = styled.button`
   background: white;
-  border: 1px solid #ddd;
+  border: 1px solid #ddd4c7;
   width: 28px;
   height: 28px;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-size: 1rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #333;
+  color: #2e2a26;
   padding: 0;
 
   &:hover:not(:disabled) {
@@ -75,7 +75,7 @@ const QtyValue = styled.span`
   min-width: 30px;
   text-align: center;
   font-weight: 600;
-  color: #202020;
+  color: #1c1a18;
 `
 
 const RemoveBtn = styled.button`
@@ -89,21 +89,20 @@ const RemoveBtn = styled.button`
 
 const Details = styled.div`
   font-size: 0.85rem;
-  color: #666;
+  color: #6b6157;
   line-height: 1.6;
 `
 
 const PriceSection = styled.div`
   margin-top: 0.75rem;
   padding-top: 0.75rem;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid #e8e1d7;
 `
 
 const PriceLabel = styled.div`
   font-size: 0.75rem;
-  color: #999;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: #7a6f61;
+  letter-spacing: -0.005em;
   margin-bottom: 0.25rem;
 `
 
@@ -115,7 +114,7 @@ const PriceValue = styled.div`
 
 const Notes = styled.div`
   padding: 1.5rem;
-  border-top: 2px solid #e0e0e0;
+  border-top: 2px solid #e8e1d7;
   flex-shrink: 0;
 
   label {
@@ -130,8 +129,8 @@ const Notes = styled.div`
     width: 100%;
     min-height: 80px;
     padding: 0.75rem;
-    border: 2px solid #e0e0e0;
-    border-radius: 4px;
+    border: 2px solid #e8e1d7;
+    border-radius: 8px;
     font-family: inherit;
     font-size: 0.9rem;
     resize: vertical;
@@ -143,7 +142,7 @@ const Notes = styled.div`
 
 const TotalSection = styled.div`
   padding: 1.5rem;
-  border-top: 2px solid #e0e0e0;
+  border-top: 2px solid #e8e1d7;
   flex-shrink: 0;
   display: flex;
   justify-content: space-between;
@@ -164,7 +163,7 @@ const TotalValue = styled.span`
 
 const Footer = styled.div`
   padding: 1.5rem;
-  border-top: 2px solid #e0e0e0;
+  border-top: 2px solid #e8e1d7;
   flex-shrink: 0;
 `
 
@@ -179,9 +178,9 @@ const CheckoutBtn = styled.button`
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
-  &:hover { background: #333; }
+  &:hover { background: #2e2a26; }
 `
 
 interface BasketViewProps {

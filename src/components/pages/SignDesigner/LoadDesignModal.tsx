@@ -7,7 +7,7 @@ import { getUserDesigns, deleteDesign } from '../../../services/designService'
 
 const Content = styled.div`
   padding: 2rem;
-  color: #ddd;
+  color: #ddd4c7;
 `
 
 const Title = styled.h3`
@@ -24,8 +24,8 @@ const DesignList = styled.div`
 `
 
 const DesignCard = styled.div`
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: #2e2a26;
+  border: 1px solid #4a433c;
   border-radius: 8px;
   padding: 1rem;
   display: flex;
@@ -34,7 +34,7 @@ const DesignCard = styled.div`
   cursor: pointer;
   transition: border-color 0.2s ease;
 
-  &:hover { border-color: #1da1f2; }
+  &:hover { border-color: #a8512c; }
 `
 
 const DesignInfo = styled.div`
@@ -49,24 +49,24 @@ const DesignName = styled.div`
 
 const DesignMeta = styled.div`
   font-size: 0.75rem;
-  color: #888;
+  color: #7a6f61;
 `
 
 const DeleteBtn = styled.button`
   background: transparent;
   border: none;
-  color: #888;
+  color: #7a6f61;
   cursor: pointer;
   padding: 0.3rem;
   font-size: 0.9rem;
 
-  &:hover { color: #f44336; }
+  &:hover { color: #b3382f; }
 `
 
 const EmptyState = styled.div`
   text-align: center;
   padding: 2rem;
-  color: #666;
+  color: #6b6157;
   font-size: 0.9rem;
 `
 

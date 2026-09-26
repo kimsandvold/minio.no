@@ -24,12 +24,12 @@ const Nav = styled.nav`
   width: calc(100% - 2rem);
   max-width: ${({ theme }) => theme.spacing.containerMax};
   padding: 0.6rem 1.5rem;
-  background: rgba(20, 20, 20, 0.65);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(28, 26, 24, 0.68);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border-radius: ${({ theme }) => theme.borderRadius.large};
+  box-shadow: 0 10px 34px rgba(0, 0, 0, 0.26);
   z-index: ${({ theme }) => theme.zIndex.nav};
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -102,7 +102,7 @@ const MenuLinks = styled.div<{ $open: boolean }>`
     width: 75%;
     max-width: 320px;
     height: 100vh;
-    background: linear-gradient(135deg, ${({ theme }) => theme.colors.darkBg} 0%, #2a2a2a 100%);
+    background: linear-gradient(135deg, ${({ theme }) => theme.colors.darkBg} 0%, #2e2a26 100%);
     flex-direction: column;
     align-items: flex-start;
     padding: 80px 2rem 2rem;
@@ -130,11 +130,6 @@ const textLinkStyles = `
     opacity: 1;
   }
 
-  &:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
 `
 
 const TextLink = styled.a`
@@ -146,9 +141,26 @@ const TextLink = styled.a`
   }
 `
 
-const TextRouterLink = styled(Link)`
+const TextRouterLink = styled(Link)<{ $aktiv?: boolean }>`
   ${textLinkStyles}
   color: ${({ theme }) => theme.colors.textLight};
+  position: relative;
+  opacity: ${({ $aktiv }) => ($aktiv ? 1 : 0.85)};
+  font-weight: ${({ $aktiv }) => ($aktiv ? 600 : 400)};
+
+  /* Understreken bæres av aksenten – eneste kulørte i navbaren. */
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.45rem;
+    height: 2px;
+    border-radius: 999px;
+    background: ${({ theme }) => theme.colors.accentLight};
+    opacity: ${({ $aktiv }) => ($aktiv ? 1 : 0)};
+    transition: opacity ${({ theme }) => theme.transitions.default};
+  }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     display: none;
@@ -161,11 +173,6 @@ const iconLinkStyles = `
   transition: color 0.3s ease;
   text-decoration: none;
 
-  &:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
 `
 
 const IconLink = styled.a`
@@ -173,7 +180,7 @@ const IconLink = styled.a`
   color: ${({ theme }) => theme.colors.textLight};
 
   &:hover {
-    color: ${({ theme }) => theme.colors.accent};
+    color: ${({ theme }) => theme.colors.accentLight};
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -193,12 +200,12 @@ const IconLink = styled.a`
   }
 `
 
-const IconRouterLink = styled(Link)`
+const IconRouterLink = styled(Link)<{ $aktiv?: boolean }>`
   ${iconLinkStyles}
-  color: ${({ theme }) => theme.colors.textLight};
+  color: ${({ theme, $aktiv }) => ($aktiv ? theme.colors.accentLight : theme.colors.textLight)};
 
   &:hover {
-    color: ${({ theme }) => theme.colors.accent};
+    color: ${({ theme }) => theme.colors.accentLight};
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -242,11 +249,6 @@ const BasketLink = styled(Link)`
 
   &:hover { color: #fff; }
 
-  &:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
 `
 
 const SearchButton = styled.button`
@@ -262,11 +264,6 @@ const SearchButton = styled.button`
 
   &:hover { color: #fff; }
 
-  &:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
 `
 
 const BasketCount = styled.span`
@@ -312,10 +309,6 @@ const UserPill = styled.button`
     background: rgba(255, 255, 255, 0.15);
   }
 
-  &:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
-  }
 `
 
 const UserAvatar = styled.img`
@@ -337,7 +330,7 @@ const UserDropdown = styled.div`
   top: 100%;
   right: 0;
   margin-top: 0.5rem;
-  background: rgba(20, 20, 20, 0.85);
+  background: rgba(28, 26, 24, 0.88);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -363,10 +356,6 @@ const DropdownLink = styled(Link)`
     color: #fff;
   }
 
-  &:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
-  }
 `
 
 const DropdownBtn = styled.button`
@@ -389,10 +378,6 @@ const DropdownBtn = styled.button`
     color: #ff8888;
   }
 
-  &:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
-  }
 `
 
 const LoginLink = styled.button`
@@ -411,11 +396,6 @@ const LoginLink = styled.button`
     opacity: 1;
   }
 
-  &:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     display: none;
@@ -427,7 +407,7 @@ const LoginPopover = styled.div`
   top: 100%;
   right: 0;
   margin-top: 0.5rem;
-  background: rgba(20, 20, 20, 0.85);
+  background: rgba(28, 26, 24, 0.88);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -485,11 +465,6 @@ const MobileLogoutBtn = styled.button`
   padding: 0.5rem 0;
   opacity: 0.6;
 
-  &:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
 `
 
 const Hamburger = styled.button<{ $open: boolean }>`
@@ -509,7 +484,7 @@ const Hamburger = styled.button<{ $open: boolean }>`
     height: 3px;
     background: ${({ theme }) => theme.colors.textLight};
     border-radius: 2px;
-    transition: all 0.3s ease;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
     transform-origin: center;
   }
 
@@ -519,11 +494,6 @@ const Hamburger = styled.button<{ $open: boolean }>`
     span:nth-child(3) { transform: translateY(-10.5px) rotate(-45deg); }
   `}
 
-  &:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     display: flex;
@@ -599,10 +569,19 @@ export default function Navbar() {
 
   const navHref = (hash: string) => isHome ? hash : `/${hash}`
 
+  /**
+   * «/produkter» skal også lyse på «/produkter/vedskjul», men «/» må matche
+   * eksakt – ellers ville forsiden vært aktiv overalt.
+   */
+  const erAktiv = (href: string) =>
+    href === '/'
+      ? location.pathname === '/'
+      : location.pathname === href || location.pathname.startsWith(`${href}/`)
+
   return (
     <>
       <Backdrop $open={menuOpen} onClick={closeMenu} />
-      <Nav aria-label="Hovedmeny">
+      <Nav aria-label="Hovedmeny" data-surface="dark">
         <NavContainer>
           <Logo>
             <Link to="/"><img src="/images/branding/logo_navbar.webp" alt="Minio" /></Link>
@@ -614,7 +593,13 @@ export default function Navbar() {
             {navLinks.map(link => {
               const isRoute = link.href.startsWith('/')
               return isRoute ? (
-                <TextRouterLink key={link.href} to={link.href} onClick={closeMenu}>
+                <TextRouterLink
+                  key={link.href}
+                  to={link.href}
+                  $aktiv={erAktiv(link.href)}
+                  aria-current={erAktiv(link.href) ? 'page' : undefined}
+                  onClick={closeMenu}
+                >
                   {link.label}
                 </TextRouterLink>
               ) : (
@@ -626,7 +611,14 @@ export default function Navbar() {
             {navLinks.map(link => {
               const isRoute = link.href.startsWith('/')
               return isRoute ? (
-                <IconRouterLink key={`icon-${link.href}`} to={link.href} aria-label={link.ariaLabel} onClick={closeMenu}>
+                <IconRouterLink
+                  key={`icon-${link.href}`}
+                  to={link.href}
+                  $aktiv={erAktiv(link.href)}
+                  aria-current={erAktiv(link.href) ? 'page' : undefined}
+                  aria-label={link.ariaLabel}
+                  onClick={closeMenu}
+                >
                   <Icon name={link.icon} />
                 </IconRouterLink>
               ) : (

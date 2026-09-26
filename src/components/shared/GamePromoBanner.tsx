@@ -8,25 +8,25 @@ const Banner = styled(Link)`
   gap: 0.75rem;
   margin-top: 2rem;
   padding: 0.9rem 1.5rem;
-  background: rgba(29, 161, 242, 0.25);
-  border: 1px solid rgba(29, 161, 242, 0.5);
+  background: rgba(168, 81, 44, 0.25);
+  border: 1px solid rgba(168, 81, 44, 0.5);
   border-radius: 50px;
   color: white;
   text-decoration: none;
   font-size: 0.95rem;
-  transition: all 0.3s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   animation: ${promoPulse} 3s ease-in-out infinite;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 
   &:hover {
-    background: rgba(29, 161, 242, 0.35);
-    border-color: rgba(29, 161, 242, 0.7);
-    transform: translateY(-2px);
+    background: rgba(168, 81, 44, 0.35);
+    border-color: rgba(168, 81, 44, 0.7);
+    transform: translateY(-1px);
   }
 
   strong {
-    color: #1da1f2;
+    color: #a8512c;
   }
 
   @media (max-width: 600px) {

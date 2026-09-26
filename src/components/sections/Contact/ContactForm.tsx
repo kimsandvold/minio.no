@@ -20,7 +20,7 @@ const Form = styled.form`
 
 const Input = styled.input`
   padding: 0.75rem 1rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #e8e1d7;
   border-radius: 8px;
   font-size: 1rem;
   font-family: ${({ theme }) => theme.fonts.body};
@@ -29,13 +29,13 @@ const Input = styled.input`
   &:focus {
     outline: 0;
     border-color: ${({ theme }) => theme.colors.accent};
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 0 0 3px rgba(60, 42, 28, 0.08);
   }
 `
 
 const TextArea = styled.textarea`
   padding: 0.75rem 1rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #e8e1d7;
   border-radius: 8px;
   font-size: 1rem;
   font-family: ${({ theme }) => theme.fonts.body};
@@ -46,13 +46,13 @@ const TextArea = styled.textarea`
   &:focus {
     outline: 0;
     border-color: ${({ theme }) => theme.colors.accent};
-    box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 0 0 3px rgba(60, 42, 28, 0.08);
   }
 `
 
 const HelperText = styled.div`
   font-size: 0.85rem;
-  color: #666;
+  color: #6b6157;
   margin-top: -0.5rem;
   font-style: italic;
 `
@@ -66,17 +66,16 @@ const SubmitButton = styled.button`
   background-color: ${({ theme }) => theme.colors.textDark};
   color: #fff;
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
+  letter-spacing: -0.005em;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background-color: #333;
-    transform: translateY(-2px);
+    background-color: #2e2a26;
+    transform: translateY(-1px);
   }
   &:disabled {
     opacity: 0.7;
@@ -117,7 +116,7 @@ const SuccessHeading = styled.h3`
 
 const SuccessBody = styled.p`
   font-size: 0.95rem;
-  color: #555;
+  color: #5a5249;
   line-height: 1.6;
   margin: 0 0 1.5rem;
 `
@@ -126,12 +125,12 @@ const ResetButton = styled.button`
   padding: 0.75rem 1.5rem;
   background: none;
   border: 2px solid ${({ theme }) => theme.colors.textDark};
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.9rem;
   color: ${({ theme }) => theme.colors.textDark};
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     background: ${({ theme }) => theme.colors.textDark};
@@ -174,7 +173,7 @@ const RetryButton = styled.button`
   background: #721c24;
   color: #fff;
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.85rem;

@@ -895,21 +895,21 @@ export default function VedskjulThreeVisualizer(props: VedskjulVisualizerProps) 
                   <SbSliderName>Bredde</SbSliderName>
                   <SbSliderVal>{props.width} cm</SbSliderVal>
                 </SbSliderRow>
-                <SbSlider type="range" min={200} max={400} step={5} value={props.width} onChange={(e) => update({ width: +e.target.value })} />
+                <SbSlider type="range" aria-label="Bredde" min={200} max={400} step={5} value={props.width} onChange={(e) => update({ width: +e.target.value })} />
               </SbSliderGroup>
               <SbSliderGroup>
                 <SbSliderRow>
                   <SbSliderName>Høyde</SbSliderName>
                   <SbSliderVal>{props.height} cm</SbSliderVal>
                 </SbSliderRow>
-                <SbSlider type="range" min={150} max={250} step={5} value={props.height} onChange={(e) => update({ height: +e.target.value })} />
+                <SbSlider type="range" aria-label="Høyde" min={150} max={250} step={5} value={props.height} onChange={(e) => update({ height: +e.target.value })} />
               </SbSliderGroup>
               <SbSliderGroup>
                 <SbSliderRow>
                   <SbSliderName>Dybde</SbSliderName>
                   <SbSliderVal>{props.depth} cm</SbSliderVal>
                 </SbSliderRow>
-                <SbSlider type="range" min={100} max={300} step={5} value={props.depth} onChange={(e) => update({ depth: +e.target.value })} />
+                <SbSlider type="range" aria-label="Dybde" min={100} max={300} step={5} value={props.depth} onChange={(e) => update({ depth: +e.target.value })} />
               </SbSliderGroup>
             </SbSection>
 
@@ -928,7 +928,7 @@ export default function VedskjulThreeVisualizer(props: VedskjulVisualizerProps) 
                   <SbSliderName>Grad</SbSliderName>
                   <SbSliderVal>{props.roofDegree}%</SbSliderVal>
                 </SbSliderRow>
-                <SbSlider type="range" min={0} max={45} step={1} value={props.roofDegree} onChange={(e) => update({ roofDegree: +e.target.value })} />
+                <SbSlider type="range" aria-label="Grad" min={0} max={45} step={1} value={props.roofDegree} onChange={(e) => update({ roofDegree: +e.target.value })} />
               </SbSliderGroup>
             </SbSection>
 

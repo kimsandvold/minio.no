@@ -8,13 +8,13 @@ const Card = styled.div`
   background: #fff;
   border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(60, 42, 28, 0.06);
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
     transform: translateY(-6px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 12px 32px rgba(60, 42, 28, 0.12);
   }
 `
 
@@ -36,7 +36,7 @@ const CardBody = styled.div`
   h3 {
     font-size: 1.05rem;
     font-weight: 600;
-    color: #222;
+    color: #242019;
     margin: 0 0 0.4rem;
     line-height: 1.3;
   }
@@ -45,7 +45,7 @@ const CardBody = styled.div`
 const Description = styled.p`
   font-size: 0.85rem;
   line-height: 1.6;
-  color: #666;
+  color: #6b6157;
   margin: 0 0 auto;
   padding-bottom: 1rem;
 `
@@ -63,11 +63,11 @@ const VoteButton = styled.button`
   font-size: 0.9rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background: #333;
-    transform: translateY(-2px);
+    background: #2e2a26;
+    transform: translateY(-1px);
   }
 `
 

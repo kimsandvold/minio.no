@@ -6,18 +6,18 @@ import Icon from '../../shared/Icon'
 /**
  * Forside-seksjon som promoterer det interaktive 3D-designverktøyet
  * (/designverktoy). Mørk «tool»-identitet som matcher selve verktøyet, med
- * renderen vist i et app-vindu. Skiller seg fra DesignPromo («noen tegner for
- * deg») og DesignerHighlight (skiltdesigner).
+ * renderen vist i et app-vindu. Dette er sidens eneste verktøy-seksjon –
+ * «noen gjør det for deg» ligger nå samlet i TjenesterPromo og /tjenester.
  */
 
 const Section = styled.section`
   position: relative;
   overflow: hidden;
   background:
-    radial-gradient(120% 90% at 15% 0%, rgba(90, 120, 90, 0.16), transparent 55%),
-    #16181d;
-  color: #e9e7e1;
-  padding: 5.5rem 2rem;
+    radial-gradient(120% 90% at 15% 0%, rgba(168, 81, 44, 0.22), transparent 58%),
+    ${({ theme }) => theme.colors.deep};
+  color: ${({ theme }) => theme.colors.inkInverted};
+  padding: 6.5rem 2rem;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     padding: 3.5rem 1.25rem;
@@ -50,34 +50,26 @@ const Text = styled.div`
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #7bc39c;
-    margin-bottom: 1rem;
+    color: ${({ theme }) => theme.colors.accentLight};
+    margin-bottom: 1.1rem;
   }
   .kicker span {
-    background: rgba(123, 195, 156, 0.14);
-    border: 1px solid rgba(123, 195, 156, 0.35);
+    background: rgba(224, 137, 95, 0.14);
+    border: 1px solid rgba(224, 137, 95, 0.38);
     border-radius: 999px;
     padding: 0.2rem 0.6rem;
     letter-spacing: 0.06em;
   }
 
   h2 {
-    font-size: 2.6rem;
-    line-height: 1.08;
-    font-weight: 800;
-    letter-spacing: -0.01em;
     margin: 0 0 1.1rem;
     color: #fff;
-
-    @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1.9rem;
-    }
   }
 
   p.lead {
-    font-size: 1.1rem;
-    line-height: 1.65;
-    color: #b3afa6;
+    font-size: ${({ theme }) => theme.fontSizes.md};
+    line-height: 1.7;
+    color: ${({ theme }) => theme.colors.inkInvertedMuted};
     margin: 0 0 1.75rem;
     max-width: 30rem;
   }
@@ -100,10 +92,10 @@ const Points = styled.ul`
     align-items: center;
     gap: 0.6rem;
     font-size: 0.95rem;
-    color: #d6d3cb;
+    color: rgba(250, 247, 242, 0.82);
   }
   svg {
-    color: #7bc39c;
+    color: ${({ theme }) => theme.colors.accentLight};
     font-size: 0.85rem;
     flex-shrink: 0;
   }
@@ -119,15 +111,15 @@ const Primary = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  background: #f4f2ec;
-  color: #16181d;
+  background: ${({ theme }) => theme.colors.accent};
+  color: #fff;
   font-size: 1rem;
-  font-weight: 700;
-  padding: 0.9rem 1.6rem;
-  border-radius: ${({ theme }) => theme.borderRadius.pill};
+  font-weight: 600;
+  padding: 0.95rem 1.7rem;
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
   text-decoration: none;
-  transition: transform 0.12s ease, background 0.15s ease;
-  &:hover { background: #fff; }
+  transition: transform 0.12s ease, background ${({ theme }) => theme.transitions.default};
+  &:hover { background: ${({ theme }) => theme.colors.accentHover}; }
   &:active { transform: translateY(1px); }
 `
 
@@ -135,11 +127,11 @@ const Secondary = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: #d6d3cb;
+  color: rgba(250, 247, 242, 0.85);
   font-size: 1rem;
   font-weight: 600;
-  padding: 0.9rem 1.2rem;
-  border-radius: ${({ theme }) => theme.borderRadius.pill};
+  padding: 0.95rem 1.4rem;
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
   border: 1px solid rgba(255, 255, 255, 0.22);
   text-decoration: none;
   transition: background 0.15s ease, border-color 0.15s ease;
@@ -147,9 +139,9 @@ const Secondary = styled(Link)`
 `
 
 const Frame = styled.div`
-  border-radius: 16px;
+  border-radius: ${({ theme }) => theme.borderRadius.xl};
   overflow: hidden;
-  background: #f4f2ec;
+  background: ${({ theme }) => theme.colors.paper};
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45);
 
@@ -163,7 +155,7 @@ const FrameBar = styled.div`
   align-items: center;
   gap: 0.4rem;
   padding: 0.7rem 0.9rem;
-  background: #1b1e24;
+  background: ${({ theme }) => theme.colors.neutral[800]};
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 
   i {
@@ -177,8 +169,8 @@ const FrameBar = styled.div`
   i:nth-child(3) { background: #28c840; }
   span {
     margin-left: 0.6rem;
-    font-size: 0.78rem;
-    color: #8b877e;
+    font-size: ${({ theme }) => theme.fontSizes.xs};
+    color: ${({ theme }) => theme.colors.neutral[400]};
   }
 `
 
@@ -188,14 +180,14 @@ const Shot = styled.img`
   aspect-ratio: 16 / 11;
   object-fit: cover;
   object-position: center 42%;
-  background: #ece9e1;
+  background: ${({ theme }) => theme.colors.sunken};
 `
 
 export default function DesignerToolPromo() {
   const [ref, isVisible] = useIntersectionObserver({ threshold: 0.15 })
 
   return (
-    <Section>
+    <Section data-surface="dark">
       <Inner ref={ref} $visible={isVisible}>
         <Text>
           <div className="kicker"><span>Nyhet</span> Designverktøy i 3D</div>

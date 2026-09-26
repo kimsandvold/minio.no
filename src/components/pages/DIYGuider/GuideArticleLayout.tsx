@@ -16,7 +16,7 @@ import {
   guideTopics,
 } from '../../../data/byggeguider'
 
-const ACCENT = '#9c6b3f'
+const ACCENT = '#a8512c'
 const SITE_URL = 'https://minio.no'
 
 export interface ArticleSection {
@@ -36,8 +36,8 @@ interface GuideArticleLayoutProps {
 
 /* ---------- Header ---------- */
 const Header = styled.header`
-  background: linear-gradient(180deg, #fff 0%, ${({ theme }) => theme.colors.lightBg} 100%);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  background: linear-gradient(180deg, ${({ theme }) => theme.colors.surface} 0%, ${({ theme }) => theme.colors.paper} 100%);
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
   padding: 7rem 2rem 2.5rem;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -52,7 +52,7 @@ const Container = styled.div`
 
 const Breadcrumb = styled.nav`
   font-size: 0.85rem;
-  color: #888;
+  color: #7a6f61;
   margin-bottom: 1.25rem;
 
   a {
@@ -67,7 +67,7 @@ const Breadcrumb = styled.nav`
 
   span {
     margin: 0 0.5rem;
-    color: #bbb;
+    color: ${({ theme }) => theme.colors.neutral[400]};
   }
 `
 
@@ -111,7 +111,7 @@ const Meta = styled.div`
   gap: 0.45rem;
   margin-top: 1.25rem;
   font-size: 0.88rem;
-  color: #777;
+  color: #7a7065;
 
   svg {
     color: ${ACCENT};
@@ -150,7 +150,7 @@ const Toc = styled.aside`
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #999;
+    color: #7a6f61;
     margin-bottom: 0.85rem;
   }
 
@@ -168,7 +168,7 @@ const Toc = styled.aside`
     border-left: 2px solid transparent;
     font-size: 0.9rem;
     line-height: 1.35;
-    color: #777;
+    color: #7a7065;
     text-decoration: none;
     transition: color 0.2s ease, border-color 0.2s ease;
 
@@ -238,7 +238,7 @@ const AllGuides = styled.nav`
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: #999;
+    color: #7a6f61;
     margin-bottom: 1.1rem;
   }
 `
@@ -284,7 +284,7 @@ const RowText = styled.span`
 
   .status {
     font-size: 0.72rem;
-    color: #aaa;
+    color: #b3a797;
   }
 `
 
@@ -294,7 +294,7 @@ const RowLink = styled(Link)`
   transition: background 0.2s ease;
 
   ${RowNum} {
-    color: rgba(156, 107, 63, 0.55);
+    color: ${({ theme }) => theme.colors.accent};
     transition: color 0.2s ease;
   }
 
@@ -309,8 +309,8 @@ const RowLink = styled(Link)`
 
 const RowCurrent = styled.span`
   ${rowStyles}
-  background: rgba(156, 107, 63, 0.08);
-  border: 1px solid rgba(156, 107, 63, 0.25);
+  background: rgba(168, 81, 44, 0.08);
+  border: 1px solid rgba(168, 81, 44, 0.25);
 
   ${RowNum} {
     color: ${ACCENT};
@@ -335,7 +335,7 @@ const RowSoon = styled.span`
   }
 
   .name {
-    color: #aaa;
+    color: #b3a797;
   }
 `
 
@@ -384,7 +384,7 @@ const CtaButtons = styled.div`
     color: #fff;
 
     &:hover {
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
   }
 
@@ -409,7 +409,7 @@ export const P = styled.p`
     color: ${ACCENT};
     font-weight: 600;
     text-decoration: underline;
-    text-decoration-color: rgba(156, 107, 63, 0.35);
+    text-decoration-color: rgba(168, 81, 44, 0.35);
     text-decoration-thickness: 1px;
     text-underline-offset: 0.18em;
     transition: text-decoration-color 0.2s ease, color 0.2s ease;
@@ -487,7 +487,7 @@ const StyledDataTable = styled.table`
   caption {
     text-align: left;
     font-size: 0.85rem;
-    color: #888;
+    color: #7a6f61;
     margin-bottom: 0.5rem;
   }
 
@@ -505,7 +505,7 @@ const StyledDataTable = styled.table`
   }
 
   td {
-    color: #444;
+    color: #4a433c;
   }
 
   /* On phones, keep cells readable on one line and scroll instead of
@@ -528,15 +528,15 @@ const CalloutBox = styled.div<{ $variant: 'tip' | 'warn' }>`
   margin: 0 0 1.4rem;
   border-radius: 12px;
   border: 1px solid
-    ${({ $variant }) => ($variant === 'warn' ? 'rgba(196, 120, 40, 0.3)' : 'rgba(156, 107, 63, 0.25)')};
+    ${({ $variant }) => ($variant === 'warn' ? 'rgba(176, 124, 29, 0.32)' : 'rgba(168, 81, 44, 0.26)')};
   background: ${({ $variant }) =>
-    $variant === 'warn' ? 'rgba(232, 156, 60, 0.08)' : 'rgba(156, 107, 63, 0.06)'};
+    $variant === 'warn' ? 'rgba(176, 124, 29, 0.07)' : 'rgba(168, 81, 44, 0.06)'};
 
   > svg {
     flex-shrink: 0;
     margin-top: 0.15rem;
     font-size: 1.1rem;
-    color: ${({ $variant }) => ($variant === 'warn' ? '#c47828' : ACCENT)};
+    color: ${({ $variant }) => ($variant === 'warn' ? '#b07c1d' : ACCENT)};
   }
 
   .body {
@@ -550,7 +550,7 @@ const CalloutBox = styled.div<{ $variant: 'tip' | 'warn' }>`
     p {
       font-size: 1rem;
       line-height: 1.6;
-      color: #444;
+      color: #4a433c;
       margin: 0;
     }
 
@@ -558,7 +558,7 @@ const CalloutBox = styled.div<{ $variant: 'tip' | 'warn' }>`
       color: ${ACCENT};
       font-weight: 600;
       text-decoration: underline;
-      text-decoration-color: rgba(156, 107, 63, 0.35);
+      text-decoration-color: rgba(168, 81, 44, 0.35);
       text-decoration-thickness: 1px;
       text-underline-offset: 0.18em;
       transition: text-decoration-color 0.2s ease, color 0.2s ease;

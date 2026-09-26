@@ -83,10 +83,10 @@ function RissBlokk({ riss, scale }: { riss: Riss2D; scale: number }) {
             const stroke = f.tynn ? tw : sw
             const dash = f.dashed ? `${sw * 3} ${sw * 2}` : undefined
             if (f.type === 'rect') {
-              return <rect key={i} x={f.x} y={f.y} width={f.w} height={f.h} fill="none" stroke="#161616" strokeWidth={stroke} strokeDasharray={dash} strokeLinejoin="miter" />
+              return <rect key={i} x={f.x} y={f.y} width={f.w} height={f.h} fill="none" stroke="#181614" strokeWidth={stroke} strokeDasharray={dash} strokeLinejoin="miter" />
             }
             const pts = (f.points ?? []).map((p) => p.join(',')).join(' ')
-            return <polyline key={i} points={pts} fill="none" stroke={f.tynn ? '#5c5c5c' : '#161616'} strokeWidth={stroke} strokeDasharray={dash} strokeLinejoin="miter" strokeLinecap="square" />
+            return <polyline key={i} points={pts} fill="none" stroke={f.tynn ? '#5c5c5c' : '#181614'} strokeWidth={stroke} strokeDasharray={dash} strokeLinejoin="miter" strokeLinecap="square" />
           })}
           <g>
             {riss.maal.map((m, i) => (
@@ -113,10 +113,10 @@ function Malestokk({ scale }: { scale: number }) {
     <ScaleWrap>
       <svg width={px(seg * n) + pad * 2} height={22}>
         {Array.from({ length: n }).map((_, i) => (
-          <rect key={i} x={pad + px(seg * i)} y={4} width={px(seg)} height={7} fill={i % 2 ? '#161616' : '#fff'} stroke="#161616" strokeWidth={0.8} />
+          <rect key={i} x={pad + px(seg * i)} y={4} width={px(seg)} height={7} fill={i % 2 ? '#181614' : '#fff'} stroke="#181614" strokeWidth={0.8} />
         ))}
         {Array.from({ length: n + 1 }).map((_, i) => (
-          <text key={i} x={pad + px(seg * i)} y={20} fontSize={8} textAnchor={i === 0 ? 'start' : i === n ? 'end' : 'middle'} fill="#161616">{seg * i}</text>
+          <text key={i} x={pad + px(seg * i)} y={20} fontSize={8} textAnchor={i === 0 ? 'start' : i === n ? 'end' : 'middle'} fill="#181614">{seg * i}</text>
         ))}
       </svg>
       <span>cm</span>
@@ -237,7 +237,7 @@ const Sheet = styled.div`
 const Frame = styled.div`
   box-sizing: border-box;
   height: 100%;
-  border: 2px solid #161616;
+  border: 2px solid #181614;
   padding: 1.2rem 1.2rem 0;
   display: flex;
   flex-direction: column;
@@ -266,20 +266,20 @@ const Blokk = styled.figure`
 
 const BlokkNavn = styled.figcaption`
   padding-top: 0.35rem;
-  border-top: 1.5px solid #161616;
+  border-top: 1.5px solid #181614;
   min-width: 120px;
   text-align: center;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #161616;
+  color: #181614;
 `
 
 const TitleBlock = styled.div`
   display: flex;
   align-items: stretch;
-  border-top: 2px solid #161616;
+  border-top: 2px solid #181614;
   font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
 `
 
@@ -289,7 +289,7 @@ const Brand = styled.div`
   justify-content: center;
   gap: 0.35rem;
   padding: 0.7rem 1rem;
-  border-right: 1px solid #161616;
+  border-right: 1px solid #181614;
   img { height: 20px; width: auto; object-fit: contain; }
   em { font-style: normal; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: #626a74; }
 `
@@ -308,7 +308,7 @@ const Row = styled.div`
   border-right: 1px solid rgba(0, 0, 0, 0.15);
   border-bottom: 1px solid rgba(0, 0, 0, 0.15);
   b { font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: #7c848e; font-weight: 700; }
-  span { font-size: 0.82rem; font-weight: 700; color: #161616; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  span { font-size: 0.82rem; font-weight: 700; color: #181614; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 `
 
 const ScaleCell = styled.div`
@@ -316,7 +316,7 @@ const ScaleCell = styled.div`
   flex-direction: column;
   gap: 0.3rem;
   padding: 0.5rem 0.9rem;
-  border-left: 1px solid #161616;
+  border-left: 1px solid #181614;
   b { font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: #7c848e; font-weight: 700; }
 `
 

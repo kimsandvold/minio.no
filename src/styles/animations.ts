@@ -44,10 +44,10 @@ export const heroZoom = keyframes`
 
 export const promoPulse = keyframes`
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(29, 161, 242, 0.4);
+    box-shadow: 0 0 0 0 rgba(168, 81, 44, 0.4);
   }
   50% {
-    box-shadow: 0 0 20px 5px rgba(29, 161, 242, 0.2);
+    box-shadow: 0 0 20px 5px rgba(168, 81, 44, 0.2);
   }
 `
 

@@ -7,10 +7,11 @@ const Notification = styled.div<{ $visible: boolean }>`
   bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
-  background: ${({ theme }) => theme.colors.accent};
+  background: ${({ theme }) => theme.colors.ink};
   color: #fff;
   padding: 1rem 2rem;
   border-radius: ${({ theme }) => theme.borderRadius.medium};
+  box-shadow: ${({ theme }) => theme.shadows.lg};
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   z-index: ${({ theme }) => theme.zIndex.modal};
   animation: ${slideUp} 0.3s ease;

@@ -61,6 +61,13 @@ function HoldBtn({ action, title, icon, className }: { action: () => void; title
   )
 }
 
+/**
+ * Leveranser et produkt tilbyr når templatet ikke sier noe. Materialpakke er
+ * bevisst utelatt: vi kapper ikke virke som egen vare, og må slås på per
+ * produkt der det faktisk gjelder.
+ */
+const STANDARD_LEVERANSER: Array<'ferdig' | 'materialpakke' | 'plan'> = ['ferdig', 'plan']
+
 // Testkode som låser opp alle leveranser uten betaling. Finnes KUN når
 // VITE_DESIGNER_DEMO_CODE er satt (lokal .env og test-deploys). I produksjon
 // er variabelen utelatt, og demo-opplåsing er da helt død kode.
@@ -824,9 +831,10 @@ export default function DesignerPage() {
   const prisFerdig = materialPris + arbeidPris
   const prisPakke = materialPris + kappPris
 
-  // Tilbyr templatet denne leveransen? Utelatt liste = alle tilbys.
+  // Tilbyr templatet denne leveransen? Utelatt liste = STANDARD_LEVERANSER;
+  // materialpakke må slås på eksplisitt (se ProductTemplate.leveranser).
   const kanLeveranse = (id: 'ferdig' | 'materialpakke' | 'plan') =>
-    !template?.leveranser || template.leveranser.includes(id)
+    (template?.leveranser ?? STANDARD_LEVERANSER).includes(id)
 
   // Areal + mål til oppsummeringskortet. Templatet rapporterer brukervendte
   // verdier via BOM; `bounds` (kamera-geometri) er kun fallback.
@@ -1037,6 +1045,7 @@ export default function DesignerPage() {
                           </SliderTop>
                           <input
                             type="range"
+                            aria-label={d.label}
                             min={d.min}
                             max={d.max}
                             step={d.step}
@@ -1180,17 +1189,15 @@ export default function DesignerPage() {
                     ? (<><OptPrice><span>fra</span>{formatKr(prisFerdig)}</OptPrice><OptArrow><Icon name="faChevronRight" /></OptArrow></>)
                     : (<OptNa>Ikke tilgjengelig</OptNa>)}
                 </OptRow>
-                <OptRow
-                  $disabled={!kanLeveranse('materialpakke')}
-                  disabled={!kanLeveranse('materialpakke')}
-                  onClick={() => kanLeveranse('materialpakke') && setForesporsel('materialpakke')}
-                >
-                  <OptIco><Icon name="faBoxOpen" /></OptIco>
-                  <OptText><b>Forespør materialpakke</b><em>Vi kapper, du bygger selv</em></OptText>
-                  {kanLeveranse('materialpakke')
-                    ? (<><OptPrice><span>fra</span>{formatKr(prisPakke)}</OptPrice><OptArrow><Icon name="faChevronRight" /></OptArrow></>)
-                    : (<OptNa>Ikke tilgjengelig</OptNa>)}
-                </OptRow>
+                {/* Vises kun for produkter som faktisk tilbyr kapping. */}
+                {kanLeveranse('materialpakke') && (
+                  <OptRow onClick={() => setForesporsel('materialpakke')}>
+                    <OptIco><Icon name="faBoxOpen" /></OptIco>
+                    <OptText><b>Forespør materialpakke</b><em>Vi kapper, du bygger selv</em></OptText>
+                    <OptPrice><span>fra</span>{formatKr(prisPakke)}</OptPrice>
+                    <OptArrow><Icon name="faChevronRight" /></OptArrow>
+                  </OptRow>
+                )}
                 {gratis ? (
                   <OptRow $highlight onClick={() => exportPlan('pdf')}>
                     <OptBadge>Gratis</OptBadge>
@@ -1317,17 +1324,17 @@ export default function DesignerPage() {
                   </Toggle>
                   <Slider>
                     <SliderTop><span>Lysstyrke</span><b>{Math.round(lightIntensity * 100)} %</b></SliderTop>
-                    <input type="range" min={0.4} max={1.8} step={0.05} value={lightIntensity}
+                    <input type="range" aria-label="Lysstyrke" min={0.4} max={1.8} step={0.05} value={lightIntensity}
                       onChange={(e) => setLightIntensity(Number(e.target.value))} />
                   </Slider>
                   <Slider>
                     <SliderTop><span>Sol – retning</span><b>{sunAzimuth}°</b></SliderTop>
-                    <input type="range" min={0} max={360} step={5} value={sunAzimuth}
+                    <input type="range" aria-label="Sol – retning" min={0} max={360} step={5} value={sunAzimuth}
                       onChange={(e) => setSunAzimuth(Number(e.target.value))} />
                   </Slider>
                   <Slider>
                     <SliderTop><span>Sol – høyde</span><b>{sunElevation}°</b></SliderTop>
-                    <input type="range" min={8} max={85} step={1} value={sunElevation}
+                    <input type="range" aria-label="Sol – høyde" min={8} max={85} step={1} value={sunElevation}
                       onChange={(e) => setSunElevation(Number(e.target.value))} />
                   </Slider>
                 </ViewSettingsMenu>
@@ -1756,7 +1763,7 @@ export default function DesignerPage() {
  * aksentene den hadde: oliven grønn, blå på ferdige oppsett, gult merke.
  *
  *   Mørke flater   #101216 (shell/topplinje) · #15171b · #1a1d21 (panel)
- *                  #212429 (hevet) · #262a30 (kort) · #333841 (kant)
+ *                  #212429 (hevet) · #262a30 (kort) · #2e2a26841 (kant)
  *   Lyse flater    #f7f8fa · #f2f4f7 · #eaedf1 · #e7eaef (kant) · #dce0e6
  *   Tekst          #1a1d21 · #626a74 (dempet) · #838b95 (svak)
  *   Aksent indigo  #4b53b0 (mørk/hover) · #5b63c4 (PRIMÆR fyll)
@@ -2359,7 +2366,7 @@ const Toolbar = styled.div`
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 6px 22px rgba(60, 42, 28, 0.14);
 `
 
 // Vertikal glass-navigasjonsstripe på høyre kant: bytt vinkel, roter og zoom
@@ -2377,7 +2384,7 @@ const NavRail = styled.div`
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 6px 22px rgba(60, 42, 28, 0.14);
   z-index: 5;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -2440,7 +2447,7 @@ const ViewMenu = styled.div`
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 28px rgba(60, 42, 28, 0.18);
 `
 
 const ViewMenuItem = styled.button`
@@ -2600,7 +2607,7 @@ const ModeBar = styled.div`
   backdrop-filter: blur(8px);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 999px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 10px rgba(60, 42, 28, 0.08);
 `
 
 const ModeDivider = styled.div`
@@ -2681,7 +2688,7 @@ const SplitSlider = styled.div`
   backdrop-filter: blur(8px);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 10px rgba(60, 42, 28, 0.08);
   color: #2b2d31;
   svg { font-size: 13px; opacity: 0.7; }
   input[type='range'] { width: 190px; accent-color: #2f7bf6; cursor: pointer; }
@@ -2696,7 +2703,7 @@ const ModeBtn = styled.button<{ $active: boolean }>`
   border: none;
   border-radius: 999px;
   background: ${({ $active }) => ($active ? '#5b63c4' : 'transparent')};
-  color: ${({ $active }) => ($active ? '#fff' : '#333841')};
+  color: ${({ $active }) => ($active ? '#fff' : '#2e2a26841')};
   font-size: 0.78rem;
   font-weight: 600;
   white-space: nowrap;
@@ -2877,7 +2884,7 @@ const PartDrawing = styled.div`
 const PartBar = styled.div`
   background: linear-gradient(180deg, #c69a63, #a9834f);
   border: 1px solid #8a6a3f;
-  border-radius: 4px;
+  border-radius: 8px;
   flex-shrink: 0;
 `
 
@@ -2901,7 +2908,7 @@ const PartDims = styled.div`
   gap: 1.25rem;
   margin-top: 0.6rem;
   font-size: 0.82rem;
-  color: #333841;
+  color: #2e2a26841;
   font-variant-numeric: tabular-nums;
 
   b { font-weight: 600; color: #838b95; margin-right: 0.3rem; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; }
@@ -3230,7 +3237,7 @@ const Slider = styled.div`
     -webkit-appearance: none;
     appearance: none;
     height: 4px;
-    border-radius: 4px;
+    border-radius: 8px;
     background: var(--ui-rail, rgba(255,255,255,0.12));
     outline: none;
     cursor: pointer;
@@ -3427,7 +3434,7 @@ const RailScroll = styled.div`
   padding: 0.85rem 0;
 
   &::-webkit-scrollbar { width: 8px; }
-  &::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
+  &::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 8px; }
 
   @media (max-width: 820px) { min-width: 0; }
 `
@@ -3445,7 +3452,7 @@ const RailActions = styled.div`
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 
   &::-webkit-scrollbar { width: 8px; }
-  &::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
+  &::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 8px; }
 
   @media (max-width: 820px) { min-width: 0; max-height: none; }
 `
@@ -3550,7 +3557,7 @@ const FrozenBanner = styled.div`
   padding: 0.9rem 1rem;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.96);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 30px rgba(60, 42, 28, 0.18);
   backdrop-filter: blur(6px);
 `
 
@@ -3809,7 +3816,7 @@ const ViewSettings = styled.div`
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 6px 22px rgba(60, 42, 28, 0.14);
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     bottom: 10px;
@@ -3832,7 +3839,7 @@ const ViewSettingsMenu = styled.div`
   backdrop-filter: blur(10px);
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 12px;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 10px 28px rgba(60, 42, 28, 0.18);
   --ui-text: #262a30;
   --ui-muted: #7c848e;
   --ui-track-on: #262a30;

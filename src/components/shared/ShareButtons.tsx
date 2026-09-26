@@ -6,47 +6,39 @@ import { getShareUrl, shareFacebook, copyToClipboard } from '../../utils/share'
 
 const HeroGroup = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: 0.6rem;
   justify-content: center;
   flex-wrap: wrap;
 `
 
 const HeroBtn = styled.button`
-  padding: 0.65rem 1.5rem;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 8px;
+  padding: 0.4rem 0.9rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: ${({ theme }) => theme.borderRadius.pill};
   cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  letter-spacing: -0.005em;
+  transition:
+    background-color ${({ theme }) => theme.transitions.default},
+    border-color ${({ theme }) => theme.transitions.default},
+    color ${({ theme }) => theme.transitions.default};
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #fff;
+  gap: 0.45rem;
+  color: rgba(255, 255, 255, 0.72);
 
   &:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
-    transform: translateY(-2px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  }
-  &:active {
-    transform: translateY(0);
-  }
-
-  &:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.4);
+    color: #fff;
   }
 
   @media (max-width: 768px) {
-    padding: 0.55rem 1.25rem;
-    font-size: 0.85rem;
+    padding: 0.35rem 0.8rem;
+    font-size: 0.8rem;
   }
 `
 
@@ -60,14 +52,14 @@ const SectionGroup = styled.div`
 const SectionBtn = styled.button<{ $platform: 'facebook' | 'instagram' }>`
   padding: 0.75rem 1.75rem;
   background: #fff;
-  border: 2px solid;
-  border-radius: 8px;
+  border: 1px solid;
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
   cursor: pointer;
+  font-family: inherit;
   font-weight: 600;
   font-size: 0.95rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
+  letter-spacing: -0.005em;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -77,12 +69,12 @@ const SectionBtn = styled.button<{ $platform: 'facebook' | 'instagram' }>`
       ? `
     color: #3b5998;
     border-color: #3b5998;
-    &:hover { background: #3b5998; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(59, 89, 152, 0.3); }
+    &:hover { background: #3b5998; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59, 89, 152, 0.3); }
   `
       : `
-    color: #e4405f;
-    border-color: #e4405f;
-    &:hover { background: #e4405f; color: #fff; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(228, 64, 95, 0.3); }
+    color: #c9344f;
+    border-color: #c9344f;
+    &:hover { background: #c9344f; color: #fff; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(228, 64, 95, 0.3); }
   `}
   &:active {
     transform: translateY(0);
@@ -101,7 +93,7 @@ const SectionBtn = styled.button<{ $platform: 'facebook' | 'instagram' }>`
 
 const SmallBtn = styled.button<{ $platform: 'facebook' | 'instagram' }>`
   background: #fff;
-  border: 1.5px solid #ddd;
+  border: 1.5px solid #ddd4c7;
   width: 28px;
   height: 28px;
   border-radius: 50%;
@@ -110,7 +102,7 @@ const SmallBtn = styled.button<{ $platform: 'facebook' | 'instagram' }>`
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0;
 
   ${({ $platform }) =>
@@ -120,8 +112,8 @@ const SmallBtn = styled.button<{ $platform: 'facebook' | 'instagram' }>`
     &:hover { background: #3b5998; color: #fff; transform: scale(1.1); box-shadow: 0 3px 8px rgba(59, 89, 152, 0.3); }
   `
       : `
-    color: #e4405f; border-color: #e4405f;
-    &:hover { background: #e4405f; color: #fff; transform: scale(1.1); box-shadow: 0 3px 8px rgba(228, 64, 95, 0.3); }
+    color: #c9344f; border-color: #c9344f;
+    &:hover { background: #c9344f; color: #fff; transform: scale(1.1); box-shadow: 0 3px 8px rgba(228, 64, 95, 0.3); }
   `}
 
   &:focus-visible {
@@ -152,11 +144,11 @@ export default function ShareButtons({ variant, context = '' }: ShareButtonsProp
     return (
       <>
         <HeroGroup>
-          <HeroBtn onClick={() => handleShare('facebook')}>
-            <Icon name="faFacebookF" /> Del på Facebook
+          <HeroBtn onClick={() => handleShare('facebook')} aria-label="Del på Facebook">
+            <Icon name="faFacebookF" /> Del
           </HeroBtn>
-          <HeroBtn onClick={() => handleShare('instagram')}>
-            <Icon name="faInstagram" /> Del på Instagram
+          <HeroBtn onClick={() => handleShare('instagram')} aria-label="Kopier lenke for Instagram">
+            <Icon name="faInstagram" /> Kopier lenke
           </HeroBtn>
         </HeroGroup>
         {notification && <CopyNotification message={notification} onDone={() => setNotification(null)} />}
@@ -167,7 +159,7 @@ export default function ShareButtons({ variant, context = '' }: ShareButtonsProp
   if (variant === 'small') {
     return (
       <>
-        <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #e0e0e0' }}>
+        <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.5rem', paddingBottom: '1rem', borderBottom: '1px solid #e8e1d7' }}>
           <SmallBtn $platform="facebook" onClick={() => handleShare('facebook')} aria-label="Del på Facebook" title="Del på Facebook">
             <Icon name="faFacebookF" />
           </SmallBtn>

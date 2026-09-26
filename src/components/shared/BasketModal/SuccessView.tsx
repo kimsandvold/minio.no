@@ -14,7 +14,7 @@ const Message = styled.div`
 
 const SuccessIcon = styled.div`
   font-size: 4rem;
-  color: #4caf50;
+  color: #3f7d52;
   margin-bottom: 1rem;
 `
 
@@ -25,14 +25,14 @@ const Title = styled.h4`
 `
 
 const Text = styled.p`
-  color: #666;
+  color: #6b6157;
   line-height: 1.6;
   margin-bottom: 0.5rem;
 `
 
 const Footer = styled.div`
   padding: 1.5rem;
-  border-top: 2px solid #e0e0e0;
+  border-top: 2px solid #e8e1d7;
   flex-shrink: 0;
 `
 
@@ -45,9 +45,9 @@ const CloseBtn = styled.button`
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
-  &:hover { background: #333; }
+  &:hover { background: #2e2a26; }
 `
 
 interface SuccessViewProps {
@@ -63,8 +63,8 @@ export default function SuccessView({ onClose }: SuccessViewProps) {
             <Icon name="faCheckCircle" />
           </SuccessIcon>
           <Title>Forespørselen er sendt!</Title>
-          <Text>Vi har mottatt din forespørsel og vil kontakte deg snart.</Text>
-          <Text>Du vil motta en bekreftelse på e-post.</Text>
+          <Text>Vi har mottatt forespørselen din.</Text>
+          <Text>Vi svarer på e-posten du oppga, vanligvis innen 24 timer.</Text>
         </Message>
       </Body>
       <Footer>

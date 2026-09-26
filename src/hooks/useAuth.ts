@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { onAuthStateChanged, signInWithPopup, signOut, type User } from 'firebase/auth'
 import { auth, googleProvider } from '../lib/firebase'
-import { subscribeToNewsletter } from '../services/newsletterService'
 
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL ?? ''
 
@@ -18,10 +17,9 @@ export function useAuth() {
   }, [])
 
   const login = useCallback(async () => {
-    const result = await signInWithPopup(auth, googleProvider)
-    if (result.user.email) {
-      subscribeToNewsletter(result.user.email)
-    }
+    // Bevisst ingen nyhetsbrev-påmelding her: innlogging er ikke samtykke til
+    // markedsføring. Påmelding skjer kun der brukeren aktivt haker av.
+    await signInWithPopup(auth, googleProvider)
   }, [])
 
   const logout = useCallback(async () => {

@@ -4,8 +4,8 @@ import Icon from '../../shared/Icon'
 
 const Toolbar = styled.div`
   width: 52px;
-  background: #1a1a1a;
-  border-right: 1px solid #333;
+  background: #1c1a18;
+  border-right: 1px solid #2e2a26;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -18,7 +18,7 @@ const Toolbar = styled.div`
     flex-direction: row;
     justify-content: center;
     border-right: none;
-    border-top: 1px solid #333;
+    border-top: 1px solid #2e2a26;
     padding: 0.4rem 0.5rem;
     order: 3;
   }
@@ -29,8 +29,8 @@ const ToolButton = styled.button<{ $active?: boolean }>`
   height: 40px;
   border: none;
   border-radius: 8px;
-  background: ${({ $active }) => ($active ? '#1da1f2' : 'transparent')};
-  color: ${({ $active }) => ($active ? '#fff' : '#aaa')};
+  background: ${({ $active }) => ($active ? '#a8512c' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#fff' : '#b3a797')};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -40,7 +40,7 @@ const ToolButton = styled.button<{ $active?: boolean }>`
   position: relative;
 
   &:hover {
-    background: ${({ $active }) => ($active ? '#1da1f2' : '#333')};
+    background: ${({ $active }) => ($active ? '#a8512c' : '#2e2a26')};
     color: #fff;
   }
 `
@@ -48,7 +48,7 @@ const ToolButton = styled.button<{ $active?: boolean }>`
 const Divider = styled.div`
   width: 28px;
   height: 1px;
-  background: #333;
+  background: #2e2a26;
   margin: 4px 0;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {

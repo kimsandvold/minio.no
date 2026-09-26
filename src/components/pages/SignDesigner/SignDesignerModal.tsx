@@ -54,18 +54,18 @@ const LoginCard = styled.div`
 
 const LoginCardIcon = styled.div`
   font-size: 1.8rem;
-  color: #666;
+  color: #6b6157;
 `
 
 const LoginCardTitle = styled.h2`
-  color: #202020;
+  color: #1c1a18;
   font-size: 1.25rem;
   font-weight: 600;
   margin: 0;
 `
 
 const LoginCardText = styled.p`
-  color: #666;
+  color: #6b6157;
   font-size: 0.9rem;
   margin: 0;
   line-height: 1.5;
@@ -75,12 +75,12 @@ const LoginCardClose = styled.button`
   margin-top: 0.5rem;
   background: none;
   border: none;
-  color: #999;
+  color: #7a6f61;
   font-size: 0.85rem;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
 
-  &:hover { color: #333; }
+  &:hover { color: #2e2a26; }
 `
 
 const EditorLayout = styled.div`

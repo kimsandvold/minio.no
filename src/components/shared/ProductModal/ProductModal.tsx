@@ -10,8 +10,8 @@ const ModalBody = styled.div`
   padding: 2rem 2rem 1rem;
 
   &::-webkit-scrollbar { width: 8px; }
-  &::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-  &::-webkit-scrollbar-thumb { background: ${({ theme }) => theme.colors.accent}; border-radius: 4px; }
+  &::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 8px; }
+  &::-webkit-scrollbar-thumb { background: ${({ theme }) => theme.colors.accent}; border-radius: 8px; }
   &::-webkit-scrollbar-thumb:hover { background: ${({ theme }) => theme.colors.accentHover}; }
 
   h3 {
@@ -45,7 +45,7 @@ const ModalFooter = styled.div`
   flex-shrink: 0;
   padding: 1.5rem 2rem;
   background: #fff;
-  border-top: 2px solid #e0e0e0;
+  border-top: 2px solid #e8e1d7;
   border-radius: 0 0 16px 16px;
   display: flex;
   align-items: center;
@@ -77,7 +77,7 @@ const RegularPrice = styled.div`
   margin-top: 0.15rem;
   font-size: 0.8rem;
   font-weight: 400;
-  color: #888;
+  color: #7a6f61;
   text-decoration: line-through;
 `
 
@@ -86,18 +86,17 @@ const ContactButton = styled.button`
   background-color: ${({ theme }) => theme.colors.textDark};
   color: #fff;
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
+  letter-spacing: -0.005em;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   white-space: nowrap;
 
   &:hover {
-    background-color: #333;
-    transform: translateY(-2px);
+    background-color: #2e2a26;
+    transform: translateY(-1px);
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {

@@ -549,6 +549,7 @@ export const plantekasse: ProductTemplate<PlantekasseConfig> = {
   tilgjengelig: true,
   gratis: true,
   fraPris: 199,
+  leveranser: ['ferdig', 'plan'],
   defaultConfig: {
     shape: 'rect',
     bredde: 80,

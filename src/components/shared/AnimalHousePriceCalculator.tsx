@@ -49,7 +49,7 @@ const ButtonGroup = styled.div`
   display: flex;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid #e0e0e0;
+  border: 1px solid #e8e1d7;
   margin-bottom: 1rem;
 `
 
@@ -58,19 +58,19 @@ const ButtonGroupBtn = styled.button<{ $active: boolean }>`
   padding: 0.45rem 0.3rem;
   font-size: 0.72rem;
   border: none;
-  background: ${({ $active }) => ($active ? '#333' : '#fff')};
-  color: ${({ $active }) => ($active ? '#fff' : '#555')};
+  background: ${({ $active }) => ($active ? '#2e2a26' : '#fff')};
+  color: ${({ $active }) => ($active ? '#fff' : '#5a5249')};
   cursor: pointer;
   transition: all 0.15s;
   font-weight: ${({ $active }) => ($active ? '600' : '400')};
   white-space: nowrap;
 
   &:not(:last-child) {
-    border-right: 1px solid #e0e0e0;
+    border-right: 1px solid #e8e1d7;
   }
 
   &:hover {
-    background: ${({ $active }) => ($active ? '#333' : '#f5f5f5')};
+    background: ${({ $active }) => ($active ? '#2e2a26' : '#f4efe8')};
   }
 `
 
@@ -96,7 +96,7 @@ const StyledSlider = styled.input`
   width: 100%;
   height: 6px;
   border-radius: 3px;
-  background: #e0e0e0;
+  background: #e8e1d7;
   outline: none;
   appearance: none;
   cursor: pointer;
@@ -143,7 +143,7 @@ const StyledSlider = styled.input`
 const VolumeDisplay = styled.div`
   text-align: center;
   font-size: 0.75rem;
-  color: #888;
+  color: #7a6f61;
   margin-top: 0.25rem;
 `
 
@@ -158,7 +158,7 @@ const PriceSection = styled.div`
 const PriceTotalLabel = styled.div`
   font-size: 0.75rem;
   font-weight: 500;
-  color: #888;
+  color: #7a6f61;
   margin-bottom: 0.15rem;
 `
 
@@ -186,14 +186,14 @@ const AddToBasketButton = styled.button`
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(60, 42, 28, 0.2);
   }
 `
 
 const Note = styled.p`
   font-size: 0.65rem;
-  color: #999;
+  color: #7a6f61;
   text-align: center;
   margin-top: 0.75rem;
   margin-bottom: 0;
@@ -210,7 +210,7 @@ const Toast = styled.div<{ $visible: boolean }>`
   border-radius: ${({ theme }) => theme.borderRadius.pill};
   font-size: 0.85rem;
   font-weight: 600;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px rgba(60, 42, 28, 0.2);
   z-index: ${({ theme }) => theme.zIndex.modal};
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   transition: opacity 0.3s, transform 0.3s;
@@ -287,17 +287,17 @@ export default function AnimalHousePriceCalculator(props: AnimalHousePricingProp
       <SectionTitle>Innvendig mål</SectionTitle>
       <SliderGroup>
         <SliderLabel><span>Bredde</span><SliderValue>{width} cm</SliderValue></SliderLabel>
-        <StyledSlider type="range" min={wR.min} max={wR.max} step={1} value={width}
+        <StyledSlider type="range" aria-label="Bredde" min={wR.min} max={wR.max} step={1} value={width}
           onChange={(e) => setWidth(parseInt(e.target.value, 10))} />
       </SliderGroup>
       <SliderGroup>
         <SliderLabel><span>Dybde</span><SliderValue>{depth} cm</SliderValue></SliderLabel>
-        <StyledSlider type="range" min={dR.min} max={dR.max} step={1} value={depth}
+        <StyledSlider type="range" aria-label="Dybde" min={dR.min} max={dR.max} step={1} value={depth}
           onChange={(e) => setDepth(parseInt(e.target.value, 10))} />
       </SliderGroup>
       <SliderGroup>
         <SliderLabel><span>Høyde</span><SliderValue>{height} cm</SliderValue></SliderLabel>
-        <StyledSlider type="range" min={hR.min} max={hR.max} step={1} value={height}
+        <StyledSlider type="range" aria-label="Høyde" min={hR.min} max={hR.max} step={1} value={height}
           onChange={(e) => setHeight(parseInt(e.target.value, 10))} />
       </SliderGroup>
       <VolumeDisplay>Volum: {(volumeCm3 / 1000000).toFixed(3)} m³</VolumeDisplay>
@@ -307,7 +307,7 @@ export default function AnimalHousePriceCalculator(props: AnimalHousePricingProp
           <SectionTitle>Stolpehøyde</SectionTitle>
           <SliderGroup>
             <SliderLabel><span>Høyde til gulv</span><SliderValue>{poleHeight} cm</SliderValue></SliderLabel>
-            <StyledSlider type="range" min={pole.min} max={pole.max} step={1} value={poleHeight}
+            <StyledSlider type="range" aria-label="Høyde til gulv" min={pole.min} max={pole.max} step={1} value={poleHeight}
               onChange={(e) => setPoleHeight(parseInt(e.target.value, 10))} />
           </SliderGroup>
         </>

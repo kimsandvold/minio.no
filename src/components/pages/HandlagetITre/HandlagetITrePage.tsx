@@ -173,7 +173,7 @@ const SectionHead = styled.div`
 
   p {
     font-size: 0.98rem;
-    color: #666;
+    color: #6b6157;
     margin: 0;
   }
 `
@@ -199,12 +199,12 @@ const Card = styled(Link)`
   overflow: hidden;
   text-decoration: none;
   color: inherit;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 12px rgba(60, 42, 28, 0.07);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 12px 30px rgba(60, 42, 28, 0.12);
   }
 
   .img {
@@ -235,7 +235,7 @@ const Card = styled(Link)`
     p {
       font-size: 0.88rem;
       line-height: 1.55;
-      color: #555;
+      color: #5a5249;
       margin: 0 0 0.85rem;
       flex: 1;
     }
@@ -284,7 +284,7 @@ const CrossCard = styled(Link)`
 
   &:hover {
     border-color: #d4d4d4;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 
   svg {
@@ -304,7 +304,7 @@ const CrossCard = styled(Link)`
 
     span {
       font-size: 0.9rem;
-      color: #666;
+      color: #6b6157;
       line-height: 1.5;
     }
   }

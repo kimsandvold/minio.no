@@ -186,12 +186,12 @@ const Card = styled.div`
   padding: 1.75rem;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 20px rgba(60, 42, 28, 0.04);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 14px 36px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 14px 36px rgba(60, 42, 28, 0.12);
   }
 
   &:hover .thumb img {
@@ -203,7 +203,7 @@ const Card = styled.div`
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #999;
+    color: #7a6f61;
     margin-bottom: 0.4rem;
   }
 
@@ -216,7 +216,7 @@ const Card = styled.div`
   .ingress {
     font-size: 0.92rem;
     line-height: 1.6;
-    color: #555;
+    color: #5a5249;
     margin: 0 0 1.25rem;
   }
 `
@@ -256,7 +256,7 @@ const Punkter = styled.ul`
     align-items: center;
     gap: 0.6rem;
     font-size: 0.88rem;
-    color: #444;
+    color: #4a433c;
 
     svg {
       color: ${({ theme }) => theme.colors.textDark};
@@ -280,7 +280,7 @@ const DesignerBtn = styled(Link)`
   border-radius: ${({ theme }) => theme.borderRadius.pill};
   text-decoration: none;
   transition: background 0.2s ease, transform 0.15s ease;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 14px rgba(60, 42, 28, 0.12);
 
   .ny {
     font-size: 0.7rem;
@@ -298,9 +298,49 @@ const DesignerBtn = styled(Link)`
   }
 `
 
+const VerktoyBanner = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem 1.5rem;
+  max-width: ${({ theme }) => theme.spacing.containerMax};
+  margin: 0 auto 2.5rem;
+  padding: 1.1rem 1.4rem;
+  background: ${({ theme }) => theme.colors.accentSoft};
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
+
+  span {
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    line-height: 1.6;
+    color: ${({ theme }) => theme.colors.accentInk};
+  }
+
+  strong {
+    font-weight: 600;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    font-weight: 600;
+    color: ${({ theme }) => theme.colors.accent};
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.accentHover};
+      text-decoration: underline;
+      text-underline-offset: 0.2em;
+    }
+  }
+`
+
 export default function PlanleggerePage() {
   useSEO({
-    title: 'Planleggere – tegn terrasse, pergola og carport i 3D | Minio',
+    title: 'Planleggere – tegn terrasse, pergola, carport og utekjøkken i 3D | Minio',
     description:
       'Minios gratis 3D-planleggere for uteprosjekter i tre. Tegn terrasse, veranda, platting, pergola eller carport i 3D, og få komplett materialliste med prisestimat og PDF.',
     keywords:
@@ -316,14 +356,24 @@ export default function PlanleggerePage() {
       <PageTransition>
         <main id="main-content">
           <Hero>
-            <h1>Planleggere</h1>
+            <h1>Planlegg uteprosjektet ditt</h1>
             <p>
-              Tegn uteprosjektet ditt i 3D, se det ferdig før du bygger, og få en komplett materialliste med
-              veiledende prisestimat – helt gratis.
+              Start her hvis du vet hva du skal bygge. Hver side forklarer hva prosjektet
+              krever — og tar deg rett inn i designverktøyet, der du tegner i 3D med dine
+              egne mål og får materialliste og prisestimat. Helt gratis.
             </p>
           </Hero>
 
           <Content>
+            <VerktoyBanner>
+              <span>
+                <strong>Alle prosjektene tegnes i det samme designverktøyet.</strong> Vil du
+                heller velge produkt der med én gang?
+              </span>
+              <Link to="/designverktoy">
+                Åpne designverktøyet <Icon name="faArrowRight" />
+              </Link>
+            </VerktoyBanner>
             <Grid>
               {PLANLEGGERE.map((p) => (
                 <Card key={p.slug}>

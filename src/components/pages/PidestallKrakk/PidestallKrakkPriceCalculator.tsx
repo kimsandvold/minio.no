@@ -54,7 +54,7 @@ const SectionTitle = styled.h3`
 
 const SlotIntro = styled.p`
   font-size: 0.72rem;
-  color: #666;
+  color: #6b6157;
   line-height: 1.45;
   margin: 0 0 0.6rem;
 `
@@ -74,9 +74,9 @@ const SlotBox = styled.button<{ $active: boolean; $focused: boolean }>`
     ${({ $focused, $active, theme }) =>
       $focused ? theme.colors.textDark : $active ? '#bdbdbd' : '#d8d8d8'};
   background: ${({ $focused, $active, theme }) =>
-    $focused ? theme.colors.textDark : $active ? '#fff' : '#fafafa'};
+    $focused ? theme.colors.textDark : $active ? '#fff' : '#faf7f2'};
   color: ${({ $focused, $active }) =>
-    $focused ? '#fff' : $active ? '#222' : '#9a9a9a'};
+    $focused ? '#fff' : $active ? '#242019' : '#9a9a9a'};
   border-radius: ${({ theme }) => theme.borderRadius.small};
   cursor: pointer;
   display: flex;
@@ -129,9 +129,9 @@ const SlotDiscount = styled.span<{ $focused: boolean; $active: boolean }>`
   padding: 0.05rem 0.3rem;
   border-radius: 999px;
   color: ${({ $focused, $active }) =>
-    $focused ? '#fff' : $active ? '#fff' : '#666'};
+    $focused ? '#fff' : $active ? '#fff' : '#6b6157'};
   background: ${({ $focused, $active }) =>
-    $focused ? '#2e7d32' : $active ? '#43a047' : '#e0e0e0'};
+    $focused ? '#2e7d32' : $active ? '#43a047' : '#e8e1d7'};
 `
 
 const FocusBadge = styled.div`
@@ -143,7 +143,7 @@ const FocusBadge = styled.div`
   background: #f4f4f4;
   border-radius: ${({ theme }) => theme.borderRadius.small};
   font-size: 0.75rem;
-  color: #444;
+  color: #4a433c;
   margin: 0.25rem 0 0.75rem;
 
   strong {
@@ -173,7 +173,7 @@ const StyledSlider = styled.input`
   width: 100%;
   height: 6px;
   border-radius: 3px;
-  background: #e0e0e0;
+  background: #e8e1d7;
   outline: none;
   appearance: none;
   cursor: pointer;
@@ -202,7 +202,7 @@ const StyledSlider = styled.input`
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     height: 8px;
-    border-radius: 4px;
+    border-radius: 8px;
 
     &::-webkit-slider-thumb {
       width: 30px;
@@ -223,7 +223,7 @@ const CheckboxBox = styled.label<{ $checked?: boolean }>`
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 0.75rem;
-  border: 2px solid ${({ $checked, theme }) => ($checked ? theme.colors.textDark : '#e0e0e0')};
+  border: 2px solid ${({ $checked, theme }) => ($checked ? theme.colors.textDark : '#e8e1d7')};
   border-radius: ${({ theme }) => theme.borderRadius.small};
   cursor: pointer;
   font-size: 0.8rem;
@@ -238,7 +238,7 @@ const HiddenCheckbox = styled.input`
 const CheckMark = styled.span<{ $checked: boolean }>`
   width: 18px;
   height: 18px;
-  border: 2px solid ${({ $checked, theme }) => ($checked ? theme.colors.textDark : '#ccc')};
+  border: 2px solid ${({ $checked, theme }) => ($checked ? theme.colors.textDark : '#d6ccbe')};
   border-radius: 3px;
   display: flex;
   align-items: center;
@@ -253,9 +253,9 @@ const CheckMark = styled.span<{ $checked: boolean }>`
 const DeliveryDetails = styled.div`
   margin-top: 0.5rem;
   padding: 0.75rem;
-  background: #fafafa;
+  background: #faf7f2;
   border-radius: ${({ theme }) => theme.borderRadius.small};
-  border: 1px solid #e8e8e8;
+  border: 1px solid #eae3d9;
 `
 
 const InputGroup = styled.div`
@@ -283,7 +283,7 @@ const SearchIcon = styled.span`
   left: 0.5rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #aaa;
+  color: #b3a797;
   font-size: 0.75rem;
   pointer-events: none;
 `
@@ -292,7 +292,7 @@ const StyledInput = styled.input<{ $hasIcon?: boolean }>`
   width: 100%;
   padding: 0.45rem 0.6rem;
   padding-left: ${({ $hasIcon }) => ($hasIcon ? '1.8rem' : '0.6rem')};
-  border: 2px solid #e0e0e0;
+  border: 2px solid #e8e1d7;
   border-radius: ${({ theme }) => theme.borderRadius.small};
   font-size: 0.78rem;
   color: ${({ theme }) => theme.colors.textDark};
@@ -307,7 +307,7 @@ const StyledInput = styled.input<{ $hasIcon?: boolean }>`
 
 const InputNote = styled.div`
   font-size: 0.65rem;
-  color: #999;
+  color: #7a6f61;
   margin-top: 0.2rem;
 `
 
@@ -320,13 +320,13 @@ const StatusMessage = styled.div<{ $type?: 'success' | 'error' | 'warning' | 'in
   color: ${({ $type }) => {
     switch ($type) {
       case 'success':
-        return '#4caf50'
+        return '#3f7d52'
       case 'error':
-        return '#f44336'
+        return '#b3382f'
       case 'warning':
         return '#ff9800'
       default:
-        return '#888'
+        return '#7a6f61'
     }
   }};
 `
@@ -334,11 +334,11 @@ const StatusMessage = styled.div<{ $type?: 'success' | 'error' | 'warning' | 'in
 const WarningBox = styled.div`
   margin-top: 0.4rem;
   padding: 0.4rem 0.6rem;
-  background: #fff3e0;
-  border: 1px solid #ffcc80;
+  background: #f7e8de;
+  border: 1px solid #e0895f;
   border-radius: ${({ theme }) => theme.borderRadius.small};
   font-size: 0.7rem;
-  color: #e65100;
+  color: #a8512c;
   display: flex;
   align-items: center;
   gap: 0.3rem;
@@ -377,7 +377,7 @@ const RemoveSlotButton = styled.button`
   height: 22px;
   border: none;
   background: transparent;
-  color: #999;
+  color: #7a6f61;
   font-size: 0.75rem;
   cursor: pointer;
   border-radius: 50%;
@@ -405,7 +405,7 @@ const DiscountRow = styled(PriceRow)`
 const PriceTotalLabel = styled.div`
   font-size: 0.75rem;
   font-weight: 500;
-  color: #888;
+  color: #7a6f61;
   margin-bottom: 0.15rem;
 `
 
@@ -415,7 +415,7 @@ const PriceTotal = styled.div`
   color: ${({ theme }) => theme.colors.textDark};
   margin-top: 0.5rem;
   padding-top: 0.5rem;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid #e8e1d7;
 `
 
 
@@ -438,8 +438,8 @@ const AddToBasketButton = styled.button`
     box-shadow ${({ theme }) => theme.transitions.default};
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(60, 42, 28, 0.2);
   }
 
   &:active {
@@ -449,7 +449,7 @@ const AddToBasketButton = styled.button`
 
 const Note = styled.p`
   font-size: 0.65rem;
-  color: #999;
+  color: #7a6f61;
   text-align: center;
   margin-top: 0.75rem;
   margin-bottom: 0;
@@ -466,7 +466,7 @@ const Toast = styled.div<{ $visible: boolean }>`
   border-radius: ${({ theme }) => theme.borderRadius.pill};
   font-size: 0.85rem;
   font-weight: 600;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 16px rgba(60, 42, 28, 0.2);
   z-index: ${({ theme }) => theme.zIndex.modal};
   opacity: ${({ $visible }) => ($visible ? 1 : 0)};
   transition: opacity 0.3s, transform 0.3s;
@@ -722,7 +722,7 @@ export default function PidestallKrakkPriceCalculator({ basePrice, onConfigChang
           <SliderValue>{focusedSlot.width} cm</SliderValue>
         </SliderLabel>
         <StyledSlider
-          type="range"
+          type="range" aria-label="Bredde"
           min={30}
           max={60}
           step={5}
@@ -736,7 +736,7 @@ export default function PidestallKrakkPriceCalculator({ basePrice, onConfigChang
           <SliderValue>{focusedSlot.depth} cm</SliderValue>
         </SliderLabel>
         <StyledSlider
-          type="range"
+          type="range" aria-label="Dybde"
           min={30}
           max={60}
           step={5}
@@ -750,7 +750,7 @@ export default function PidestallKrakkPriceCalculator({ basePrice, onConfigChang
           <SliderValue>{focusedSlot.height} cm</SliderValue>
         </SliderLabel>
         <StyledSlider
-          type="range"
+          type="range" aria-label="Høyde"
           min={30}
           max={80}
           step={5}

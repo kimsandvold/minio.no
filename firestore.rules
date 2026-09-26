@@ -75,6 +75,32 @@ service cloud.firestore {
                           && request.auth.token.email == 'kimsandvold@gmail.com';
     }
 
+    // Prosjektidéer fra /prosjekthjelp. Skjemaet er lav-terskel-inngangen til
+    // nettverket og krever ingen innlogging, så create tillates uten auth –
+    // men bare med nøyaktig disse feltene, med størrelsesgrenser og status
+    // 'ny'. Ingen andre enn admin kan lese eller endre noe; dialogen videre
+    // går på e-post.
+    match /prosjektIdeer/{id} {
+      allow create: if request.resource.data.keys().hasOnly(
+                         ['navn', 'epost', 'sted', 'prosjektType', 'melding', 'status', 'createdAt'])
+                    && request.resource.data.navn is string
+                    && request.resource.data.navn.size() > 0
+                    && request.resource.data.navn.size() <= 120
+                    && request.resource.data.epost is string
+                    && request.resource.data.epost.size() >= 5
+                    && request.resource.data.epost.size() <= 200
+                    && request.resource.data.sted is string
+                    && request.resource.data.sted.size() <= 120
+                    && request.resource.data.prosjektType is string
+                    && request.resource.data.prosjektType.size() <= 60
+                    && request.resource.data.melding is string
+                    && request.resource.data.melding.size() >= 10
+                    && request.resource.data.melding.size() <= 4000
+                    && request.resource.data.status == 'ny';
+      allow read, update: if request.auth != null
+                          && request.auth.token.email == 'kimsandvold@gmail.com';
+    }
+
     match /polls/{pollId} {
       allow read: if true;
       allow write: if request.auth != null

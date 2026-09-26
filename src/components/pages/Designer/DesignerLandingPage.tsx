@@ -243,12 +243,12 @@ const Card = styled(Link)`
   border: 1px solid #ececec;
   text-decoration: none;
   color: inherit;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 20px rgba(60, 42, 28, 0.04);
   transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.2s ease;
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.13);
+    box-shadow: 0 18px 40px rgba(60, 42, 28, 0.13);
     border-color: #dce0e6;
   }
   &:hover .thumb img { transform: scale(1.05); }

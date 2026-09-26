@@ -9,6 +9,7 @@ import PageTransition from '../../shared/PageTransition'
 import AnimatedBlock from '../../shared/AnimatedBlock'
 import { useSEO } from '../../../hooks/useSEO'
 import ContactForm from '../../sections/Contact/ContactForm'
+import Leveringskart from '../../shared/Leveringskart/Leveringskart'
 import ShareButtons from '../../shared/ShareButtons'
 import Icon from '../../shared/Icon'
 
@@ -67,9 +68,10 @@ const Container = styled.div`
 `
 
 const Intro = styled.p`
-  font-size: 1.05rem;
+  font-size: ${({ theme }) => theme.fontSizes.md};
   line-height: 1.8;
-  color: #444;
+  color: ${({ theme }) => theme.colors.inkMuted};
+  max-width: ${({ theme }) => theme.spacing.proseMax};
   margin-bottom: 2.5rem;
 `
 
@@ -89,7 +91,7 @@ const FormSection = styled.div`
   background: #fff;
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(60, 42, 28, 0.06);
 
   h2 {
     font-size: 1.5rem;
@@ -100,7 +102,7 @@ const FormSection = styled.div`
 
   & > p {
     font-size: 0.9rem;
-    color: #888;
+    color: #7a6f61;
     margin: 0 0 0.5rem;
   }
 
@@ -124,7 +126,7 @@ const InfoCard = styled.div`
   background: #fff;
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(60, 42, 28, 0.06);
 
   h3 {
     font-size: 1.15rem;
@@ -167,9 +169,8 @@ const InfoText = styled.div`
     display: block;
     font-size: 0.78rem;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: #999;
+    letter-spacing: -0.005em;
+    color: #7a6f61;
     margin-bottom: 0.15rem;
   }
 
@@ -211,10 +212,10 @@ const SocialLink = styled.a<{ $platform: 'facebook' | 'instagram' }>`
   color: #fff;
 
   background: ${({ $platform }) =>
-    $platform === 'facebook' ? '#3b5998' : '#e4405f'};
+    $platform === 'facebook' ? '#3b5998' : '#c9344f'};
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow: 0 4px 12px ${({ $platform }) =>
       $platform === 'facebook' ? 'rgba(59, 89, 152, 0.35)' : 'rgba(228, 64, 95, 0.35)'};
   }
@@ -228,18 +229,29 @@ const ShareCard = styled.div`
   background: #fff;
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(60, 42, 28, 0.06);
   text-align: center;
 
   p {
     font-size: 0.9rem;
-    color: #666;
+    color: #6b6157;
     margin: 0 0 1rem;
     line-height: 1.5;
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     padding: 1.5rem;
+  }
+`
+
+const KartSeksjon = styled.div`
+  margin-top: 4rem;
+  padding-top: 4rem;
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    margin-top: 2.5rem;
+    padding-top: 2.5rem;
   }
 `
 
@@ -263,7 +275,7 @@ const FaqHeader = styled.div`
 
   p {
     font-size: 0.95rem;
-    color: #888;
+    color: #7a6f61;
     margin: 0;
   }
 `
@@ -277,7 +289,7 @@ const FaqList = styled.div`
 const FaqItem = styled.div`
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 12px rgba(60, 42, 28, 0.05);
   overflow: hidden;
 `
 
@@ -315,7 +327,7 @@ const FaqQuestion = styled.button<{ $open: boolean }>`
     flex-shrink: 0;
     margin-left: 1rem;
     font-size: 0.75rem;
-    color: ${({ $open, theme }) => $open ? theme.colors.accent : '#aaa'};
+    color: ${({ $open, theme }) => $open ? theme.colors.accent : '#b3a797'};
     transition: color 0.2s;
   }
 `
@@ -332,7 +344,7 @@ const FaqAnswer = styled.div<{ $open: boolean }>`
   p {
     font-size: 0.92rem;
     line-height: 1.7;
-    color: #555;
+    color: #5a5249;
     margin: 0;
     padding: 0 2rem 1.5rem;
   }
@@ -490,6 +502,11 @@ export default function KontaktPage() {
                   </Sidebar>
                 </AnimatedBlock>
               </Grid>
+              <AnimatedBlock>
+                <KartSeksjon>
+                  <Leveringskart />
+                </KartSeksjon>
+              </AnimatedBlock>
               <AnimatedBlock>
                 <FaqSection>
                   <FaqHeader>

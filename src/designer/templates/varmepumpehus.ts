@@ -775,6 +775,7 @@ export const varmepumpehus: ProductTemplate<VarmepumpehusConfig> = {
   bilde: '/images/products/varmepumpehus-3d.webp',
   tilgjengelig: true,
   fraPris: 199,
+  leveranser: ['ferdig', 'plan'],
   defaultConfig: {
     kvalitet: 'standard',
     bredde: 90,

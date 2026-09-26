@@ -67,13 +67,19 @@ const Container = styled.div`
   margin: 0 auto;
 `
 
+const StepsHeading = styled.h2`
+  font-size: ${({ theme }) => theme.fontSizes['2xl']};
+  margin: 0 0 2rem;
+`
+
 const Intro = styled.div`
   margin-bottom: 3rem;
 
   p {
-    font-size: 1.05rem;
+    font-size: ${({ theme }) => theme.fontSizes.md};
     line-height: 1.8;
-    color: #444;
+    color: ${({ theme }) => theme.colors.inkMuted};
+    max-width: ${({ theme }) => theme.spacing.proseMax};
   }
 `
 
@@ -105,7 +111,7 @@ const ServicesSection = styled.div`
   & > p {
     font-size: 1.05rem;
     line-height: 1.7;
-    color: #555;
+    color: #5a5249;
   }
 `
 
@@ -141,7 +147,7 @@ const Cta = styled.div`
   p {
     font-size: 1rem;
     margin-bottom: 1.5rem;
-    color: #555;
+    color: #5a5249;
   }
 `
 
@@ -151,18 +157,17 @@ const ContactButton = styled.a`
   background-color: ${({ theme }) => theme.colors.textDark};
   color: #fff;
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  letter-spacing: -0.005em;
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background-color: #333;
-    transform: translateY(-2px);
+    background-color: #2e2a26;
+    transform: translateY(-1px);
   }
 `
 
@@ -192,6 +197,7 @@ export default function ProsessPage() {
                   </p>
                 </Intro>
               </AnimatedBlock>
+              <StepsHeading>Prosessen steg for steg</StepsHeading>
               <Steps>
                 {processSteps.map((step, i) => (
                   <AnimatedBlock key={step.number} delay={i * 100}>

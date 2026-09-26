@@ -565,7 +565,7 @@ export const utekjokken: ProductTemplate<UtekjokkenConfig> = {
   bilde: '/images/products/utekjokken-3d.webp',
   tilgjengelig: true,
   fraPris: 349,
-  // Materialpakke tilbys ikke for utekjøkken – kun forespør bygging + byggeplan.
+  // Materialpakke tilbys ikke – bygging og byggeplan.
   leveranser: ['ferdig', 'plan'],
   defaultConfig: {
     form: 'rett',

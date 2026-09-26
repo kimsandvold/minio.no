@@ -7,6 +7,12 @@ interface SplideCarouselProps {
   options?: Options
   children: ReactNode[]
   className?: string
+  /**
+   * Hva karusellen viser, f.eks. «Bilder av varmepumpehus». Brukes som
+   * tilgjengelig navn. Uten dette annonserer skjermlesere bare «karusell»,
+   * og flere karuseller på samme side blir umulige å skille fra hverandre.
+   */
+  label?: string
 }
 
 const defaultOptions: Options = {
@@ -19,11 +25,20 @@ const defaultOptions: Options = {
   arrows: true,
   pagination: true,
   speed: 800,
+  /**
+   * Splide setter `role="region"` som standard, noe som gjør hver karusell til
+   * et landemerke. Med flere navnløse karuseller på samme side blir
+   * landemerkelista ubrukelig — `group` gir samme semantikk uten støyen.
+   */
+  role: 'group',
 }
 
-export default function SplideCarousel({ options, children, className }: SplideCarouselProps) {
+export default function SplideCarousel({ options, children, className, label }: SplideCarouselProps) {
   return (
-    <Splide options={{ ...defaultOptions, ...options }} className={className}>
+    <Splide
+      options={{ ...defaultOptions, ...(label ? { label } : {}), ...options }}
+      className={className}
+    >
       {children.map((child, i) => (
         <SplideSlide key={i}>{child}</SplideSlide>
       ))}

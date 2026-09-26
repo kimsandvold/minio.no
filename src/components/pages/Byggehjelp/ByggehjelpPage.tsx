@@ -219,7 +219,7 @@ const Card = styled.div`
   padding: 1.9rem;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 20px rgba(60, 42, 28, 0.04);
 
   .ikon {
     font-size: 1.6rem;
@@ -237,7 +237,7 @@ const Card = styled.div`
   .ingress {
     font-size: 0.96rem;
     line-height: 1.6;
-    color: #555;
+    color: #5a5249;
     margin: 0 0 1.1rem;
   }
 
@@ -255,7 +255,7 @@ const Card = styled.div`
     align-items: flex-start;
     gap: 0.55rem;
     font-size: 0.9rem;
-    color: #444;
+    color: #4a433c;
     line-height: 1.45;
 
     svg {
@@ -338,7 +338,7 @@ const Step = styled.div`
 
   span {
     font-size: 0.92rem;
-    color: #666;
+    color: #6b6157;
     line-height: 1.55;
   }
 `
@@ -348,7 +348,7 @@ const CrossNote = styled.p`
   margin: 2.5rem auto 0;
   text-align: center;
   font-size: 1rem;
-  color: #555;
+  color: #5a5249;
   line-height: 1.6;
 
   a {
@@ -397,6 +397,9 @@ export default function ByggehjelpPage() {
                 Vil du prøve selv først? Start med de gratis{' '}
                 <Link to="/byggeguider">byggeguidene</Link> og{' '}
                 <Link to="/planleggere">planleggerne</Link> – og hent meg inn når du står fast.
+                Har du bare en løs idé, kan du{' '}
+                <Link to="/prosjekthjelp">fortelle om prosjektet ditt</Link> og få et gratis,
+                uforpliktende svar.
               </p>
             </IntroInner>
           </Intro>

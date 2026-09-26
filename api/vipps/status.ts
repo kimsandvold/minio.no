@@ -67,7 +67,7 @@ export default postHandler(async (req: VercelRequest, uid: string) => {
         tilgangskode,
         leveranser: VARER_FOR_KJOP[vare],
         belopKr,
-        designUrl: `${SITE_URL}/designverktoy/${p.templateId}`,
+        designUrl: `${SITE_URL}/designverktoy/${p.templateId}?design=${prosjektId}`,
       })
     } else {
       console.warn(`[vipps] Ingen e-postadresse på bruker ${uid} – tilgangskode ikke sendt.`)

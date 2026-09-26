@@ -27,13 +27,35 @@ const FormGroup = styled.div`
 
   input {
     padding: 0.75rem;
-    border: 2px solid #e0e0e0;
-    border-radius: 4px;
+    border: 2px solid #e8e1d7;
+    border-radius: 8px;
     font-size: 0.95rem;
     font-family: inherit;
     transition: border-color 0.3s ease;
 
     &:focus { outline: none; border-color: ${({ theme }) => theme.colors.textDark}; }
+  }
+`
+
+const Samtykke = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  margin: 0 0 1.25rem;
+
+  input {
+    margin-top: 0.15rem;
+    width: 1rem;
+    height: 1rem;
+    flex-shrink: 0;
+    accent-color: ${({ theme }) => theme.colors.accent};
+  }
+
+  label {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: ${({ theme }) => theme.colors.inkMuted};
+    font-weight: 400;
   }
 `
 
@@ -49,14 +71,14 @@ const Summary = styled.div`
 
 const SummaryItem = styled.div`
   padding: 0.5rem 0;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid #e8e1d7;
   &:last-child { border-bottom: none; }
 `
 
 const SummaryTotal = styled.div`
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 2px solid #ccc;
+  border-top: 2px solid #d6ccbe;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -68,14 +90,14 @@ const SummaryTotal = styled.div`
 const VatNote = styled.div`
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #ddd;
+  border-top: 1px solid #ddd4c7;
   font-size: 0.85rem;
-  color: #666;
+  color: #6b6157;
 `
 
 const Footer = styled.div`
   padding: 1.5rem;
-  border-top: 2px solid #e0e0e0;
+  border-top: 2px solid #e8e1d7;
   flex-shrink: 0;
 `
 
@@ -86,14 +108,14 @@ const SubmitBtn = styled.button`
   gap: 0.5rem;
   width: 100%;
   padding: 1rem;
-  background: #4caf50;
+  background: #3f7d52;
   color: white;
   border: none;
   border-radius: 8px;
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover { background: #45a049; }
   &:disabled { opacity: 0.7; cursor: not-allowed; }
@@ -113,6 +135,7 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
   const [email, setEmail] = useState(user?.email ?? '')
   const [phone, setPhone] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [nyhetsbrev, setNyhetsbrev] = useState(false)
   const totalSum = items.reduce((sum, item) => sum + parsePrice(item.price) * item.quantity, 0)
 
   const formatBasketForEmail = () => {
@@ -192,7 +215,7 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
       formData.append('name', name)
       formData.append('email', email)
       formData.append('phone', phone)
-      formData.append('subject', 'Ny forespørsel fra handlekurv')
+      formData.append('_subject', `Ny forespørsel fra handlekurv – ${name}`)
       formData.append('message', formatBasketForEmail())
 
       const response = await fetch(FORMSPREE_ENDPOINT, {
@@ -202,8 +225,8 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
       })
 
       if (response.ok) {
-        // 3. Auto-subscribe to newsletter (best-effort)
-        subscribeToNewsletter(email)
+        // 3. Nyhetsbrev kun når kunden har huket av (best-effort).
+        if (nyhetsbrev) subscribeToNewsletter(email)
 
         clearBasket()
         onSuccess()
@@ -233,6 +256,17 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
             <label htmlFor="checkout-phone">Telefon *</label>
             <input type="tel" id="checkout-phone" required placeholder="123 45 678" value={phone} onChange={e => setPhone(e.target.value)} />
           </FormGroup>
+          <Samtykke>
+            <input
+              type="checkbox"
+              id="checkout-nyhetsbrev"
+              checked={nyhetsbrev}
+              onChange={(e) => setNyhetsbrev(e.target.checked)}
+            />
+            <label htmlFor="checkout-nyhetsbrev">
+              Ja, jeg vil ha nyhetsbrev fra Minio. Du kan melde deg av når som helst.
+            </label>
+          </Samtykke>
           <Summary>
             <p><strong>Du er i ferd med å sende forespørsel om:</strong></p>
             {items.map((item, i) => (
@@ -269,7 +303,7 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
                   <>
                     Skilt: Ja ({item.signWidthCm}&times;{item.signHeightCm} cm) — pris kommer separat<br />
                     {item.signDesignId && (
-                      <><a href={`/design/${item.signDesignId}`} target="_blank" rel="noopener noreferrer" style={{ color: '#1da1f2' }}>Se skiltdesign</a><br /></>
+                      <><a href={`/design/${item.signDesignId}`} target="_blank" rel="noopener noreferrer" style={{ color: '#a8512c' }}>Se skiltdesign</a><br /></>
                     )}
                   </>
                 )}

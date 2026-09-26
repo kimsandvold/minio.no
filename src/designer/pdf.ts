@@ -336,7 +336,7 @@ function buildPlanHtml(a: PlanArgs, forPrint: boolean): string {
   <p class="note">
     Byggeplan generert med designverktøyet på minio.no ut fra dine valgte mål. Mengder inkluderer 10&nbsp;% kapp/svinn.
     Priser er veiledende ca-priser – sjekk mot din lokale byggevarehandel. Kontroller alle mål mot faktisk trelast før innkjøp og bygging.
-    Kontakt Minio for ferdig materialpakke eller ferdig bygget prosjekt.
+    Kontakt Minio hvis du vil ha de mindre produktene bygget ferdig i stedet.
   </p>
 
   ${forPrint ? '<script>window.onload = function () { window.focus(); window.print(); };</script>' : ''}

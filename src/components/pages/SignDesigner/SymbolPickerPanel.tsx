@@ -4,8 +4,8 @@ import { designerSymbols, symbolCategories } from '../../../data/designerSymbols
 
 const Panel = styled.div`
   width: 220px;
-  background: #1a1a1a;
-  border-right: 1px solid #333;
+  background: #1c1a18;
+  border-right: 1px solid #2e2a26;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -15,7 +15,7 @@ const Panel = styled.div`
     width: 100%;
     max-height: 35vh;
     border-right: none;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #2e2a26;
   }
 `
 
@@ -24,24 +24,23 @@ const CategoryTabs = styled.div`
   flex-wrap: wrap;
   gap: 3px;
   padding: 0.5rem;
-  border-bottom: 1px solid #333;
+  border-bottom: 1px solid #2e2a26;
 `
 
 const CategoryTab = styled.button<{ $active: boolean }>`
   padding: 3px 7px;
-  border: 1px solid ${({ $active }) => ($active ? '#1da1f2' : '#444')};
-  border-radius: 4px;
-  background: ${({ $active }) => ($active ? '#1da1f233' : 'transparent')};
-  color: ${({ $active }) => ($active ? '#1da1f2' : '#aaa')};
+  border: 1px solid ${({ $active }) => ($active ? '#a8512c' : '#4a433c')};
+  border-radius: 8px;
+  background: ${({ $active }) => ($active ? '#a8512c33' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#a8512c' : '#b3a797')};
   cursor: pointer;
   font-size: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: -0.005em;
   white-space: nowrap;
 
   &:hover {
-    border-color: #1da1f2;
-    color: #ddd;
+    border-color: #a8512c;
+    color: #ddd4c7;
   }
 `
 
@@ -61,9 +60,9 @@ const Grid = styled.div`
 
 const Cell = styled.button<{ $active: boolean }>`
   aspect-ratio: 1;
-  border: 1px solid ${({ $active }) => ($active ? '#1da1f2' : '#333')};
-  border-radius: 4px;
-  background: ${({ $active }) => ($active ? '#1da1f220' : '#2a2a2a')};
+  border: 1px solid ${({ $active }) => ($active ? '#a8512c' : '#2e2a26')};
+  border-radius: 8px;
+  background: ${({ $active }) => ($active ? '#a8512c20' : '#2e2a26')};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -72,8 +71,8 @@ const Cell = styled.button<{ $active: boolean }>`
   transition: border-color 0.15s, background 0.15s;
 
   &:hover {
-    border-color: #1da1f2;
-    background: #333;
+    border-color: #a8512c;
+    background: #2e2a26;
   }
 
   svg {
@@ -112,7 +111,7 @@ export default function SymbolPickerPanel({ activeSymbolId, onSymbolChange }: Pr
             title={s.name}
             onClick={() => onSymbolChange(s.id)}
           >
-            <svg viewBox={s.viewBox} fill="none" stroke="#ddd" strokeWidth="2">
+            <svg viewBox={s.viewBox} fill="none" stroke="#ddd4c7" strokeWidth="2">
               <path d={s.path} />
             </svg>
           </Cell>

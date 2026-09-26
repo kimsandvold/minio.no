@@ -173,7 +173,7 @@ const Article = styled.article`
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     order: 2;
     padding-bottom: 2rem;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e8e1d7;
   }
 `
 
@@ -182,13 +182,13 @@ const Sidebar = styled.aside`
   height: fit-content;
   position: sticky;
   top: 100px;
-  border-left: 1px solid #e0e0e0;
+  border-left: 1px solid #e8e1d7;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     position: static;
     padding: 0 0 2rem;
     border-left: none;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e8e1d7;
     order: 1;
     width: 100%;
     max-width: 100%;

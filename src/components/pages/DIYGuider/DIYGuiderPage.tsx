@@ -20,7 +20,7 @@ import {
   topicMatchesQuery,
 } from '../../../data/byggeguider'
 
-const ACCENT = '#9c6b3f'
+const ACCENT = '#a8512c'
 const SITE_URL = 'https://minio.no'
 
 const Hero = styled.section`
@@ -137,7 +137,7 @@ const Intro = styled.div`
   p {
     font-size: 1.18rem;
     line-height: 1.7;
-    color: #555;
+    color: #5a5249;
 
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
       font-size: 1.04rem;
@@ -184,7 +184,7 @@ const ProjectsHeader = styled.header`
 
   p {
     font-size: 1.05rem;
-    color: #666;
+    color: #6b6157;
     line-height: 1.6;
   }
 `
@@ -208,12 +208,12 @@ const ProjectCard = styled(Link)`
   overflow: hidden;
   text-decoration: none;
   color: inherit;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 12px rgba(60, 42, 28, 0.05);
   transition: transform 0.28s ease, box-shadow 0.28s ease;
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 16px 38px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 16px 38px rgba(60, 42, 28, 0.12);
   }
 
   &:hover .go {
@@ -229,7 +229,7 @@ const ProjectThumb = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(156, 107, 63, 0.55);
+  color: ${({ theme }) => theme.colors.accent};
   font-size: 0.85rem;
   font-weight: 600;
   letter-spacing: 0.04em;
@@ -268,7 +268,7 @@ const ProjectBody = styled.div`
     gap: 1.25rem;
     margin: 1rem 0;
     font-size: 0.82rem;
-    color: #777;
+    color: #7a7065;
 
     strong {
       display: block;
@@ -276,7 +276,7 @@ const ProjectBody = styled.div`
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: #aaa;
+      color: #b3a797;
       margin-bottom: 0.15rem;
     }
   }
@@ -305,12 +305,12 @@ const Featured = styled(Link)`
   overflow: hidden;
   text-decoration: none;
   color: inherit;
-  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 6px 28px rgba(60, 42, 28, 0.07);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
     transform: translateY(-5px);
-    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.13);
+    box-shadow: 0 24px 56px rgba(60, 42, 28, 0.13);
   }
 
   &:hover .cta {
@@ -333,7 +333,7 @@ const FeaturedImg = styled.div`
   align-items: center;
   justify-content: center;
   min-height: 340px;
-  color: rgba(156, 107, 63, 0.55);
+  color: ${({ theme }) => theme.colors.accent};
   font-weight: 600;
 
   img {
@@ -423,7 +423,7 @@ const FeaturedFacts = styled.div`
     font-weight: 700;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #aaa;
+    color: #b3a797;
     margin-bottom: 0.2rem;
   }
 
@@ -474,7 +474,7 @@ const JourneyHeader = styled.header`
 
   p {
     font-size: 1.05rem;
-    color: #666;
+    color: #6b6157;
     line-height: 1.6;
   }
 `
@@ -513,13 +513,13 @@ const SearchInput = styled.input`
   &:focus {
     outline: none;
     border-color: ${ACCENT};
-    box-shadow: 0 0 0 3px rgba(156, 107, 63, 0.12);
+    box-shadow: 0 0 0 3px rgba(168, 81, 44, 0.12);
   }
 `
 
 const NoResults = styled.p`
   text-align: center;
-  color: #888;
+  color: #7a6f61;
   font-size: 1.02rem;
   padding: 2.5rem 0;
 
@@ -542,7 +542,7 @@ const PhaseLabel = styled.div`
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #999;
+  color: #7a6f61;
   margin-bottom: 1.1rem;
 
   &::after {
@@ -628,7 +628,7 @@ const TopicLink = styled(Link)`
   background: #fff;
   color: inherit;
   border: 1px solid rgba(0, 0, 0, 0.07);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(60, 42, 28, 0.04);
   transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
 
   &::before {
@@ -646,8 +646,8 @@ const TopicLink = styled(Link)`
 
   &:hover {
     transform: translateY(-5px);
-    border-color: rgba(156, 107, 63, 0.35);
-    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.11);
+    border-color: rgba(168, 81, 44, 0.35);
+    box-shadow: 0 18px 36px rgba(60, 42, 28, 0.11);
   }
 
   &:hover::before {

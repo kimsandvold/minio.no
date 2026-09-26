@@ -48,7 +48,7 @@ const Availability = styled.span`
   font-size: 0.72rem;
   font-weight: 500;
   color: #fff;
-  background: rgba(20, 20, 20, 0.78);
+  background: rgba(28, 26, 24, 0.78);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   padding: 0.35rem 0.7rem;
@@ -68,7 +68,8 @@ const Availability = styled.span`
   }
 `
 
-const CAMPAIGN_RED = '#c0392b'
+const BADGE_ACCENT = '#a8512c'
+const BADGE_ACCENT_HOVER = '#8e4223'
 
 const PILL_PADDING = '0.85rem 1.25rem'
 const PILL_PADDING_MOBILE = '0.75rem 1.1rem'
@@ -80,7 +81,7 @@ const Pill = styled.button`
   gap: 0.65rem;
   height: 48px;
   padding: ${PILL_PADDING};
-  background: ${CAMPAIGN_RED};
+  background: ${BADGE_ACCENT};
   color: #fff;
   border: 0;
   border-radius: 999px;
@@ -89,32 +90,15 @@ const Pill = styled.button`
   font-weight: 700;
   letter-spacing: 0.02em;
   cursor: pointer;
-  box-shadow: 0 8px 24px rgba(192, 57, 43, 0.45);
+  box-shadow: 0 8px 24px rgba(168, 81, 44, 0.45);
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  animation: contactPulse 2.4s ease-in-out infinite;
 
-  @keyframes contactPulse {
-    0%, 100% {
-      box-shadow: 0 8px 24px rgba(192, 57, 43, 0.45), 0 0 0 0 rgba(192, 57, 43, 0.5);
-    }
-    50% {
-      box-shadow: 0 8px 24px rgba(192, 57, 43, 0.45), 0 0 0 14px rgba(192, 57, 43, 0);
-    }
-  }
 
-  @keyframes contactPulseMobile {
-    0%, 100% {
-      box-shadow: 0 6px 18px rgba(192, 57, 43, 0.42), 0 0 0 0 rgba(192, 57, 43, 0.5);
-    }
-    50% {
-      box-shadow: 0 6px 18px rgba(192, 57, 43, 0.42), 0 0 0 8px rgba(192, 57, 43, 0);
-    }
-  }
 
   &:hover {
-    background: #a83423;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(192, 57, 43, 0.55);
+    background: ${BADGE_ACCENT_HOVER};
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px rgba(168, 81, 44, 0.55);
   }
 
   &:focus-visible {
@@ -130,7 +114,6 @@ const Pill = styled.button`
     height: 44px;
     font-size: 0.95rem;
     padding: ${PILL_PADDING_MOBILE};
-    animation: contactPulseMobile 2.4s ease-in-out infinite;
   }
 `
 
@@ -142,7 +125,7 @@ const ActionLink = styled.a`
   height: 48px;
   padding: ${PILL_PADDING};
   background: #fff;
-  color: ${CAMPAIGN_RED};
+  color: ${BADGE_ACCENT};
   border-radius: 999px;
   font-family: ${({ theme }) => theme.fonts.body};
   font-size: 1rem;
@@ -150,19 +133,19 @@ const ActionLink = styled.a`
   text-decoration: none;
   letter-spacing: 0.02em;
   white-space: nowrap;
-  box-shadow: 0 8px 24px rgba(192, 57, 43, 0.3), inset 0 0 0 2px ${CAMPAIGN_RED};
+  box-shadow: 0 8px 24px rgba(168, 81, 44, 0.3), inset 0 0 0 2px ${BADGE_ACCENT};
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
   animation: contactBadgeIn 0.25s ease;
 
   &:hover {
-    background: ${CAMPAIGN_RED};
+    background: ${BADGE_ACCENT};
     color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(192, 57, 43, 0.4), inset 0 0 0 2px ${CAMPAIGN_RED};
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px rgba(168, 81, 44, 0.4), inset 0 0 0 2px ${BADGE_ACCENT};
   }
 
   &:focus-visible {
-    outline: 2px solid ${CAMPAIGN_RED};
+    outline: 2px solid ${BADGE_ACCENT};
     outline-offset: 3px;
   }
 

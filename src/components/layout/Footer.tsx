@@ -4,20 +4,35 @@ import Icon from '../shared/Icon'
 import { company } from '../../data/company'
 
 const StyledFooter = styled.footer`
-  background-color: #1a1a1a;
-  color: ${({ theme }) => theme.colors.textLight};
-  padding: 2rem 1rem;
+  background-color: ${({ theme }) => theme.colors.deep};
+  color: ${({ theme }) => theme.colors.inkInverted};
+  padding: 4.5rem 1rem 0;
   text-align: center;
+  /* Hårfin varm topplinje skiller footeren fra seksjonen over uten hard kant. */
+  border-top: 1px solid rgba(224, 137, 95, 0.18);
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    padding: 3rem 1rem 0;
+  }
 `
 
 const FooterContainer = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 3rem;
+  grid-template-columns: 1.5fr 0.75fr 0.85fr 0.75fr 1.15fr;
+  gap: 3rem 2.25rem;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
   align-items: start;
+
+  @media (max-width: 1240px) {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2.5rem 2rem;
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr 1fr;
+  }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     grid-template-columns: 1fr;
@@ -55,16 +70,12 @@ const FooterAbout = styled.div`
   }
 `
 
-const FooterRight = styled.div`
+
+
+const SisteKolonne = styled.div`
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  align-items: flex-start;
-  text-align: left;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    gap: 1.5rem;
-  }
 `
 
 const FooterSection = styled.div`
@@ -78,8 +89,7 @@ const FooterSection = styled.div`
     font-weight: 600;
     color: ${({ theme }) => theme.colors.textLight};
     margin: 0;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: -0.005em;
 
     @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
       font-size: 0.95rem;
@@ -101,9 +111,9 @@ const ContactInfo = styled.div`
   a {
     color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
-    transition: color 0.3s ease;
+    transition: color ${({ theme }) => theme.transitions.default};
 
-    &:hover { color: ${({ theme }) => theme.colors.accent}; }
+    &:hover { color: ${({ theme }) => theme.colors.accentLight}; }
   }
 `
 
@@ -115,20 +125,17 @@ const Socials = styled.div`
   a {
     color: ${({ theme }) => theme.colors.textLight};
     font-size: 1.3rem;
-    transition: color 0.3s ease;
+    transition: color ${({ theme }) => theme.transitions.default};
     text-decoration: none;
 
-    &:hover { color: ${({ theme }) => theme.colors.accent}; }
+    &:hover { color: ${({ theme }) => theme.colors.accentLight}; }
 
-    &:focus-visible {
-      outline: 2px solid rgba(255, 255, 255, 0.8);
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
   }
 `
 
-const FooterNav = styled.nav`
+/* Bevisst <div>, ikke <nav>: hver gruppe er merket av sin <h4>, og flere
+   navnløse nav-landemerker gjør landemerkelista ubrukelig. */
+const FooterNav = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -138,18 +145,12 @@ const FooterNav = styled.nav`
     color: rgba(255, 255, 255, 0.75);
     text-decoration: none;
     font-size: 0.9rem;
-    transition: all 0.3s ease;
+    transition: color ${({ theme }) => theme.transitions.default};
 
     &:hover {
-      color: ${({ theme }) => theme.colors.accent};
-      transform: translateY(-2px);
+      color: ${({ theme }) => theme.colors.accentLight};
     }
 
-    &:focus-visible {
-      outline: 2px solid rgba(255, 255, 255, 0.8);
-      outline-offset: 2px;
-      border-radius: 4px;
-    }
   }
 `
 
@@ -157,39 +158,61 @@ const FooterLink = styled(Link)`
   color: rgba(255, 255, 255, 0.75);
   text-decoration: none;
   font-size: 0.9rem;
-  transition: all 0.3s ease;
+  transition: color ${({ theme }) => theme.transitions.default};
 
   &:hover {
-    color: ${({ theme }) => theme.colors.accent};
-    transform: translateY(-2px);
+    color: ${({ theme }) => theme.colors.accentLight};
   }
 
-  &:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.8);
-    outline-offset: 2px;
-    border-radius: 4px;
-  }
 `
 
 const NewsletterSection = styled.div`
+  width: 100%;
+
+  /* Skjema-iframen har egen innebygd marg; negativ venstremarg i stedet for
+     transform, slik at den ikke stikker utenfor på små skjermer. */
   iframe {
     display: block;
-    margin-left: auto;
-    margin-right: auto;
+    width: 100%;
     max-width: 100%;
-    transform: translateX(-35px);
+    margin-left: -35px;
+    border: 0;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    iframe { margin-left: -20px; }
+  }
+`
+
+const Bunnlenker = styled.nav`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.5rem;
+
+  a {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color ${({ theme }) => theme.transitions.default};
+
+    &:hover {
+      color: ${({ theme }) => theme.colors.accentLight};
+    }
   }
 `
 
 const Copyright = styled.div`
   width: 100%;
   max-width: 1200px;
-  margin: 3rem auto 0;
+  margin: 4rem auto 0;
   padding: 2rem;
   border-top: 1px solid rgba(255, 255, 255, 0.15);
   text-align: center;
   min-height: 80px;
   display: flex;
+  flex-direction: column;
+  gap: 1rem;
   align-items: center;
   justify-content: center;
 
@@ -207,7 +230,7 @@ const Copyright = styled.div`
 
 export default function Footer() {
   return (
-    <StyledFooter>
+    <StyledFooter data-surface="dark">
       <FooterContainer>
         <FooterAbout>
           <h3>Skreddersydde treprodukter – designet i 3D</h3>
@@ -216,39 +239,53 @@ export default function Footer() {
           <p>Hvert produkt lages på bestilling og tilpasses ditt uterom, med kvalitetsmaterialer og presist håndverk. Kort vei fra idé til ferdig resultat – og tett oppfølging hele veien.</p>
         </FooterAbout>
 
-        <FooterRight>
-          <FooterSection>
-            <h4>Kontakt</h4>
-            <ContactInfo>
-              <p>Minio</p>
-              <p>Org.nr {company.orgNr}</p>
-              <Socials>
-                <a href="https://www.facebook.com/profile.php?id=61576010648640&locale=nb_NO" target="_blank" rel="noopener noreferrer" aria-label="Facebook (åpnes i nytt vindu)">
-                  <Icon name="faFacebookF" />
-                </a>
-                <a href="https://www.instagram.com/minio2624" target="_blank" rel="noopener noreferrer" aria-label="Instagram (åpnes i nytt vindu)">
-                  <Icon name="faInstagram" />
-                </a>
-              </Socials>
-            </ContactInfo>
-          </FooterSection>
 
+        <FooterSection>
+          <h4>Bygg selv</h4>
+          <FooterNav>
+            <FooterLink to="/designverktoy">Designverktøy i 3D</FooterLink>
+            <FooterLink to="/planleggere">Planleggere</FooterLink>
+            <FooterLink to="/byggeguider">Byggeguider</FooterLink>
+            <FooterLink to="/produkter">Produkter</FooterLink>
+          </FooterNav>
+        </FooterSection>
+
+        <FooterSection>
+          <h4>Vi hjelper deg</h4>
+          <FooterNav>
+            <FooterLink to="/tjenester">Alle tjenester</FooterLink>
+            <FooterLink to="/prosjekthjelp">Prosjekthjelp – fortell om idéen din</FooterLink>
+            <FooterLink to="/3d-design">3D-design</FooterLink>
+            <FooterLink to="/byggehjelp">Byggehjelp</FooterLink>
+            <FooterLink to="/skilt-og-gravering">Skilt og gravering</FooterLink>
+          </FooterNav>
+        </FooterSection>
+
+        <FooterSection>
+          <h4>Om Minio</h4>
+          <FooterNav>
+            <FooterLink to="/handlaget-i-tre">Håndlaget i tre</FooterLink>
+            <FooterLink to="/slik-jobber-vi">Slik jobber vi</FooterLink>
+            <FooterLink to="/kontakt">Kontakt</FooterLink>
+          </FooterNav>
+        </FooterSection>
+
+        <SisteKolonne>
           <FooterSection>
-            <h4>Hurtiglenker</h4>
-            <FooterNav>
-              <FooterLink to="/">Hjem</FooterLink>
-              <FooterLink to="/produkter">Produkter</FooterLink>
-              <FooterLink to="/handlaget-i-tre">Håndlaget i tre</FooterLink>
-              <FooterLink to="/byggehjelp">Byggehjelp</FooterLink>
-              <FooterLink to="/3d-design">3D-design</FooterLink>
-              <FooterLink to="/slik-jobber-vi">Slik jobber vi</FooterLink>
-              <FooterLink to="/kontakt">Kontakt</FooterLink>
-              <FooterLink to="/underholdning">Underholdning</FooterLink>
-              <FooterLink to="/spill-av-leah-noelle">Spill av Leah Noelle</FooterLink>
-              <FooterLink to="/salgsbetingelser">Salgsbetingelser</FooterLink>
-              <FooterLink to="/personvern">Personvern</FooterLink>
-            </FooterNav>
-          </FooterSection>
+          <h4>Kontakt</h4>
+          <ContactInfo>
+            <p>Minio</p>
+            <p>Org.nr {company.orgNr}</p>
+            <Socials>
+              <a href="https://www.facebook.com/profile.php?id=61576010648640&locale=nb_NO" target="_blank" rel="noopener noreferrer" aria-label="Facebook (åpnes i nytt vindu)">
+                <Icon name="faFacebookF" />
+              </a>
+              <a href="https://www.instagram.com/minio2624" target="_blank" rel="noopener noreferrer" aria-label="Instagram (åpnes i nytt vindu)">
+                <Icon name="faInstagram" />
+              </a>
+            </Socials>
+          </ContactInfo>
+        </FooterSection>
 
           <NewsletterSection>
             <FooterSection>
@@ -264,10 +301,17 @@ export default function Footer() {
               />
             </FooterSection>
           </NewsletterSection>
-        </FooterRight>
+        </SisteKolonne>
+
       </FooterContainer>
 
       <Copyright>
+        <Bunnlenker aria-label="Juridisk og øvrig">
+          <Link to="/salgsbetingelser">Salgsbetingelser</Link>
+          <Link to="/personvern">Personvern</Link>
+          <Link to="/underholdning">Underholdning</Link>
+          <Link to="/spill-av-leah-noelle">Spill av Leah Noelle</Link>
+        </Bunnlenker>
         <p>&copy; {new Date().getFullYear()} Minio. Alle rettigheter reservert.</p>
       </Copyright>
     </StyledFooter>

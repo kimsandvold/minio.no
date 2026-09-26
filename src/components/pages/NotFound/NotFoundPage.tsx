@@ -98,7 +98,7 @@ const SuggestionCard = styled(Link)<{ $delay: number }>`
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 
   svg {
@@ -124,8 +124,8 @@ const HomeButton = styled(Link)`
   transition: transform 0.2s, box-shadow 0.2s;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(29, 161, 242, 0.35);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(168, 81, 44, 0.35);
   }
 `
 

@@ -7,17 +7,23 @@ import type { Product } from '../../../types/product'
 const Card = styled.div`
   display: flex;
   flex-direction: column;
-  background: #fff;
-  border-radius: 10px;
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.large};
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: ${({ theme }) => theme.shadows.sm};
   color: inherit;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform ${({ theme }) => theme.transitions.soft},
+    box-shadow ${({ theme }) => theme.transitions.soft},
+    border-color ${({ theme }) => theme.transitions.soft};
   position: relative;
 
+  /* Roligere løft enn før (6px leste som hopp) — skyggen gjør jobben. */
   &:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    transform: translateY(-3px);
+    border-color: ${({ theme }) => theme.colors.borderStrong};
+    box-shadow: ${({ theme }) => theme.shadows.lg};
   }
 `
 
@@ -43,7 +49,7 @@ const ImageWrap = styled.div`
   }
 
   ${Card}:hover & img {
-    transform: scale(1.05);
+    transform: scale(1.04);
   }
 `
 
@@ -54,18 +60,20 @@ const CardBody = styled.div`
   flex: 1;
 
   h3 {
+    font-family: ${({ theme }) => theme.fonts.body};
     font-size: 1.05rem;
     font-weight: 600;
-    color: #222;
+    color: ${({ theme }) => theme.colors.ink};
     margin: 0 0 0.4rem;
-    line-height: 1.3;
+    line-height: 1.35;
+    letter-spacing: -0.01em;
   }
 `
 
 const Description = styled.p`
-  font-size: 0.85rem;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   line-height: 1.6;
-  color: #666;
+  color: ${({ theme }) => theme.colors.inkMuted};
   margin: 0 0 auto;
   padding-bottom: 1rem;
 `
@@ -74,44 +82,46 @@ const PriceRow = styled.div`
   display: flex;
   align-items: baseline;
   gap: 0.5rem;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
   padding-top: 0.85rem;
 `
 
 const Price = styled.span`
   font-weight: 600;
   font-size: 1.15rem;
-  color: ${({ theme }) => theme.colors.textDark};
+  color: ${({ theme }) => theme.colors.ink};
   letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 `
 
 const RegularPrice = styled.span`
-  font-size: 0.8rem;
-  color: #aaa;
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.inkSubtle};
   text-decoration: line-through;
+  font-variant-numeric: tabular-nums;
 `
 
 const DetailsButton = styled(Link)`
   display: block;
   text-align: center;
   padding: 0.75rem 1.5rem;
-  margin: 0 1.5rem 1.5rem;
-  background: ${({ theme }) => theme.colors.darkBg};
-  color: ${({ theme }) => theme.colors.textLight};
-  border-radius: 6px;
+  margin: 0 1.25rem 1.25rem;
+  background: ${({ theme }) => theme.colors.ink};
+  color: ${({ theme }) => theme.colors.inkInverted};
+  border: 1px solid ${({ theme }) => theme.colors.ink};
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
   text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: opacity 0.2s ease;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: 600;
+  transition:
+    background-color ${({ theme }) => theme.transitions.default},
+    color ${({ theme }) => theme.transitions.default},
+    border-color ${({ theme }) => theme.transitions.default};
 
+  ${Card}:hover &,
   &:hover {
-    background: #333;
-    transform: translateY(-2px);
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.colors.accent};
-    outline-offset: 2px;
+    background: ${({ theme }) => theme.colors.neutral[800]};
+    border-color: ${({ theme }) => theme.colors.neutral[800]};
   }
 `
 
@@ -127,7 +137,7 @@ export default function ProductCard({ product }: ProductCardProps) {
       {product.hasPromoRibbon && <PromoRibbon />}
       <ImageWrap>
         {hasMultipleImages ? (
-          <SplideCarousel>
+          <SplideCarousel label={`Bilder av ${product.title}`}>
             {product.images.map((img, i) => (
               <img key={i} src={img.src} alt={img.alt} loading="lazy" />
             ))}

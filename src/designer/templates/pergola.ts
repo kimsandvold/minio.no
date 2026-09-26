@@ -437,8 +437,8 @@ export const pergola: ProductTemplate<PergolaConfig> = {
   bilde: '/images/products/pergola-3d.webp',
   tilgjengelig: true,
   fraPris: 249,
-  // Materialpakke tilbys ikke for pergola – kun forespør bygging + byggeplan.
-  leveranser: ['ferdig', 'plan'],
+  // Pergola er ikke et lite prosjekt – kun byggeplan, ingen bygging.
+  leveranser: ['plan'],
   defaultConfig: {
     montering: 'frittstående',
     bredde: 360,

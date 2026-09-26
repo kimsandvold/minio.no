@@ -8,7 +8,7 @@ import PageTransition from '../../../shared/PageTransition'
 import { useSEO } from '../../../../hooks/useSEO'
 import { Callout, DataTable, H3, Ol, P, Ul } from '../GuideArticleLayout'
 
-const ACCENT = '#9c6b3f'
+const ACCENT = '#a8512c'
 const SITE_URL = 'https://minio.no'
 
 const Header = styled.header`
@@ -28,7 +28,7 @@ const Container = styled.div`
 
 const Breadcrumb = styled.nav`
   font-size: 0.85rem;
-  color: #888;
+  color: #7a6f61;
   margin-bottom: 1.25rem;
 
   a {
@@ -103,7 +103,7 @@ const FactsBar = styled.dl`
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: #999;
+    color: #7a6f61;
     margin-bottom: 0.3rem;
   }
 
@@ -129,7 +129,7 @@ const Figure = styled.figure`
   figcaption {
     margin-top: 0.6rem;
     font-size: 0.85rem;
-    color: #999;
+    color: #7a6f61;
     text-align: center;
   }
 `
@@ -194,7 +194,7 @@ const Cta = styled.div`
     transition: transform 0.2s ease;
 
     &:hover {
-      transform: translateY(-2px);
+      transform: translateY(-1px);
     }
   }
 `

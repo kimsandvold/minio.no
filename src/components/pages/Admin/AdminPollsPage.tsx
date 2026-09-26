@@ -21,7 +21,7 @@ const CreateBtn = styled.button`
   align-items: center;
   gap: 0.5rem;
   padding: 0.65rem 1.25rem;
-  background: #1a1a1a;
+  background: #1c1a18;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -39,7 +39,7 @@ const CreateBtn = styled.button`
 const PollCardWrapper = styled.div`
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(60, 42, 28, 0.06);
   overflow: hidden;
 `
 
@@ -52,7 +52,7 @@ const PollCardHeader = styled.div`
   gap: 1rem;
 
   &:hover {
-    background: #fafafa;
+    background: #faf7f2;
   }
 `
 
@@ -64,13 +64,13 @@ const PollInfo = styled.div`
 const PollQuestion = styled.h3`
   font-size: 1.05rem;
   font-weight: 600;
-  color: #222;
+  color: #242019;
   margin: 0 0 0.3rem;
 `
 
 const PollMeta = styled.div`
   font-size: 0.8rem;
-  color: #888;
+  color: #7a6f61;
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
@@ -104,14 +104,14 @@ const IconBtn = styled.button`
   border-radius: 6px;
   padding: 0.4rem 0.6rem;
   cursor: pointer;
-  color: #666;
+  color: #6b6157;
   font-size: 0.85rem;
   transition: all 0.15s ease;
 
   &:hover {
     background: #f7f7f7;
-    border-color: #ccc;
-    color: #333;
+    border-color: #d6ccbe;
+    color: #2e2a26;
   }
 `
 
@@ -124,7 +124,7 @@ const DeleteBtn = styled(IconBtn)`
 `
 
 const ExpandedContent = styled.div`
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid #efe9e0;
   padding: 1.25rem 1.5rem;
 `
 
@@ -142,15 +142,15 @@ const ResultLabel = styled.div`
   justify-content: space-between;
   font-size: 0.85rem;
   margin-bottom: 0.2rem;
-  color: #333;
+  color: #2e2a26;
   font-weight: 500;
 `
 
 const BarTrack = styled.div`
   width: 100%;
   height: 22px;
-  background: #f0f0f0;
-  border-radius: 4px;
+  background: #efe9e0;
+  border-radius: 8px;
   overflow: hidden;
 `
 
@@ -158,14 +158,14 @@ const BarFill = styled.div<{ $pct: number }>`
   height: 100%;
   width: ${({ $pct }) => $pct}%;
   background: #4a5568;
-  border-radius: 4px;
+  border-radius: 8px;
   transition: width 0.5s ease;
   min-width: ${({ $pct }) => ($pct > 0 ? '4px' : '0')};
 `
 
 const TotalVotes = styled.p`
   font-size: 0.8rem;
-  color: #999;
+  color: #7a6f61;
   margin: 0.75rem 0 0;
 `
 
@@ -175,7 +175,7 @@ const OtherVotesList = styled.div`
   h4 {
     font-size: 0.85rem;
     font-weight: 600;
-    color: #333;
+    color: #2e2a26;
     margin: 0 0 0.4rem;
   }
 
@@ -187,7 +187,7 @@ const OtherVotesList = styled.div`
 
   li {
     font-size: 0.8rem;
-    color: #666;
+    color: #6b6157;
     line-height: 1.5;
   }
 `
@@ -195,14 +195,14 @@ const OtherVotesList = styled.div`
 const LoadingState = styled.div`
   text-align: center;
   padding: 3rem 2rem;
-  color: #999;
+  color: #7a6f61;
   font-size: 1.1rem;
 `
 
 const EmptyState = styled.div`
   text-align: center;
   padding: 3rem 2rem;
-  color: #999;
+  color: #7a6f61;
   font-size: 1.1rem;
 `
 

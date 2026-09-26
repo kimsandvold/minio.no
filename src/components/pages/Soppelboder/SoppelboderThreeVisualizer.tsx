@@ -762,7 +762,7 @@ export default function SoppelboderThreeVisualizer(props: SoppelboderVisualizerP
                   <SbSliderName>Bredde</SbSliderName>
                   <SbSliderVal>{props.width} cm</SbSliderVal>
                 </SbSliderRow>
-                <SbSlider type="range" min={70} max={400} step={5} value={props.width} onChange={(e) => {
+                <SbSlider type="range" aria-label="Bredde" min={70} max={400} step={5} value={props.width} onChange={(e) => {
                   const w = +e.target.value
                   update({ width: w, binCount: Math.min(5, Math.max(1, Math.floor(w / 70))) })
                 }} />
@@ -772,14 +772,14 @@ export default function SoppelboderThreeVisualizer(props: SoppelboderVisualizerP
                   <SbSliderName>Høyde</SbSliderName>
                   <SbSliderVal>{props.height} cm</SbSliderVal>
                 </SbSliderRow>
-                <SbSlider type="range" min={160} max={250} step={5} value={props.height} onChange={(e) => update({ height: +e.target.value })} />
+                <SbSlider type="range" aria-label="Høyde" min={160} max={250} step={5} value={props.height} onChange={(e) => update({ height: +e.target.value })} />
               </SbSliderGroup>
               <SbSliderGroup>
                 <SbSliderRow>
                   <SbSliderName>Dybde</SbSliderName>
                   <SbSliderVal>{props.depth} cm</SbSliderVal>
                 </SbSliderRow>
-                <SbSlider type="range" min={60} max={150} step={5} value={props.depth} onChange={(e) => update({ depth: +e.target.value })} />
+                <SbSlider type="range" aria-label="Dybde" min={60} max={150} step={5} value={props.depth} onChange={(e) => update({ depth: +e.target.value })} />
               </SbSliderGroup>
             </SbSection>
 

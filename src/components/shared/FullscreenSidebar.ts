@@ -38,7 +38,7 @@ export const SidebarClose = styled.button`
   border-radius: 8px;
   border: none;
   background: rgba(255, 255, 255, 0.06);
-  color: #888;
+  color: #7a6f61;
   font-size: 1.1rem;
   cursor: pointer;
   display: flex;
@@ -68,7 +68,7 @@ export const SbLabel = styled.div`
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: #555;
+  color: #5a5249;
   margin-bottom: 0.6rem;
   font-weight: 600;
 `
@@ -90,7 +90,7 @@ export const SbSliderRow = styled.div`
 
 export const SbSliderName = styled.span`
   font-size: 0.78rem;
-  color: #999;
+  color: #7a6f61;
 `
 
 export const SbSliderVal = styled.span`
@@ -104,7 +104,7 @@ export const SbSlider = styled.input`
   width: 100%;
   height: 4px;
   border-radius: 2px;
-  background: #2a2a2a;
+  background: #2e2a26;
   outline: none;
   appearance: none;
   cursor: pointer;
@@ -132,7 +132,7 @@ export const SbSlider = styled.input`
 
 export const SegRow = styled.div`
   display: flex;
-  background: #1a1a1a;
+  background: #1c1a18;
   border-radius: 8px;
   padding: 3px;
   gap: 2px;
@@ -143,8 +143,8 @@ export const SegBtn = styled.button<{ $active: boolean }>`
   padding: 7px 6px;
   border-radius: 6px;
   border: none;
-  background: ${({ $active }) => ($active ? '#2a2a2a' : 'transparent')};
-  color: ${({ $active }) => ($active ? '#fff' : '#666')};
+  background: ${({ $active }) => ($active ? '#2e2a26' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#fff' : '#6b6157')};
   font-size: 0.72rem;
   font-weight: ${({ $active }) => ($active ? '600' : '400')};
   cursor: pointer;
@@ -152,7 +152,7 @@ export const SegBtn = styled.button<{ $active: boolean }>`
   white-space: nowrap;
 
   &:hover {
-    color: ${({ $active }) => ($active ? '#fff' : '#999')};
+    color: ${({ $active }) => ($active ? '#fff' : '#7a6f61')};
   }
 `
 
@@ -166,14 +166,14 @@ export const ToggleRow = styled.label`
 
 export const ToggleText = styled.span`
   font-size: 0.78rem;
-  color: #999;
+  color: #7a6f61;
 `
 
 export const ToggleTrack = styled.span<{ $on: boolean }>`
   width: 36px;
   height: 20px;
   border-radius: 10px;
-  background: ${({ $on }) => ($on ? '#3b82f6' : '#333')};
+  background: ${({ $on }) => ($on ? '#3b82f6' : '#2e2a26')};
   position: relative;
   transition: background 0.2s ease;
   flex-shrink: 0;

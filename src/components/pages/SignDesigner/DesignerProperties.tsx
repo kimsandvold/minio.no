@@ -7,17 +7,17 @@ import Icon from '../../shared/Icon'
 
 const Panel = styled.div<{ $visible: boolean; $collapsed?: boolean }>`
   width: 260px;
-  background: #1a1a1a;
-  border-left: 1px solid #333;
+  background: #1c1a18;
+  border-left: 1px solid #2e2a26;
   overflow-y: auto;
   padding: 1rem;
   flex-shrink: 0;
-  color: #ddd;
+  color: #ddd4c7;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     width: 100%;
     border-left: none;
-    border-top: 1px solid #333;
+    border-top: 1px solid #2e2a26;
     max-height: ${({ $visible, $collapsed }) => !$visible ? '0' : $collapsed ? '0' : '40vh'};
     padding: ${({ $visible, $collapsed }) => (!$visible || $collapsed) ? '0 1rem' : '1rem'};
     overflow-y: ${({ $visible, $collapsed }) => ($visible && !$collapsed) ? 'auto' : 'hidden'};
@@ -36,17 +36,16 @@ const MobileToggle = styled.button<{ $visible: boolean }>`
     justify-content: center;
     gap: 0.4rem;
     padding: 0.4rem;
-    background: #1a1a1a;
+    background: #1c1a18;
     border: none;
-    border-top: 1px solid #333;
-    color: #888;
+    border-top: 1px solid #2e2a26;
+    color: #7a6f61;
     font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: -0.005em;
     cursor: pointer;
     order: 2;
 
-    &:hover { color: #ddd; }
+    &:hover { color: #ddd4c7; }
   }
 `
 
@@ -54,7 +53,7 @@ const SectionTitle = styled.h4`
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #888;
+  color: #7a6f61;
   margin: 1rem 0 0.5rem;
   &:first-child { margin-top: 0; }
 `
@@ -68,21 +67,21 @@ const Row = styled.div`
 
 const Label = styled.label`
   font-size: 0.8rem;
-  color: #aaa;
+  color: #b3a797;
   min-width: 50px;
 `
 
 const Input = styled.input`
   flex: 1;
-  background: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 4px;
-  color: #ddd;
+  background: #2e2a26;
+  border: 1px solid #4a433c;
+  border-radius: 8px;
+  color: #ddd4c7;
   padding: 0.35rem 0.5rem;
   font-size: 0.8rem;
   outline: none;
 
-  &:focus { border-color: #1da1f2; }
+  &:focus { border-color: #a8512c; }
   &[type="color"] {
     width: 32px;
     height: 28px;
@@ -93,22 +92,22 @@ const Input = styled.input`
 
 const Select = styled.select`
   flex: 1;
-  background: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 4px;
-  color: #ddd;
+  background: #2e2a26;
+  border: 1px solid #4a433c;
+  border-radius: 8px;
+  color: #ddd4c7;
   padding: 0.35rem 0.5rem;
   font-size: 0.8rem;
   outline: none;
 
-  &:focus { border-color: #1da1f2; }
+  &:focus { border-color: #a8512c; }
 `
 
 const ActionButton = styled.button`
-  background: #333;
-  border: 1px solid #444;
-  border-radius: 4px;
-  color: #ddd;
+  background: #2e2a26;
+  border: 1px solid #4a433c;
+  border-radius: 8px;
+  color: #ddd4c7;
   padding: 0.35rem 0.6rem;
   font-size: 0.75rem;
   cursor: pointer;
@@ -116,7 +115,7 @@ const ActionButton = styled.button`
   align-items: center;
   gap: 0.3rem;
 
-  &:hover { background: #444; }
+  &:hover { background: #4a433c; }
 `
 
 const DeleteButton = styled(ActionButton)`
@@ -127,7 +126,7 @@ const DeleteButton = styled(ActionButton)`
 
 const EmptyState = styled.div`
   text-align: center;
-  color: #666;
+  color: #6b6157;
   font-size: 0.85rem;
   padding: 2rem 1rem;
 `
@@ -141,18 +140,17 @@ const CategoryTabs = styled.div`
 
 const CategoryTab = styled.button<{ $active: boolean }>`
   padding: 3px 8px;
-  border: 1px solid ${({ $active }) => ($active ? '#1da1f2' : '#444')};
-  border-radius: 4px;
-  background: ${({ $active }) => ($active ? '#1da1f233' : 'transparent')};
-  color: ${({ $active }) => ($active ? '#1da1f2' : '#aaa')};
+  border: 1px solid ${({ $active }) => ($active ? '#a8512c' : '#4a433c')};
+  border-radius: 8px;
+  background: ${({ $active }) => ($active ? '#a8512c33' : 'transparent')};
+  color: ${({ $active }) => ($active ? '#a8512c' : '#b3a797')};
   cursor: pointer;
   font-size: 0.65rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: -0.005em;
 
   &:hover {
-    border-color: #1da1f2;
-    color: #ddd;
+    border-color: #a8512c;
+    color: #ddd4c7;
   }
 `
 
@@ -165,9 +163,9 @@ const SymbolGrid = styled.div`
 const SymbolCell = styled.button<{ $active: boolean }>`
   width: 100%;
   aspect-ratio: 1;
-  border: 1px solid ${({ $active }) => ($active ? '#1da1f2' : '#333')};
-  border-radius: 4px;
-  background: ${({ $active }) => ($active ? '#1da1f220' : '#2a2a2a')};
+  border: 1px solid ${({ $active }) => ($active ? '#a8512c' : '#2e2a26')};
+  border-radius: 8px;
+  background: ${({ $active }) => ($active ? '#a8512c20' : '#2e2a26')};
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -176,8 +174,8 @@ const SymbolCell = styled.button<{ $active: boolean }>`
   transition: border-color 0.15s, background 0.15s;
 
   &:hover {
-    border-color: #1da1f2;
-    background: #333;
+    border-color: #a8512c;
+    background: #2e2a26;
   }
 
   svg {
@@ -272,7 +270,7 @@ export default function DesignerProperties({ element, dispatch, activeTool: _act
       </Row>
       <Row>
         <Label>Gj.sikt</Label>
-        <Input type="range" min={0} max={1} step={0.05} value={element.opacity} onChange={e => update({ opacity: Number(e.target.value) })} />
+        <Input type="range" aria-label="Gjennomsiktighet" min={0} max={1} step={0.05} value={element.opacity} onChange={e => update({ opacity: Number(e.target.value) })} />
       </Row>
 
       {element.type === 'rect' && (
@@ -350,7 +348,7 @@ export default function DesignerProperties({ element, dispatch, activeTool: _act
                 title={s.name}
                 onClick={() => update({ symbolId: s.id })}
               >
-                <svg viewBox={s.viewBox} fill="none" stroke="#ddd" strokeWidth="2">
+                <svg viewBox={s.viewBox} fill="none" stroke="#ddd4c7" strokeWidth="2">
                   <path d={s.path} />
                 </svg>
               </SymbolCell>

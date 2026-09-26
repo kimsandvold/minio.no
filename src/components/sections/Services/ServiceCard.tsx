@@ -42,7 +42,7 @@ const Title = styled.h3`
 const Description = styled.p`
   font-size: 0.95rem;
   line-height: 1.6;
-  color: #555;
+  color: #5a5249;
   margin-bottom: 1.5rem;
   flex-grow: 1;
 
@@ -64,17 +64,16 @@ const ContactButton = styled.button`
   background-color: ${({ theme }) => theme.colors.textDark};
   color: #fff;
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  transition: all 0.3s ease;
+  letter-spacing: -0.005em;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    background-color: #333;
-    transform: translateY(-2px);
+    background-color: #2e2a26;
+    transform: translateY(-1px);
   }
 
   &:focus-visible {
@@ -87,12 +86,12 @@ const linkButtonStyles = `
   padding: 0.75rem 1.25rem;
   background-color: transparent;
   border: 2px solid;
-  border-radius: 4px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.9rem;
   letter-spacing: 0.3px;
-  transition: all 0.3s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   display: inline-flex;
   align-items: center;
@@ -107,7 +106,7 @@ const LinkButton = styled.a`
   &:hover {
     background-color: ${({ theme }) => theme.colors.textDark};
     color: #fff;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 
   &:focus-visible {
@@ -124,7 +123,7 @@ const RouterLinkButton = styled(Link)`
   &:hover {
     background-color: ${({ theme }) => theme.colors.textDark};
     color: #fff;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 
   &:focus-visible {

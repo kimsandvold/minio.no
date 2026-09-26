@@ -9,7 +9,7 @@ const SkeletonBlock = styled.div<{ $width?: string; $height?: string; $radius?: 
   width: ${({ $width }) => $width || '100%'};
   height: ${({ $height }) => $height || '1rem'};
   border-radius: ${({ $radius }) => $radius || '4px'};
-  background: linear-gradient(90deg, #e8e8e8 25%, #f5f5f5 50%, #e8e8e8 75%);
+  background: linear-gradient(90deg, #eae3d9 25%, #f4efe8 50%, #eae3d9 75%);
   background-size: 800px 100%;
   animation: ${shimmer} 1.5s infinite linear;
 `
@@ -25,7 +25,7 @@ const GridCardSkeleton = styled.div`
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(60, 42, 28, 0.08);
 `
 
 const GridCardBody = styled.div`

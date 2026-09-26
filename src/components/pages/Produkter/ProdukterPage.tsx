@@ -100,14 +100,14 @@ const Card = styled.div`
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(60, 42, 28, 0.08);
   color: inherit;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
 
   &:hover {
     transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 8px 24px rgba(60, 42, 28, 0.12);
   }
 `
 
@@ -137,17 +137,20 @@ const CardBody = styled.div`
   flex-direction: column;
   flex: 1;
 
-  h3 {
+  /* Kortnavn, ikke seksjonsoverskrift – derfor sans, ikke display-serifen. */
+  h2 {
+    font-family: ${({ theme }) => theme.fonts.body};
     font-size: 1.05rem;
     font-weight: 600;
-    color: #222;
+    letter-spacing: -0.01em;
+    color: ${({ theme }) => theme.colors.ink};
     margin: 0 0 0.5rem;
   }
 
   p {
     font-size: 0.88rem;
     line-height: 1.6;
-    color: #555;
+    color: #5a5249;
     margin: 0 0 1rem;
     flex: 1;
   }
@@ -162,7 +165,7 @@ const CardPrice = styled.div`
 
 const CardRegularPrice = styled.div`
   font-size: 0.8rem;
-  color: #999;
+  color: #7a6f61;
   text-decoration: line-through;
   margin-top: 0.15rem;
 `
@@ -218,7 +221,7 @@ export default function ProdukterPage() {
                       {product.hasPromoRibbon && <PromoRibbon />}
                       <CardImageWrap>
                         {product.images.length > 1 ? (
-                          <SplideCarousel>
+                          <SplideCarousel label={`Bilder av ${product.title}`}>
                             {product.images.map((img, i) => (
                               <img key={i} src={img.src} alt={img.alt} loading="lazy" />
                             ))}
@@ -228,7 +231,7 @@ export default function ProdukterPage() {
                         )}
                       </CardImageWrap>
                       <CardBody>
-                        <h3>{product.title}</h3>
+                        <h2>{product.title}</h2>
                         <p>{product.shortDescription}</p>
                         <CardPrice>{product.price}</CardPrice>
                         {product.regularPrice && <CardRegularPrice>{product.regularPrice}</CardRegularPrice>}

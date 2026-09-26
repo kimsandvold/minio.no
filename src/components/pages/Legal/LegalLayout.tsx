@@ -59,7 +59,7 @@ const Content = styled.section`
 const Article = styled.article`
   max-width: 820px;
   margin: 0 auto;
-  color: #333;
+  color: #2e2a26;
   font-size: 1rem;
   line-height: 1.75;
 
@@ -111,7 +111,7 @@ const Article = styled.article`
 
   .updated {
     font-size: 0.9rem;
-    color: #777;
+    color: #7a7065;
     margin-bottom: 2rem;
   }
 `

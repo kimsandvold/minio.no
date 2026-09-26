@@ -7,7 +7,7 @@ const Form = styled.div`
   background: #fff;
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(60, 42, 28, 0.06);
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
@@ -16,7 +16,7 @@ const Form = styled.div`
 const FormTitle = styled.h3`
   font-size: 1.2rem;
   font-weight: 600;
-  color: #222;
+  color: #242019;
   margin: 0;
 `
 
@@ -26,7 +26,7 @@ const Label = styled.label`
   gap: 0.35rem;
   font-size: 0.9rem;
   font-weight: 500;
-  color: #333;
+  color: #2e2a26;
 `
 
 const Input = styled.input`
@@ -39,7 +39,7 @@ const Input = styled.input`
   transition: border-color 0.2s ease;
 
   &:focus {
-    border-color: #333;
+    border-color: #2e2a26;
   }
 `
 
@@ -56,7 +56,7 @@ const RemoveBtn = styled.button`
   cursor: pointer;
   padding: 0.4rem;
   font-size: 0.85rem;
-  border-radius: 4px;
+  border-radius: 8px;
 
   &:hover {
     background: rgba(229, 62, 62, 0.1);
@@ -68,18 +68,18 @@ const AddOptionBtn = styled.button`
   align-items: center;
   gap: 0.4rem;
   background: none;
-  border: 2px dashed #ccc;
+  border: 2px dashed #d6ccbe;
   padding: 0.5rem 1rem;
   border-radius: 8px;
-  color: #666;
+  color: #6b6157;
   font-size: 0.85rem;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
-    border-color: #999;
-    color: #333;
+    border-color: #7a6f61;
+    color: #2e2a26;
   }
 `
 
@@ -102,15 +102,15 @@ const Actions = styled.div`
 
 const Btn = styled.button<{ $variant?: 'primary' | 'secondary' }>`
   padding: 0.65rem 1.5rem;
-  border: 2px solid ${({ $variant }) => ($variant === 'primary' ? '#1a1a1a' : '#ccc')};
-  background: ${({ $variant }) => ($variant === 'primary' ? '#1a1a1a' : '#fff')};
-  color: ${({ $variant }) => ($variant === 'primary' ? '#fff' : '#666')};
+  border: 2px solid ${({ $variant }) => ($variant === 'primary' ? '#1c1a18' : '#d6ccbe')};
+  background: ${({ $variant }) => ($variant === 'primary' ? '#1c1a18' : '#fff')};
+  color: ${({ $variant }) => ($variant === 'primary' ? '#fff' : '#6b6157')};
   border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 
   &:hover {
     opacity: 0.85;

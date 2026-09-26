@@ -90,7 +90,7 @@ export default function UnderholdningPage() {
 }
 
 function Particles() {
-  const colors = ['#1da1f2', '#4caf50', '#fff']
+  const colors = ['#a8512c', '#3f7d52', '#fff']
   const particles = Array.from({ length: 15 }, (_, i) => ({
     id: i,
     left: `${Math.random() * 100}%`,
@@ -134,8 +134,8 @@ const floatParticle = keyframes`
 `
 
 const rewardPulse = keyframes`
-  0%, 100% { box-shadow: 0 0 0 0 rgba(29, 161, 242, 0.3); }
-  50% { box-shadow: 0 0 20px 5px rgba(29, 161, 242, 0.1); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(168, 81, 44, 0.3); }
+  50% { box-shadow: 0 0 20px 5px rgba(168, 81, 44, 0.1); }
 `
 
 const fadeInDown = keyframes`
@@ -257,7 +257,7 @@ const Title = styled.h1`
   font-size: 2.5rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #fff 0%, #1da1f2 100%);
+  background: linear-gradient(135deg, #fff 0%, #a8512c 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -280,15 +280,15 @@ const RewardBanner = styled.div`
   align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 1.2rem;
-  background: linear-gradient(135deg, rgba(29, 161, 242, 0.15) 0%, rgba(76, 175, 80, 0.15) 100%);
-  border: 1px solid rgba(29, 161, 242, 0.3);
+  background: linear-gradient(135deg, rgba(168, 81, 44, 0.15) 0%, rgba(76, 175, 80, 0.15) 100%);
+  border: 1px solid rgba(168, 81, 44, 0.3);
   border-radius: 50px;
   font-size: 0.85rem;
   margin-bottom: 2rem;
   animation: ${fadeInDown} 0.4s ease-out 0.15s both, ${rewardPulse} 2s ease-in-out infinite 0.5s;
 
   strong {
-    color: #4caf50;
+    color: #3f7d52;
   }
 
   @media (max-width: 500px) {
@@ -337,9 +337,9 @@ const GameCard = styled.a<{ $index: number }>`
   }
 
   &:hover {
-    border-color: #1da1f2;
+    border-color: #a8512c;
     transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(29, 161, 242, 0.4);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(168, 81, 44, 0.4);
   }
 
   @media (max-width: 500px) {
@@ -350,7 +350,7 @@ const GameCard = styled.a<{ $index: number }>`
 const GameIcon = styled.div`
   width: 70px;
   height: 70px;
-  background: linear-gradient(135deg, rgba(29, 161, 242, 0.2) 0%, rgba(29, 161, 242, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(168, 81, 44, 0.2) 0%, rgba(168, 81, 44, 0.05) 100%);
   border-radius: 18px;
   display: flex;
   align-items: center;
@@ -358,11 +358,11 @@ const GameIcon = styled.div`
   font-size: 2.2rem;
   flex-shrink: 0;
   transition: all 0.3s;
-  border: 1px solid rgba(29, 161, 242, 0.2);
+  border: 1px solid rgba(168, 81, 44, 0.2);
 
   ${GameCard}:hover & {
     transform: scale(1.1) rotate(-5deg);
-    box-shadow: 0 0 20px rgba(29, 161, 242, 0.4);
+    box-shadow: 0 0 20px rgba(168, 81, 44, 0.4);
   }
 
   @media (max-width: 500px) {
@@ -406,7 +406,7 @@ const GameArrow = styled.span`
   ${GameCard}:hover & {
     opacity: 1;
     transform: translateX(5px);
-    color: #1da1f2;
+    color: #a8512c;
   }
 `
 
@@ -425,7 +425,7 @@ const HomeLink = styled(Link)`
   animation: ${fadeInUp} 0.35s ease-out 0.4s both;
 
   &:hover {
-    background: #1da1f2;
-    border-color: #1da1f2;
+    background: #a8512c;
+    border-color: #a8512c;
   }
 `

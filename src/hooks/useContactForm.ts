@@ -35,6 +35,8 @@ export function useContactForm() {
     formData.append('name', formState.name)
     formData.append('email', formState.email)
     formData.append('phone', formState.phone)
+    // `_subject` er Formspree sin emnelinje; `subject` alene blir bare et felt.
+    formData.append('_subject', `Minio-skjema: ${formState.subject || 'Henvendelse'} – ${formState.name}`)
     formData.append('subject', formState.subject)
     formData.append('message', formState.message)
 

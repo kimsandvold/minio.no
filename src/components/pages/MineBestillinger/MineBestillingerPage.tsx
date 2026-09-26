@@ -68,7 +68,7 @@ const Container = styled.div`
 const LoginGate = styled.div`
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(60, 42, 28, 0.06);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -79,12 +79,12 @@ const LoginGate = styled.div`
 
 const LockIcon = styled.div`
   font-size: 2.5rem;
-  color: #999;
+  color: #7a6f61;
 `
 
 const LoginMessage = styled.p`
   font-size: 1.1rem;
-  color: #555;
+  color: #5a5249;
   max-width: 400px;
   line-height: 1.6;
 `
@@ -92,14 +92,14 @@ const LoginMessage = styled.p`
 const EmptyState = styled.div`
   text-align: center;
   padding: 3rem 2rem;
-  color: #999;
+  color: #7a6f61;
   font-size: 1.1rem;
 `
 
 const LoadingState = styled.div`
   text-align: center;
   padding: 3rem 2rem;
-  color: #999;
+  color: #7a6f61;
   font-size: 1.1rem;
 `
 

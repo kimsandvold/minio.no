@@ -661,21 +661,21 @@ export default function ThreeVisualizer(props: ThreeVisualizerProps) {
                   <SbSliderName>Bredde</SbSliderName>
                   <SbSliderVal>{props.width} cm</SbSliderVal>
                 </SbSliderRow>
-                <SbSlider type="range" min={70} max={200} step={1} value={props.width} onChange={(e) => update({ width: +e.target.value })} />
+                <SbSlider type="range" aria-label="Bredde" min={70} max={200} step={1} value={props.width} onChange={(e) => update({ width: +e.target.value })} />
               </SbSliderGroup>
               <SbSliderGroup>
                 <SbSliderRow>
                   <SbSliderName>Høyde</SbSliderName>
                   <SbSliderVal>{props.height} cm</SbSliderVal>
                 </SbSliderRow>
-                <SbSlider type="range" min={50} max={200} step={1} value={props.height} onChange={(e) => update({ height: +e.target.value })} />
+                <SbSlider type="range" aria-label="Høyde" min={50} max={200} step={1} value={props.height} onChange={(e) => update({ height: +e.target.value })} />
               </SbSliderGroup>
               <SbSliderGroup>
                 <SbSliderRow>
                   <SbSliderName>Dybde</SbSliderName>
                   <SbSliderVal>{props.depth} cm</SbSliderVal>
                 </SbSliderRow>
-                <SbSlider type="range" min={40} max={150} step={1} value={props.depth} onChange={(e) => update({ depth: +e.target.value })} />
+                <SbSlider type="range" aria-label="Dybde" min={40} max={150} step={1} value={props.depth} onChange={(e) => update({ depth: +e.target.value })} />
               </SbSliderGroup>
             </SbSection>
 
@@ -686,7 +686,7 @@ export default function ThreeVisualizer(props: ThreeVisualizerProps) {
                   <SbSliderName>Vinkel</SbSliderName>
                   <SbSliderVal>{props.angle}°</SbSliderVal>
                 </SbSliderRow>
-                <SbSlider type="range" min={0} max={45} step={1} value={props.angle} onChange={(e) => update({ angle: +e.target.value })} />
+                <SbSlider type="range" aria-label="Vinkel" min={0} max={45} step={1} value={props.angle} onChange={(e) => update({ angle: +e.target.value })} />
               </SbSliderGroup>
             </SbSection>
 

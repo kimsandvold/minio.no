@@ -87,6 +87,7 @@ export async function sendTilgangskode(opts: {
   designUrl: string
 }): Promise<boolean> {
   const linjer = opts.leveranser.map((v) => VARE_NAVN[v] ?? v)
+  const belop = `${opts.belopKr.toLocaleString('nb-NO')} kr`
   const emne = `Tilgangskode for ${opts.designNavn} – Minio`
 
   const tekst = [
@@ -94,7 +95,7 @@ export async function sendTilgangskode(opts: {
     ``,
     `Design: ${opts.designNavn}`,
     `Du har kjøpt: ${linjer.join(', ')}`,
-    `Beløp: ${opts.belopKr} kr`,
+    `Beløp: ${belop}`,
     ``,
     `Tilgangskode: ${opts.tilgangskode}`,
     ``,
@@ -111,7 +112,7 @@ export async function sendTilgangskode(opts: {
       <h2 style="margin:0 0 16px">Takk for kjøpet!</h2>
       <p style="margin:0 0 8px"><strong>Design:</strong> ${esc(opts.designNavn)}</p>
       <p style="margin:0 0 8px"><strong>Du har kjøpt:</strong> ${esc(linjer.join(', '))}</p>
-      <p style="margin:0 0 20px"><strong>Beløp:</strong> ${opts.belopKr} kr</p>
+      <p style="margin:0 0 20px"><strong>Beløp:</strong> ${esc(belop)}</p>
       <div style="background:#f5f5f4;border-radius:12px;padding:20px;text-align:center;margin:0 0 20px">
         <div style="font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:#57534e">Tilgangskode</div>
         <div style="font-size:34px;font-weight:700;letter-spacing:.18em;margin-top:6px">${esc(opts.tilgangskode)}</div>

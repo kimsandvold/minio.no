@@ -6,8 +6,8 @@ import Icon from '../../shared/Icon'
 import GoogleLoginButton from '../../shared/GoogleLoginButton'
 
 const TopBar = styled.div`
-  background: #1a1a1a;
-  border-bottom: 1px solid #333;
+  background: #1c1a18;
+  border-bottom: 1px solid #2e2a26;
   padding: 0.5rem 1rem 0.5rem 10px;
   display: flex;
   align-items: center;
@@ -22,16 +22,16 @@ const TopBar = styled.div`
 `
 
 const NameInput = styled.input`
-  background: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 4px;
-  color: #ddd;
+  background: #2e2a26;
+  border: 1px solid #4a433c;
+  border-radius: 8px;
+  color: #ddd4c7;
   padding: 0.35rem 0.6rem;
   font-size: 0.85rem;
   outline: none;
   min-width: 150px;
 
-  &:focus { border-color: #1da1f2; }
+  &:focus { border-color: #a8512c; }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     display: none;
@@ -42,7 +42,7 @@ const SizeGroup = styled.div`
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  color: #aaa;
+  color: #b3a797;
   font-size: 0.8rem;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -52,16 +52,16 @@ const SizeGroup = styled.div`
 
 const SizeInput = styled.input`
   width: 55px;
-  background: #2a2a2a;
-  border: 1px solid #444;
-  border-radius: 4px;
-  color: #ddd;
+  background: #2e2a26;
+  border: 1px solid #4a433c;
+  border-radius: 8px;
+  color: #ddd4c7;
   padding: 0.3rem 0.4rem;
   font-size: 0.8rem;
   text-align: center;
   outline: none;
 
-  &:focus { border-color: #1da1f2; }
+  &:focus { border-color: #a8512c; }
 `
 
 const FormatButton = styled.button<{ $active: boolean }>`
@@ -70,23 +70,23 @@ const FormatButton = styled.button<{ $active: boolean }>`
   justify-content: center;
   width: 30px;
   height: 30px;
-  border-radius: 4px;
-  border: 1px solid ${({ $active }) => $active ? '#1da1f2' : '#444'};
-  background: ${({ $active }) => $active ? 'rgba(29, 161, 242, 0.15)' : 'transparent'};
-  color: ${({ $active }) => $active ? '#1da1f2' : '#999'};
+  border-radius: 8px;
+  border: 1px solid ${({ $active }) => $active ? '#a8512c' : '#4a433c'};
+  background: ${({ $active }) => $active ? 'rgba(168, 81, 44, 0.15)' : 'transparent'};
+  color: ${({ $active }) => $active ? '#a8512c' : '#7a6f61'};
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
 
   &:hover {
-    border-color: #1da1f2;
-    color: #1da1f2;
+    border-color: #a8512c;
+    color: #a8512c;
   }
 `
 
 const SizeBadge = styled.span`
-  color: #888;
+  color: #7a6f61;
   font-size: 0.75rem;
   white-space: nowrap;
 `
@@ -95,7 +95,7 @@ const BgGroup = styled.div`
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  color: #aaa;
+  color: #b3a797;
   font-size: 0.8rem;
 `
 
@@ -111,7 +111,7 @@ const Spacer = styled.div`
 
 const SaveIndicator = styled.span`
   font-size: 0.75rem;
-  color: #888;
+  color: #7a6f61;
   display: flex;
   align-items: center;
   gap: 0.3rem;
@@ -124,16 +124,16 @@ const Button = styled.button<{ $primary?: boolean }>`
   gap: 0.4rem;
   padding: 0.4rem 0.75rem;
   border-radius: 6px;
-  border: 1px solid ${({ $primary }) => ($primary ? '#1da1f2' : '#444')};
-  background: ${({ $primary }) => ($primary ? '#1da1f2' : '#333')};
-  color: ${({ $primary }) => ($primary ? '#fff' : '#ddd')};
+  border: 1px solid ${({ $primary }) => ($primary ? '#a8512c' : '#4a433c')};
+  background: ${({ $primary }) => ($primary ? '#a8512c' : '#2e2a26')};
+  color: ${({ $primary }) => ($primary ? '#fff' : '#ddd4c7')};
   font-size: 0.8rem;
   cursor: pointer;
   white-space: nowrap;
   transition: all 0.15s ease;
 
   &:hover {
-    background: ${({ $primary }) => ($primary ? '#1890d0' : '#444')};
+    background: ${({ $primary }) => ($primary ? '#1890d0' : '#4a433c')};
   }
 
   &:disabled {
@@ -155,21 +155,21 @@ const ButtonLabel = styled.span`
 const TransparentToggle = styled.button<{ $active: boolean }>`
   width: 28px;
   height: 28px;
-  border-radius: 4px;
-  border: 1px solid ${({ $active }) => $active ? '#1da1f2' : '#444'};
+  border-radius: 8px;
+  border: 1px solid ${({ $active }) => $active ? '#a8512c' : '#4a433c'};
   cursor: pointer;
-  background: repeating-conic-gradient(#ccc 0% 25%, #fff 0% 50%) 0 0 / 10px 10px;
+  background: repeating-conic-gradient(#d6ccbe 0% 25%, #fff 0% 50%) 0 0 / 10px 10px;
   flex-shrink: 0;
 `
 
 const ColorInput = styled.input`
   width: 28px;
   height: 28px;
-  border: 1px solid #444;
-  border-radius: 4px;
+  border: 1px solid #4a433c;
+  border-radius: 8px;
   padding: 2px;
   cursor: pointer;
-  background: #2a2a2a;
+  background: #2e2a26;
 `
 
 const SaveWrapper = styled.div`
@@ -191,7 +191,7 @@ const LoginPopover = styled.div`
   p {
     margin: 0 0 1rem;
     font-size: 0.9rem;
-    color: #333;
+    color: #2e2a26;
   }
 `
 
@@ -202,16 +202,16 @@ const CloseButton = styled.button`
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  border: 1px solid #444;
-  background: #333;
-  color: #ddd;
+  border: 1px solid #4a433c;
+  background: #2e2a26;
+  color: #ddd4c7;
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
 
   &:hover {
-    background: #444;
+    background: #4a433c;
   }
 `
 

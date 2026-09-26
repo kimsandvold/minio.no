@@ -74,7 +74,7 @@ const ImageWrap = styled.div`
   .splide {
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 12px rgba(60, 42, 28, 0.15);
   }
 
   img {
@@ -101,14 +101,14 @@ const Price = styled.div`
 
 const RegularPrice = styled.div`
   font-size: 0.9rem;
-  color: #999;
+  color: #7a6f61;
   text-decoration: line-through;
   margin-top: 0.15rem;
 `
 
 const Details = styled.div`
   line-height: 1.7;
-  color: #333;
+  color: #2e2a26;
 
   h3 { display: none; }
   h4 { margin: 1.5rem 0 0.5rem; font-size: 1.1rem; }
@@ -125,18 +125,17 @@ const ContactButton = styled.a`
   background: ${({ theme }) => theme.colors.textDark};
   color: #fff;
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   font-weight: 600;
   font-size: 1rem;
   text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
+  letter-spacing: -0.005em;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
 
   &:hover {
-    background: #333;
-    transform: translateY(-2px);
+    background: #2e2a26;
+    transform: translateY(-1px);
   }
 `
 

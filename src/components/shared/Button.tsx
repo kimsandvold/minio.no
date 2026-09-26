@@ -1,106 +1,151 @@
 import styled, { css } from 'styled-components'
 
-type ButtonVariant = 'primary' | 'outline' | 'ghost' | 'social-fb' | 'social-ig'
+/**
+ * `primary` er den rolige standarden (blekk). `accent` er terrakotta og skal
+ * brukes sparsomt — som regel én gang per skjermbilde, på den handlingen vi
+ * faktisk vil at brukeren skal gjøre.
+ */
+type ButtonVariant = 'primary' | 'accent' | 'outline' | 'ghost' | 'social-fb' | 'social-ig'
+type ButtonSize = 'sm' | 'md' | 'lg'
+
+/** Felles løft. Mindre enn før (2px var nok til å skjelve), med varm skygge. */
+const lift = css`
+  &:hover {
+    transform: translateY(-1px);
+  }
+  &:active {
+    transform: translateY(0);
+    transition-duration: 0.05s;
+  }
+`
 
 const variants = {
   primary: css`
-    background-color: ${({ theme }) => theme.colors.textDark};
-    color: #fff;
-    border: 0;
+    background-color: ${({ theme }) => theme.colors.ink};
+    color: ${({ theme }) => theme.colors.inkInverted};
+    border: 1px solid transparent;
+    box-shadow: ${({ theme }) => theme.shadows.sm};
     &:hover {
-      background-color: #333;
-      transform: translateY(-2px);
+      background-color: ${({ theme }) => theme.colors.neutral[800]};
+      box-shadow: ${({ theme }) => theme.shadows.md};
     }
-    &:active {
-      transform: translateY(0);
+    ${lift}
+  `,
+  accent: css`
+    background-color: ${({ theme }) => theme.colors.accent};
+    color: #fff;
+    border: 1px solid transparent;
+    box-shadow: ${({ theme }) => theme.shadows.sm};
+    &:hover {
+      background-color: ${({ theme }) => theme.colors.accentHover};
+      box-shadow: ${({ theme }) => theme.shadows.md};
     }
+    ${lift}
   `,
   outline: css`
     background-color: transparent;
-    color: ${({ theme }) => theme.colors.textDark};
-    border: 2px solid ${({ theme }) => theme.colors.textDark};
+    color: ${({ theme }) => theme.colors.ink};
+    border: 1px solid ${({ theme }) => theme.colors.borderStrong};
     &:hover {
-      background-color: ${({ theme }) => theme.colors.textDark};
-      color: #fff;
-      transform: translateY(-2px);
+      border-color: ${({ theme }) => theme.colors.ink};
+      background-color: ${({ theme }) => theme.colors.sunken};
     }
-    &:active {
-      transform: translateY(0);
-    }
+    ${lift}
   `,
   ghost: css`
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.28);
     color: #fff;
     &:hover {
-      background: rgba(255, 255, 255, 0.25);
-      border-color: rgba(255, 255, 255, 0.5);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      background: rgba(255, 255, 255, 0.2);
+      border-color: rgba(255, 255, 255, 0.45);
+      box-shadow: ${({ theme }) => theme.shadows.onDark};
     }
-    &:active {
-      transform: translateY(0);
-    }
+    ${lift}
   `,
   'social-fb': css`
-    color: #3b5998;
-    border: 2px solid #3b5998;
-    background: #fff;
+    color: ${({ theme }) => theme.colors.facebook};
+    border: 1px solid ${({ theme }) => theme.colors.facebook};
+    background: ${({ theme }) => theme.colors.surface};
     &:hover {
-      background: #3b5998;
+      background: ${({ theme }) => theme.colors.facebook};
       color: #fff;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(59, 89, 152, 0.3);
     }
-    &:active {
-      transform: translateY(0);
-    }
+    ${lift}
   `,
   'social-ig': css`
-    color: #e4405f;
-    border: 2px solid #e4405f;
-    background: #fff;
+    color: ${({ theme }) => theme.colors.instagram};
+    border: 1px solid ${({ theme }) => theme.colors.instagram};
+    background: ${({ theme }) => theme.colors.surface};
     &:hover {
-      background: #e4405f;
+      background: ${({ theme }) => theme.colors.instagram};
       color: #fff;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(228, 64, 95, 0.3);
     }
-    &:active {
-      transform: translateY(0);
-    }
+    ${lift}
   `,
 }
 
-const StyledButton = styled.button<{ $variant: ButtonVariant }>`
-  padding: 0.9rem 1.5rem;
-  border-radius: ${({ theme }) => theme.borderRadius.small};
+const sizes = {
+  sm: css`
+    padding: 0.5rem 0.9rem;
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+  `,
+  md: css`
+    padding: 0.75rem 1.35rem;
+    font-size: ${({ theme }) => theme.fontSizes.base};
+  `,
+  lg: css`
+    padding: 1rem 1.9rem;
+    font-size: ${({ theme }) => theme.fontSizes.md};
+  `,
+}
+
+const StyledButton = styled.button<{ $variant: ButtonVariant; $size: ButtonSize; $full: boolean }>`
+  font-family: inherit;
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  transition: all ${({ theme }) => theme.transitions.default};
+  /* Setningsversaler, ikke uppercase — kortere å lese og mindre 2015. */
+  letter-spacing: -0.005em;
+  line-height: 1.2;
+  transition:
+    background-color ${({ theme }) => theme.transitions.default},
+    border-color ${({ theme }) => theme.transitions.default},
+    color ${({ theme }) => theme.transitions.default},
+    box-shadow ${({ theme }) => theme.transitions.default},
+    transform ${({ theme }) => theme.transitions.default};
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  box-shadow: none;
+  justify-content: center;
+  gap: 0.55rem;
   text-decoration: none;
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  width: ${({ $full }) => ($full ? '100%' : 'auto')};
+  -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.colors.accent};
-    outline-offset: 2px;
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
   }
+
+  ${({ $size }) => sizes[$size]}
   ${({ $variant }) => variants[$variant]}
 `
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant
+  size?: ButtonSize
+  fullWidth?: boolean
 }
 
-export default function Button({ variant = 'primary', children, ...props }: ButtonProps) {
-  return <StyledButton $variant={variant} {...props}>{children}</StyledButton>
+export default function Button({ variant = 'primary', size = 'md', fullWidth = false, children, ...props }: ButtonProps) {
+  return (
+    <StyledButton $variant={variant} $size={size} $full={fullWidth} {...props}>
+      {children}
+    </StyledButton>
+  )
 }

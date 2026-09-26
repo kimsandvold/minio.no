@@ -36,7 +36,7 @@ export const Card = styled.div`
   background: #fff;
   border: 1px solid #e7e5df;
   border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(60, 42, 28, 0.04);
 `
 
 export const Tabs = styled.div`
@@ -105,12 +105,12 @@ const StatBox = styled.div<{ $clickable: boolean }>`
   background: #fff;
   border: 1px solid #e7e5df;
   border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(60, 42, 28, 0.04);
   text-align: left;
   font-family: inherit;
   cursor: ${({ $clickable }) => ($clickable ? 'pointer' : 'default')};
   transition: transform 0.12s, box-shadow 0.15s;
-  &:hover { ${({ $clickable }) => ($clickable ? 'transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.08);' : '')} }
+  &:hover { ${({ $clickable }) => ($clickable ? 'transform: translateY(-1px); box-shadow: 0 6px 18px rgba(60, 42, 28, 0.08);' : '')} }
 `
 
 const StatIcon = styled.span`
@@ -122,7 +122,7 @@ const StatIcon = styled.span`
   border-radius: 12px;
   font-size: 1.05rem;
   background: #eef0e9;
-  color: #33322e;
+  color: #2e2a2622e;
   &.ico-green { background: rgba(90, 143, 90, 0.14); color: #3f7a3f; }
   &.ico-amber { background: rgba(197, 149, 62, 0.16); color: #9a6c1e; }
 `

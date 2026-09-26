@@ -16,7 +16,7 @@ const Wrapper = styled.div`
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 24px rgba(60, 42, 28, 0.08);
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     border-radius: 8px;
@@ -67,7 +67,7 @@ const CornerRibbon = styled.div`
   background: ${CAMPAIGN_RED};
   color: #fff;
   padding: 0.5rem 0.9rem;
-  border-radius: 4px;
+  border-radius: 8px;
   box-shadow: 0 4px 12px rgba(192, 57, 43, 0.35);
   display: flex;
   flex-direction: column;
@@ -114,7 +114,7 @@ const Info = styled.div`
 const Description = styled.p`
   font-size: 0.9rem;
   line-height: 1.55;
-  color: #555;
+  color: #5a5249;
   margin: 0;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -128,9 +128,9 @@ const PriceBlock = styled.div`
   gap: 0.25rem;
   margin-top: 0.4rem;
   padding: 0.6rem 0.8rem;
-  background: #fdf6f4;
+  background: ${({ theme }) => theme.colors.sunken};
   border-left: 3px solid ${CAMPAIGN_RED};
-  border-radius: 4px;
+  border-radius: 0 ${({ theme }) => theme.borderRadius.medium} ${({ theme }) => theme.borderRadius.medium} 0;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     padding: 0.55rem 0.65rem;
@@ -149,6 +149,7 @@ const Price = styled.span`
   font-weight: 700;
   color: ${CAMPAIGN_RED};
   letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
   line-height: 1.1;
   white-space: nowrap;
 
@@ -159,7 +160,7 @@ const Price = styled.span`
 
 const RegularPrice = styled.span`
   font-size: 0.9rem;
-  color: #888;
+  color: #7a6f61;
   text-decoration: line-through;
 `
 
@@ -174,18 +175,17 @@ const ReadMoreLink = styled(Link)`
   background: ${({ theme }) => theme.colors.textDark};
   color: #fff;
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: -0.005em;
   text-decoration: none;
-  transition: all 0.3s ease;
+  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   margin-top: 0.5rem;
 
   &:hover {
-    background: #333;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background: #2e2a26;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(60, 42, 28, 0.15);
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
@@ -211,7 +211,7 @@ export default function FeaturedProduct() {
                 <strong>-30%</strong>
                 <small>Kampanje</small>
               </CornerRibbon>
-              <SplideCarousel>
+              <SplideCarousel label={`Bilder av ${p.title}`}>
                 {p.images.map((img, i) => (
                   <img key={i} src={img.src} alt={img.alt} loading="lazy" />
                 ))}

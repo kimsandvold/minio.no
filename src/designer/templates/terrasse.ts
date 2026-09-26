@@ -764,8 +764,8 @@ export const terrasse: ProductTemplate<TerrasseConfig> = {
   bilde: '/images/products/terrasse-3d.webp',
   tilgjengelig: true,
   fraPris: 349,
-  // Materialpakke tilbys ikke for terrasse – kun forespør bygging + byggeplan.
-  leveranser: ['ferdig', 'plan'],
+  // Terrasse er ikke et lite prosjekt – kun byggeplan, ingen bygging.
+  leveranser: ['plan'],
   defaultConfig: {
     form: 'rektangel',
     lengde: 500,

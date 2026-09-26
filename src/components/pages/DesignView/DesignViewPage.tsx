@@ -61,7 +61,7 @@ const Card = styled.div`
   width: 100%;
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 16px rgba(60, 42, 28, 0.08);
   overflow: hidden;
 `
 
@@ -70,7 +70,7 @@ const SvgWrapper = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: repeating-conic-gradient(#f0f0f0 0% 25%, #fff 0% 50%) 0 0 / 20px 20px;
+  background: repeating-conic-gradient(#efe9e0 0% 25%, #fff 0% 50%) 0 0 / 20px 20px;
   min-height: 300px;
 
   img {
@@ -82,7 +82,7 @@ const SvgWrapper = styled.div`
 
 const InfoBar = styled.div`
   padding: 1rem 2rem;
-  border-top: 1px solid #eee;
+  border-top: 1px solid #f0eae1;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -97,18 +97,18 @@ const InfoBar = styled.div`
 const DesignName = styled.h2`
   font-size: 1.1rem;
   font-weight: 600;
-  color: #202020;
+  color: #1c1a18;
   margin: 0;
 `
 
 const DesignMeta = styled.span`
   font-size: 0.85rem;
-  color: #888;
+  color: #7a6f61;
 `
 
 const Message = styled.div`
   text-align: center;
-  color: #666;
+  color: #6b6157;
   font-size: 1.1rem;
   padding: 4rem 2rem;
 `

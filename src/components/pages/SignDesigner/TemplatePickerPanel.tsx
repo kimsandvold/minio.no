@@ -3,8 +3,8 @@ import { doorSignTemplates } from '../../../data/doorSignTemplates'
 
 const Panel = styled.div`
   width: 220px;
-  background: #1a1a1a;
-  border-right: 1px solid #333;
+  background: #1c1a18;
+  border-right: 1px solid #2e2a26;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -14,7 +14,7 @@ const Panel = styled.div`
     width: 100%;
     max-height: 35vh;
     border-right: none;
-    border-bottom: 1px solid #333;
+    border-bottom: 1px solid #2e2a26;
   }
 `
 
@@ -22,10 +22,9 @@ const PanelTitle = styled.div`
   padding: 0.75rem 0.75rem 0.5rem;
   font-size: 0.7rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #888;
-  border-bottom: 1px solid #333;
+  letter-spacing: -0.005em;
+  color: #7a6f61;
+  border-bottom: 1px solid #2e2a26;
 `
 
 const List = styled.div`
@@ -48,8 +47,8 @@ const List = styled.div`
 const Card = styled.button`
   display: flex;
   flex-direction: column;
-  background: #2a2a2a;
-  border: 1px solid #333;
+  background: #2e2a26;
+  border: 1px solid #2e2a26;
   border-radius: 6px;
   padding: 0;
   cursor: pointer;
@@ -58,8 +57,8 @@ const Card = styled.button`
   text-align: left;
 
   &:hover {
-    border-color: #1da1f2;
-    background: #333;
+    border-color: #a8512c;
+    background: #2e2a26;
   }
 
   &:focus-visible {
@@ -96,13 +95,13 @@ const CardInfo = styled.div`
 const CardName = styled.div`
   font-size: 0.75rem;
   font-weight: 600;
-  color: #eee;
+  color: #f0eae1;
   margin-bottom: 2px;
 `
 
 const CardDesc = styled.div`
   font-size: 0.6rem;
-  color: #888;
+  color: #7a6f61;
   line-height: 1.3;
 `
 
@@ -111,9 +110,9 @@ const CardDesc = styled.div`
 function KlassiskPreview() {
   return (
     <svg viewBox="0 0 500 200">
-      <line x1={40} y1={55} x2={460} y2={55} stroke="#1a1a1a" strokeWidth={2} />
-      <text x={250} y={110} textAnchor="middle" fontSize={34} fontWeight={600} fontFamily="Inter, sans-serif" fill="#1a1a1a">Ola Nilsens veg 23</text>
-      <line x1={40} y1={145} x2={460} y2={145} stroke="#1a1a1a" strokeWidth={2} />
+      <line x1={40} y1={55} x2={460} y2={55} stroke="#1c1a18" strokeWidth={2} />
+      <text x={250} y={110} textAnchor="middle" fontSize={34} fontWeight={600} fontFamily="Inter, sans-serif" fill="#1c1a18">Ola Nilsens veg 23</text>
+      <line x1={40} y1={145} x2={460} y2={145} stroke="#1c1a18" strokeWidth={2} />
     </svg>
   )
 }
@@ -121,9 +120,9 @@ function KlassiskPreview() {
 function ModernePreview() {
   return (
     <svg viewBox="0 0 500 150">
-      <text x={40} y={52} textAnchor="start" fontSize={22} fontWeight={300} fontFamily="Inter, sans-serif" fill="#1a1a1a" letterSpacing={3}>Ola Nilsens veg</text>
-      <text x={460} y={68} textAnchor="end" fontSize={58} fontWeight={700} fontFamily="Inter, sans-serif" fill="#1a1a1a">23</text>
-      <line x1={40} y1={110} x2={460} y2={110} stroke="#1a1a1a" strokeWidth={1} />
+      <text x={40} y={52} textAnchor="start" fontSize={22} fontWeight={300} fontFamily="Inter, sans-serif" fill="#1c1a18" letterSpacing={3}>Ola Nilsens veg</text>
+      <text x={460} y={68} textAnchor="end" fontSize={58} fontWeight={700} fontFamily="Inter, sans-serif" fill="#1c1a18">23</text>
+      <line x1={40} y1={110} x2={460} y2={110} stroke="#1c1a18" strokeWidth={1} />
     </svg>
   )
 }
@@ -131,8 +130,8 @@ function ModernePreview() {
 function InnrammetPreview() {
   return (
     <svg viewBox="0 0 500 200">
-      <rect x={20} y={20} width={460} height={160} rx={12} ry={12} fill="none" stroke="#1a1a1a" strokeWidth={3} />
-      <text x={250} y={110} textAnchor="middle" fontSize={34} fontWeight={600} fontFamily="Inter, sans-serif" fill="#1a1a1a">Ola Nilsens veg 23</text>
+      <rect x={20} y={20} width={460} height={160} rx={12} ry={12} fill="none" stroke="#1c1a18" strokeWidth={3} />
+      <text x={250} y={110} textAnchor="middle" fontSize={34} fontWeight={600} fontFamily="Inter, sans-serif" fill="#1c1a18">Ola Nilsens veg 23</text>
     </svg>
   )
 }
@@ -140,9 +139,9 @@ function InnrammetPreview() {
 function StorNummerPreview() {
   return (
     <svg viewBox="0 0 400 280">
-      <text x={200} y={110} textAnchor="middle" fontSize={86} fontWeight={700} fontFamily="Inter, sans-serif" fill="#1a1a1a">23</text>
-      <line x1={100} y1={150} x2={300} y2={150} stroke="#1a1a1a" strokeWidth={2} />
-      <text x={200} y={195} textAnchor="middle" fontSize={24} fontWeight={400} fontFamily="Inter, sans-serif" fill="#1a1a1a" letterSpacing={3}>Ola Nilsens veg</text>
+      <text x={200} y={110} textAnchor="middle" fontSize={86} fontWeight={700} fontFamily="Inter, sans-serif" fill="#1c1a18">23</text>
+      <line x1={100} y1={150} x2={300} y2={150} stroke="#1c1a18" strokeWidth={2} />
+      <text x={200} y={195} textAnchor="middle" fontSize={24} fontWeight={400} fontFamily="Inter, sans-serif" fill="#1c1a18" letterSpacing={3}>Ola Nilsens veg</text>
     </svg>
   )
 }
@@ -150,10 +149,10 @@ function StorNummerPreview() {
 function TodeltPreview() {
   return (
     <svg viewBox="0 0 500 200">
-      <text x={120} y={120} textAnchor="middle" fontSize={68} fontWeight={700} fontFamily="Inter, sans-serif" fill="#1a1a1a">23</text>
-      <line x1={240} y1={30} x2={240} y2={170} stroke="#1a1a1a" strokeWidth={2} />
-      <text x={265} y={95} textAnchor="start" fontSize={26} fontWeight={600} fontFamily="Inter, sans-serif" fill="#1a1a1a">Ola Nilsens</text>
-      <text x={265} y={125} textAnchor="start" fontSize={20} fontWeight={300} fontFamily="Inter, sans-serif" fill="#1a1a1a" letterSpacing={2}>veg</text>
+      <text x={120} y={120} textAnchor="middle" fontSize={68} fontWeight={700} fontFamily="Inter, sans-serif" fill="#1c1a18">23</text>
+      <line x1={240} y1={30} x2={240} y2={170} stroke="#1c1a18" strokeWidth={2} />
+      <text x={265} y={95} textAnchor="start" fontSize={26} fontWeight={600} fontFamily="Inter, sans-serif" fill="#1c1a18">Ola Nilsens</text>
+      <text x={265} y={125} textAnchor="start" fontSize={20} fontWeight={300} fontFamily="Inter, sans-serif" fill="#1c1a18" letterSpacing={2}>veg</text>
     </svg>
   )
 }

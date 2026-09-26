@@ -175,7 +175,7 @@ const DesignerCta = styled(Link)`
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.34);
   }
 
@@ -293,7 +293,7 @@ const Article = styled.article`
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     padding-bottom: 2rem;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e8e1d7;
   }
 `
 
@@ -419,13 +419,13 @@ const Sidebar = styled.aside`
   height: fit-content;
   position: sticky;
   top: 100px;
-  border-left: 1px solid #e0e0e0;
+  border-left: 1px solid #e8e1d7;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     position: static;
     padding: 0 0 2rem;
     border-left: none;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e8e1d7;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -447,11 +447,11 @@ const DesignerSidebarCta = styled(Link)`
   font-size: 1rem;
   text-align: center;
   text-decoration: none;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 24px rgba(60, 42, 28, 0.18);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 
   &:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.24);
   }
 
@@ -471,12 +471,12 @@ const FaqList = styled.div`
   margin-top: 1rem;
 
   details {
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e8e1d7;
     padding: 1rem 0;
   }
 
   details:first-of-type {
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #e8e1d7;
   }
 
   summary {
@@ -511,7 +511,7 @@ const FaqList = styled.div`
   details p {
     margin: 1rem 0 0;
     line-height: 1.8;
-    color: #333;
+    color: #2e2a26;
   }
 `
 

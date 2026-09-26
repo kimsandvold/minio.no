@@ -9,7 +9,7 @@ import Icon from '../../shared/Icon'
 const Card = styled.div`
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(60, 42, 28, 0.06);
   overflow: hidden;
 `
 
@@ -23,7 +23,7 @@ const CardHeader = styled.div<{ $clickable: boolean }>`
   gap: 0.5rem;
 
   &:hover {
-    background: ${({ $clickable }) => ($clickable ? '#fafafa' : 'transparent')};
+    background: ${({ $clickable }) => ($clickable ? '#faf7f2' : 'transparent')};
   }
 `
 
@@ -41,7 +41,7 @@ const CustomerName = styled.span`
 
 const OrderMeta = styled.span`
   font-size: 0.8rem;
-  color: #999;
+  color: #7a6f61;
 `
 
 const HeaderRight = styled.div`
@@ -68,13 +68,13 @@ const StatusBadge = styled.span<{ $color: string }>`
 
 const ExpandIcon = styled.span<{ $expanded: boolean }>`
   font-size: 0.8rem;
-  color: #999;
+  color: #7a6f61;
   transition: transform 0.2s ease;
   transform: rotate(${({ $expanded }) => ($expanded ? '180deg' : '0')});
 `
 
 const Details = styled.div`
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid #efe9e0;
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -86,7 +86,7 @@ const DetailSection = styled.div`
     font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: #999;
+    color: #7a6f61;
     margin-bottom: 0.5rem;
   }
 `
@@ -97,7 +97,7 @@ const InfoGrid = styled.div`
   gap: 0.25rem 1rem;
   font-size: 0.9rem;
 
-  dt { color: #666; font-weight: 500; }
+  dt { color: #6b6157; font-weight: 500; }
   dd { color: ${({ theme }) => theme.colors.textDark}; margin: 0; }
 `
 
@@ -111,14 +111,14 @@ const ItemRow = styled.div`
   display: flex;
   justify-content: space-between;
   padding: 0.5rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #efe9e0;
   font-size: 0.9rem;
 
   &:last-child { border-bottom: none; }
 `
 
 const ItemDetails = styled.span`
-  color: #666;
+  color: #6b6157;
   font-size: 0.8rem;
 `
 
@@ -130,7 +130,7 @@ const StatusControl = styled.div`
 
 const StatusSelect = styled.select`
   padding: 0.5rem 0.75rem;
-  border: 2px solid #e0e0e0;
+  border: 2px solid #e8e1d7;
   border-radius: 6px;
   font-size: 0.9rem;
   font-family: inherit;
@@ -153,16 +153,16 @@ const SaveBtn = styled.button`
   cursor: pointer;
   transition: background 0.2s ease;
 
-  &:hover { background: #333; }
+  &:hover { background: #2e2a26; }
   &:disabled { opacity: 0.5; cursor: not-allowed; }
 `
 
 const NotesBox = styled.div`
-  background: #fafafa;
+  background: #faf7f2;
   padding: 0.75rem;
   border-radius: 6px;
   font-size: 0.9rem;
-  color: #444;
+  color: #4a433c;
   white-space: pre-wrap;
 `
 

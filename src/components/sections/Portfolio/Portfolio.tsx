@@ -15,45 +15,43 @@ const SectionHeader = styled.div`
   margin-bottom: 3rem;
 
   h2 {
-    font-size: 2.2rem;
-    font-weight: 700;
-    color: ${({ theme }) => theme.colors.textDark};
-    margin-bottom: 0.75rem;
-    letter-spacing: -0.02em;
+    margin-bottom: 0.9rem;
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     margin-bottom: 2rem;
-    h2 { font-size: 1.6rem; }
   }
 `
 
 const Subtitle = styled.p`
-  font-size: 1.05rem;
+  font-size: ${({ theme }) => theme.fontSizes.md};
   line-height: 1.7;
-  color: #666;
-  max-width: 600px;
+  color: ${({ theme }) => theme.colors.inkMuted};
+  max-width: 44rem;
   margin: 0 auto;
 `
 
 const Divider = styled.div`
-  width: 60px;
-  height: 3px;
+  width: 48px;
+  height: 2px;
   background: ${({ theme }) => theme.colors.accent};
-  margin: 1.25rem auto 0;
-  border-radius: 2px;
+  margin: 1.5rem auto 0;
+  border-radius: 999px;
 `
 
+/* Sans her, ikke display — dette er en rutenett-etikett, ikke en overskrift. */
 const GridHeading = styled.h3`
-  font-size: 1.3rem;
+  font-family: ${({ theme }) => theme.fonts.body};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
   font-weight: 600;
-  color: ${({ theme }) => theme.colors.textDark};
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.colors.inkSubtle};
   text-align: center;
   margin: 4rem 0 2rem;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     margin: 2.5rem 0 1.5rem;
-    font-size: 1.15rem;
   }
 `
 
@@ -81,28 +79,26 @@ const ViewAllLink = styled(Link)`
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.85rem 2.5rem;
+  padding: 0.9rem 2rem;
   background: transparent;
-  color: ${({ theme }) => theme.colors.textDark};
-  border: 2px solid ${({ theme }) => theme.colors.textDark};
-  border-radius: 4px;
+  color: ${({ theme }) => theme.colors.ink};
+  border: 1px solid ${({ theme }) => theme.colors.borderStrong};
+  border-radius: ${({ theme }) => theme.borderRadius.medium};
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: ${({ theme }) => theme.fontSizes.base};
+  letter-spacing: -0.005em;
   text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
+  transition:
+    background-color ${({ theme }) => theme.transitions.default},
+    border-color ${({ theme }) => theme.transitions.default},
+    color ${({ theme }) => theme.transitions.default},
+    transform ${({ theme }) => theme.transitions.default};
 
   &:hover {
-    background: ${({ theme }) => theme.colors.textDark};
-    color: #fff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.colors.accent};
-    outline-offset: 2px;
+    background: ${({ theme }) => theme.colors.ink};
+    border-color: ${({ theme }) => theme.colors.ink};
+    color: ${({ theme }) => theme.colors.inkInverted};
+    transform: translateY(-1px);
   }
 `
 
@@ -112,7 +108,7 @@ export default function Portfolio() {
   const { data: randomProducts, loading } = useRandomProducts(productCount)
 
   return (
-    <Section id="portefolje" variant="light">
+    <Section id="portefolje" variant="surface">
       <Container>
         <SectionHeader>
           <h2>Utendørs treprodukter etter dine mål</h2>

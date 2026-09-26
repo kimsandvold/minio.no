@@ -5,7 +5,7 @@ import Icon from '../../shared/Icon'
 
 const Content = styled.div`
   padding: 2rem;
-  color: #ddd;
+  color: #ddd4c7;
 `
 
 const Title = styled.h3`
@@ -15,16 +15,16 @@ const Title = styled.h3`
 
 const Input = styled.input`
   width: 100%;
-  background: #2a2a2a;
-  border: 1px solid #444;
+  background: #2e2a26;
+  border: 1px solid #4a433c;
   border-radius: 6px;
-  color: #ddd;
+  color: #ddd4c7;
   padding: 0.6rem 0.8rem;
   font-size: 0.95rem;
   outline: none;
   margin-bottom: 1rem;
 
-  &:focus { border-color: #1da1f2; }
+  &:focus { border-color: #a8512c; }
 `
 
 const ButtonRow = styled.div`
@@ -36,8 +36,8 @@ const ButtonRow = styled.div`
 const Button = styled.button<{ $primary?: boolean }>`
   padding: 0.5rem 1.2rem;
   border-radius: 6px;
-  border: 1px solid ${({ $primary }) => ($primary ? '#1da1f2' : '#444')};
-  background: ${({ $primary }) => ($primary ? '#1da1f2' : '#333')};
+  border: 1px solid ${({ $primary }) => ($primary ? '#a8512c' : '#4a433c')};
+  background: ${({ $primary }) => ($primary ? '#a8512c' : '#2e2a26')};
   color: #fff;
   font-size: 0.85rem;
   cursor: pointer;

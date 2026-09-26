@@ -1,29 +1,22 @@
 import styled from 'styled-components'
+import { Link } from 'react-router-dom'
 import Section from '../../layout/Section'
 import HeroSlideshow from './HeroSlideshow'
 import ShareButtons from '../../shared/ShareButtons'
+import Icon from '../../shared/Icon'
 
-const HeroBlur = styled.div`
+/**
+ * Scrim-en er varm, ikke nøytralt svart. En flat rgba(0,0,0,.55) nøytraliserer
+ * høstlyset i fotoene; denne mørkner mot en brunsvart i bunn og lar toppen av
+ * bildet beholde kulør. Gradienten er også tettere der teksten står, slik at
+ * kontrasten holder uansett hvilket bilde som vises i slideshowet.
+ */
+const HeroScrim = styled.div`
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 70%);
-  z-index: 5;
-  pointer-events: none;
-`
-
-const HeroOverlay = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.55);
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(20, 15, 11, 0.55) 0%, rgba(20, 15, 11, 0.2) 32%, rgba(20, 15, 11, 0.72) 100%),
+    radial-gradient(90% 65% at 50% 55%, rgba(20, 15, 11, 0.45) 0%, transparent 75%);
   z-index: ${({ theme }) => theme.zIndex.heroOverlay};
   pointer-events: none;
 `
@@ -34,64 +27,184 @@ const HeroContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  max-width: 44rem;
+  padding-bottom: 3rem;
 `
 
 const HeroLogo = styled.img`
-  width: 220px;
-  margin-bottom: 3rem;
-  margin-top: -30px;
-  opacity: 0.35;
-  filter: drop-shadow(0 2px 12px rgba(0, 0, 0, 0.2));
+  width: 120px;
+  height: auto;
+  margin-bottom: 2.25rem;
+  opacity: 0.9;
+  filter: drop-shadow(0 2px 16px rgba(0, 0, 0, 0.45));
 
-  @media (max-width: 768px) {
-    width: 150px;
-    margin-bottom: 1.2rem;
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    width: 84px;
+    margin-bottom: 1.5rem;
   }
+`
+
+/** H1 var visuelt skjult før — nå bærer den heroen. */
+const HeroTitle = styled.h1`
+  font-family: ${({ theme }) => theme.fonts.display};
+  font-size: ${({ theme }) => theme.fontSizes['4xl']};
+  font-weight: 600;
+  line-height: 1.08;
+  color: #fff;
+  letter-spacing: -0.02em;
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.35);
+  margin: 0;
+  text-wrap: balance;
 `
 
 const HeroText = styled.p`
-  font-size: 0.95rem;
-  font-weight: 300;
-  letter-spacing: 0.3px;
-  line-height: 1.7;
-  color: rgba(255, 255, 255, 0.85);
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-  max-width: 460px;
-  margin: 0 auto;
+  font-size: ${({ theme }) => theme.fontSizes.md};
+  font-weight: 400;
+  line-height: 1.65;
+  color: rgba(255, 255, 255, 0.88);
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.4);
+  max-width: 34rem;
+  margin: 1.25rem auto 0;
 
-  @media (max-width: 768px) {
-    font-size: 0.9rem;
-    max-width: 340px;
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    font-size: ${({ theme }) => theme.fontSizes.base};
   }
 `
 
-const VisuallyHiddenH1 = styled.h1`
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+const Actions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.85rem;
+  margin-top: 2.25rem;
+
+  /* På mobil stables knappene — da skal de ha samme bredde, ellers ser de
+     ut som to tilfeldig klipte bokser under hverandre. */
+  @media (max-width: ${({ theme }) => theme.breakpoints.smallMobile}) {
+    flex-direction: column;
+    align-items: stretch;
+    width: min(20rem, 100%);
+  }
+`
+
+const ctaBase = `
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.95rem 1.7rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  text-decoration: none;
+  cursor: pointer;
+`
+
+const PrimaryCta = styled(Link)`
+  ${ctaBase}
+  background: ${({ theme }) => theme.colors.accent};
+  color: #fff;
+  border: 1px solid transparent;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+  transition:
+    background-color ${({ theme }) => theme.transitions.default},
+    transform ${({ theme }) => theme.transitions.default},
+    box-shadow ${({ theme }) => theme.transitions.default};
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.accentHover};
+    transform: translateY(-1px);
+    box-shadow: 0 12px 34px rgba(0, 0, 0, 0.38);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`
+
+const SecondaryCta = styled(Link)`
+  ${ctaBase}
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition:
+    background-color ${({ theme }) => theme.transitions.default},
+    border-color ${({ theme }) => theme.transitions.default},
+    transform ${({ theme }) => theme.transitions.default};
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`
+
+/** Liten trygghetslinje under CTA-ene — svarer på «hvem er dette» før scroll. */
+const TrustLine = styled.p`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin-top: 1.75rem;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.4);
+
+  span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+`
+
+const ShareWrap = styled.div`
+  margin-top: 2.5rem;
+  opacity: 0.75;
+  transition: opacity ${({ theme }) => theme.transitions.default};
+
+  &:hover {
+    opacity: 1;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    margin-top: 2rem;
+  }
 `
 
 export default function Hero() {
   return (
     <Section id="hjem" variant="hero">
       <HeroSlideshow />
-      <HeroBlur />
-      <HeroOverlay />
+      <HeroScrim />
       <HeroContent>
-        <VisuallyHiddenH1>Hageprodukter i tre, skreddersydd etter dine mål</VisuallyHiddenH1>
-        <HeroLogo src="/images/branding/logo_icon_white.webp" alt="Minio logo" />
+        <HeroLogo src="/images/branding/logo_icon_white.webp" alt="Minio" width={120} height={120} />
+        <HeroTitle>Hageprodukter i tre, bygget etter dine mål</HeroTitle>
         <HeroText>
-          Drømmer du om et uteprodukt som er helt unikt for ditt hjem? Vi bygger det etter dine mål og preferanser.
+          Tegn prosjektet ditt i 3D med dine egne mål – helt gratis. Så bygger vi det
+          for deg, eller du får byggeplan og materialliste og bygger selv.
         </HeroText>
-        <div style={{ marginTop: '3rem' }}>
+        <Actions>
+          <PrimaryCta to="/designverktoy">
+            <Icon name="faCube" /> Design ditt eget
+          </PrimaryCta>
+          <SecondaryCta to="/produkter">Se produktene</SecondaryCta>
+        </Actions>
+        <TrustLine>
+          <span><Icon name="faCheck" /> Gratis å designe</span>
+          <span><Icon name="faCheck" /> Egne mål</span>
+          <span><Icon name="faCheck" /> Håndlaget i Lillehammer</span>
+        </TrustLine>
+        <ShareWrap>
           <ShareButtons variant="hero" context="hero" />
-        </div>
+        </ShareWrap>
       </HeroContent>
     </Section>
   )

@@ -67,7 +67,7 @@ const Hero = styled.section`
   position: relative;
   color: ${({ theme }) => theme.colors.textLight};
   text-align: center;
-  padding: 4rem 2rem 2rem;
+  padding: 6rem 2rem 2rem;
 
   &::before {
     content: '';
@@ -218,7 +218,7 @@ const Article = styled.article`
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     padding: 0;
     padding-bottom: 2rem;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e8e1d7;
   }
 `
 
@@ -255,7 +255,7 @@ const ImageWrap = styled.div`
 
   .splide {
     overflow: hidden;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 12px rgba(60, 42, 28, 0.15);
   }
 
   .splide__slide {
@@ -278,13 +278,13 @@ const Sidebar = styled.aside`
   height: fit-content;
   position: sticky;
   top: 100px;
-  border-left: 1px solid #e0e0e0;
+  border-left: 1px solid #e8e1d7;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     position: static;
     padding: 0 0 2rem;
     border-left: none;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e8e1d7;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -312,7 +312,7 @@ const AdvancedCta = styled(Link)`
 
   &:hover {
     background: #202329;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
   }
 
   .ac-ico {
@@ -360,7 +360,7 @@ const ReviewsHeader = styled.div`
 
   p {
     font-size: 0.95rem;
-    color: #888;
+    color: #7a6f61;
     margin: 0;
   }
 `
@@ -368,7 +368,7 @@ const ReviewsHeader = styled.div`
 const ReviewNote = styled.p`
   text-align: center;
   font-size: 0.85rem;
-  color: #999;
+  color: #7a6f61;
   margin-top: 1rem;
 `
 

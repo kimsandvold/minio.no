@@ -6,7 +6,7 @@ import { formatSum } from '../../../utils/formatPrice'
 const Card = styled.div`
   background: white;
   border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(60, 42, 28, 0.06);
   padding: 1.5rem;
   display: flex;
   flex-direction: column;
@@ -23,7 +23,7 @@ const CardHeader = styled.div`
 
 const OrderId = styled.span`
   font-size: 0.8rem;
-  color: #999;
+  color: #7a6f61;
   font-family: monospace;
 `
 
@@ -42,7 +42,7 @@ const ItemList = styled.div`
   flex-direction: column;
   gap: 0.5rem;
   font-size: 0.9rem;
-  color: #444;
+  color: #4a433c;
 `
 
 const ItemRow = styled.div`
@@ -50,7 +50,7 @@ const ItemRow = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #efe9e0;
 
   &:last-child { border-bottom: none; }
 `
@@ -60,7 +60,7 @@ const CardFooter = styled.div`
   justify-content: space-between;
   align-items: center;
   padding-top: 0.75rem;
-  border-top: 2px solid #f0f0f0;
+  border-top: 2px solid #efe9e0;
 `
 
 const TotalSum = styled.span`
@@ -71,7 +71,7 @@ const TotalSum = styled.span`
 
 const DateText = styled.span`
   font-size: 0.8rem;
-  color: #999;
+  color: #7a6f61;
 `
 
 function formatDate(timestamp: { seconds: number } | null): string {

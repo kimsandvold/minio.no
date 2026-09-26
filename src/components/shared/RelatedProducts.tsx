@@ -19,7 +19,7 @@ const Header = styled.div`
 
   p {
     font-size: 0.9rem;
-    color: #666;
+    color: #6b6157;
     margin: 0;
   }
 `
@@ -41,15 +41,15 @@ const Card = styled(Link)`
   gap: 1rem;
   padding: 1rem;
   background: #fff;
-  border: 1px solid #e8e8e8;
+  border: 1px solid #eae3d9;
   border-radius: 10px;
   text-decoration: none;
   color: inherit;
   transition: box-shadow 0.2s ease, transform 0.2s ease;
 
   &:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(60, 42, 28, 0.08);
+    transform: translateY(-1px);
   }
 
   &:focus-visible {
@@ -64,7 +64,7 @@ const CardImage = styled.div`
   border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
-  background: #f5f5f5;
+  background: #f4efe8;
 
   img {
     width: 100%;
@@ -90,7 +90,7 @@ const CardTitle = styled.div`
 
 const CardPrice = styled.div`
   font-size: 0.78rem;
-  color: #666;
+  color: #6b6157;
 `
 
 interface RelatedProductsProps {
