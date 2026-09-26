@@ -5,8 +5,8 @@ import { useIntersectionObserver } from '../../hooks/useIntersectionObserver'
 import Icon from '../shared/Icon'
 
 /**
- * Felles byggeklosser for forsiden. Ett gitter (1240 px), én overskriftsstil
- * og én lenkestil – så seksjonene leser som ett system i stedet for sju.
+ * Redaksjonelle byggeklosser for hele siden. Ett gitter (1240 px), én overskriftsstil
+ * og én lenkestil – så sidene leser som ett system. Brukes av forsiden og undersidene.
  */
 
 export const Wrap = styled.div`
@@ -173,3 +173,92 @@ export function Reveal({ children, forsinkelse = 0 }: { children: ReactNode; for
     </RevealBoks>
   )
 }
+
+interface SideHodeProps {
+  eyebrow?: ReactNode
+  tittel: ReactNode
+  ingress?: ReactNode
+  /** Knapper/lenker under ingressen. */
+  handlinger?: ReactNode
+  /** Fullbredde innhold nederst i headeren (faner, søk, nøkkeltall …). */
+  children?: ReactNode
+}
+
+/**
+ * Standard sidehode for undersidene: mørk flate (navbaren står skarpt mot den),
+ * venstrejustert stor tittel, ingress til høyre på brede skjermer. Samme
+ * typografi som forsidens helt – bare uten foto.
+ */
+export function SideHode({ eyebrow, tittel, ingress, handlinger, children }: SideHodeProps) {
+  return (
+    <HodeFlate data-surface="dark">
+      <Wrap>
+        <HodeGrid>
+          <div>
+            {eyebrow && <Eyebrow $lys>{eyebrow}</Eyebrow>}
+            <h1>{tittel}</h1>
+          </div>
+          {(ingress || handlinger) && (
+            <HodeSide>
+              {ingress && <Ingress $lys>{ingress}</Ingress>}
+              {handlinger && <HodeHandlinger>{handlinger}</HodeHandlinger>}
+            </HodeSide>
+          )}
+        </HodeGrid>
+        {children && <HodeBunn>{children}</HodeBunn>}
+      </Wrap>
+    </HodeFlate>
+  )
+}
+
+const HodeFlate = styled.header`
+  position: relative;
+  overflow: hidden;
+  padding: clamp(8.5rem, 14vw, 11rem) 0 clamp(3rem, 6vw, 5rem);
+  color: ${({ theme }) => theme.colors.inkInverted};
+  background:
+    radial-gradient(90% 120% at 0% 0%, rgba(168, 81, 44, 0.22), transparent 55%),
+    radial-gradient(60% 80% at 100% 100%, rgba(224, 137, 95, 0.08), transparent 60%),
+    ${({ theme }) => theme.colors.deep};
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2.8rem, 6.6vw, 5.75rem);
+    font-weight: 600;
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+    max-width: 13ch;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    padding: 7rem 0 2.75rem;
+  }
+`
+
+const HodeGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 2.5rem 4rem;
+  align-items: end;
+
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const HodeSide = styled.div`
+  ${Ingress} {
+    margin-top: 0;
+  }
+`
+
+const HodeHandlinger = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+`
+
+const HodeBunn = styled.div`
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+`

@@ -1,195 +1,37 @@
-import { Link } from 'react-router-dom'
 import styled from 'styled-components'
+import { Link } from 'react-router-dom'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
-import { useSEO } from '../../../hooks/useSEO'
 import PageTransition from '../../shared/PageTransition'
-import SplideCarousel from '../../shared/SplideCarousel'
-import PromoRibbon from '../../shared/PromoRibbon'
-import { ProductGridCardSkeleton } from '../../shared/ProductSkeleton'
+import Icon from '../../shared/Icon'
+import { useSEO } from '../../../hooks/useSEO'
 import { useAllProducts } from '../../../hooks/useProducts'
-import PollCard from '../../sections/Portfolio/PollCard'
 import { useActivePoll } from '../../../hooks/useActivePoll'
-import { blueprintGrid, blueprintGridVignette } from '../../../styles/blueprintGrid'
+import PollCard from '../../sections/Portfolio/PollCard'
+import { Eyebrow, Knapp, Reveal, Seksjon, SideHode, Tittel, Wrap } from '../../editorial'
+import ProduktKort, { ProduktKortSkjelett } from '../../editorial/ProduktKort'
 
-const Hero = styled.section`
-  position: relative;
-  overflow: hidden;
-  min-height: 30vh;
-  ${blueprintGrid}
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.textLight};
-  text-align: center;
-  padding: 6rem 2rem 3rem;
-
-  &::after {
-    ${blueprintGridVignette}
-  }
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    min-height: 25vh;
-    padding: 5rem 1.5rem 2rem;
-  }
-`
-
-const HeroContent = styled.div`
-  position: relative;
-  z-index: 1;
-  max-width: 800px;
-
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    font-weight: 700;
-
-    @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1.8rem;
-    }
-  }
-
-  p {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.8);
-    line-height: 1.6;
-
-    @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1rem;
-    }
-  }
-
-  a {
-    color: #fff;
-    font-weight: 600;
-    text-decoration: underline;
-    text-underline-offset: 0.18em;
-  }
-`
-
-const Content = styled.section`
-  background: ${({ theme }) => theme.colors.lightBg};
-  padding: 3rem 2rem 4rem;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    padding: 2rem 1rem 3rem;
-  }
-`
-
-const Container = styled.div`
-  max-width: ${({ theme }) => theme.spacing.containerMax};
-  margin: 0 auto;
-`
-
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 2rem;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-`
-
-const Card = styled.div`
-  display: flex;
-  flex-direction: column;
-  background: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 12px rgba(60, 42, 28, 0.08);
-  color: inherit;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  position: relative;
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(60, 42, 28, 0.12);
-  }
-`
-
-const CardImageWrap = styled.div`
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  overflow: hidden;
-
-  .splide,
-  .splide__track,
-  .splide__list,
-  .splide__slide {
-    height: 100%;
-  }
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-`
-
-const CardBody = styled.div`
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-
-  /* Kortnavn, ikke seksjonsoverskrift – derfor sans, ikke display-serifen. */
-  h2 {
-    font-family: ${({ theme }) => theme.fonts.body};
-    font-size: 1.05rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    color: ${({ theme }) => theme.colors.ink};
-    margin: 0 0 0.5rem;
-  }
-
-  p {
-    font-size: 0.88rem;
-    line-height: 1.6;
-    color: #5a5249;
-    margin: 0 0 1rem;
-    flex: 1;
-  }
-`
-
-const CardPrice = styled.div`
-  font-weight: 500;
-  font-size: 1.2rem;
-  color: #2c2c2c;
-  letter-spacing: -0.02em;
-`
-
-const CardRegularPrice = styled.div`
-  font-size: 0.8rem;
-  color: #7a6f61;
-  text-decoration: line-through;
-  margin-top: 0.15rem;
-`
-
-const DetailsButton = styled(Link)`
-  display: block;
-  text-align: center;
-  padding: 0.75rem 1.5rem;
-  margin: 0 1.25rem 1.25rem;
-  background: ${({ theme }) => theme.colors.darkBg};
-  color: ${({ theme }) => theme.colors.textLight};
-  border-radius: 6px;
-  text-decoration: none;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: opacity 0.2s ease;
-
-  &:hover {
-    opacity: 0.85;
-  }
-`
+const ANDRE_VEIER = [
+  {
+    ikon: 'faCube',
+    tittel: 'Design selv i 3D',
+    tekst: 'Carport, terrasse, pergola og mer – tegn med dine mål og få materialliste og byggeplan.',
+    til: '/designverktoy',
+    cta: 'Åpne designverktøyet',
+  },
+  {
+    ikon: 'faLightbulb',
+    tittel: 'Har du en egen idé?',
+    tekst: 'Få prisanslag på tre trykk og et personlig svar – også på prosjekter som ikke står her.',
+    til: '/prosjekthjelp',
+    cta: 'Få prisanslag',
+  },
+]
 
 export default function ProdukterPage() {
-  const { data: allProducts, loading } = useAllProducts()
+  const { data: produkter, loading } = useAllProducts()
   const { activePollId } = useActivePoll()
 
   useSEO({
@@ -201,49 +43,61 @@ export default function ProdukterPage() {
     <>
       <Navbar />
       <PageTransition>
-      <main>
-        <Hero>
-          <HeroContent>
-            <h1>Alle produkter</h1>
-            <p>
-              Utforsk hele vårt sortiment av skreddersydde produkter i tre. Alt lages på bestilling
-              etter dine mål og ønsker. Les mer om <Link to="/handlaget-i-tre">håndlaget i tre</Link>.
-            </p>
-          </HeroContent>
-        </Hero>
-        <Content>
-          <Container>
-            <Grid>
-              {loading
-                ? Array.from({ length: 6 }, (_, i) => <ProductGridCardSkeleton key={i} />)
-                : allProducts.map(product => (
-                    <Card key={product.id}>
-                      {product.hasPromoRibbon && <PromoRibbon />}
-                      <CardImageWrap>
-                        {product.images.length > 1 ? (
-                          <SplideCarousel label={`Bilder av ${product.title}`}>
-                            {product.images.map((img, i) => (
-                              <img key={i} src={img.src} alt={img.alt} loading="lazy" />
-                            ))}
-                          </SplideCarousel>
-                        ) : (
-                          <img src={product.images[0].src} alt={product.images[0].alt} loading="lazy" />
-                        )}
-                      </CardImageWrap>
-                      <CardBody>
-                        <h2>{product.title}</h2>
-                        <p>{product.shortDescription}</p>
-                        <CardPrice>{product.price}</CardPrice>
-                        {product.regularPrice && <CardRegularPrice>{product.regularPrice}</CardRegularPrice>}
-                      </CardBody>
-                      <DetailsButton to={`/produkter/${product.slug}`}>Se detaljer</DetailsButton>
-                    </Card>
-                  ))}
-              {activePollId && <PollCard pollId={activePollId} />}
-            </Grid>
-          </Container>
-        </Content>
-      </main>
+        <main id="main-content">
+          <SideHode
+            eyebrow="Laget på bestilling"
+            tittel="Produkter"
+            ingress={
+              <>
+                Plantekasser, varmepumpehus, søppelboder og mer – laget etter dine mål. Velg et
+                produkt for å tilpasse størrelse, treslag og finish.
+              </>
+            }
+            handlinger={
+              <>
+                <Knapp to="/handlaget-i-tre" $variant="glass">Om håndverket</Knapp>
+              </>
+            }
+          />
+
+          <Seksjon>
+            <Wrap>
+              <Grid aria-busy={loading}>
+                {loading
+                  ? Array.from({ length: 6 }, (_, i) => <ProduktKortSkjelett key={i} />)
+                  : produkter.map((p, i) => (
+                      <Reveal key={p.id} forsinkelse={(i % 3) * 80}>
+                        <ProduktKort produkt={p} medBeskrivelse />
+                      </Reveal>
+                    ))}
+                {!loading && activePollId && <PollCard pollId={activePollId} />}
+              </Grid>
+            </Wrap>
+          </Seksjon>
+
+          <Seksjon $flate="surface">
+            <Wrap>
+              <Reveal>
+                <Eyebrow>Finner du ikke det du leter etter?</Eyebrow>
+                <Tittel>Større prosjekter starter i 3D.</Tittel>
+              </Reveal>
+              <Veier>
+                {ANDRE_VEIER.map((v, i) => (
+                  <Reveal key={v.til} forsinkelse={i * 90}>
+                    <Vei to={v.til}>
+                      <VeiIkon><Icon name={v.ikon} /></VeiIkon>
+                      <h3>{v.tittel}</h3>
+                      <p>{v.tekst}</p>
+                      <VeiCta>
+                        {v.cta} <Icon name="faArrowRight" />
+                      </VeiCta>
+                    </Vei>
+                  </Reveal>
+                ))}
+              </Veier>
+            </Wrap>
+          </Seksjon>
+        </main>
       </PageTransition>
       <Footer />
       <ProductModal />
@@ -251,3 +105,98 @@ export default function ProdukterPage() {
     </>
   )
 }
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3rem 1.5rem;
+
+  @media (max-width: 960px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem 1rem;
+  }
+
+  /* Mobil: to kolonner som i en nettbutikk – bilde, navn og pris er nok. */
+  @media (max-width: 520px) {
+    gap: 2rem 0.75rem;
+
+    .beskrivelse {
+      display: none;
+    }
+  }
+`
+
+const Veier = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-top: clamp(2rem, 4vw, 3rem);
+
+  @media (max-width: 760px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const Vei = styled(Link)`
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 2rem;
+  border-radius: 24px;
+  background: ${({ theme }) => theme.colors.paper};
+  color: inherit;
+  text-decoration: none;
+  transition: transform ${({ theme }) => theme.transitions.soft}, box-shadow ${({ theme }) => theme.transitions.soft};
+
+  h3 {
+    margin: 1.5rem 0 0.5rem;
+    font-size: 1.6rem;
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    margin: 0 0 1.75rem;
+    color: ${({ theme }) => theme.colors.inkMuted};
+    max-width: 44ch;
+  }
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 24px 48px rgba(28, 26, 24, 0.08);
+  }
+
+  &:hover svg:last-child {
+    transform: translateX(4px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover {
+      transform: none;
+    }
+  }
+`
+
+const VeiIkon = styled.span`
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  font-size: 1.15rem;
+  color: ${({ theme }) => theme.colors.accent};
+  background: ${({ theme }) => theme.colors.accentSoft};
+`
+
+const VeiCta = styled.span`
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.accent};
+
+  svg {
+    font-size: 0.8em;
+    transition: transform ${({ theme }) => theme.transitions.default};
+  }
+`

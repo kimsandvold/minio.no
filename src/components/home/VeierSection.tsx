@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import Icon from '../shared/Icon'
-import { Eyebrow, Hode, Ingress, Reveal, Seksjon, Tittel, Wrap } from './shared'
+import { Eyebrow, Hode, Ingress, Reveal, Seksjon, Tittel, Wrap } from '../editorial'
 
 /**
  * Hele forretningen på én skjerm: hvor mye vil kunden gjøre selv? Tre kort,

@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { guidePhases, guideTopics } from '../../data/byggeguider'
-import { Eyebrow, Hode, Ingress, PilLenke, Reveal, Seksjon, Tittel, Wrap } from './shared'
+import { Eyebrow, Hode, Ingress, PilLenke, Reveal, Seksjon, Tittel, Wrap } from '../editorial'
 
 const TILGJENGELIGE = guideTopics.filter((t) => t.available)
 const PER_FASE = 4

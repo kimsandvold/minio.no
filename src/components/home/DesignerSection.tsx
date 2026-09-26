@@ -1,7 +1,7 @@
 import styled, { keyframes } from 'styled-components'
 import { Link } from 'react-router-dom'
 import Icon from '../shared/Icon'
-import { Eyebrow, Ingress, Knapp, Reveal, Seksjon, Tittel, Wrap } from './shared'
+import { Eyebrow, Ingress, Knapp, Reveal, Seksjon, Tittel, Wrap } from '../editorial'
 
 /**
  * Designverktøyet er produktet – vis det som et produkt. Speilet av

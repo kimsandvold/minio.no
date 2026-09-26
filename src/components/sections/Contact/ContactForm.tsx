@@ -1,191 +1,26 @@
-import styled from 'styled-components'
+import { useEffect } from 'react'
+import styled, { keyframes } from 'styled-components'
+import { Link } from 'react-router-dom'
 import { useContactForm } from '../../../hooks/useContactForm'
-import { scaleIn, shake } from '../../../styles/animations'
+import { trackEvent } from '../../../utils/analytics'
 import Icon from '../../shared/Icon'
 
-const Form = styled.form`
-  display: flex;
-  flex-direction: column;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  gap: 1rem;
-  max-width: 600px;
-  width: 100%;
+interface ContactFormProps {
+  /** Forhåndsutfylt emne, f.eks. fra `?subject=` i URL-en. */
+  emne?: string
+}
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    margin-top: 1.5rem;
-    margin-bottom: 1.5rem;
-  }
-`
+export default function ContactForm({ emne }: ContactFormProps) {
+  const { formState, setField, prefillSubject, submit, status, reset } = useContactForm()
 
-const Input = styled.input`
-  padding: 0.75rem 1rem;
-  border: 2px solid #e8e1d7;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-family: ${({ theme }) => theme.fonts.body};
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  // Emnet må inn i skjemastaten (feltet er kontrollert) – ellers sendes det ikke med.
+  useEffect(() => {
+    if (emne) prefillSubject(emne)
+  }, [emne, prefillSubject])
 
-  &:focus {
-    outline: 0;
-    border-color: ${({ theme }) => theme.colors.accent};
-    box-shadow: 0 0 0 3px rgba(60, 42, 28, 0.08);
-  }
-`
-
-const TextArea = styled.textarea`
-  padding: 0.75rem 1rem;
-  border: 2px solid #e8e1d7;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-family: ${({ theme }) => theme.fonts.body};
-  min-height: 120px;
-  resize: vertical;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
-
-  &:focus {
-    outline: 0;
-    border-color: ${({ theme }) => theme.colors.accent};
-    box-shadow: 0 0 0 3px rgba(60, 42, 28, 0.08);
-  }
-`
-
-const HelperText = styled.div`
-  font-size: 0.85rem;
-  color: #6b6157;
-  margin-top: -0.5rem;
-  font-style: italic;
-`
-
-const SubmitButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.9rem 1.5rem;
-  background-color: ${({ theme }) => theme.colors.textDark};
-  color: #fff;
-  border: 0;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: -0.005em;
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:hover {
-    background-color: #2e2a26;
-    transform: translateY(-1px);
-  }
-  &:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-    transform: none;
-  }
-`
-
-const SuccessPanel = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 2.5rem 1.5rem;
-  margin-top: 2rem;
-  margin-bottom: 2rem;
-  max-width: 600px;
-  width: 100%;
-  animation: ${scaleIn} 0.4s ease both;
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
-`
-
-const SuccessIcon = styled.div`
-  font-size: 2.5rem;
-  color: #28a745;
-  margin-bottom: 1rem;
-`
-
-const SuccessHeading = styled.h3`
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: ${({ theme }) => theme.colors.textDark};
-  margin: 0 0 0.5rem;
-`
-
-const SuccessBody = styled.p`
-  font-size: 0.95rem;
-  color: #5a5249;
-  line-height: 1.6;
-  margin: 0 0 1.5rem;
-`
-
-const ResetButton = styled.button`
-  padding: 0.75rem 1.5rem;
-  background: none;
-  border: 2px solid ${({ theme }) => theme.colors.textDark};
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: ${({ theme }) => theme.colors.textDark};
-  transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.textDark};
-    color: #fff;
-  }
-`
-
-const ErrorPanel = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 1.5rem;
-  border-radius: 8px;
-  background-color: #f8d7da;
-  border: 1px solid #f5c6cb;
-  margin-top: 1rem;
-  animation: ${shake} 0.4s ease;
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
-`
-
-const ErrorIcon = styled.div`
-  font-size: 1.5rem;
-  color: #721c24;
-  margin-bottom: 0.5rem;
-`
-
-const ErrorText = styled.p`
-  font-size: 0.9rem;
-  color: #721c24;
-  margin: 0 0 1rem;
-  line-height: 1.5;
-`
-
-const RetryButton = styled.button`
-  padding: 0.6rem 1.25rem;
-  background: #721c24;
-  color: #fff;
-  border: 0;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.85rem;
-  transition: opacity 0.2s;
-
-  &:hover {
-    opacity: 0.85;
-  }
-`
-
-export default function ContactForm() {
-  const { formState, setField, submit, status, reset } = useContactForm()
+  useEffect(() => {
+    if (status === 'success') trackEvent('kontakt_sendt', 'kontakt')
+  }, [status])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -194,81 +29,320 @@ export default function ContactForm() {
 
   if (status === 'success') {
     return (
-      <SuccessPanel>
-        <SuccessIcon>
-          <Icon name="faCheckCircle" />
-        </SuccessIcon>
-        <SuccessHeading>Meldingen er sendt!</SuccessHeading>
-        <SuccessBody>
-          Takk for din henvendelse. Vi svarer vanligvis innen 24 timer.
-        </SuccessBody>
-        <ResetButton onClick={reset}>Send ny melding</ResetButton>
-      </SuccessPanel>
+      <Kvittering role="status">
+        <KvitteringIkon><Icon name="faCheckCircle" /></KvitteringIkon>
+        <h2>Takk, meldingen er sendt.</h2>
+        <p>Du får et personlig svar på e-posten du oppga.</p>
+        <SekundaerKnapp type="button" onClick={reset}>Send en ny melding</SekundaerKnapp>
+      </Kvittering>
     )
   }
 
   return (
-    <Form id="contactForm" onSubmit={handleSubmit}>
-      <Input
-        type="text"
-        name="name"
-        placeholder="Navn *"
-        required
-        value={formState.name}
-        onChange={e => setField('name', e.target.value)}
-      />
-      <Input
-        type="email"
-        name="email"
-        placeholder="E-post *"
-        required
-        value={formState.email}
-        onChange={e => setField('email', e.target.value)}
-      />
-      <Input
-        type="tel"
-        name="phone"
-        placeholder="Telefon"
-        value={formState.phone}
-        onChange={e => setField('phone', e.target.value)}
-      />
-      <Input
-        type="text"
-        name="subject"
-        id="contactSubject"
-        placeholder="Emne"
-        value={formState.subject}
-        onChange={e => setField('subject', e.target.value)}
-      />
-      <TextArea
-        name="message"
-        id="contactMessage"
-        placeholder="Melding *"
-        required
-        value={formState.message}
-        onChange={e => setField('message', e.target.value)}
-      />
-      <HelperText>Vær så spesifikk som mulig med størrelse, utførelse, forventet levering etc.</HelperText>
-      <SubmitButton type="submit" disabled={status === 'submitting'}>
-        {status === 'submitting' ? (
-          <>
-            <Icon name="faSpinner" spin /> Sender...
-          </>
-        ) : (
-          <>
-            <Icon name="faPaperPlane" /> Send melding
-          </>
-        )}
-      </SubmitButton>
+    <Skjema id="contactForm" onSubmit={handleSubmit}>
+      <Topp>
+        <h2>Send en melding</h2>
+        <p>Felt merket med * må fylles ut.</p>
+      </Topp>
+      <ToKolonner>
+        <Felt>
+          <label htmlFor="contactName">Navn *</label>
+          <input
+            id="contactName"
+            type="text"
+            name="name"
+            required
+            autoComplete="name"
+            value={formState.name}
+            onChange={e => setField('name', e.target.value)}
+          />
+        </Felt>
+        <Felt>
+          <label htmlFor="contactEmail">E-post *</label>
+          <input
+            id="contactEmail"
+            type="email"
+            name="email"
+            required
+            autoComplete="email"
+            value={formState.email}
+            onChange={e => setField('email', e.target.value)}
+          />
+        </Felt>
+      </ToKolonner>
+
+      <ToKolonner>
+        <Felt>
+          <label htmlFor="contactPhone">Telefon <span>(valgfritt)</span></label>
+          <input
+            id="contactPhone"
+            type="tel"
+            name="phone"
+            autoComplete="tel"
+            value={formState.phone}
+            onChange={e => setField('phone', e.target.value)}
+          />
+        </Felt>
+        <Felt>
+          <label htmlFor="contactSubject">Emne <span>(valgfritt)</span></label>
+          <input
+            id="contactSubject"
+            type="text"
+            name="subject"
+            value={formState.subject}
+            onChange={e => setField('subject', e.target.value)}
+          />
+        </Felt>
+      </ToKolonner>
+
+      <Felt>
+        <label htmlFor="contactMessage">Melding *</label>
+        <textarea
+          id="contactMessage"
+          name="message"
+          required
+          rows={6}
+          value={formState.message}
+          onChange={e => setField('message', e.target.value)}
+          aria-describedby="contactMessageHjelp"
+        />
+        <Hjelp id="contactMessageHjelp">
+          Jo mer konkret, jo bedre svar: mål, treslag, finish og når du trenger det.
+        </Hjelp>
+      </Felt>
+
       {status === 'error' && (
-        <ErrorPanel>
-          <ErrorIcon>
-            <Icon name="faExclamationTriangle" />
-          </ErrorIcon>
-          <ErrorText>Noe gikk galt. Vennligst prøv igjen eller kontakt oss via sosiale medier.</ErrorText>
-          <RetryButton onClick={reset}>Prøv igjen</RetryButton>
-        </ErrorPanel>
+        <Feil role="alert">
+          <Icon name="faExclamationTriangle" />
+          <span>
+            Noe gikk galt. Prøv igjen, eller send oss en melding på Facebook eller Instagram.
+          </span>
+        </Feil>
       )}
-    </Form>
+
+      <SendKnapp type="submit" disabled={status === 'submitting'}>
+        {status === 'submitting'
+          ? <><Icon name="faSpinner" spin /> Sender …</>
+          : <><Icon name="faPaperPlane" /> Send melding</>}
+      </SendKnapp>
+      <Note>
+        Uforpliktende. E-posten brukes bare til å svare deg. Se{' '}
+        <Link to="/personvern">personvernerklæringen</Link>.
+      </Note>
+    </Skjema>
   )
 }
+
+const innFade = keyframes`
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+`
+
+const Skjema = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  width: 100%;
+`
+
+const Topp = styled.div`
+  margin-bottom: 0.65rem;
+
+  h2 {
+    margin: 0 0 0.35rem;
+    font-size: ${({ theme }) => theme.fontSizes['2xl']};
+    font-weight: 600;
+    letter-spacing: -0.035em;
+  }
+
+  p {
+    margin: 0;
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    color: ${({ theme }) => theme.colors.inkMuted};
+  }
+`
+
+const ToKolonner = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.1rem 0.9rem;
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const Felt = styled.div`
+  min-width: 0;
+
+  label {
+    display: block;
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    font-weight: 600;
+    margin-bottom: 0.45rem;
+    color: ${({ theme }) => theme.colors.ink};
+
+    span {
+      font-weight: 400;
+      color: ${({ theme }) => theme.colors.inkMuted};
+    }
+  }
+
+  input,
+  textarea {
+    width: 100%;
+    font: inherit;
+    font-size: 1rem;
+    color: ${({ theme }) => theme.colors.ink};
+    background: ${({ theme }) => theme.colors.surface};
+    border: 1px solid ${({ theme }) => theme.colors.borderStrong};
+    border-radius: 12px;
+    padding: 0.8rem 0.95rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      border-color: ${({ theme }) => theme.colors.neutral[400]};
+    }
+
+    &:focus {
+      outline: none;
+      border-color: ${({ theme }) => theme.colors.accent};
+      box-shadow: 0 0 0 3px ${({ theme }) => theme.colors.accentSoft};
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 150px;
+    line-height: 1.55;
+  }
+`
+
+const Hjelp = styled.p`
+  margin: 0.5rem 0 0;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  line-height: 1.5;
+  color: ${({ theme }) => theme.colors.inkMuted};
+`
+
+const Feil = styled.p`
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  line-height: 1.5;
+  color: ${({ theme }) => theme.colors.error};
+  background: ${({ theme }) => theme.colors.errorSoft};
+
+  svg {
+    margin-top: 0.2rem;
+    flex: none;
+  }
+`
+
+const SendKnapp = styled.button`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  width: 100%;
+  min-height: 52px;
+  margin-top: 0.3rem;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  background: ${({ theme }) => theme.colors.accent};
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 0 1.5rem;
+  cursor: pointer;
+  transition: background ${({ theme }) => theme.transitions.default}, transform ${({ theme }) => theme.transitions.default};
+
+  &:hover:not(:disabled) {
+    background: ${({ theme }) => theme.colors.accentHover};
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.99);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.focus};
+    outline-offset: 3px;
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: default;
+  }
+`
+
+const Note = styled.p`
+  margin: -0.2rem 0 0;
+  text-align: center;
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  line-height: 1.55;
+  color: ${({ theme }) => theme.colors.inkMuted};
+
+  a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+  }
+`
+
+const Kvittering = styled.div`
+  text-align: center;
+  padding: 3rem 0.5rem;
+  animation: ${innFade} 0.5s ${({ theme }) => theme.easing.soft} both;
+
+  h2 {
+    margin: 0 0 0.6rem;
+    font-size: ${({ theme }) => theme.fontSizes['2xl']};
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    margin: 0 auto 1.75rem;
+    max-width: 40ch;
+    color: ${({ theme }) => theme.colors.inkMuted};
+    line-height: 1.6;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`
+
+const KvitteringIkon = styled.div`
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1.25rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 1.7rem;
+  color: ${({ theme }) => theme.colors.success};
+  background: ${({ theme }) => theme.colors.successSoft};
+`
+
+const SekundaerKnapp = styled.button`
+  font: inherit;
+  font-weight: 500;
+  min-height: 44px;
+  padding: 0 1.4rem;
+  border-radius: 999px;
+  border: 1px solid ${({ theme }) => theme.colors.borderStrong};
+  background: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.ink};
+  cursor: pointer;
+  transition: border-color ${({ theme }) => theme.transitions.default};
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.ink};
+  }
+`

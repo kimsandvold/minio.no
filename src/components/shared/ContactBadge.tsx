@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
+import { useLocation } from 'react-router-dom'
 import Icon from './Icon'
 
 // Phone digits stored as (charCode - 8) to keep "48252843" out of the bundled source.
@@ -175,6 +176,7 @@ export default function ContactBadge() {
   const [expanded, setExpanded] = useState(false)
   const [phone, setPhone] = useState('')
   const wrapperRef = useRef<HTMLDivElement>(null)
+  const { pathname } = useLocation()
 
   const handleReveal = () => {
     if (!phone) setPhone(decodePhone())
@@ -198,6 +200,9 @@ export default function ContactBadge() {
       document.removeEventListener('keydown', onKey)
     }
   }, [expanded])
+
+  // Overflødig på kontaktsiden – der dekker den bare skjemaet på mobil.
+  if (pathname === '/kontakt') return null
 
   return (
     <Wrapper ref={wrapperRef} data-nosnippet>

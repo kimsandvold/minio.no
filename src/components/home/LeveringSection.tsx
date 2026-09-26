@@ -1,5 +1,5 @@
 import Leveringskart from '../shared/Leveringskart/Leveringskart'
-import { Reveal, Seksjon, Wrap } from './shared'
+import { Reveal, Seksjon, Wrap } from '../editorial'
 
 export default function LeveringSection() {
   return (

@@ -1,20 +1,9 @@
 import { useRef } from 'react'
 import styled from 'styled-components'
-import { Link } from 'react-router-dom'
 import Icon from '../shared/Icon'
 import { allProducts } from '../../data/products'
-import { Eyebrow, Hode, PilLenke, Reveal, Seksjon, Tittel, Wrap } from './shared'
-
-/** «Varmepumpehus – tilpasset ditt hjem» → «Varmepumpehus». */
-function kortNavn(tittel: string) {
-  return tittel.split(' – ')[0]
-}
-
-/** «Pris fra 3490,-» → «fra 3 490 kr». Faller tilbake på originalteksten. */
-function kortPris(pris: string) {
-  const tall = pris.match(/\d[\d\s]*/)?.[0].replace(/\s/g, '')
-  return tall ? `fra ${Number(tall).toLocaleString('nb-NO')} kr` : pris
-}
+import { Eyebrow, Hode, PilLenke, Reveal, Seksjon, Tittel, Wrap } from '../editorial'
+import ProduktKort from '../editorial/ProduktKort'
 
 const PRODUKTER = allProducts
   .filter((p) => p.showOnFrontPage && !p.unlisted)
@@ -54,17 +43,9 @@ export default function ProdukterSection() {
       <Reveal forsinkelse={100}>
         <Skinne ref={skinne}>
           {PRODUKTER.map((p) => (
-            <Produkt key={p.slug} to={`/produkter/${p.slug}`}>
-              <Bilde>
-                <img src={p.images[0]?.src} alt={p.images[0]?.alt ?? ''} loading="lazy" />
-                {p.regularPrice && <Merke>Tilbud</Merke>}
-              </Bilde>
-              <Navn>{kortNavn(p.title)}</Navn>
-              <Pris>
-                {kortPris(p.price)}
-                {p.regularPrice && <s>{kortPris(p.regularPrice).replace('fra ', '')}</s>}
-              </Pris>
-            </Produkt>
+            <Plass key={p.slug}>
+              <ProduktKort produkt={p} />
+            </Plass>
           ))}
         </Skinne>
       </Reveal>
@@ -129,66 +110,6 @@ const Skinne = styled.div`
   }
 `
 
-const Produkt = styled(Link)`
+const Plass = styled.div`
   scroll-snap-align: start;
-  color: inherit;
-  text-decoration: none;
-
-  img {
-    transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-
-  &:hover img {
-    transform: scale(1.05);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    &:hover img {
-      transform: none;
-    }
-  }
-`
-
-const Bilde = styled.div`
-  position: relative;
-  aspect-ratio: 4 / 5;
-  border-radius: 20px;
-  overflow: hidden;
-  background: ${({ theme }) => theme.colors.sunken};
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-`
-
-const Merke = styled.span`
-  position: absolute;
-  top: 0.9rem;
-  left: 0.9rem;
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  font-size: ${({ theme }) => theme.fontSizes.xs};
-  font-weight: 600;
-  background: ${({ theme }) => theme.colors.surface};
-  color: ${({ theme }) => theme.colors.accent};
-`
-
-const Navn = styled.h3`
-  margin: 1rem 0 0.2rem;
-  font-size: ${({ theme }) => theme.fontSizes.md};
-  font-weight: 600;
-  letter-spacing: -0.015em;
-`
-
-const Pris = styled.p`
-  margin: 0;
-  font-size: ${({ theme }) => theme.fontSizes.sm};
-  color: ${({ theme }) => theme.colors.inkMuted};
-
-  s {
-    margin-left: 0.5rem;
-    color: ${({ theme }) => theme.colors.inkSubtle};
-  }
 `

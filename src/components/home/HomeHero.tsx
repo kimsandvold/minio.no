@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import styled, { css, keyframes } from 'styled-components'
 import { Link } from 'react-router-dom'
 import Icon from '../shared/Icon'
-import { Knapp } from './shared'
+import { Knapp } from '../editorial'
 
 /**
  * Fullskjerms helt. Ett budskap, to valg, og bildene gjør resten. Hvert bilde

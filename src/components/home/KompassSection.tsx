@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import Icon from '../shared/Icon'
 import { PROSJEKTTYPER } from '../pages/Prosjekthjelp/prosjektKompass'
-import { Eyebrow, Ingress, Reveal, Seksjon, Tittel, Wrap } from './shared'
+import { Eyebrow, Ingress, Reveal, Seksjon, Tittel, Wrap } from '../editorial'
 
 /**
  * Snarvei inn i prosjektkompasset på /prosjekthjelp. Hver type lander rett på

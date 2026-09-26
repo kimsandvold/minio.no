@@ -1,356 +1,42 @@
-import { useEffect, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useId, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
-import AnimatedBlock from '../../shared/AnimatedBlock'
+import Icon from '../../shared/Icon'
 import { useSEO } from '../../../hooks/useSEO'
+import { MINIO_PUBLISHER } from '../../../utils/seo'
+import { company } from '../../../data/company'
 import ContactForm from '../../sections/Contact/ContactForm'
 import Leveringskart from '../../shared/Leveringskart/Leveringskart'
-import ShareButtons from '../../shared/ShareButtons'
-import Icon from '../../shared/Icon'
+import { Eyebrow, Reveal, Seksjon, SideHode, Tittel, Wrap } from '../../editorial'
 
-const Hero = styled.section`
-  min-height: 30vh;
-  background: ${({ theme }) => theme.colors.darkBg};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: ${({ theme }) => theme.colors.textLight};
-  text-align: center;
-  padding: 6rem 2rem 3rem;
+const SITE_URL = 'https://minio.no'
 
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    min-height: 25vh;
-    padding: 5rem 1.5rem 2rem;
-  }
-`
+const FACEBOOK_URL = 'https://www.facebook.com/profile.php?id=61576010648640&locale=nb_NO'
+const INSTAGRAM_URL = 'https://www.instagram.com/minio2624'
 
-const HeroContent = styled.div`
-  max-width: 800px;
+const VEIER = [
+  {
+    ikon: 'faLightbulb',
+    tittel: 'Har du en prosjektidé?',
+    tekst: 'Terrasse, pergola, carport eller noe helt eget – få prisanslag på tre trykk og et personlig svar.',
+    til: '/prosjekthjelp',
+    cta: 'Få prisanslag',
+  },
+  {
+    ikon: 'faCube',
+    tittel: 'Vil du tegne selv?',
+    tekst: 'Tegn prosjektet i 3D med dine mål og få materialliste og byggeplan.',
+    til: '/designverktoy',
+    cta: 'Åpne designverktøyet',
+  },
+]
 
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    font-weight: 700;
-
-    @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1.8rem;
-    }
-  }
-
-  p {
-    font-size: 1.1rem;
-    color: rgba(255, 255, 255, 0.8);
-    line-height: 1.6;
-
-    @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-      font-size: 1rem;
-    }
-  }
-`
-
-const Content = styled.section`
-  background: ${({ theme }) => theme.colors.lightBg};
-  padding: 4rem 2rem 5rem;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    padding: 2rem 1rem 3rem;
-  }
-`
-
-const Container = styled.div`
-  max-width: ${({ theme }) => theme.spacing.containerMax};
-  margin: 0 auto;
-`
-
-const Intro = styled.p`
-  font-size: ${({ theme }) => theme.fontSizes.md};
-  line-height: 1.8;
-  color: ${({ theme }) => theme.colors.inkMuted};
-  max-width: ${({ theme }) => theme.spacing.proseMax};
-  margin-bottom: 2.5rem;
-`
-
-const Grid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 380px;
-  gap: 4rem;
-  align-items: start;
-
-  @media (max-width: 960px) {
-    grid-template-columns: 1fr;
-    gap: 2.5rem;
-  }
-`
-
-const FormSection = styled.div`
-  background: #fff;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 16px rgba(60, 42, 28, 0.06);
-
-  h2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: ${({ theme }) => theme.colors.textDark};
-    margin: 0 0 0.25rem;
-  }
-
-  & > p {
-    font-size: 0.9rem;
-    color: #7a6f61;
-    margin: 0 0 0.5rem;
-  }
-
-  form {
-    margin-top: 1.5rem;
-    margin-bottom: 0;
-  }
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    padding: 1.5rem;
-  }
-`
-
-const Sidebar = styled.aside`
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-`
-
-const InfoCard = styled.div`
-  background: #fff;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 16px rgba(60, 42, 28, 0.06);
-
-  h3 {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: ${({ theme }) => theme.colors.textDark};
-    margin: 0 0 1.25rem;
-  }
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    padding: 1.5rem;
-  }
-`
-
-const InfoItem = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: 0.85rem;
-  margin-bottom: 1.25rem;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-`
-
-const InfoIcon = styled.div`
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: ${({ theme }) => theme.colors.lightBg};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: ${({ theme }) => theme.colors.accent};
-  font-size: 0.85rem;
-`
-
-const InfoText = styled.div`
-  span {
-    display: block;
-    font-size: 0.78rem;
-    font-weight: 600;
-    letter-spacing: -0.005em;
-    color: #7a6f61;
-    margin-bottom: 0.15rem;
-  }
-
-  p {
-    font-size: 0.95rem;
-    color: ${({ theme }) => theme.colors.textDark};
-    margin: 0;
-    line-height: 1.5;
-  }
-
-  a {
-    color: ${({ theme }) => theme.colors.textDark};
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.2s;
-
-    &:hover {
-      color: ${({ theme }) => theme.colors.accent};
-    }
-  }
-`
-
-const SocialLinks = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-`
-
-const SocialLink = styled.a<{ $platform: 'facebook' | 'instagram' }>`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.85rem 1rem;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: transform 0.2s, box-shadow 0.2s;
-  color: #fff;
-
-  background: ${({ $platform }) =>
-    $platform === 'facebook' ? '#3b5998' : '#c9344f'};
-
-  &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px ${({ $platform }) =>
-      $platform === 'facebook' ? 'rgba(59, 89, 152, 0.35)' : 'rgba(228, 64, 95, 0.35)'};
-  }
-
-  svg {
-    font-size: 1rem;
-  }
-`
-
-const ShareCard = styled.div`
-  background: #fff;
-  border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 16px rgba(60, 42, 28, 0.06);
-  text-align: center;
-
-  p {
-    font-size: 0.9rem;
-    color: #6b6157;
-    margin: 0 0 1rem;
-    line-height: 1.5;
-  }
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    padding: 1.5rem;
-  }
-`
-
-const KartSeksjon = styled.div`
-  margin-top: 4rem;
-  padding-top: 4rem;
-  border-top: 1px solid ${({ theme }) => theme.colors.border};
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    margin-top: 2.5rem;
-    padding-top: 2.5rem;
-  }
-`
-
-const FaqSection = styled.div`
-  margin-top: 4rem;
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    margin-top: 2.5rem;
-  }
-`
-
-const FaqHeader = styled.div`
-  margin-bottom: 2rem;
-
-  h2 {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: ${({ theme }) => theme.colors.textDark};
-    margin: 0 0 0.5rem;
-  }
-
-  p {
-    font-size: 0.95rem;
-    color: #7a6f61;
-    margin: 0;
-  }
-`
-
-const FaqList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-`
-
-const FaqItem = styled.div`
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 2px 12px rgba(60, 42, 28, 0.05);
-  overflow: hidden;
-`
-
-const FaqQuestion = styled.button<{ $open: boolean }>`
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.25rem 2rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-
-  &:focus {
-    outline: none;
-  }
-
-  &:focus-visible {
-    outline: 2px solid ${({ theme }) => theme.colors.accent};
-    outline-offset: -2px;
-    border-radius: 10px;
-  }
-  text-align: left;
-  font-size: 1rem;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.textDark};
-  line-height: 1.4;
-  transition: color 0.2s;
-
-  &:hover {
-    color: ${({ theme }) => theme.colors.accent};
-  }
-
-  svg {
-    flex-shrink: 0;
-    margin-left: 1rem;
-    font-size: 0.75rem;
-    color: ${({ $open, theme }) => $open ? theme.colors.accent : '#b3a797'};
-    transition: color 0.2s;
-  }
-`
-
-const FaqAnswer = styled.div<{ $open: boolean }>`
-  display: grid;
-  grid-template-rows: ${({ $open }) => ($open ? '1fr' : '0fr')};
-  transition: grid-template-rows 0.3s ease;
-
-  & > div {
-    overflow: hidden;
-  }
-
-  p {
-    font-size: 0.92rem;
-    line-height: 1.7;
-    color: #5a5249;
-    margin: 0;
-    padding: 0 2rem 1.5rem;
-  }
-`
-
-const faqData = [
+const FAQ = [
   {
     q: 'Hvor lang er leveringstiden?',
     a: 'Leveringstiden varierer avhengig av produkt og ordremengde, men normalt leverer vi innen 2–4 uker etter bekreftet bestilling.',
@@ -361,163 +47,209 @@ const faqData = [
   },
   {
     q: 'Kan jeg velge farge og finish selv?',
-    a: 'Absolutt! Du kan velge mellom ubehandlet, grunnet eller ferdig malt/beiset i ønsket farge. Vi tilpasser etter dine preferanser.',
+    a: 'Ja. Du kan velge mellom ubehandlet, grunnet eller ferdig malt/beiset i ønsket farge.',
   },
   {
     q: 'Hvordan fungerer bestillingsprosessen?',
-    a: 'Send oss en melding med dine ønsker og mål. Vi gir deg et tilbud, og etter godkjenning betaler du 50 % forskudd før produksjonen starter. Resterende 50 % betales ved ferdigstilling.',
+    a: 'Send oss en melding med dine ønsker og mål. Du får et tilbud, og etter godkjenning betaler du 50 % forskudd før produksjonen starter. Resterende 50 % betales ved ferdigstilling.',
   },
   {
     q: 'Tilbyr dere montering?',
-    a: 'Ja, vi tilbyr montering som tilleggstjeneste innenfor vårt leveringsområde. Pris avhenger av produkt og kompleksitet.',
+    a: 'Ja, vi tilbyr montering som tilleggstjeneste innenfor leveringsområdet. Pris avhenger av produkt og kompleksitet.',
+  },
+  {
+    q: 'Kan dere bygge terrassen eller carporten min?',
+    a: 'Større prosjekter som terrasse, pergola og carport bygger du selv eller med en snekker. I prosjekthjelpen får du prisanslag og et personlig svar – og hjelp til å finne en snekker hvis du trenger det.',
   },
   {
     q: 'Hva om produktet ikke passer?',
-    a: 'Siden alle produkter er skreddersydde, jobber vi tett med deg gjennom hele prosessen for å sikre at resultatet blir riktig. Vi sender alltid detaljerte mål og illustrasjoner før produksjon.',
+    a: 'Siden alle produkter lages etter mål, jobber vi tett med deg gjennom hele prosessen. Du får alltid detaljerte mål og illustrasjoner før produksjon.',
   },
 ]
 
-function FaqAccordion() {
-  const [openIndex, setOpenIndex] = useState<number | null>(null)
+const JSONLD = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ContactPage',
+    '@id': `${SITE_URL}/kontakt#page`,
+    url: `${SITE_URL}/kontakt`,
+    name: 'Kontakt Minio',
+    inLanguage: 'nb-NO',
+    about: {
+      ...MINIO_PUBLISHER,
+      sameAs: [FACEBOOK_URL.split('&')[0], INSTAGRAM_URL],
+    },
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    inLanguage: 'nb-NO',
+    mainEntity: FAQ.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Hjem', item: `${SITE_URL}/` },
+      { '@type': 'ListItem', position: 2, name: 'Kontakt', item: `${SITE_URL}/kontakt` },
+    ],
+  },
+]
 
-  const toggle = (i: number) => {
-    setOpenIndex(openIndex === i ? null : i)
-  }
+function FaqListe() {
+  const [apen, setApen] = useState<number | null>(null)
+  const id = useId()
 
   return (
-    <FaqList>
-      {faqData.map((item, i) => (
-        <FaqItem key={i}>
-          <FaqQuestion $open={openIndex === i} onClick={() => toggle(i)}>
-            {item.q}
-            <Icon name={openIndex === i ? 'faMinus' : 'faPlus'} />
-          </FaqQuestion>
-          <FaqAnswer $open={openIndex === i}>
-            <div><p>{item.a}</p></div>
-          </FaqAnswer>
-        </FaqItem>
-      ))}
-    </FaqList>
+    <Liste>
+      {FAQ.map((item, i) => {
+        const erApen = apen === i
+        return (
+          <Rad key={item.q}>
+            <Sporsmal
+              type="button"
+              aria-expanded={erApen}
+              aria-controls={`${id}-${i}`}
+              onClick={() => setApen(erApen ? null : i)}
+            >
+              <span>{item.q}</span>
+              <Pluss $apen={erApen} aria-hidden="true" />
+            </Sporsmal>
+            <Svar id={`${id}-${i}`} $apen={erApen} role="region" aria-hidden={!erApen}>
+              <div><p>{item.a}</p></div>
+            </Svar>
+          </Rad>
+        )
+      })}
+    </Liste>
   )
 }
 
 export default function KontaktPage() {
   const [searchParams] = useSearchParams()
+  const emne = searchParams.get('subject') ?? undefined
 
   useSEO({
     title: 'Ta kontakt – Minio',
-    description: 'Kontakt Minio for skreddersydde treløsninger. Send oss en melding, så tar vi kontakt innen kort tid. Basert i Lillehammer med levering inntil 200 km.',
+    description:
+      'Kontakt Minio om produkter, bestillinger og levering. Send en melding, så får du et personlig svar på e-post. Levering inntil 200 km fra Lillehammer.',
+    jsonLd: JSONLD,
   })
-
-  useEffect(() => {
-    const subject = searchParams.get('subject')
-    if (subject) {
-      setTimeout(() => {
-        const subjectField = document.getElementById('contactSubject') as HTMLInputElement | null
-        if (subjectField) subjectField.value = subject
-      }, 300)
-    }
-  }, [searchParams])
 
   return (
     <>
       <Navbar />
       <PageTransition>
-        <main>
-          <Hero>
-            <HeroContent>
-              <h1>Ta kontakt</h1>
-              <p>Vi hjelper deg gjerne med ditt neste prosjekt. Send oss en melding, så tar vi kontakt innen kort tid.</p>
-            </HeroContent>
-          </Hero>
-          <Content>
-            <Container>
-              <AnimatedBlock>
-                <Intro>Enten du har en konkret idé eller bare lurer på hva som er mulig – send oss en melding. Vi svarer vanligvis innen 24 timer, og alle henvendelser er helt uforpliktende.</Intro>
-              </AnimatedBlock>
-              <Grid>
-                <AnimatedBlock delay={100}>
-                  <FormSection>
-                    <h2>Send oss en melding</h2>
-                    <p>Felter merket med * er obligatoriske</p>
-                    <ContactForm />
-                  </FormSection>
-                </AnimatedBlock>
+        <main id="main-content">
+          <SideHode
+            eyebrow="Spørsmål og bestilling"
+            tittel="Ta kontakt."
+            ingress={
+              <>
+                Spørsmål om et produkt, en bestilling eller levering? Send en melding, så får du et
+                personlig svar på e-post – helt uforpliktende.
+              </>
+            }
+          />
 
-                <AnimatedBlock delay={200}>
-                  <Sidebar>
-                    <InfoCard>
-                      <h3>Kontaktinformasjon</h3>
-                      <InfoItem>
-                        <InfoIcon><Icon name="faHandPointer" /></InfoIcon>
-                        <InfoText>
-                          <span>Lokasjon</span>
-                          <p>Lillehammer, Norge</p>
-                        </InfoText>
-                      </InfoItem>
-                      <InfoItem>
-                        <InfoIcon><Icon name="faTruck" /></InfoIcon>
-                        <InfoText>
-                          <span>Leveringsområde</span>
-                          <p>Inntil 200 km fra Lillehammer</p>
-                        </InfoText>
-                      </InfoItem>
-                      <InfoItem>
-                        <InfoIcon><Icon name="faEnvelope" /></InfoIcon>
-                        <InfoText>
-                          <span>E-post</span>
-                          <p>Bruk kontaktskjemaet på denne siden</p>
-                        </InfoText>
-                      </InfoItem>
-                    </InfoCard>
+          <SkjemaSeksjon>
+            <Wrap>
+              <Oppsett>
+                <Reveal>
+                  <SkjemaKort>
+                    <ContactForm emne={emne} />
+                  </SkjemaKort>
+                </Reveal>
 
-                    <InfoCard>
-                      <h3>Finn oss på sosiale medier</h3>
-                      <SocialLinks>
-                        <SocialLink
-                          href="https://www.facebook.com/profile.php?id=61576010648640&locale=nb_NO"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          $platform="facebook"
-                          aria-label="Kontakt oss på Facebook (åpnes i nytt vindu)"
-                        >
-                          <Icon name="faFacebookF" /> Facebook
-                        </SocialLink>
-                        <SocialLink
-                          href="https://www.instagram.com/minio2624"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          $platform="instagram"
-                          aria-label="Kontakt oss på Instagram (åpnes i nytt vindu)"
-                        >
-                          <Icon name="faInstagram" /> Instagram
-                        </SocialLink>
-                      </SocialLinks>
-                    </InfoCard>
+                <Reveal forsinkelse={120}>
+                  <Info aria-label="Andre veier og kontaktinformasjon">
+                    <Eyebrow>Finn riktig vei</Eyebrow>
+                    <Veier>
+                      {VEIER.map((v) => (
+                        <Vei key={v.til} to={v.til}>
+                          <VeiIkon><Icon name={v.ikon} /></VeiIkon>
+                          <div>
+                            <h3>{v.tittel}</h3>
+                            <p>{v.tekst}</p>
+                            <VeiCta>
+                              {v.cta} <Icon name="faArrowRight" />
+                            </VeiCta>
+                          </div>
+                        </Vei>
+                      ))}
+                    </Veier>
 
-                    <ShareCard>
-                      <p>Liker du det du ser? Anbefal oss til venner og familie!</p>
-                      <ShareButtons variant="section" context="contact" />
-                    </ShareCard>
-                  </Sidebar>
-                </AnimatedBlock>
-              </Grid>
-              <AnimatedBlock>
-                <KartSeksjon>
-                  <Leveringskart />
-                </KartSeksjon>
-              </AnimatedBlock>
-              <AnimatedBlock>
-                <FaqSection>
-                  <FaqHeader>
-                    <h2>Vanlige spørsmål</h2>
-                    <p>Finner du ikke svaret du leter etter? Send oss en melding!</p>
-                  </FaqHeader>
-                  <FaqAccordion />
-                </FaqSection>
-              </AnimatedBlock>
-            </Container>
-          </Content>
+                    <Fakta>
+                      <div>
+                        <dt>Levering</dt>
+                        <dd>Produkter leveres inntil 200 km fra Lillehammer.</dd>
+                      </div>
+                      <div>
+                        <dt>Foretak</dt>
+                        <dd>{company.brand} · org.nr {company.orgNr}</dd>
+                      </div>
+                      <div>
+                        <dt>Følg oss</dt>
+                        <dd>
+                          <Sosiale>
+                            <Sosial
+                              href={FACEBOOK_URL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              $platform="facebook"
+                              aria-label="Minio på Facebook (åpnes i nytt vindu)"
+                            >
+                              <span><Icon name="faFacebookF" /></span> Facebook
+                            </Sosial>
+                            <Sosial
+                              href={INSTAGRAM_URL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              $platform="instagram"
+                              aria-label="Minio på Instagram (åpnes i nytt vindu)"
+                            >
+                              <span><Icon name="faInstagram" /></span> Instagram
+                            </Sosial>
+                          </Sosiale>
+                        </dd>
+                      </div>
+                    </Fakta>
+                  </Info>
+                </Reveal>
+              </Oppsett>
+            </Wrap>
+          </SkjemaSeksjon>
+
+          <Seksjon $flate="surface">
+            <Wrap>
+              <Reveal>
+                <Leveringskart />
+              </Reveal>
+            </Wrap>
+          </Seksjon>
+
+          <Seksjon>
+            <Wrap>
+              <FaqOppsett>
+                <Reveal>
+                  <FaqHode>
+                    <Eyebrow>Vanlige spørsmål</Eyebrow>
+                    <Tittel>Kort fortalt.</Tittel>
+                    <p>
+                      Finner du ikke svaret? <a href="#contactName" onClick={tilSkjema}>Send oss en melding</a>.
+                    </p>
+                  </FaqHode>
+                </Reveal>
+                <Reveal forsinkelse={100}>
+                  <FaqListe />
+                </Reveal>
+              </FaqOppsett>
+            </Wrap>
+          </Seksjon>
         </main>
       </PageTransition>
       <Footer />
@@ -526,3 +258,330 @@ export default function KontaktPage() {
     </>
   )
 }
+
+/** Ruller til skjemaet og setter fokus i første felt. */
+function tilSkjema(e: React.MouseEvent) {
+  e.preventDefault()
+  const felt = document.getElementById('contactName')
+  if (!felt) return
+  const redusert = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  felt.scrollIntoView({ behavior: redusert ? 'auto' : 'smooth', block: 'center' })
+  felt.focus({ preventScroll: true })
+}
+
+/* ---------- Oppsett ---------- */
+
+/** Skjemaet skal ligge tett under headeren – mindre luft over enn en vanlig seksjon. */
+const SkjemaSeksjon = styled(Seksjon)`
+  padding-top: clamp(2.5rem, 5vw, 4.5rem);
+`
+
+const Oppsett = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, 0.75fr);
+  gap: clamp(2.5rem, 5vw, 5rem);
+  align-items: start;
+
+  @media (max-width: 960px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+`
+
+const SkjemaKort = styled.div`
+  background: ${({ theme }) => theme.colors.surface};
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 24px;
+  padding: clamp(1.25rem, 3.5vw, 2.5rem);
+  box-shadow: ${({ theme }) => theme.shadows.sm};
+`
+
+/* ---------- Infokolonne ---------- */
+
+const Info = styled.aside`
+  @media (min-width: 961px) {
+    position: sticky;
+    top: 6.5rem;
+  }
+`
+
+const Veier = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`
+
+const Vei = styled(Link)`
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.35rem 1.4rem;
+  border-radius: 20px;
+  background: ${({ theme }) => theme.colors.sunken};
+  color: inherit;
+  text-decoration: none;
+  transition: transform ${({ theme }) => theme.transitions.soft}, box-shadow ${({ theme }) => theme.transitions.soft},
+    background ${({ theme }) => theme.transitions.soft};
+
+  h3 {
+    margin: 0.1rem 0 0.35rem;
+    font-size: 1.15rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  p {
+    margin: 0 0 0.8rem;
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    line-height: 1.55;
+    color: ${({ theme }) => theme.colors.inkMuted};
+  }
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.surface};
+    transform: translateY(-3px);
+    box-shadow: ${({ theme }) => theme.shadows.lg};
+  }
+
+  &:hover svg:last-child {
+    transform: translateX(4px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.focus};
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover {
+      transform: none;
+    }
+  }
+`
+
+const VeiIkon = styled.span`
+  flex: none;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  font-size: 1rem;
+  color: ${({ theme }) => theme.colors.accent};
+  background: ${({ theme }) => theme.colors.accentSoft};
+`
+
+const VeiCta = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.accent};
+
+  svg {
+    font-size: 0.8em;
+    transition: transform ${({ theme }) => theme.transitions.default};
+  }
+`
+
+const Fakta = styled.dl`
+  margin: 2rem 0 0;
+
+  > div {
+    display: grid;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    gap: 1rem;
+    padding: 1rem 0;
+    border-top: 1px solid ${({ theme }) => theme.colors.border};
+  }
+
+  dt {
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    color: ${({ theme }) => theme.colors.inkSubtle};
+  }
+
+  dd {
+    margin: 0;
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    line-height: 1.55;
+    color: ${({ theme }) => theme.colors.ink};
+  }
+
+  @media (max-width: 380px) {
+    > div {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.35rem;
+    }
+  }
+`
+
+const Sosiale = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: -0.3rem;
+`
+
+const Sosial = styled.a<{ $platform: 'facebook' | 'instagram' }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 40px;
+  padding: 0 0.95rem 0 0.35rem;
+  border-radius: 999px;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  background: ${({ theme }) => theme.colors.surface};
+  color: ${({ theme }) => theme.colors.ink};
+  font-weight: 500;
+  text-decoration: none;
+  transition: border-color ${({ theme }) => theme.transitions.default};
+
+  span {
+    width: 30px;
+    height: 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    font-size: 0.85rem;
+    color: #fff;
+    background: ${({ theme, $platform }) => ($platform === 'facebook' ? theme.colors.facebook : theme.colors.instagramInk)};
+  }
+
+  &:hover {
+    border-color: ${({ theme }) => theme.colors.ink};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.focus};
+    outline-offset: 2px;
+  }
+`
+
+/* ---------- FAQ ---------- */
+
+const FaqOppsett = styled.div`
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  align-items: start;
+
+  @media (max-width: 960px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+`
+
+const FaqHode = styled.div`
+  > p {
+    margin: 1.25rem 0 0;
+    color: ${({ theme }) => theme.colors.inkMuted};
+    font-size: ${({ theme }) => theme.fontSizes.md};
+
+    a {
+      color: ${({ theme }) => theme.colors.accent};
+      text-decoration: underline;
+      text-underline-offset: 0.18em;
+    }
+  }
+
+  @media (min-width: 961px) {
+    position: sticky;
+    top: 6.5rem;
+  }
+`
+
+const Liste = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+`
+
+const Rad = styled.div`
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+`
+
+const Sporsmal = styled.button`
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  padding: 1.4rem 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  font-size: 1.1rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.35;
+  color: ${({ theme }) => theme.colors.ink};
+  transition: color ${({ theme }) => theme.transitions.default};
+
+  &:hover {
+    color: ${({ theme }) => theme.colors.accent};
+  }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.focus};
+    outline-offset: 4px;
+    border-radius: 6px;
+  }
+`
+
+/** Pluss som roterer til minus. */
+const Pluss = styled.span<{ $apen: boolean }>`
+  position: relative;
+  flex: none;
+  width: 14px;
+  height: 14px;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 100%;
+    height: 1.5px;
+    margin-top: -0.75px;
+    border-radius: 1px;
+    background: currentColor;
+    transition: transform ${({ theme }) => theme.transitions.soft};
+  }
+
+  &::after {
+    transform: rotate(${({ $apen }) => ($apen ? '0deg' : '90deg')});
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    &::before,
+    &::after {
+      transition: none;
+    }
+  }
+`
+
+const Svar = styled.div<{ $apen: boolean }>`
+  display: grid;
+  grid-template-rows: ${({ $apen }) => ($apen ? '1fr' : '0fr')};
+  transition: grid-template-rows ${({ theme }) => theme.transitions.soft};
+
+  > div {
+    overflow: hidden;
+  }
+
+  p {
+    margin: 0;
+    padding: 0 2.5rem 1.5rem 0;
+    max-width: 62ch;
+    line-height: 1.65;
+    color: ${({ theme }) => theme.colors.inkMuted};
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+`
