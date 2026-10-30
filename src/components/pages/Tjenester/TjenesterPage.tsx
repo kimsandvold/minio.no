@@ -112,7 +112,7 @@ const TJENESTER: Tjeneste[] = [
       'Lagre og del designet med oss',
       'Eksporteres som SVG for laserskjæring',
     ],
-    til: '/skilt-og-gravering',
+    til: '/gravering',
     lenketekst: 'Åpne skiltdesigneren',
     bilde: '/images/featured/minio_gravering_3.webp',
   },

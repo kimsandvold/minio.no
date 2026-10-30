@@ -18,6 +18,8 @@ import ProdukterSection from './components/home/ProdukterSection'
 import DesignerSection from './components/home/DesignerSection'
 import KompassSection from './components/home/KompassSection'
 import GuiderSection from './components/home/GuiderSection'
+import GraveringSection from './components/home/GraveringSection'
+import { gjeldendeSesong, sesongInnhold } from './data/sesong'
 import LeveringSection from './components/home/LeveringSection'
 import ProsessPage from './components/pages/Prosess/ProsessPage'
 import KontaktPage from './components/pages/Kontakt/KontaktPage'
@@ -30,7 +32,6 @@ import ProduktDetailPage from './components/pages/Produkter/ProduktDetailPage'
 import UnderholdningPage from './components/pages/Underholdning/UnderholdningPage'
 import LeahNoellePage from './components/pages/LeahNoelle/LeahNoellePage'
 import HandlekurvPage from './components/pages/Handlekurv/HandlekurvPage'
-import SkiltOgGraveringPage from './components/pages/SkiltOgGravering/SkiltOgGraveringPage'
 import MineBestillingerPage from './components/pages/MineBestillinger/MineBestillingerPage'
 import MineDesignPage from './components/pages/MineDesign/MineDesignPage'
 import AdminLayout from './components/pages/Admin/AdminLayout'
@@ -38,6 +39,7 @@ import AdminDashboardPage from './components/pages/Admin/AdminDashboardPage'
 import AdminBestillingerPage from './components/pages/Admin/AdminBestillingerPage'
 import AdminForesporslerPage from './components/pages/Admin/AdminForesporslerPage'
 import AdminProsjektIdeerPage from './components/pages/Admin/AdminProsjektIdeerPage'
+import AdminGraveringerPage from './components/pages/Admin/AdminGraveringerPage'
 import AdminPollsPage from './components/pages/Admin/AdminPollsPage'
 import DesignViewPage from './components/pages/DesignView/DesignViewPage'
 import NotFoundPage from './components/pages/NotFound/NotFoundPage'
@@ -130,10 +132,27 @@ const DesignerLandingPage = lazy(() => import('./components/pages/Designer/Desig
 const DesignerPage = lazy(() => import('./components/pages/Designer/DesignerPage'))
 const HundehusPage = lazy(() => import('./components/pages/Hundehus/HundehusPage'))
 const KattehusPage = lazy(() => import('./components/pages/Kattehus/KattehusPage'))
+const GraveringPage = lazy(() => import('./components/pages/Gravering/GraveringPage'))
 const SalgsbetingelserPage = lazy(() => import('./components/pages/Legal/SalgsbetingelserPage'))
 const PersonvernPage = lazy(() => import('./components/pages/Legal/PersonvernPage'))
 
+/**
+ * Forsidens seksjoner. Sesongen bestemmer rekkefølgen, aldri hvilke som finnes
+ * – se src/data/sesong.ts.
+ */
+const FORSIDESEKSJONER = {
+  veier: VeierSection,
+  gravering: GraveringSection,
+  produkter: ProdukterSection,
+  designer: DesignerSection,
+  kompass: KompassSection,
+  guider: GuiderSection,
+  levering: LeveringSection,
+} as const
+
 function HomePage() {
+  const { forsideRekkefolge } = sesongInnhold[gjeldendeSesong()]
+
   useHashNavigation()
   useSEO({
     title: 'Minio – Hageprodukter i tre, skreddersydd etter dine mål',
@@ -203,12 +222,10 @@ function HomePage() {
       <Navbar />
       <main id="main-content">
         <HomeHero />
-        <VeierSection />
-        <ProdukterSection />
-        <DesignerSection />
-        <KompassSection />
-        <GuiderSection />
-        <LeveringSection />
+        {forsideRekkefolge.map((navn) => {
+          const Seksjon = FORSIDESEKSJONER[navn]
+          return <Seksjon key={navn} />
+        })}
       </main>
       <Footer />
       <ProductModal />
@@ -256,7 +273,9 @@ export default function App() {
                 <Route path="/terrasseplanlegger" element={<Navigate to="/planleggere/terrasse" replace />} />
                 <Route path="/pergolaplanlegger" element={<Navigate to="/planleggere/pergola" replace />} />
                 <Route path="/carportplanlegger" element={<Navigate to="/planleggere/carport" replace />} />
-                <Route path="/skilt-og-gravering" element={<SkiltOgGraveringPage />} />
+                <Route path="/gravering" element={<Suspense fallback={<PageLoadingFallback />}><GraveringPage /></Suspense>} />
+                {/* Gammel URL – beholdes som omdirigering så innkommende lenker og indekserte treff ikke dør. */}
+                <Route path="/skilt-og-gravering" element={<Navigate to="/gravering" replace />} />
                 <Route path="/byggeguider" element={<Suspense fallback={<PageLoadingFallback />}><DIYGuiderPage /></Suspense>} />
                 <Route path="/byggeguider/planlegging" element={<Suspense fallback={<PageLoadingFallback />}><PlanleggingPage /></Suspense>} />
                 <Route path="/byggeguider/prosjekter/hagebenk" element={<Suspense fallback={<PageLoadingFallback />}><HagebenkPage /></Suspense>} />
@@ -336,6 +355,7 @@ export default function App() {
                   <Route index element={<AdminDashboardPage />} />
                   <Route path="bestillinger" element={<AdminBestillingerPage />} />
                   <Route path="foresporsler" element={<AdminForesporslerPage />} />
+                  <Route path="graveringer" element={<AdminGraveringerPage />} />
                   <Route path="prosjektideer" element={<AdminProsjektIdeerPage />} />
                   <Route path="avstemninger" element={<AdminPollsPage />} />
                 </Route>

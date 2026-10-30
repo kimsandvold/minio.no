@@ -257,7 +257,7 @@ export default function Footer() {
             <FooterLink to="/prosjekthjelp">Prosjekthjelp – fortell om idéen din</FooterLink>
             <FooterLink to="/3d-design">3D-design</FooterLink>
             <FooterLink to="/byggehjelp">Byggehjelp</FooterLink>
-            <FooterLink to="/skilt-og-gravering">Skilt og gravering</FooterLink>
+            <FooterLink to="/gravering">Gravering</FooterLink>
           </FooterNav>
         </FooterSection>
 
@@ -267,6 +267,7 @@ export default function Footer() {
             <FooterLink to="/handlaget-i-tre">Håndlaget i tre</FooterLink>
             <FooterLink to="/slik-jobber-vi">Slik jobber vi</FooterLink>
             <FooterLink to="/kontakt">Kontakt</FooterLink>
+            <FooterLink to="/spill-av-leah-noelle">Spill av Leah Noelle</FooterLink>
           </FooterNav>
         </FooterSection>
 
@@ -310,7 +311,6 @@ export default function Footer() {
           <Link to="/salgsbetingelser">Salgsbetingelser</Link>
           <Link to="/personvern">Personvern</Link>
           <Link to="/underholdning">Underholdning</Link>
-          <Link to="/spill-av-leah-noelle">Spill av Leah Noelle</Link>
         </Bunnlenker>
         <p>&copy; {new Date().getFullYear()} Minio. Alle rettigheter reservert.</p>
       </Copyright>

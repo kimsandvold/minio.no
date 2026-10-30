@@ -101,6 +101,62 @@ service cloud.firestore {
                           && request.auth.token.email == 'kimsandvold@gmail.com';
     }
 
+    // Graveringsbestillinger fra /gravering. Som prosjektidéene krever de
+    // ingen innlogging – en gravert gave skal ikke kreve Google-pålogging –
+    // så create er åpen, men bundet til nøyaktig disse feltene med grenser.
+    // `svg` er produksjonsfila med teksten som kurver, og kan derfor bli stor;
+    // 400 kB er romslig for et motiv og godt under Firestores feltgrense.
+    // Bare admin kan lese: dokumentet bærer kundens navn, e-post og telefon.
+    match /graveringBestillinger/{id} {
+      allow create: if request.resource.data.keys().hasOnly(
+                         ['navn', 'epost', 'telefon', 'adresse', 'postnr', 'sted', 'melding',
+                          'produktId', 'produktNavn', 'sammendrag', 'maal', 'prisSum', 'valg',
+                          'svg', 'filnavn', 'ordreId', 'antall', 'status', 'createdAt'])
+                    && request.resource.data.navn is string
+                    && request.resource.data.navn.size() > 0
+                    && request.resource.data.navn.size() <= 120
+                    && request.resource.data.epost is string
+                    && request.resource.data.epost.size() >= 5
+                    && request.resource.data.epost.size() <= 200
+                    && request.resource.data.telefon is string
+                    && request.resource.data.telefon.size() <= 40
+                    && request.resource.data.adresse is string
+                    && request.resource.data.adresse.size() > 0
+                    && request.resource.data.adresse.size() <= 200
+                    && request.resource.data.postnr is string
+                    && request.resource.data.postnr.size() == 4
+                    && request.resource.data.sted is string
+                    && request.resource.data.sted.size() > 0
+                    && request.resource.data.sted.size() <= 120
+                    && request.resource.data.melding is string
+                    && request.resource.data.melding.size() <= 4000
+                    && request.resource.data.produktId is string
+                    && request.resource.data.produktId.size() <= 40
+                    && request.resource.data.produktNavn is string
+                    && request.resource.data.produktNavn.size() <= 80
+                    && request.resource.data.sammendrag is string
+                    && request.resource.data.sammendrag.size() <= 4000
+                    && request.resource.data.maal is string
+                    && request.resource.data.maal.size() <= 40
+                    && request.resource.data.prisSum is number
+                    && request.resource.data.prisSum >= 0
+                    && request.resource.data.prisSum <= 100000
+                    && request.resource.data.valg is map
+                    && request.resource.data.svg is string
+                    && request.resource.data.svg.size() <= 400000
+                    && request.resource.data.filnavn is string
+                    && request.resource.data.filnavn.size() <= 160
+                    && request.resource.data.ordreId is string
+                    && request.resource.data.ordreId.size() > 0
+                    && request.resource.data.ordreId.size() <= 40
+                    && request.resource.data.antall is int
+                    && request.resource.data.antall >= 1
+                    && request.resource.data.antall <= 100
+                    && request.resource.data.status == 'ny';
+      allow read, update: if request.auth != null
+                          && request.auth.token.email == 'kimsandvold@gmail.com';
+    }
+
     match /polls/{pollId} {
       allow read: if true;
       allow write: if request.auth != null

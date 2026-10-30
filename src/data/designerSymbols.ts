@@ -19,7 +19,7 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'deciduous-tree',
-    name: 'Lovtre',
+    name: 'Løvtre',
     category: 'Natur',
     viewBox: '0 0 100 100',
     path: 'M50 15 C30 15 15 30 15 48 C15 66 30 75 50 75 C70 75 85 66 85 48 C85 30 70 15 50 15 Z M45 75 V95 H55 V75',
@@ -47,7 +47,7 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'moon',
-    name: 'Mane',
+    name: 'Måne',
     category: 'Natur',
     viewBox: '0 0 100 100',
     path: 'M60 10 C35 15 20 38 20 55 C20 78 40 95 60 95 C45 85 38 70 38 55 C38 35 48 18 60 10 Z',
@@ -61,14 +61,14 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'snowflake',
-    name: 'Snofnugg',
+    name: 'Snøfnugg',
     category: 'Natur',
     viewBox: '0 0 100 100',
     path: 'M50 10 V90 M15 27 L85 73 M85 27 L15 73 M50 10 L42 22 M50 10 L58 22 M50 90 L42 78 M50 90 L58 78 M15 27 L28 30 M15 27 L18 40 M85 27 L72 30 M85 27 L82 40 M85 73 L72 70 M85 73 L82 60 M15 73 L28 70 M15 73 L18 60',
   },
   {
     id: 'wave',
-    name: 'Bolge',
+    name: 'Bølge',
     category: 'Natur',
     viewBox: '0 0 100 100',
     path: 'M5 50 C15 30 25 30 35 50 C45 70 55 70 65 50 C75 30 85 30 95 50 M5 65 C15 45 25 45 35 65 C45 85 55 85 65 65 C75 45 85 45 95 65',
@@ -89,7 +89,7 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'raindrop',
-    name: 'Regndape',
+    name: 'Regndråpe',
     category: 'Natur',
     viewBox: '0 0 100 100',
     path: 'M50 10 C50 10 20 50 20 65 C20 82 33 95 50 95 C67 95 80 82 80 65 C80 50 50 10 50 10 Z',
@@ -110,7 +110,7 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'acorn',
-    name: 'Eikenott',
+    name: 'Eikenøtt',
     category: 'Natur',
     viewBox: '0 0 100 100',
     path: 'M50 55 C35 55 25 65 25 78 C25 90 35 95 50 95 C65 95 75 90 75 78 C75 65 65 55 50 55 Z M30 55 C30 42 38 35 50 35 C62 35 70 42 70 55 M50 35 V20 C50 15 55 10 60 12',
@@ -203,7 +203,7 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'bear',
-    name: 'Bjorn',
+    name: 'Bjørn',
     category: 'Dyr',
     viewBox: '0 0 100 100',
     path: 'M25 40 C20 35 15 28 20 22 C25 17 32 20 35 25 C40 18 60 18 65 25 C68 20 75 17 80 22 C85 28 80 35 75 40 C82 48 85 60 80 72 L82 88 H68 L65 75 H35 L32 88 H18 L20 72 C15 60 18 48 25 40 Z M38 50 A4 4 0 1 0 42 50 M58 50 A4 4 0 1 0 62 50 M45 60 C45 62 48 65 50 65 C52 65 55 62 55 60',
@@ -226,7 +226,7 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'key',
-    name: 'Nokkel',
+    name: 'Nøkkel',
     category: 'Hjem',
     viewBox: '0 0 100 100',
     path: 'M35 50 A20 20 0 1 1 35 50.1 M35 50 H80 V62 H72 V50 M62 50 V58',
@@ -254,7 +254,7 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'barn',
-    name: 'Love',
+    name: 'Låve',
     category: 'Hjem',
     viewBox: '0 0 100 100',
     path: 'M10 50 L50 15 L90 50 V90 H10 Z M35 90 V65 C35 58 42 52 50 52 C58 52 65 58 65 65 V90 M50 15 V5',
@@ -270,7 +270,7 @@ export const designerSymbols: DesignerSymbol[] = [
   // === Piler ===
   {
     id: 'arrow-right',
-    name: 'Pil hoyre',
+    name: 'Pil høyre',
     category: 'Piler',
     viewBox: '0 0 100 100',
     path: 'M10 50 H75 L55 30 M75 50 L55 70',
@@ -305,7 +305,7 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'chevron-right',
-    name: 'Vinkel hoyre',
+    name: 'Vinkel høyre',
     category: 'Piler',
     viewBox: '0 0 100 100',
     path: 'M35 15 L70 50 L35 85',
@@ -398,7 +398,7 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'ribbon',
-    name: 'Band',
+    name: 'Bånd',
     category: 'Former',
     viewBox: '0 0 100 100',
     path: 'M10 30 H90 V70 L80 60 L70 70 L60 60 L50 70 L40 60 L30 70 L20 60 L10 70 Z',
@@ -505,7 +505,7 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'feather',
-    name: 'Fjaer',
+    name: 'Fjær',
     category: 'Dekor',
     viewBox: '0 0 100 100',
     path: 'M75 10 C75 10 60 20 45 40 C30 60 20 80 20 90 L25 85 C30 70 40 55 55 38 C55 38 48 52 38 68 L42 62 C50 48 60 35 70 25 C70 25 62 40 55 58 L60 52 C65 40 72 28 78 18 Z',
@@ -535,7 +535,7 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'campfire',
-    name: 'Bal',
+    name: 'Bål',
     category: 'Sport',
     viewBox: '0 0 100 100',
     path: 'M50 15 C42 30 35 40 35 52 C35 65 42 72 50 72 C58 72 65 65 65 52 C65 40 58 30 50 15 Z M45 35 C48 42 50 50 50 55 M55 35 C52 42 50 50 50 55 M15 85 L50 70 L85 85 M20 82 L50 68 L80 82',
@@ -593,7 +593,7 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'beer',
-    name: 'Ol',
+    name: 'Øl',
     category: 'Mat',
     viewBox: '0 0 100 100',
     path: 'M22 20 H62 V85 C62 88 58 90 42 90 C26 90 22 88 22 85 Z M62 35 H75 C80 35 84 40 84 48 V60 C84 68 80 72 75 72 H62 M32 30 V50 M42 25 V52 M52 30 V48',
@@ -614,7 +614,7 @@ export const designerSymbols: DesignerSymbol[] = [
   },
   {
     id: 'bread',
-    name: 'Brod',
+    name: 'Brød',
     category: 'Mat',
     viewBox: '0 0 100 100',
     path: 'M15 50 C15 35 28 25 50 25 C72 25 85 35 85 50 V75 C85 82 72 88 50 88 C28 88 15 82 15 75 Z M30 50 V72 M50 48 V70 M70 50 V72',
@@ -636,26 +636,26 @@ export const designerSymbols: DesignerSymbol[] = [
 
   // === Verktoy ===
   { id: 'hammer', name: 'Hammer', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M25 80 L55 50 L48 43 L60 30 H75 V45 L62 57 L55 50 M25 80 L20 85 L15 80 L20 75 Z' },
-  { id: 'wrench', name: 'Skrunokkel', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M20 20 A18 18 0 0 1 45 20 L70 45 L80 80 L75 85 L70 80 L45 55 A18 18 0 0 1 20 20 Z M28 28 A8 8 0 1 0 36 28' },
+  { id: 'wrench', name: 'Skiftenøkkel', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M20 20 A18 18 0 0 1 45 20 L70 45 L80 80 L75 85 L70 80 L45 55 A18 18 0 0 1 20 20 Z M28 28 A8 8 0 1 0 36 28' },
   { id: 'screwdriver', name: 'Skrutrekker', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M50 8 L58 12 L55 50 C55 55 52 58 50 58 C48 58 45 55 45 50 L42 12 Z M45 58 V85 C45 90 48 92 50 92 C52 92 55 90 55 85 V58' },
   { id: 'saw', name: 'Sag', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M10 50 H80 L85 45 L80 50 L85 55 M10 50 V35 H25 V50 M10 50 L15 42 L20 50 L25 42 L30 50 L35 42 L40 50 L45 42 L50 50 L55 42 L60 50 L65 42 L70 50 L75 42 L80 50' },
   { id: 'drill', name: 'Drill', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M25 40 H60 V65 H25 Z M60 45 H72 C78 45 82 48 82 52 C82 56 78 60 72 60 H60 M25 52 H10 M42 40 V30 L46 25 M42 65 V75 L38 80 M50 40 V32' },
   { id: 'pliers', name: 'Tang', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M40 10 C35 10 30 18 30 28 C30 35 34 40 40 42 L35 55 L25 85 L30 88 L45 58 L50 42 M60 10 C65 10 70 18 70 28 C70 35 66 40 60 42 L65 55 L75 85 L70 88 L55 58 L50 42 M40 42 H60' },
   { id: 'ruler', name: 'Linjal', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M15 30 H85 V70 H15 Z M25 30 V42 M35 30 V38 M45 30 V42 M55 30 V38 M65 30 V42 M75 30 V38' },
-  { id: 'tape-measure', name: 'Malband', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M50 15 A35 35 0 1 0 50 85 A35 35 0 1 0 50 15 M50 25 A25 25 0 1 0 50 75 A25 25 0 1 0 50 25 M50 50 H85' },
+  { id: 'tape-measure', name: 'Målebånd', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M50 15 A35 35 0 1 0 50 85 A35 35 0 1 0 50 15 M50 25 A25 25 0 1 0 50 75 A25 25 0 1 0 50 25 M50 50 H85' },
   { id: 'paintbrush', name: 'Pensel', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M42 55 V85 C42 90 45 92 50 92 C55 92 58 90 58 85 V55 Z M42 55 C42 45 38 35 35 20 C34 15 38 8 50 8 C62 8 66 15 65 20 C62 35 58 45 58 55' },
   { id: 'level', name: 'Vater', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M8 38 H92 V62 H8 Z M38 42 H62 V58 H38 Z M45 48 A5 5 0 1 0 55 48 A5 5 0 1 0 45 48' },
   { id: 'bolt', name: 'Bolt', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M35 10 H65 L75 27 L65 44 H35 L25 27 Z M44 44 V90 H56 V44 M44 55 H56 M44 65 H56 M44 75 H56' },
-  { id: 'scissors-tool', name: 'Klipp', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M30 25 A12 12 0 1 0 30 25.1 M70 25 A12 12 0 1 0 70 25.1 M38 33 L62 75 M62 33 L38 75 M30 85 H70' },
-  { id: 'toolbox', name: 'Verktoy-kasse', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M10 45 H90 V85 H10 Z M10 45 H90 V55 H10 Z M35 45 V35 H65 V45 M45 55 H55 V62 H45 Z' },
-  { id: 'axe', name: 'Oks', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M45 10 V75 C45 82 48 88 50 88 C52 88 55 82 55 75 V10 Z M30 20 C22 25 18 35 20 45 C22 52 28 55 35 52 L45 35 M55 35 L65 52 C72 55 78 52 80 45 C82 35 78 25 70 20' },
+  { id: 'scissors-tool', name: 'Blikksaks', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M30 25 A12 12 0 1 0 30 25.1 M70 25 A12 12 0 1 0 70 25.1 M38 33 L62 75 M62 33 L38 75 M30 85 H70' },
+  { id: 'toolbox', name: 'Verktøykasse', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M10 45 H90 V85 H10 Z M10 45 H90 V55 H10 Z M35 45 V35 H65 V45 M45 55 H55 V62 H45 Z' },
+  { id: 'axe', name: 'Øks', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M45 10 V75 C45 82 48 88 50 88 C52 88 55 82 55 75 V10 Z M30 20 C22 25 18 35 20 45 C22 52 28 55 35 52 L45 35 M55 35 L65 52 C72 55 78 52 80 45 C82 35 78 25 70 20' },
   { id: 'flashlight', name: 'Lommelykt', category: 'Verktoy', viewBox: '0 0 100 100', path: 'M40 45 H60 V75 H40 Z M38 75 H62 V82 H38 Z M42 45 L38 25 C37 18 42 12 50 12 C58 12 63 18 62 25 L58 45 M50 82 V90' },
 
   // === Jul ===
   { id: 'christmas-tree', name: 'Juletre', category: 'Jul', viewBox: '0 0 100 100', path: 'M50 5 L65 30 H60 L75 50 H68 L85 75 H58 V95 H42 V75 H15 L32 50 H25 L40 30 H35 Z M50 5 L52 8' },
   { id: 'santa-hat', name: 'Nisselue', category: 'Jul', viewBox: '0 0 100 100', path: 'M15 70 H85 V80 H15 Z M25 70 C25 45 35 20 50 10 C65 20 75 45 75 70 M85 75 A8 8 0 1 0 85 75.1 M50 10 L55 5 A5 5 0 1 0 55 5.1' },
   { id: 'candy-cane', name: 'Sukkerstang', category: 'Jul', viewBox: '0 0 100 100', path: 'M40 95 V35 C40 20 45 10 55 10 C65 10 70 20 70 35 V40 C70 48 65 52 60 52 C55 52 52 48 52 40 V35 M40 50 H52 M40 65 H52 M40 80 H52' },
-  { id: 'snowman', name: 'Snemann', category: 'Jul', viewBox: '0 0 100 100', path: 'M50 18 A12 12 0 1 0 50 42 A12 12 0 1 0 50 18 M50 42 A18 18 0 1 0 50 78 A18 18 0 1 0 50 42 M42 28 A2 2 0 1 0 44 28 M56 28 A2 2 0 1 0 58 28 M46 34 H54 M32 55 H20 M68 55 H80 M44 52 A2 2 0 1 0 46 52 M54 52 A2 2 0 1 0 56 52 M48 62 A2 2 0 1 0 52 62' },
+  { id: 'snowman', name: 'Snømann', category: 'Jul', viewBox: '0 0 100 100', path: 'M50 18 A12 12 0 1 0 50 42 A12 12 0 1 0 50 18 M50 42 A18 18 0 1 0 50 78 A18 18 0 1 0 50 42 M42 28 A2 2 0 1 0 44 28 M56 28 A2 2 0 1 0 58 28 M46 34 H54 M32 55 H20 M68 55 H80 M44 52 A2 2 0 1 0 46 52 M54 52 A2 2 0 1 0 56 52 M48 62 A2 2 0 1 0 52 62' },
   { id: 'stocking', name: 'Julestrømpe', category: 'Jul', viewBox: '0 0 100 100', path: 'M35 10 H60 V55 L75 70 C82 77 80 88 70 90 L55 92 C45 92 40 85 40 78 L35 55 Z M35 10 H60 V20 H35 Z' },
   { id: 'gingerbread', name: 'Pepperkake', category: 'Jul', viewBox: '0 0 100 100', path: 'M50 12 A10 10 0 1 0 50 32 A10 10 0 1 0 50 12 M42 32 L25 50 L30 55 L42 42 M58 32 L75 50 L70 55 L58 42 M42 42 H58 V65 H42 Z M42 65 L30 90 H38 L50 72 L62 90 H70 L58 65' },
   { id: 'ornament', name: 'Julekule', category: 'Jul', viewBox: '0 0 100 100', path: 'M50 25 A30 30 0 1 0 50 85 A30 30 0 1 0 50 25 M42 25 H58 V18 H42 Z M50 18 V10 M30 45 C35 50 45 55 50 55 C55 55 65 50 70 45' },
@@ -669,7 +669,7 @@ export const designerSymbols: DesignerSymbol[] = [
 
   // === Halloween ===
   { id: 'pumpkin', name: 'Gresskar', category: 'Halloween', viewBox: '0 0 100 100', path: 'M50 20 C25 20 10 40 10 58 C10 78 25 90 50 90 C75 90 90 78 90 58 C90 40 75 20 50 20 Z M50 20 C50 15 48 8 52 5 M35 50 L40 42 L45 50 M55 50 L60 42 L65 50 M35 65 C40 72 60 72 65 65' },
-  { id: 'ghost', name: 'Spokelse', category: 'Halloween', viewBox: '0 0 100 100', path: 'M25 55 C25 30 35 12 50 12 C65 12 75 30 75 55 V85 L68 78 L60 85 L50 78 L40 85 L32 78 L25 85 Z M38 42 A4 4 0 1 0 42 42 M58 42 A4 4 0 1 0 62 42' },
+  { id: 'ghost', name: 'Spøkelse', category: 'Halloween', viewBox: '0 0 100 100', path: 'M25 55 C25 30 35 12 50 12 C65 12 75 30 75 55 V85 L68 78 L60 85 L50 78 L40 85 L32 78 L25 85 Z M38 42 A4 4 0 1 0 42 42 M58 42 A4 4 0 1 0 62 42' },
   { id: 'bat', name: 'Flaggermus', category: 'Halloween', viewBox: '0 0 100 100', path: 'M50 30 C48 28 45 25 45 22 C45 18 48 16 50 16 C52 16 55 18 55 22 C55 25 52 28 50 30 M50 30 V55 M50 40 L25 25 L30 45 L10 35 L28 55 L50 55 M50 40 L75 25 L70 45 L90 35 L72 55 L50 55 M45 60 L40 80 M55 60 L60 80' },
   { id: 'spider', name: 'Edderkopp', category: 'Halloween', viewBox: '0 0 100 100', path: 'M50 35 A15 12 0 1 0 50 59 A15 12 0 1 0 50 35 M38 40 L15 20 M38 47 L10 45 M38 54 L15 70 M62 40 L85 20 M62 47 L90 45 M62 54 L85 70 M50 59 L42 85 M50 59 L58 85' },
   { id: 'skull', name: 'Hodeskalle', category: 'Halloween', viewBox: '0 0 100 100', path: 'M50 12 C28 12 15 28 15 48 C15 62 22 72 35 76 V88 H65 V76 C78 72 85 62 85 48 C85 28 72 12 50 12 Z M34 45 A8 8 0 1 0 34 45.1 M66 45 A8 8 0 1 0 66 45.1 M45 62 V68 M50 62 V70 M55 62 V68' },
@@ -677,9 +677,9 @@ export const designerSymbols: DesignerSymbol[] = [
   { id: 'cauldron', name: 'Gryte', category: 'Halloween', viewBox: '0 0 100 100', path: 'M20 40 H80 V65 C80 80 68 90 50 90 C32 90 20 80 20 65 Z M20 40 C20 35 32 30 50 30 C68 30 80 35 80 40 M25 90 L18 95 M75 90 L82 95 M40 25 C38 18 42 12 48 15 M55 22 C58 15 62 12 60 18 M50 28 C48 22 52 18 55 22' },
   { id: 'coffin', name: 'Kiste', category: 'Halloween', viewBox: '0 0 100 100', path: 'M50 5 L70 25 V70 L50 95 L30 70 V25 Z M42 35 V55 M50 30 V60 M58 35 V55' },
   { id: 'cat-halloween', name: 'Svart katt', category: 'Halloween', viewBox: '0 0 100 100', path: 'M30 50 L22 20 L38 38 L50 32 L62 38 L78 20 L70 50 C75 55 78 62 75 70 L80 85 L65 80 L58 90 H42 L35 80 L20 85 L25 70 C22 62 25 55 30 50 Z M40 52 A3 3 0 1 0 44 52 M56 52 A3 3 0 1 0 60 52' },
-  { id: 'moon-halloween', name: 'Fullmane', category: 'Halloween', viewBox: '0 0 100 100', path: 'M50 8 A42 42 0 1 0 50 92 A42 42 0 1 0 50 8 M35 40 A5 5 0 1 0 40 40 M55 35 A7 7 0 1 0 62 35 M42 60 A4 4 0 1 0 46 60 M60 58 A6 6 0 1 0 66 58' },
+  { id: 'moon-halloween', name: 'Fullmåne', category: 'Halloween', viewBox: '0 0 100 100', path: 'M50 8 A42 42 0 1 0 50 92 A42 42 0 1 0 50 8 M35 40 A5 5 0 1 0 40 40 M55 35 A7 7 0 1 0 62 35 M42 60 A4 4 0 1 0 46 60 M60 58 A6 6 0 1 0 66 58' },
   { id: 'grave', name: 'Gravstein', category: 'Halloween', viewBox: '0 0 100 100', path: 'M25 85 H75 V45 C75 25 65 15 50 15 C35 15 25 25 25 45 Z M15 85 H85 V92 H15 Z M42 40 H58 M50 32 V48 M38 58 L50 68 L62 58' },
-  { id: 'eye', name: 'Oye', category: 'Halloween', viewBox: '0 0 100 100', path: 'M10 50 C10 50 25 25 50 25 C75 25 90 50 90 50 C90 50 75 75 50 75 C25 75 10 50 10 50 Z M50 35 A15 15 0 1 0 50 65 A15 15 0 1 0 50 35 M50 42 A8 8 0 1 0 50 58 A8 8 0 1 0 50 42' },
+  { id: 'eye', name: 'Øye', category: 'Halloween', viewBox: '0 0 100 100', path: 'M10 50 C10 50 25 25 50 25 C75 25 90 50 90 50 C90 50 75 75 50 75 C25 75 10 50 10 50 Z M50 35 A15 15 0 1 0 50 65 A15 15 0 1 0 50 35 M50 42 A8 8 0 1 0 50 58 A8 8 0 1 0 50 42' },
   { id: 'potion', name: 'Trylledrikk', category: 'Halloween', viewBox: '0 0 100 100', path: 'M40 10 H60 V25 L72 55 V80 C72 88 62 92 50 92 C38 92 28 88 28 80 V55 L40 25 Z M40 25 H60 M32 60 H68 M40 72 C42 68 48 66 50 70 C52 66 58 68 60 72' },
 
   // === Univers ===
@@ -697,14 +697,14 @@ export const designerSymbols: DesignerSymbol[] = [
   { id: 'satellite', name: 'Satellitt', category: 'Univers', viewBox: '0 0 100 100', path: 'M40 40 L60 60 M45 35 L65 55 M35 45 L55 65 M60 60 L75 55 L80 60 V75 L75 80 H60 L55 75 Z M40 40 L25 45 L20 40 V25 L25 20 H40 L45 25 Z' },
 
   // === Jakt ===
-  { id: 'crosshair', name: 'Siktemiddel', category: 'Jakt', viewBox: '0 0 100 100', path: 'M50 15 A35 35 0 1 0 50 85 A35 35 0 1 0 50 15 M50 5 V25 M50 75 V95 M5 50 H25 M75 50 H95 M50 35 A15 15 0 1 0 50 65 A15 15 0 1 0 50 35' },
+  { id: 'crosshair', name: 'Sikte', category: 'Jakt', viewBox: '0 0 100 100', path: 'M50 15 A35 35 0 1 0 50 85 A35 35 0 1 0 50 15 M50 5 V25 M50 75 V95 M5 50 H25 M75 50 H95 M50 35 A15 15 0 1 0 50 65 A15 15 0 1 0 50 35' },
   { id: 'antlers', name: 'Gevir', category: 'Jakt', viewBox: '0 0 100 100', path: 'M50 85 V60 M50 60 L35 40 L25 20 L30 25 L35 40 L28 30 M50 60 L65 40 L75 20 L70 25 L65 40 L72 30 M35 40 L20 45 M65 40 L80 45' },
   { id: 'rifle', name: 'Rifle', category: 'Jakt', viewBox: '0 0 100 100', path: 'M8 50 H75 L82 45 L85 50 L82 55 H75 M8 50 V42 H20 V50 M55 50 V62 H65 V50 M35 50 V58' },
   { id: 'binoculars', name: 'Kikkert', category: 'Jakt', viewBox: '0 0 100 100', path: 'M20 30 H38 V70 H20 Z M62 30 H80 V70 H62 Z M38 42 H62 V58 H38 Z M20 70 A12 5 0 1 0 38 70 M62 70 A12 5 0 1 0 80 70' },
   { id: 'knife', name: 'Kniv', category: 'Jakt', viewBox: '0 0 100 100', path: 'M50 8 C48 8 45 12 45 18 V52 H55 V18 C55 12 52 8 50 8 Z M42 52 H58 V58 H42 Z M44 58 H56 V90 C56 92 54 95 50 95 C46 95 44 92 44 90 Z' },
   { id: 'campsite', name: 'Leir', category: 'Jakt', viewBox: '0 0 100 100', path: 'M50 15 L20 75 H80 Z M50 15 V75 M35 75 C35 65 42 58 50 58 C58 58 65 65 65 75 M85 60 V35 C85 30 82 28 80 30 M85 45 C88 42 92 44 90 48' },
   { id: 'duck', name: 'And', category: 'Jakt', viewBox: '0 0 100 100', path: 'M20 55 C20 40 30 30 45 30 C50 30 55 28 55 24 C55 20 52 18 48 18 C44 18 42 20 42 22 M45 30 C55 30 65 35 70 42 C78 52 85 55 90 55 L85 60 C80 62 72 60 65 55 C60 65 50 72 35 72 C22 72 15 65 15 58 C15 55 17 53 20 55 Z M48 18 L55 12' },
-  { id: 'boot', name: 'Stovle', category: 'Jakt', viewBox: '0 0 100 100', path: 'M35 10 H55 V60 L72 65 C80 68 85 75 82 82 C80 88 72 90 62 88 L35 80 V10 Z M35 30 H55' },
+  { id: 'boot', name: 'Støvel', category: 'Jakt', viewBox: '0 0 100 100', path: 'M35 10 H55 V60 L72 65 C80 68 85 75 82 82 C80 88 72 90 62 88 L35 80 V10 Z M35 30 H55' },
   { id: 'moose', name: 'Elghode', category: 'Jakt', viewBox: '0 0 100 100', path: 'M50 45 C40 45 32 52 32 62 C32 72 40 78 50 78 C60 78 68 72 68 62 C68 52 60 45 50 45 Z M38 55 L25 42 L15 35 L20 42 L25 42 L18 48 M62 55 L75 42 L85 35 L80 42 L75 42 L82 48 M42 58 A3 3 0 1 0 45 58 M55 58 A3 3 0 1 0 58 58 M48 68 C50 70 52 68 50 66' },
   { id: 'cabin-hunt', name: 'Jaktbu', category: 'Jakt', viewBox: '0 0 100 100', path: 'M50 15 L10 50 V85 H90 V50 Z M38 85 V62 H52 V85 M65 58 H78 V72 H65 Z M85 30 V15 H78 V25' },
   { id: 'dog', name: 'Hund', category: 'Jakt', viewBox: '0 0 100 100', path: 'M25 45 C20 40 18 32 22 25 C25 20 30 22 32 28 L38 38 L55 35 C60 32 65 28 68 22 C70 18 75 18 75 25 C75 32 72 38 68 42 L65 55 L70 80 H62 L58 60 H42 L38 80 H30 L35 55 L25 45 Z M70 32 A2 2 0 1 0 72 32' },
@@ -712,17 +712,17 @@ export const designerSymbols: DesignerSymbol[] = [
 
   // === Villmark ===
   { id: 'pine-tree-2', name: 'Furutre', category: 'Villmark', viewBox: '0 0 100 100', path: 'M50 5 L70 40 H62 L78 65 H60 V92 H40 V65 H22 L38 40 H30 Z' },
-  { id: 'bear-face', name: 'Bjornehode', category: 'Villmark', viewBox: '0 0 100 100', path: 'M50 20 C32 20 18 35 18 55 C18 75 32 88 50 88 C68 88 82 75 82 55 C82 35 68 20 50 20 Z M22 28 A12 12 0 1 0 22 28.1 M78 28 A12 12 0 1 0 78 28.1 M38 50 A4 4 0 1 0 42 50 M58 50 A4 4 0 1 0 62 50 M45 62 C45 65 48 68 50 68 C52 68 55 65 55 62 Z' },
+  { id: 'bear-face', name: 'Bjørnehode', category: 'Villmark', viewBox: '0 0 100 100', path: 'M50 20 C32 20 18 35 18 55 C18 75 32 88 50 88 C68 88 82 75 82 55 C82 35 68 20 50 20 Z M22 28 A12 12 0 1 0 22 28.1 M78 28 A12 12 0 1 0 78 28.1 M38 50 A4 4 0 1 0 42 50 M58 50 A4 4 0 1 0 62 50 M45 62 C45 65 48 68 50 68 C52 68 55 65 55 62 Z' },
   { id: 'river', name: 'Elv', category: 'Villmark', viewBox: '0 0 100 100', path: 'M30 10 C40 20 60 30 55 45 C50 60 30 65 35 80 C38 90 50 95 60 95 M45 10 C55 20 70 30 65 45 C60 60 45 65 50 80 C53 90 62 95 72 95' },
   { id: 'waterfall', name: 'Foss', category: 'Villmark', viewBox: '0 0 100 100', path: 'M15 10 H45 V45 M55 10 H85 V45 M30 45 V85 C30 90 35 92 40 90 M50 45 V80 C50 85 55 88 58 85 M70 45 V82 C70 88 75 90 78 88 M15 92 H85' },
   { id: 'wolf', name: 'Ulv', category: 'Villmark', viewBox: '0 0 100 100', path: 'M30 45 L20 15 L38 35 L50 28 L62 35 L80 15 L70 45 C78 52 82 62 78 72 L82 90 H65 L60 78 H40 L35 90 H18 L22 72 C18 62 22 52 30 45 Z M40 52 A3 3 0 1 0 43 52 M57 52 A3 3 0 1 0 60 52 M48 60 L50 62 L52 60' },
   { id: 'log-cabin', name: 'Koie', category: 'Villmark', viewBox: '0 0 100 100', path: 'M50 15 L5 50 H15 V85 H85 V50 H95 Z M15 55 H85 M15 65 H85 M15 75 H85 M38 85 V65 H52 V85' },
-  { id: 'eagle', name: 'Orn', category: 'Villmark', viewBox: '0 0 100 100', path: 'M50 25 C45 25 42 28 42 32 C42 36 45 38 48 38 L55 42 M50 38 V60 M50 42 L20 28 L30 42 L8 35 L32 52 L50 50 M50 42 L80 28 L70 42 L92 35 L68 52 L50 50 M42 60 L30 82 M58 60 L70 82' },
+  { id: 'eagle', name: 'Ørn', category: 'Villmark', viewBox: '0 0 100 100', path: 'M50 25 C45 25 42 28 42 32 C42 36 45 38 48 38 L55 42 M50 38 V60 M50 42 L20 28 L30 42 L8 35 L32 52 L50 50 M50 42 L80 28 L70 42 L92 35 L68 52 L50 50 M42 60 L30 82 M58 60 L70 82' },
   { id: 'log', name: 'Vedkubbe', category: 'Villmark', viewBox: '0 0 100 100', path: 'M20 45 H70 V75 H20 Z M70 45 A15 15 0 1 0 70 75 M70 60 A15 15 0 1 0 70 60.1 M35 55 A3 3 0 1 0 35 55.1 M50 62 A2 2 0 1 0 50 62.1' },
   { id: 'lake', name: 'Vann', category: 'Villmark', viewBox: '0 0 100 100', path: 'M50 10 L65 45 H55 V55 M45 55 V45 H35 Z M10 60 C18 55 28 55 35 60 C42 65 52 65 60 60 C68 55 78 55 85 60 M10 72 C18 67 28 67 35 72 C42 77 52 77 60 72 C68 67 78 67 85 72 M10 84 C18 79 28 79 35 84 C42 89 52 89 60 84 C68 79 78 79 85 84' },
-  { id: 'axe-villmark', name: 'Oks', category: 'Villmark', viewBox: '0 0 100 100', path: 'M50 10 V80 C50 85 52 90 55 90 C58 90 60 85 60 80 M35 22 C28 28 25 38 28 48 C30 55 36 58 42 55 L50 40' },
+  { id: 'axe-villmark', name: 'Vedøks', category: 'Villmark', viewBox: '0 0 100 100', path: 'M50 10 V80 C50 85 52 90 55 90 C58 90 60 85 60 80 M35 22 C28 28 25 38 28 48 C30 55 36 58 42 55 L50 40' },
   { id: 'backpack', name: 'Ryggsekk', category: 'Villmark', viewBox: '0 0 100 100', path: 'M28 30 H72 V82 C72 88 68 90 50 90 C32 90 28 88 28 82 Z M38 30 V20 C38 14 42 10 50 10 C58 10 62 14 62 20 V30 M28 50 H72 M20 45 V65 M80 45 V65' },
-  { id: 'bonfire', name: 'Leirbal', category: 'Villmark', viewBox: '0 0 100 100', path: 'M50 10 C42 25 32 35 32 48 C32 62 40 70 50 70 C60 70 68 62 68 48 C68 35 58 25 50 10 Z M42 30 C46 38 48 45 48 50 M58 30 C54 38 52 45 52 50 M15 82 L50 72 L85 82 M20 78 L50 68 L80 78 M35 88 H65' },
+  { id: 'bonfire', name: 'Leirbål', category: 'Villmark', viewBox: '0 0 100 100', path: 'M50 10 C42 25 32 35 32 48 C32 62 40 70 50 70 C60 70 68 62 68 48 C68 35 58 25 50 10 Z M42 30 C46 38 48 45 48 50 M58 30 C54 38 52 45 52 50 M15 82 L50 72 L85 82 M20 78 L50 68 L80 78 M35 88 H65' },
 
   // === Kontor ===
   { id: 'laptop', name: 'Laptop', category: 'Kontor', viewBox: '0 0 100 100', path: 'M20 25 H80 V65 H20 Z M10 68 H90 V75 C90 78 85 80 50 80 C15 80 10 78 10 75 Z M30 35 H70 V58 H30 Z' },
@@ -740,14 +740,14 @@ export const designerSymbols: DesignerSymbol[] = [
 
   // === Trearbeid ===
   { id: 'plank', name: 'Planke', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M10 30 H90 V70 H10 Z M25 35 C28 40 27 55 25 65 M50 32 C53 42 52 58 50 68 M75 35 C78 40 77 55 75 65' },
-  { id: 'hand-saw', name: 'Handsag', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M10 55 H65 L68 50 L72 58 L75 48 L78 56 L82 45 L85 55 L88 48 L90 55 M10 55 C10 48 15 42 22 42 H30 V55 M10 55 V48' },
+  { id: 'hand-saw', name: 'Håndsag', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M10 55 H65 L68 50 L72 58 L75 48 L78 56 L82 45 L85 55 L88 48 L90 55 M10 55 C10 48 15 42 22 42 H30 V55 M10 55 V48' },
   { id: 'chisel', name: 'Stemjern', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M42 60 H58 V90 C58 92 55 95 50 95 C45 95 42 92 42 90 Z M42 60 L45 10 H55 L58 60 M45 10 C45 8 48 5 50 5 C52 5 55 8 55 10' },
   { id: 'wood-screw', name: 'Treskrue', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M42 15 H58 V25 C62 28 65 32 65 38 V75 C65 82 58 88 50 88 C42 88 35 82 35 75 V38 C35 32 38 28 42 25 Z M35 42 H65 M35 52 H65 M35 62 H65 M35 72 H65 M50 88 V95 L48 98 M50 95 L52 98' },
   { id: 'sandpaper', name: 'Sandpapir', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M15 20 H85 V80 H15 Z M25 30 A2 2 0 1 0 27 30 M35 35 A2 2 0 1 0 37 35 M45 28 A2 2 0 1 0 47 28 M55 32 A2 2 0 1 0 57 32 M65 28 A2 2 0 1 0 67 28 M75 34 A2 2 0 1 0 77 34 M30 45 A2 2 0 1 0 32 45 M40 48 A2 2 0 1 0 42 48 M50 42 A2 2 0 1 0 52 42 M60 46 A2 2 0 1 0 62 46 M70 42 A2 2 0 1 0 72 42 M25 58 A2 2 0 1 0 27 58 M35 55 A2 2 0 1 0 37 55 M45 60 A2 2 0 1 0 47 60 M55 56 A2 2 0 1 0 57 56 M65 60 A2 2 0 1 0 67 60 M75 55 A2 2 0 1 0 77 55 M30 70 A2 2 0 1 0 32 70 M40 68 A2 2 0 1 0 42 68 M50 72 A2 2 0 1 0 52 72 M60 68 A2 2 0 1 0 62 68 M70 72 A2 2 0 1 0 72 72' },
   { id: 'clamp', name: 'Tvinge', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M20 15 H80 V25 H20 Z M20 75 H55 V85 H20 Z M25 25 V75 M75 25 V45 L70 50 V75 H80 V50 L75 45' },
   { id: 'workbench', name: 'Arbeidsbenk', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M8 35 H92 V45 H8 Z M18 45 V85 M82 45 V85 M15 85 H25 M78 85 H88 M28 45 V60 H72 V45 M48 60 V45' },
-  { id: 'wood-joint', name: 'Tresammenf.', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M10 30 H45 V40 H55 V30 H90 V50 H55 V60 H45 V50 H10 Z M10 50 H45 V60 H55 V50 H90 V70 H55 V80 H45 V70 H10 Z' },
-  { id: 'plane-tool', name: 'Hovel', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M10 60 L90 45 V55 L10 70 Z M70 48 L62 38 L55 42 L63 52 M30 58 V52 H38 V60' },
+  { id: 'wood-joint', name: 'Treskjøt', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M10 30 H45 V40 H55 V30 H90 V50 H55 V60 H45 V50 H10 Z M10 50 H45 V60 H55 V50 H90 V70 H55 V80 H45 V70 H10 Z' },
+  { id: 'plane-tool', name: 'Høvel', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M10 60 L90 45 V55 L10 70 Z M70 48 L62 38 L55 42 L63 52 M30 58 V52 H38 V60' },
   { id: 'lathe', name: 'Dreiebenk', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M15 50 A8 8 0 1 0 15 50.1 M85 50 A8 8 0 1 0 85 50.1 M23 50 H77 M23 42 C30 35 40 32 50 32 C60 32 70 35 77 42 M23 58 C30 65 40 68 50 68 C60 68 70 65 77 58' },
   { id: 'nail', name: 'Spiker', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M45 10 H55 V18 H45 Z M47 18 H53 V82 L50 95 L47 82 Z' },
   { id: 'wood-grain', name: 'Trestruktur', category: 'Trearbeid', viewBox: '0 0 100 100', path: 'M10 20 C25 22 40 28 55 25 C70 22 85 18 95 22 M8 35 C22 38 38 42 52 40 C68 38 82 32 95 36 M10 50 C25 52 42 58 58 55 C72 52 85 48 95 52 M8 65 C20 68 38 72 55 70 C70 68 85 62 95 66 M10 80 C25 82 40 88 58 85 C72 82 88 78 95 82' },

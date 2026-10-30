@@ -98,8 +98,7 @@ export function PilLenke({ til, children, lys }: { til: string; children: ReactN
   )
 }
 
-/** Knapper – hvit (på mørkt), mørk (på lyst) eller glass (over foto). */
-export const Knapp = styled(Link)<{ $variant?: 'hvit' | 'mork' | 'glass' | 'aksent' }>`
+const knappStil = css<{ $variant?: 'hvit' | 'mork' | 'glass' | 'aksent' }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -148,6 +147,23 @@ export const Knapp = styled(Link)<{ $variant?: 'hvit' | 'mork' | 'glass' | 'akse
         `
     }
   }}
+`
+
+/** Knapper – hvit (på mørkt), mørk (på lyst) eller glass (over foto). */
+export const Knapp = styled(Link)<{ $variant?: 'hvit' | 'mork' | 'glass' | 'aksent' }>`
+  ${knappStil}
+`
+
+/**
+ * Samme knapp, men som ekte `<button>` – for handlinger som åpner en modal
+ * eller ruller i siden i stedet for å navigere. `Knapp as="button"` ville
+ * fungert visuelt, men typene krever fortsatt `to`.
+ */
+export const Handlingsknapp = styled.button<{ $variant?: 'hvit' | 'mork' | 'glass' | 'aksent' }>`
+  ${knappStil}
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
 `
 
 const RevealBoks = styled.div<{ $synlig: boolean; $forsinkelse: number }>`

@@ -9,12 +9,12 @@ export const services: ServiceData[] = [
   },
   {
     icon: 'faBurn',
-    title: 'Skilt, gravering og laserskjæring',
+    title: 'Gravering og laserskjæring',
     description: 'Vi laserskjærer og graverer nummerskilt, adresseskilt, velkomstskilt og dekorative utendørselementer i tre – perfekt tilpasset våre produkter. Gi postkassestativet et personlig adresseskilt, merk varmepumpehuset med husnummer, eller skap et unikt hytteskilt. Alt lages etter dine ønsker med presis laserteknikk.',
     serviceName: 'Skilt og gravering',
     externalLink: {
-      href: '/skilt-og-gravering',
-      label: 'Se utvalget',
+      href: '/gravering',
+      label: 'Design din egen',
       icon: 'faPalette',
     },
   },
