@@ -1,13 +1,65 @@
 {
   "indexes": [
     {
+      "collectionGroup": "designs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "designs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "userId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
+    },
+    {
       "collectionGroup": "terrasseScores",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "modus", "order": "ASCENDING" },
-        { "fieldPath": "dag", "order": "ASCENDING" },
-        { "fieldPath": "poeng", "order": "DESCENDING" }
-      ]
+        {
+          "fieldPath": "modus",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dag",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "poeng",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
     }
   ],
   "fieldOverrides": []
