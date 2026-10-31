@@ -1,5 +1,8 @@
 import * as THREE from 'three'
 import { takpappTexture } from './takpappTexture'
+import { BJELKER_C24, dimensjonerDrager, dimensjonerGulvbjelke, dimensjonerSperre, maksGulvbjelkeSpenn, taklaster, tverrsnitt } from './dimensjonering'
+import type { Tverrsnitt } from './dimensjonering'
+import { SK_STANDARD } from './snolast-data'
 
 /**
  * Konstruksjonsvirke – felles standard for designer-templatene.
@@ -8,6 +11,13 @@ import { takpappTexture } from './takpappTexture'
  * = 48×98 mm. Modulene her bygger bærende trevirke (bjelkelag/gulv, stenderverk
  * med sviller, og sperrer) som legges inn i 3D-modellen OG i materiallista, slik
  * at produktene kan selges som reelle byggeplaner.
+ *
+ * ⚠️ STATUS (2026-10): ingen templater bruker lenger tak-/gulv-/veggbyggerne
+ * her (byggPulttak/byggSaltak/byggValmtak/byggGulv/byggStendervegg/
+ * takBomFromBuild) – bare `settSplitt`. Byggerne setter `userData.info.lengdeCm`
+ * til senterlinjelengde, ikke spiss-til-spiss, og egner seg derfor IKKE som
+ * kilde til kapplister. Nye templater bruker `felles-3d.ts`/`deler3d.ts` +
+ * `geometri.ts` (eksakte kappelengder) og beregningskjernen.
  *
  * Standardprofiler (b × h, mm):
  *   48×48, 48×73, 48×98 («2×4»), 48×123, 48×148 («2×6»), 48×198 («2×8»)
@@ -803,30 +813,63 @@ const SPERRE_SPENN: Record<string, number> = {
 }
 
 /**
+ * ── Bakoverkompatible gradere (tynne innpakninger) ─────────────────
+ *
+ * Disse beholdes så eksisterende templater kompilerer til de er migrert til
+ * det nye beregningsgrunnlaget (`dimensjonering.ts`, se ARCHITECTURE.md §4b).
+ * Hver funksjon kjører NÅ en ekte EC5-kontroll med dokumenterte standardlaster
+ * og returnerer det STØRSTE av gammel spenntabell og ny beregning (aldri
+ * mindre enn før – konservativt). Nye/migrerte templater skal kalle
+ * `dimensjonerGulvbjelke` / `dimensjonerSperre` / `dimensjonerDrager` direkte
+ * med faktisk spenn, takvinkel, tekking og snølast.
+ *
+ * Standardforutsetninger i innpakningene:
+ * - gulv: nyttelast «bod» 3,0 kN/m² + punktlast 2 kN, tjenesteklasse 3.
+ * - sperre: sk = SK_STANDARD (3,5 kN/m²), μ1 = 0,8, shingel på kryssfiner,
+ *   oppgitt lengde behandles som vannrett spenn (på sikker side), TK 2.
+ * - mønebjelke: samme taklast, lastbredde d/2, TK 2.
+ */
+const tilGrade = (tv: Tverrsnitt): BjelkeGrade => ({ h: tv.h / 1000, profil: tv.boardProfil, pris: tv.pris ?? `bjelke-48x${tv.h}` })
+const sterkeste = (a: BjelkeGrade, b: BjelkeGrade): BjelkeGrade => (C24_DIM.findIndex((p) => p.profil === b.profil) > C24_DIM.findIndex((p) => p.profil === a.profil) ? b : a)
+const STD_GULV = { bruk: 'bod' as const, tjenesteklasse: 3 as const }
+
+/**
  * Velg minste C24-gulvbjelke som bærer det frie spennet `spanM` (m) ved gitt
- * senteravstand `cc` (0.6 eller 0.45). Byggforsk 522.351 (se `GULV_SPENN`).
+ * senteravstand `cc` (m). Maks av Byggforsk-tabell (`GULV_SPENN`) og EC5-kontroll.
+ * @deprecated Bruk `dimensjonerGulvbjelke` (dimensjonering.ts).
  */
 export function gradBjelke(spanM: number, cc = 0.6): BjelkeGrade {
   const col = cc <= 0.5 ? 1 : 0
-  return C24_DIM.find((p) => GULV_SPENN[p.profil][col] >= spanM) ?? C24_DIM[C24_DIM.length - 1]
-}
-
-/** Maks gulvbjelke-spenn (m) for største C24-profil ved gitt c/c. */
-export function maksGulvSpenn(cc = 0.6): number {
-  const col = cc <= 0.5 ? 1 : 0
-  return GULV_SPENN[C24_DIM[C24_DIM.length - 1].profil][col]
-}
-
-/** Velg minste C24-sperre som bærer takfall-spennet `spanM` (m), c/c 600. */
-export function gradSperre(spanM: number): BjelkeGrade {
-  return C24_DIM.find((p) => SPERRE_SPENN[p.profil] >= spanM) ?? C24_DIM[C24_DIM.length - 1]
+  const gammel = C24_DIM.find((p) => GULV_SPENN[p.profil][col] >= spanM) ?? C24_DIM[C24_DIM.length - 1]
+  const ny = tilGrade(dimensjonerGulvbjelke({ spennM: spanM, ccM: cc, ...STD_GULV }).valgt)
+  return sterkeste(gammel, ny)
 }
 
 /**
- * Dimensjonerer den bærende mønebjelken (C24) etter takstørrelsen – forenklet
- * bøyekontroll (NS 3478 / EC5) med snølast. Velger minste tverrsnitt som
- * holder og dobler/tredobler ved store spenn. `w` er spennet mellom gavlene,
- * `d` gir lastbredden (mønet bærer halve takflaten).
+ * Maks gulvbjelke-spenn (m) for største C24-profil (48×223) ved gitt c/c – minste
+ * av tabell og EC5-kontroll. @deprecated Bruk `maksGulvbjelkeSpenn`.
+ */
+export function maksGulvSpenn(cc = 0.6): number {
+  const col = cc <= 0.5 ? 1 : 0
+  const gammel = GULV_SPENN[C24_DIM[C24_DIM.length - 1].profil][col]
+  const ny = maksGulvbjelkeSpenn(BJELKER_C24[BJELKER_C24.length - 1], { ccM: cc, ...STD_GULV })
+  return Math.min(gammel, ny)
+}
+
+/**
+ * Velg minste C24-sperre for sperrelengden `spanM` (m), c/c 600, sk 3,5.
+ * @deprecated Bruk `dimensjonerSperre` med faktisk vinkel/tekking/snølast.
+ */
+export function gradSperre(spanM: number): BjelkeGrade {
+  const gammel = C24_DIM.find((p) => SPERRE_SPENN[p.profil] >= spanM) ?? C24_DIM[C24_DIM.length - 1]
+  const ny = tilGrade(dimensjonerSperre({ spennHorisontalM: spanM, vinkelGrader: 0, ccM: CC, tekke: 'shingel', sk: SK_STANDARD }).valgt)
+  return sterkeste(gammel, ny)
+}
+
+/**
+ * Dimensjonerer den bærende mønebjelken (C24) – `w` spenn, `d` takdybde
+ * (lastbredde d/2). Maks av gammel bøyekontroll og full EC5-kontroll.
+ * @deprecated Bruk `dimensjonerDrager` (dimensjonering.ts).
  */
 export function gradMonebjelke(w: number, d: number): RidgeGrade {
   const SNO = 3.0 // kN/m² karakteristisk snølast (moderat)
@@ -842,7 +885,17 @@ export function gradMonebjelke(w: number, d: number): RidgeGrade {
     { profil: '2 × 48 × 198 mm', boardProfil: '48 × 198 mm', h: 0.198, pris: 'bjelke-48x198', count: 2 },
     { profil: '3 × 48 × 198 mm', boardProfil: '48 × 198 mm', h: 0.198, pris: 'bjelke-48x198', count: 3 },
   ]
-  return opts.find((o) => Wx(o.count * KV_B, o.h) * fmd >= M) ?? opts[opts.length - 1]
+  const funnet = opts.findIndex((o) => Wx(o.count * KV_B, o.h) * fmd >= M)
+  const gammelIdx = funnet < 0 ? opts.length - 1 : funnet
+  const kandidater = [tverrsnitt(48, 148, 1, 'C24', 'bjelke-48x148'), tverrsnitt(48, 198, 1, 'C24', 'bjelke-48x198'), tverrsnitt(48, 198, 2, 'C24', 'bjelke-48x198'), tverrsnitt(48, 198, 3, 'C24', 'bjelke-48x198')]
+  const ny = dimensjonerDrager({
+    spennM: w,
+    lastbreddeM: trib,
+    flatelaster: taklaster({ sk: SK_STANDARD, vinkelGrader: 0, tekke: 'shingel' }),
+    kandidater,
+    sidestottet: true, // sperrene festes på mønebjelken c/c 600
+  })
+  return opts[Math.max(gammelIdx, kandidater.indexOf(ny.valgt))]
 }
 
 /**

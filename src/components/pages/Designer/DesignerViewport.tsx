@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import type { DesignConfig, DimensionSpec, PartMaterial, ProductTemplate } from '../../../designer/types'
 import { makeWoodTexture } from '../../../designer/woodTexture'
+import { trinnIModell } from '../../../designer/byggetrinn'
 
 export interface PartInfo { navn: string; profil: string; lengdeCm: number }
 export type ViewPreset = 'iso' | 'front' | 'back' | 'left' | 'right' | 'top' | 'bottom'
@@ -13,10 +14,37 @@ export interface ViewApi {
   zoom: (factor: number) => void
   /** Roter kamera rundt modellen (radianer). dTheta = venstre/høyre, dPhi = opp/ned. */
   orbit: (dTheta: number, dPhi: number) => void
-  /** Render et PNG-snapshot ved gitt splittgrad (0 = montert, 1 = splittet). */
-  snapshot: (explodeAmount: number, preset?: ViewPreset) => string
+  /**
+   * Render et PNG-snapshot ved gitt splittgrad (0 = montert, 1 = splittet).
+   * Med `opts` rendres et eget bilde i fast størrelse (uavhengig av skjermen),
+   * og `maksTrinn` viser bare delene opp til og med det byggetrinnet.
+   */
+  snapshot: (explodeAmount: number, preset?: ViewPreset, opts?: SnapshotOpts) => string
+  /** Ramm inn hele modellen på nytt (myk overgang). */
+  rammeInn: (preset?: ViewPreset) => void
   /** Fjern markering av valgt del. */
   deselect: () => void
+}
+
+export interface SnapshotOpts {
+  bredde?: number
+  hoyde?: number
+  /** Vis bare deler med byggetrinn ≤ maksTrinn (se byggetrinn.ts). */
+  maksTrinn?: number
+}
+
+/** Skjermområde (px) som dekkes av overlegg – modellen rammes inn i resten. */
+export interface Innfelt { topp: number; hoyre: number; bunn: number; venstre: number }
+
+const ISO_RETNING = new THREE.Vector3(0.8, 0.55, 1).normalize()
+const PRESET_RETNING: Record<ViewPreset, [number, number, number]> = {
+  iso: [0.8, 0.55, 1],
+  front: [0, 0.08, 1],
+  back: [0, 0.08, -1],
+  right: [1, 0.08, 0],
+  left: [-1, 0.08, 0],
+  top: [0, 1, 0.001],
+  bottom: [0, -1, 0.001],
 }
 
 const Viewport = styled.div`
@@ -73,6 +101,12 @@ interface Props {
   showcase?: boolean
   /** Kalles når brukeren tar tak i scenen (dra/zoom/berøring) – stopper «vis frem». */
   onInteract?: () => void
+  /** Overlegg rundt kanten (px) som modellen skal holdes unna ved innramming. */
+  innfelt?: Innfelt
+  /** Byggetrinn-visning: vis bare deler med trinn ≤ verdien (null = alt). */
+  byggetrinn?: number | null
+  /** Rapporterer byggetrinnene og del-lagene som finnes i modellen. */
+  onModellInfo?: (info: { trinn: number[]; parts: string[] }) => void
 }
 
 const HANDLE_R = 0.055
@@ -82,7 +116,7 @@ interface HandleData {
   sign: number // 1 for symmetriske akser, brukt til plassering
 }
 
-export default function DesignerViewport({ template, config, onConfigChange, onDragLabel, shadows = true, explode = 0, showHandles = true, lightIntensity = 1, sunAzimuth = 40, sunElevation = 55, fog = false, showGrid = false, woodTexture = false, hiddenParts = '', overrides, paintMode = false, onPaint, onHoverPart, onSelectPart, apiRef, showcase = false, onInteract }: Props) {
+export default function DesignerViewport({ template, config, onConfigChange, onDragLabel, shadows = true, explode = 0, showHandles = true, lightIntensity = 1, sunAzimuth = 40, sunElevation = 55, fog = false, showGrid = false, woodTexture = false, hiddenParts = '', overrides, paintMode = false, onPaint, onHoverPart, onSelectPart, apiRef, showcase = false, onInteract, innfelt, byggetrinn = null, onModellInfo }: Props) {
   const mountRef = useRef<HTMLDivElement>(null)
 
   // Ferske verdier til event-handlere uten å bygge scenen på nytt hver render.
@@ -106,6 +140,13 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
   const onInteractRef = useRef(onInteract)
   const woodTexRef = useRef<THREE.Texture | null>(null)
   const hiddenPartsRef = useRef(hiddenParts)
+  const innfeltRef = useRef<Innfelt>(innfelt ?? { topp: 0, hoyre: 0, bunn: 0, venstre: 0 })
+  const byggetrinnRef = useRef<number | null>(byggetrinn)
+  const onModellInfoRef = useRef(onModellInfo)
+  // Innramming: 'iso' = ny standardvinkel (produktbytte), 'behold' = samme
+  // synsretning (mål endret). Utføres i render-loopen.
+  const rammeRef = useRef<{ modus: 'iso' | 'behold'; animer: boolean; tid: number } | null>({ modus: 'iso', animer: false, tid: 0 })
+  const draRef = useRef(false)
 
   // Hold refs synkronisert (kjøres før de øvrige effektene, i deklarasjonsrekkefølge).
   useEffect(() => {
@@ -122,12 +163,21 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
     onHoverPartRef.current = onHoverPart
     onSelectPartRef.current = onSelectPart
     onInteractRef.current = onInteract
+    onModellInfoRef.current = onModellInfo
   })
+
+  // Nye innfelt (panel åpnet/lukket, mobil/desktop): ramm inn på nytt.
+  const innfeltKey = innfelt ? `${innfelt.topp}|${innfelt.hoyre}|${innfelt.bunn}|${innfelt.venstre}` : ''
+  useEffect(() => {
+    if (innfelt) innfeltRef.current = innfelt
+    if (!rammeRef.current) rammeRef.current = { modus: 'behold', animer: true, tid: performance.now() + 120 }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [innfeltKey])
 
   // Be om ny innramming når produktet byttes (håndteres i render-loopen, som
   // alltid kjører – uavhengig av effekt-timing/HMR).
   useEffect(() => {
-    needsFrameRef.current = true
+    rammeRef.current = { modus: 'iso', animer: false, tid: 0 }
   }, [template.id])
 
   // «Vis frem» slås på: bevar zoom (avstand) og start turen forfra.
@@ -155,7 +205,9 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
   const hemiLightRef = useRef<THREE.HemisphereLight | null>(null)
   const groundRef = useRef<THREE.Mesh | null>(null)
   const gridRef = useRef<THREE.GridHelper | null>(null)
-  const needsFrameRef = useRef(true)
+  /** Setter synlighet ut fra skjulte lag + byggetrinn (fylles i scene-effekten). */
+  const oppdaterSynlighetRef = useRef<() => void>(() => {})
+  const slippInnRef = useRef<(trinn: number) => void>(() => {})
   const explodablesRef = useRef<{ obj: THREE.Object3D; base: THREE.Vector3; dir: THREE.Vector3 }[]>([])
   const handlesRef = useRef<{ obj: THREE.Object3D; base: THREE.Vector3; dir: THREE.Vector3 }[]>([])
   // «Skinn»-deler (gulvdekke/kledning) som gjøres halvgjennomsiktige i splittvisning.
@@ -166,12 +218,7 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
     hiddenPartsRef.current = hiddenParts
     const mg = modelGroupRef.current
     if (!mg) return
-    const hidden = new Set(hiddenParts.split(',').filter(Boolean))
-    mg.traverse((o) => {
-      const p = o.userData.part as string | undefined
-      if (p) o.visible = !hidden.has(p)
-    })
-    needsFrameRef.current = true
+    oppdaterSynlighetRef.current()
   }, [hiddenParts])
 
   // --- Scene-oppsett (kjøres én gang) ---
@@ -210,6 +257,7 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
     key.shadow.camera.top = 8
     key.shadow.camera.bottom = -8
     key.shadow.bias = -0.0004
+    key.shadow.normalBias = 0.012
     scene.add(key)
     keyLightRef.current = key
     const fill = new THREE.DirectionalLight(0xffffff, 0.4)
@@ -337,23 +385,128 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
       return null
     }
 
+    // --- Innramming ---
+    // Kameraets mål (myk overgang): posisjon + sikte. Nullstilles når brukeren
+    // selv tar tak i scenen.
+    let kamMal: { pos: THREE.Vector3; target: THREE.Vector3 } | null = null
+    controls.addEventListener('start', () => { kamMal = null })
+    const boks = new THREE.Box3()
+    const tmpBoks = new THREE.Box3()
+    /** Hjørnene av hver dels egen boks (verden) – mye tettere enn én samlet boks. */
+    const modellPunkter = (maksTrinn?: number): THREE.Vector3[] => {
+      const pts: THREE.Vector3[] = []
+      modelGroup.updateMatrixWorld(true)
+      modelGroup.traverse((o) => {
+        const m = o as THREE.Mesh
+        if (!m.isMesh || !m.geometry) return
+        const t = m.userData.trinn as number | undefined
+        if (maksTrinn !== undefined && t !== undefined && t > maksTrinn) return
+        // Kontekst (eksisterende husvegg) rammes ikke inn – produktet er motivet.
+        if (t === -1) return
+        if (!m.geometry.boundingBox) m.geometry.computeBoundingBox()
+        const bb = m.geometry.boundingBox!
+        for (const x of [bb.min.x, bb.max.x]) for (const y of [bb.min.y, bb.max.y]) for (const z of [bb.min.z, bb.max.z]) {
+          pts.push(new THREE.Vector3(x, y, z).applyMatrix4(m.matrixWorld))
+        }
+      })
+      return pts.filter((p) => Number.isFinite(p.x) && Number.isFinite(p.y) && Number.isFinite(p.z))
+    }
+    const modellBoks = (maksTrinn?: number): THREE.Box3 | null => {
+      const pts = modellPunkter(maksTrinn)
+      if (!pts.length) return null
+      boks.makeEmpty()
+      for (const p of pts) boks.expandByPoint(p)
+      void tmpBoks
+      return boks
+    }
+    /**
+     * Eksakt perspektivisk innpasning: avstanden som får alle punktene inn i
+     * det frie området (canvas minus overlegg), og siktepunkt som sentrerer
+     * silhuetten (ikke bare boksen) i bildet.
+     */
+    const beregnRamme = (retning: THREE.Vector3, pts: THREE.Vector3[], aspect: number, fritt: { w: number; h: number }, luft = 1.1) => {
+      const b = new THREE.Box3().setFromPoints(pts)
+      const target = b.getCenter(new THREE.Vector3())
+      const dir = retning.clone().normalize()
+      const opp = Math.abs(dir.y) > 0.98 ? new THREE.Vector3(0, 0, -1) : new THREE.Vector3(0, 1, 0)
+      const right = new THREE.Vector3().crossVectors(opp, dir).normalize()
+      const up = new THREE.Vector3().crossVectors(dir, right).normalize()
+      const tanV = Math.tan((camera.fov * Math.PI) / 360) * fritt.h
+      const tanH = Math.tan((camera.fov * Math.PI) / 360) * aspect * fritt.w
+      const c = new THREE.Vector3()
+      const tilpass = () => {
+        let D = 0
+        for (const p of pts) {
+          c.copy(p).sub(target)
+          const z = c.dot(dir)
+          D = Math.max(D, z + Math.abs(c.dot(right)) / tanH, z + Math.abs(c.dot(up)) / tanV)
+        }
+        return D
+      }
+      let D = tilpass()
+      for (let it = 0; it < 3; it++) {
+        let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity
+        for (const p of pts) {
+          c.copy(p).sub(target)
+          const w = Math.max(1e-3, D - c.dot(dir))
+          const sx = c.dot(right) / w
+          const sy = c.dot(up) / w
+          x0 = Math.min(x0, sx); x1 = Math.max(x1, sx); y0 = Math.min(y0, sy); y1 = Math.max(y1, sy)
+        }
+        target.addScaledVector(right, ((x0 + x1) / 2) * D).addScaledVector(up, ((y0 + y1) / 2) * D)
+        D = tilpass()
+      }
+      D *= luft
+      // Ikke la kameraet havne under bakken (lave vinkler mot høye modeller).
+      const pos = target.clone().addScaledVector(dir, D)
+      if (pos.y < 0.15) pos.y = 0.15
+      return { pos, target, D }
+    }
+    const frittOmrade = () => {
+      const w = mount.clientWidth || 1
+      const h = mount.clientHeight || 1
+      const i = innfeltRef.current
+      return {
+        w: Math.max(0.25, (w - i.venstre - i.hoyre) / w),
+        h: Math.max(0.25, (h - i.topp - i.bunn) / h),
+      }
+    }
+    const rammeInn = (retning: THREE.Vector3, animer: boolean) => {
+      const pts = modellPunkter()
+      if (!pts.length) return false
+      // Små produkter får litt mer luft (mindre perspektivforvrengning, og
+      // rutenettet rundt gir følelse av størrelse).
+      const bb = new THREE.Box3().setFromPoints(pts)
+      const str = Math.max(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z)
+      const luft = 1.1 + 0.22 * Math.min(1, Math.max(0, (2 - str) / 1.6))
+      const r = beregnRamme(retning, pts, camera.aspect || 1, frittOmrade(), luft)
+      // Skyggekameraet følger modellens størrelse (skarpere skygger, ingen «acne»).
+      const rad = Math.max(1.5, str * 0.85)
+      const sk = keyLightRef.current?.shadow.camera
+      if (sk && Math.abs(sk.right - rad) > 0.05) {
+        sk.left = -rad; sk.right = rad; sk.top = rad; sk.bottom = -rad
+        sk.far = Math.max(30, rad * 6)
+        sk.updateProjectionMatrix()
+      }
+      controls.minDistance = Math.max(0.3, r.D * 0.2)
+      controls.maxDistance = Math.max(r.D * 4, 3)
+      if (animer) kamMal = { pos: r.pos, target: r.target }
+      else {
+        kamMal = null
+        controls.target.copy(r.target)
+        camera.position.copy(r.pos)
+        controls.update()
+      }
+      return true
+    }
+    const naaRetning = () => camera.position.clone().sub(controls.target).normalize()
+
     // --- Hurtigvinkler ---
     const setView = (preset: ViewPreset) => {
-      const dirs: Record<ViewPreset, [number, number, number]> = {
-        iso: [1, 0.7, 1],
-        front: [0, 0, 1],
-        back: [0, 0, -1],
-        right: [1, 0, 0],
-        left: [-1, 0, 0],
-        top: [0, 1, 0.001],
-        bottom: [0, -1, 0.001],
-      }
-      const dist = camera.position.distanceTo(controls.target)
-      const d = new THREE.Vector3(...dirs[preset]).normalize().multiplyScalar(dist)
-      camera.position.copy(controls.target).add(d)
-      controls.update()
+      rammeInn(new THREE.Vector3(...PRESET_RETNING[preset]), true)
     }
     const zoom = (factor: number) => {
+      kamMal = null
       const dir = camera.position.clone().sub(controls.target)
       const d = Math.max(controls.minDistance, Math.min(controls.maxDistance, dir.length() * factor))
       camera.position.copy(controls.target).add(dir.setLength(d))
@@ -361,6 +514,7 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
     }
     // Roter kameraet rundt målet via knapper (for enheter uten mus/dra).
     const orbit = (dTheta: number, dPhi: number) => {
+      kamMal = null
       const offset = camera.position.clone().sub(controls.target)
       const sph = new THREE.Spherical().setFromVector3(offset)
       sph.theta += dTheta
@@ -370,39 +524,26 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
       camera.position.copy(controls.target).add(offset)
       controls.update()
     }
-    // Ren, godt innrammet iso-innramming (uavhengig av gjeldende kamera/zoom/vinkel).
-    // Projiserer bounding-boksens 8 hjørner på skjermaksene og finner avstanden
-    // som får hele modellen inn. `marginMul` gir ekstra luft (større ved splitt).
-    const frameIso = (marginMul: number) => {
-      const bb = templateRef.current.bounds(configRef.current)
-      if (!(Number.isFinite(bb.x) && Number.isFinite(bb.y) && Number.isFinite(bb.z) && bb.x > 0)) return
-      const target = new THREE.Vector3(0, bb.y * 0.45, 0)
-      const dir = new THREE.Vector3(1, 0.7, 1).normalize()
-      const right = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0)).normalize()
-      const camUp = new THREE.Vector3().crossVectors(right, dir).normalize()
-      const hx = bb.x / 2, hy = bb.y / 2, hz = bb.z / 2
-      const corner = new THREE.Vector3()
-      let extRight = 0, extUp = 0
-      for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) {
-        corner.set(sx * hx, bb.y / 2 + sy * hy - target.y, sz * hz)
-        extRight = Math.max(extRight, Math.abs(corner.dot(right)))
-        extUp = Math.max(extUp, Math.abs(corner.dot(camUp)))
-      }
-      const vFov = (camera.fov * Math.PI) / 180
-      const hFov = 2 * Math.atan(Math.tan(vFov / 2) * (camera.aspect || 1))
-      const R = Math.max(extUp / Math.tan(vFov / 2), extRight / Math.tan(hFov / 2)) * marginMul
-      controls.target.copy(target)
-      camera.position.copy(target).addScaledVector(dir, R)
-      controls.update()
-    }
-    const snapshot = (ex: number, preset?: ViewPreset): string => {
+    const snapshot = (ex: number, preset?: ViewPreset, opts?: SnapshotOpts): string => {
       const savedPos = camera.position.clone()
       const savedTarget = controls.target.clone()
-      // Til PDF: alltid ren, komplett iso – ikke avhengig av hva brukeren ser nå.
-      if (preset === 'iso') frameIso(ex > 0.01 ? 1.7 : 1.3)
-      else if (preset) setView(preset)
+      const cw = mount.clientWidth
+      const ch = mount.clientHeight
+      const W = opts?.bredde ?? cw
+      const H = opts?.hoyde ?? ch
+      const eget = !!opts?.bredde
       // Sett splittgrad.
       for (const { obj, base, dir } of explodablesRef.current) obj.position.copy(base).addScaledVector(dir, ex)
+      // Byggetrinn: skjul deler fra senere trinn.
+      const visSaved: Array<[THREE.Object3D, boolean]> = []
+      if (opts?.maksTrinn !== undefined) {
+        modelGroup.traverse((o) => {
+          const t = o.userData.trinn as number | undefined
+          if (t === undefined) return
+          visSaved.push([o, o.visible])
+          o.visible = t <= opts.maksTrinn! && !new Set(hiddenPartsRef.current.split(',')).has(String(o.userData.part ?? ''))
+        })
+      }
       const handlesWere = handleGroup.visible
       handleGroup.visible = false
       // Nullstill all emissive (valg/«vis frem»-puls) så bildet blir rent.
@@ -418,19 +559,40 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
           }
         }
       })
-      const cw = mount.clientWidth
-      const ch = mount.clientHeight
-      renderer.setViewport(0, 0, cw, ch)
+      const savedAspect = camera.aspect
+      const savedView = camera.view ? { ...camera.view } : null
+      if (eget) {
+        renderer.setSize(W, H, false)
+        camera.aspect = W / H
+      }
+      camera.clearViewOffset()
+      camera.updateProjectionMatrix()
+      // Til PDF: alltid ren, komplett innramming av HELE modellen (samme
+      // utsnitt for alle byggetrinn), uavhengig av hva brukeren ser nå.
+      const pts = modellPunkter()
+      if (pts.length && preset) {
+        // Splittet: rammen må romme delene i sin splittede posisjon.
+        const r = beregnRamme(new THREE.Vector3(...PRESET_RETNING[preset]), pts, camera.aspect, { w: 1, h: 1 }, ex > 0.01 ? 1.12 : 1.04)
+        controls.target.copy(r.target)
+        camera.position.copy(r.pos)
+        camera.lookAt(r.target)
+      }
+      renderer.setViewport(0, 0, eget ? W : cw, eget ? H : ch)
       renderer.setScissorTest(false)
       renderer.clear()
       renderer.render(scene, camera)
       let url = ''
       try { url = renderer.domElement.toDataURL('image/png') } catch { url = '' }
-      // Gjenopprett emissive, splittgrad, håndtak og kamera/mål.
+      // Gjenopprett alt.
+      for (const [o, v] of visSaved) o.visible = v
       for (const s of emSaved) { s.m.emissive.setHex(s.hex); s.m.emissiveIntensity = s.int }
       const cur = explodeAnimRef.current
       for (const { obj, base, dir } of explodablesRef.current) obj.position.copy(base).addScaledVector(dir, cur)
       handleGroup.visible = handlesWere
+      if (eget) renderer.setSize(cw, ch, false)
+      camera.aspect = savedAspect
+      if (savedView) camera.setViewOffset(savedView.fullWidth, savedView.fullHeight, savedView.offsetX, savedView.offsetY, savedView.width, savedView.height)
+      camera.updateProjectionMatrix()
       camera.position.copy(savedPos)
       controls.target.copy(savedTarget)
       controls.update()
@@ -466,10 +628,14 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
       onSelectPartRef.current?.(null)
     }
 
-    if (apiRef) apiRef.current = { setView, zoom, orbit, snapshot, deselect }
+    if (apiRef) apiRef.current = {
+      setView, zoom, orbit, snapshot, deselect,
+      rammeInn: (preset?: ViewPreset) => { rammeInn(preset ? new THREE.Vector3(...PRESET_RETNING[preset]) : ISO_RETNING, true) },
+    }
 
-    const GIZMO_SIZE = 158
-    const GIZMO_PAD = 12
+    // Orienteringskuben skaleres ned på smale skjermer (mobil).
+    const gizmoStr = () => ((mount.clientWidth || 800) < 640 ? 92 : 132)
+    const GIZMO_PAD = 10
 
     // --- Dra-håndtak ---
     const raycaster = new THREE.Raycaster()
@@ -524,6 +690,7 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
       const grect = renderer.domElement.getBoundingClientRect()
       const px = e.clientX - grect.left
       const py = e.clientY - grect.top
+      const GIZMO_SIZE = gizmoStr()
       const gx0 = grect.width - GIZMO_SIZE - GIZMO_PAD
       if (px >= gx0 && px <= grect.width - GIZMO_PAD && py >= GIZMO_PAD && py <= GIZMO_PAD + GIZMO_SIZE) {
         const nx = ((px - gx0) / GIZMO_SIZE) * 2 - 1
@@ -563,6 +730,7 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
         factor: data.dim.axis === 'y' ? 1 : 2, // symmetriske akser: halv utstrekning
       }
       controls.enabled = false
+      draRef.current = true
       renderer.domElement.setPointerCapture(e.pointerId)
       onDragLabelRef.current?.(data.dim.label)
     }
@@ -611,6 +779,9 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
       const wasDragging = !!dragging
       if (dragging) {
         dragging = null
+        draRef.current = false
+        // Ramm inn de nye målene når brukeren slipper håndtaket.
+        rammeRef.current = { modus: 'behold', animer: true, tid: performance.now() + 120 }
         controls.enabled = true
         onDragLabelRef.current?.(null)
         try { renderer.domElement.releasePointerCapture(e.pointerId) } catch { /* noop */ }
@@ -649,6 +820,33 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
     resize()
     const ro = new ResizeObserver(resize)
     ro.observe(mount)
+
+    let slipp: Array<{ obj: THREE.Object3D; baseY: number; hoyde: number; start: number }> = []
+    oppdaterSynlighetRef.current = () => {
+      const hidden = new Set(hiddenPartsRef.current.split(',').filter(Boolean))
+      const maks = byggetrinnRef.current
+      modelGroup.traverse((o) => {
+        const p = o.userData.part as string | undefined
+        const t = o.userData.trinn as number | undefined
+        if (p === undefined && t === undefined) return
+        let vis = !(p && hidden.has(p))
+        if (maks !== null && t !== undefined && t > maks) vis = false
+        o.visible = vis
+      })
+    }
+    slippInnRef.current = (trinn: number) => {
+      const b = modellBoks()
+      const h = b ? Math.max(0.15, (b.max.y - b.min.y) * 0.35) : 0.4
+      // Avslutt pågående fall først (tilbake til basisposisjon).
+      for (const e of slipp) e.obj.position.y = e.baseY
+      slipp = []
+      const start = performance.now()
+      modelGroup.traverse((o) => {
+        if (o.userData.trinn !== trinn || !(o as THREE.Mesh).isMesh) return
+        slipp.push({ obj: o, baseY: o.position.y, hoyde: h, start })
+        o.position.y += h
+      })
+    }
 
     let raf = 0
     let lastW = 0
@@ -790,8 +988,8 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
       } else if (wasShowcase) {
         clearHighlight()
         controls.minDistance = savedMinDist
-        controls.target.set(0, showcaseH * 0.45, 0) // tilbake til nøytralt sikt-punkt
         wasShowcase = false
+        rammeRef.current = { modus: 'behold', animer: true, tid: 0 }
       }
 
       // GROUND_CLAMP: la brukeren rotere vertikalt helt ned mot bakken. Målet
@@ -821,40 +1019,45 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
         camera.updateProjectionMatrix()
       }
 
-      // Innramming når produktet er byttet (needsFrameRef). Projiserer alle 8
-      // hjørnene av bounding-boksen på kameraets skjermakser (høyre/opp) for den
-      // faste iso-retningen, og finner avstanden som får boksen til å passe i
-      // BÅDE vertikal og horisontal FOV. Dette gir riktig zoom for alle modeller
-      // – smale/høye som brede/flate – og tar hensyn til skjermformatet (mobil).
-      if (needsFrameRef.current) {
-        const bb = templateRef.current.bounds(configRef.current)
-        if (Number.isFinite(bb.x) && Number.isFinite(bb.y) && Number.isFinite(bb.z) && bb.x > 0) {
-          controls.target.set(0, bb.y * 0.45, 0)
-          const dir = new THREE.Vector3(0.8, 0.55, 1).normalize()
-          // Skjermakser sett fra kameraet langs -dir.
-          const right = new THREE.Vector3().crossVectors(dir, new THREE.Vector3(0, 1, 0)).normalize()
-          const camUp = new THREE.Vector3().crossVectors(right, dir).normalize()
-          // Største utstrekning langs hver skjermakse, relativt til target.
-          const hx = bb.x / 2, hy = bb.y / 2, hz = bb.z / 2
-          const corner = new THREE.Vector3()
-          let extRight = 0, extUp = 0
-          for (const sx of [-1, 1]) for (const sy of [-1, 1]) for (const sz of [-1, 1]) {
-            corner.set(sx * hx, bb.y / 2 + sy * hy - controls.target.y, sz * hz)
-            extRight = Math.max(extRight, Math.abs(corner.dot(right)))
-            extUp = Math.max(extUp, Math.abs(corner.dot(camUp)))
-          }
-          const vFov = (camera.fov * Math.PI) / 180
-          const aspect = camera.aspect || 1
-          const hFov = 2 * Math.atan(Math.tan(vFov / 2) * aspect)
-          const distV = extUp / Math.tan(vFov / 2)
-          const distH = extRight / Math.tan(hFov / 2)
-          const R = Math.max(distV, distH) * 1.25 // ~luft rundt modellen
-          camera.position.copy(controls.target).addScaledVector(dir, R)
-          controls.minDistance = Math.max(0.4, R * 0.25)
-          controls.maxDistance = R * 4
-          controls.update()
-          needsFrameRef.current = false
+      // Skjermforskyvning: sentrer modellen i det frie området mellom
+      // overleggene (sidepanel/verktøylinjer), ikke midt i canvas.
+      {
+        const i = innfeltRef.current
+        const ox = (i.hoyre - i.venstre) / 2
+        const oy = (i.bunn - i.topp) / 2
+        const v = camera.view
+        if (mw > 0 && mh > 0 && (!v || v.offsetX !== ox || v.offsetY !== oy || v.fullWidth !== mw || v.fullHeight !== mh)) {
+          camera.setViewOffset(mw, mh, ox, oy, mw, mh)
+          camera.updateProjectionMatrix()
         }
+      }
+
+      // Innramming (produktbytte, nye mål, nye innfelt) – utsatt til brukeren
+      // har sluppet håndtaket, og aldri mens «vis frem» kjører.
+      const rm = rammeRef.current
+      if (rm && !draRef.current && !showcaseRef.current && performance.now() >= rm.tid && mw > 0 && mh > 0) {
+        if (rammeInn(rm.modus === 'iso' ? ISO_RETNING : naaRetning(), rm.animer)) rammeRef.current = null
+      }
+      if (kamMal && !showcaseRef.current) {
+        camera.position.lerp(kamMal.pos, 0.16)
+        controls.target.lerp(kamMal.target, 0.16)
+        if (camera.position.distanceTo(kamMal.pos) < 0.002 && controls.target.distanceTo(kamMal.target) < 0.002) {
+          camera.position.copy(kamMal.pos)
+          controls.target.copy(kamMal.target)
+          kamMal = null
+        }
+        controls.update()
+      }
+
+      // Byggetrinn: nye deler «faller» på plass.
+      if (slipp.length) {
+        const naa = performance.now()
+        slipp = slipp.filter((e) => {
+          const t = Math.min(1, (naa - e.start) / 650)
+          const k = 1 - Math.pow(1 - t, 3)
+          e.obj.position.y = e.baseY + e.hoyde * (1 - k)
+          return t < 1
+        })
       }
 
       // Myk animasjon av splittvisning mot målet. «Vis frem» overstyrer med
@@ -880,7 +1083,7 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
       }
 
       // Skjul dra-håndtakene mens «vis frem» kjører – ren presentasjon.
-      handleGroup.visible = showHandlesRef.current && !showcaseRef.current
+      handleGroup.visible = showHandlesRef.current && !showcaseRef.current && byggetrinnRef.current === null
       // Hold dra-håndtakene i konstant skjermstørrelse uansett zoom-nivå.
       if (handlesRef.current.length) {
         const camDist = camera.position.distanceTo(controls.target)
@@ -902,6 +1105,7 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
       // så flaten mot deg alltid tilsvarer gjeldende utsikt (three: y=0 nederst).
       camQuatInv.copy(camera.quaternion).invert()
       gizmoCube.quaternion.copy(camQuatInv)
+      const GIZMO_SIZE = gizmoStr()
       renderer.setViewport(cw - GIZMO_SIZE - GIZMO_PAD, ch - GIZMO_SIZE - GIZMO_PAD, GIZMO_SIZE, GIZMO_SIZE)
       renderer.setScissor(cw - GIZMO_SIZE - GIZMO_PAD, ch - GIZMO_SIZE - GIZMO_PAD, GIZMO_SIZE, GIZMO_SIZE)
       renderer.setScissorTest(true)
@@ -929,6 +1133,14 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // --- Byggetrinn-visning ---
+  useEffect(() => {
+    const forrige = byggetrinnRef.current
+    byggetrinnRef.current = byggetrinn
+    oppdaterSynlighetRef.current()
+    if (byggetrinn !== null && (forrige === null || byggetrinn > forrige)) slippInnRef.current(byggetrinn)
+  }, [byggetrinn])
 
   // --- Skygge av/på ---
   useEffect(() => {
@@ -1041,12 +1253,13 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
       mm.depthWrite = skinOp > 0.98
     }
 
-    // Gjenopprett vis/skjul-deler etter ombygging.
-    const hiddenNow = new Set(hiddenPartsRef.current.split(',').filter(Boolean))
-    if (hiddenNow.size) built.traverse((o) => {
-      const p = o.userData.part as string | undefined
-      if (p) o.visible = !hiddenNow.has(p)
-    })
+    // Byggetrinn per del + rapport om hvilke lag/trinn modellen har.
+    const trinn = trinnIModell(built)
+    const parts = new Set<string>()
+    built.traverse((o) => { if (typeof o.userData.part === 'string') parts.add(o.userData.part) })
+    onModellInfoRef.current?.({ trinn, parts: [...parts] })
+    // Gjenopprett vis/skjul-deler og byggetrinn etter ombygging.
+    oppdaterSynlighetRef.current()
 
     // Håndtak – doble akse-piler (peker begge veier langs aksen).
     disposeGroup(handleGroup)
@@ -1121,11 +1334,11 @@ export default function DesignerViewport({ template, config, onConfigChange, onD
       obj.position.copy(base).addScaledVector(dir, explodeAnimRef.current * 0.35)
     }
 
-    // Ramme inn modellen første gang og senter kontrollene – kun ved gyldige mål,
-    // så framing ikke «brennes» på en NaN-modell (blank canvas til refresh).
-    const finite = Number.isFinite(b.x) && Number.isFinite(b.y) && Number.isFinite(b.z)
-    if (controls && finite) controls.target.set(0, b.y * 0.45, 0)
-    // Selve innrammingen skjer i render-loopen (needsFrameRef), som alltid kjører.
+    // Ny geometri → ramm inn igjen (samme synsretning, myk overgang). Et
+    // ventende produktbytte ('iso') beholdes. Selve innrammingen skjer i
+    // render-loopen, som venter til et pågående håndtak-drag er sluppet.
+    void controls
+    if (rammeRef.current?.modus !== 'iso') rammeRef.current = { modus: 'behold', animer: true, tid: performance.now() + 260 }
   }, [geomKey])
 
   return <Viewport ref={mountRef} />

@@ -99,17 +99,58 @@ produktene selges som reelle byggeplaner. Alle bygg-funksjoner tar en
 `mat: (pid, darken?) => MeshStandardMaterial`-fabrikk (fra templatet, så
 paint/treslag/farge følger med).
 
-### Dimensjonering (span-gradering)
-Forenklet Eurocode/Byggforsk-tilnærming, snølast ~3 kN/m², c/c 600:
+### Dimensjonering – gamle gradere (bakoverkompatible, @deprecated)
+`gradBjelke`, `maksGulvSpenn`, `gradSperre`, `gradMonebjelke` finnes fortsatt,
+men er nå tynne innpakninger rundt beregningskjernen (§ 4b) med faste
+standardlaster (bod-gulv 3,0 kN/m² TK 3; tak sk 3,5, shingel). De returnerer
+det STERKESTE av gammel spenntabell og EC5-kontroll – aldri svakere enn før.
+Nye/migrerte templater skal bruke § 4b direkte.
+- `antallCC(len, cc)` → antall medlemmer så c/c aldri > cc (uendret).
 
-- `gradBjelke(spanM, cc)` → minste C24-gulvbjelke som bærer spennet (Byggforsk 522.351).
-- `maksGulvSpenn(cc)` → når spennet er større trengs en midtre bæredrager.
-- `gradSperre(spanM)` → minste sperre for takfallslengden.
-- `gradMonebjelke(w, d)` → bærende mønebjelke, dobles/tredobles ved store spenn (bøyekontroll).
-- `antallCC(len, cc)` → antall medlemmer så c/c aldri > cc.
+---
 
-> ⚠️ Dette er en approksimasjon, ikke full lastberegning. Se memory
-> `designer-eurocode-compliance`.
+## 4b. Beregningskjernen (laster + Eurokode 5) – BRUK DENNE
+
+Rene TS-moduler uten three.js (kan testes med `npx tsx`). Enheter: m, kN,
+kN/m, kN/m²; geometri i mm. Alt er konservativt og transparent – hver kontroll
+gir **utnyttelse** (≤ 1,00 = OK) og en klartekst-utregning til PDF-vedlegget.
+
+| Modul | Innhold |
+|---|---|
+| `laster.ts` | `LASTFAKTOR`, `LASTTYPER` (ψ, varighet), `TAKTEKKE`/`taktekkeFra()`, `NYTTELAST`, `vedlast()`, `mu1()`, `snolastTak()`, `snolastTerrasse()`, `snoFonnInntilHoyereTak()`, `vindlast()`, `vindOppdrift()`, `vindHorisontal()`, `fmt()` |
+| `snolast-data.ts` | `snolastPaMark({kommune, hoydeMoh, skManuell})`, `SK_STANDARD` (3,5), `SK_RESERVE` (4,5), utdrag `SNOLAST_KOMMUNER` |
+| `dimensjonering.ts` | materialer (C18/C24/C30/GL28c/GL30c), `KMOD`/`KDEF`, tverrsnittslister, `kontrollerBjelke`, `velgBjelke`, `maksSpenn`, `kontrollerSoyle`, `velgSoyle`, høynivå `dimensjonerGulvbjelke/Sperre/Drager/Stolpe/Stender`, `taklaster`, `gulvlaster`, `forklarKontroll` |
+| `geometri.ts` | `sperreGeometri` (lengde, fuglemunn ≤ h/3, HAP, øvre svillhøyde for pult, omriss), `valmGeometri` (grat β, kinnkutt, senking, skiftesperrer), `trappGeometri`, `loddkutt`/`vannrettKutt`/`kinnkutt`, `rundOppKapp` (5 mm), `fmtGrader` (1 des.), `fmtMm` |
+| `fundament.ts` | `frostdybde({sone|F10, grunn, snofri?})` (Stefan med n-faktor: snødekt 0,5 / snøfri 0,9 – carport/garasje/tett tak/brøytet ⇒ `snofri: true`), `dimensjonerPunktfundament` (bæreevne: betong + jordprisme rett over sålen; oppløft: betong + jordkjegle 15°, 16 kN/m³), `jordvektPrisme`, `FUNDAMENTER` (pilarrør, såler 400–1000), `BETONGBLOKKER`, `FUNDAMENTER_MED_BLOKKER`, `betongvekt`, `jordvektOverSaale`, `saalebredde`, `forankringsraad`, `GRUNN`, `FROSTSONER` |
+| `byggesak.ts` | `vurderByggesak(ByggesakInput)` (SAK10 § 4-1 a/b/c, § 3-1), `rekkverkKrav` (TEK17 § 12-17), `tilByggeregler()` → `Byggeregler`. Rekkverkslast `REKKVERK_LAST_KAT_A` = 1,0 kN/m (laster.ts) og `kontrollerRekkverkstolpe` (dimensjonering.ts) |
+| `fagverk.ts` | `losFagverk` (2D stivhetsmetode) og `dimensjonerTakstol` (Fink/pult, EC5 6.23 i overgurt). `templates/felles-fagverk.ts` re-eksporterer |
+| `beregningsgrunnlag.ts` | `lagBeregningsrapport(...)` → `Beregningsrapport`; `tilPlanVedlegg(rapport)` → PDF-ens `Beregningsgrunnlag` (`plan-typer.ts`); `ANSVARSFRASKRIVELSE`, `STANDARDER` |
+
+**Grunnlag/valg** (se kommentarer i koden for kilder og usikkerhet):
+- NS-EN 1990 NA: 6.10a (1,35G + 1,5ψ0Q) og 6.10b (1,2G + 1,5Q1 + 1,5ψ0Qi). Snø ψ0/ψ2 = 0,7/0,2.
+- NS-EN 1995-1-1 NA: γM 1,25 heltre / 1,15 limtre; snø = korttidslast; nyttelast = middels.
+  kmod/kdef etter tjenesteklasse: **2 = overdekket ute** (tak, bod), **3 = værutsatt** (terrassebjelkelag, frie stolper).
+- Kontroller: bøying (k_h, vipping for dragere), skjær (k_cr 0,67), trykk ⊥ ved opplegg (k_c,90 = 1,0),
+  nedbøyning: gulv L/400 (Q) og L/200 (fin); tak/drager L/300 og L/200. Søyler: k_c (βc 0,2/0,1), trykk mot svill; med `MQk` (moment fra vind/kneband) trykk + bøying etter EC5 6.23/6.24. `dimensjonerDrager` tar `vinkelGrader` for skrå dragere/åser.
+- Snø og nyttelast på terrasse virker ikke samtidig (NS-EN 1991-1-1 3.3.2) → envelope.
+- Snølast-tabellen er et UTDRAG med usikkerhet – alltid skriv ut `snolastPaMark().merknader`, og la kunden overstyre sk.
+
+**Typisk bruk i et template**
+```ts
+const sk = snolastPaMark({ kommune: c.kommune, hoydeMoh: c.moh, skManuell: c.sk }) // eller { skManuell: SK_STANDARD }
+const tekke = taktekkeFra(c.taktekke)
+const sperre = dimensjonerSperre({ spennHorisontalM, vinkelGrader: c.takvinkel, ccM: 0.6, tekke, sk: sk.sk, opplegglengdeMm: geo.opplegglengdeMm })
+const drager = dimensjonerDrager({ spennM: stolpeAvstand, lastbreddeM: dybde / 2 + oh, flatelaster: taklaster({ sk: sk.sk, vinkelGrader: c.takvinkel, tekke }) })
+const geo = sperreGeometri({ vinkelGrader: c.takvinkel, sperreHoydeMm: sperre.valgt.h, utstikkMm: 300, topp: { type: 'vegg', lopMm: 3000, utstikkMm: 300 } })
+// kappliste: geo.kappLengdeMm, vinkler: fmtGrader(geo.loddkutt.gjaeringGrader)
+beregningsgrunnlag: (c) => tilPlanVedlegg(lagBeregningsrapport({ produkt: 'carport', tittel: '…', snolast: { mark: sk, tak: snolastTak(sk.sk, c.takvinkel) }, deler: { Sperre: sperre, Drager: drager }, byggesak }))
+```
+`velg*`/`dimensjoner*` returnerer `Dimensjonering { valgt: Tverrsnitt, kontroll: Medlemskontroll, ok, vurdert, melding }`.
+`ok = false` betyr at ingen standarddimensjon holder → legg inn mellomstøtte/drager eller kortere c/c (vis `melding`).
+`Tverrsnitt.h` er i **mm** (gamle `BjelkeGrade.h` er i meter).
+
+> ⚠️ Kjernen erstatter ikke RIB. `ANSVARSFRASKRIVELSE` skal alltid med i planen.
+> Håndregnede tester: se `designer-core/kjerne.test.mts` i agentens scratchpad (kopier inn i repoet ved behov).
 
 ### Framing-byggere
 - `byggGulv(target, mat, w, d)` – bjelkelag (48×98) + terrassebord-dekke.
@@ -220,12 +261,32 @@ tilbys (utelatt = alle). Se memory `designer-pricing-dual-source`.
 
 ---
 
-## 8. 2D-tegninger
+## 8. 2D-tegninger og byggeplanen (PDF)
 
 `tegning2D(c)` / `soknadTegning(c)` returnerer rene `Riss2D` (plan/fasade/snitt)
 tegnet fra de SAMME parametrene som 3D – ikke en projeksjon av mesh-en. Enheter
-cm, y nedover (SVG). `Riss2D.type` klassifiserer arket i søknadsheftet.
-Rendering i `tegningSvg.ts`, PDF i `pdf.ts`.
+cm, y nedover (SVG). `Riss2D.type` klassifiserer arket. Valgfrie tillegg
+(akser, snittmarkører, skravur, påskrifter, fast målestokk) ligger i
+`plan-typer.ts` (`Riss2DPlan`). Måltekster i cm gjøres om til mm automatisk.
+
+Byggeplanen er en **vektor-PDF** (jsPDF-primitiver, ingen skjermbilder):
+
+| Modul | Innhold |
+|---|---|
+| `plan-typer.ts` | Valgfrie plan-typer: `Beregningsgrunnlag` (vedlegg), `KapplisteDelPlan` (pos, mm, kappvinkler), `BomLinePlan` (kategori, kvalitet, pris), `Riss2DPlan`, `MonteringSteg`, `hentBeregningsgrunnlag()` |
+| `plan-flate.ts` | Tegneflate med to bakender: `PdfDok` (jsPDF) og `SvgDok` (forhåndsvisning). Tekst saneres til WinAnsi |
+| `plan-tegning.ts` | Tegnings-scene i mm + renderer: målekjeder, akser, snitt, nivåer, skravur, bobler; `rissTilTegning()` |
+| `plan-modell.ts` | 3D-modellen → konstruksjonstegninger (plan/oppriss/snitt via projeksjon + malerens algoritme), kappvinkler målt i geometrien, `kontrollerModell()` (QA 3D ↔ kappliste) |
+| `plan-detaljer.ts` | Parametriske detaljer (stolpefot, fundament, sperre på drager, takfot, dekke) |
+| `plan-kapp.ts` | Kappeplan: standardlengder å kjøpe (best fit, sagsnitt) |
+| `plan-ark.ts` | Sidene: forside, prosjektinfo/tegningsliste, tegningsark med tegningshode, materialliste, kappliste, montering, beregningsvedlegg, råd |
+| `byggetrinn.ts` | Klassifiserer deler i byggetrinn (fundament → … → kledning) – brukes av «Bygg steg for steg» i 3D og illustrasjonene i monteringen |
+| `byggested.ts` | Felles config-felt `kommune`/`moh`/`sk`/`frostsone`/`grunn` + `snolastForConfig(c)`, `frostForConfig(c, { snofri })`, `frostsoneForConfig(c)`, `grunnForConfig(c)` (standard 'ukjent' = konservativ telefarlig, 100 kPa), `skrivByggested`/`overforByggested` |
+
+**Hold 3D, kappliste og tegninger i takt:** konstruksjonstegningene og
+kappvinklene leses fra `buildMesh()`. `userData.info` (navn|profil|lengdeCm)
+kobler 3D-delene til kapplista (posisjonsbokstaver A, B …). Kjør
+`kontrollerModell(lesModell(t.buildMesh(c)), t.kappliste(c))` for å finne avvik.
 
 ---
 

@@ -57,7 +57,7 @@ export const PRISER: Record<string, PrisPost> = {
   vinkelbeslag: { id: 'vinkelbeslag', navn: 'Sperrebeslag / vinkelbeslag (forsinket)', enhet: 'stk', pris: 19 },
   veggpanel: { id: 'veggpanel', navn: 'Veggpanel / kledning', enhet: 'm²', pris: 230 },
   akrylplate: { id: 'akrylplate', navn: 'Akrylplate (klar)', enhet: 'm²', pris: 450 },
-  'stolpe-90x90': { id: 'stolpe-90x90', navn: 'Stolpe 90×90 mm', enhet: 'lm', pris: 70 },
+  'stolpe-90x90': { id: 'stolpe-90x90', navn: 'Limtresøyle GL30c 90×90 mm', enhet: 'lm', pris: 150 },
   'taktekke-bord': { id: 'taktekke-bord', navn: 'Bordtak', enhet: 'm²', pris: 240 },
   'platting-dekke': { id: 'platting-dekke', navn: 'Platting (dekke + bjelkelag)', enhet: 'm²', pris: 480 },
   'benkeplate-tre': { id: 'benkeplate-tre', navn: 'Benkeplate heltre', enhet: 'lm', pris: 590 },
@@ -67,6 +67,98 @@ export const PRISER: Record<string, PrisPost> = {
   underskap: { id: 'underskap', navn: 'Underskap med dør', enhet: 'stk', pris: 2900 },
   sittebenk: { id: 'sittebenk', navn: 'Sittebenk', enhet: 'lm', pris: 690 },
   postkasse: { id: 'postkasse', navn: 'Postkasse', enhet: 'stk', pris: 690 },
+
+  // ── Limtre GL30c (bjelker/dragere/søyler) ──────────────────────────
+  // Veiledende utsalgspris hos norske byggevarehus (Byggmax/Maxbo/Obs Bygg),
+  // 2026-nivå. Limtre prises i praksis etter volum: ca. 16 000 kr/m³ for
+  // standard GL30c-bjelker (90/115/140 mm bredde) og ca. 18 000 kr/m³ for
+  // søyler (kvadratiske). Pris per lm = b · h · kr/m³, avrundet til nærmeste 10 kr.
+  // Ikke impregnert – limtre ute skal stå under tak/beskyttes (tjenesteklasse 2).
+  'limtre-90x225': { id: 'limtre-90x225', navn: 'Limtre GL30c 90×225 mm', enhet: 'lm', pris: 330 },
+  'limtre-90x270': { id: 'limtre-90x270', navn: 'Limtre GL30c 90×270 mm', enhet: 'lm', pris: 390 },
+  'limtre-90x315': { id: 'limtre-90x315', navn: 'Limtre GL30c 90×315 mm', enhet: 'lm', pris: 450 },
+  'limtre-115x270': { id: 'limtre-115x270', navn: 'Limtre GL30c 115×270 mm', enhet: 'lm', pris: 500 },
+  'limtre-115x315': { id: 'limtre-115x315', navn: 'Limtre GL30c 115×315 mm', enhet: 'lm', pris: 580 },
+  'limtre-115x360': { id: 'limtre-115x360', navn: 'Limtre GL30c 115×360 mm', enhet: 'lm', pris: 660 },
+  'limtre-115x405': { id: 'limtre-115x405', navn: 'Limtre GL30c 115×405 mm', enhet: 'lm', pris: 750 },
+  'limtre-140x360': { id: 'limtre-140x360', navn: 'Limtre GL30c 140×360 mm', enhet: 'lm', pris: 810 },
+  'limtre-140x405': { id: 'limtre-140x405', navn: 'Limtre GL30c 140×405 mm', enhet: 'lm', pris: 910 },
+  'limtre-140x450': { id: 'limtre-140x450', navn: 'Limtre GL30c 140×450 mm', enhet: 'lm', pris: 1010 },
+  'limtre-140x495': { id: 'limtre-140x495', navn: 'Limtre GL30c 140×495 mm', enhet: 'lm', pris: 1110 },
+  'stolpe-115x115': { id: 'stolpe-115x115', navn: 'Limtresøyle GL30c 115×115 mm', enhet: 'lm', pris: 240 },
+  'stolpe-140x140': { id: 'stolpe-140x140', navn: 'Limtresøyle GL30c 140×140 mm', enhet: 'lm', pris: 350 },
+
+  // ── Takkonstruksjon, tekking og avvanning ─────────────────────────
+  'taklekt-36x48': { id: 'taklekt-36x48', navn: 'Taklekt 36×48 mm (C24/impregnert)', enhet: 'lm', pris: 14 },
+  'taklekt-48x48': { id: 'taklekt-48x48', navn: 'Taklekt 48×48 mm', enhet: 'lm', pris: 18 },
+  'vindskibord-22x148': { id: 'vindskibord-22x148', navn: 'Vindski-/raftebord 22×148 mm (grunnet)', enhet: 'lm', pris: 34 },
+  'vindskibord-22x198': { id: 'vindskibord-22x198', navn: 'Vindski-/raftebord 22×198 mm (grunnet)', enhet: 'lm', pris: 44 },
+  'kryssfiner-18-plate': { id: 'kryssfiner-18-plate', navn: 'Takplate kryssfiner 18 mm 1200×2400 (not og fjær)', enhet: 'stk', pris: 545 },
+  'undertaksbelegg': { id: 'undertaksbelegg', navn: 'Underlagsbelegg for shingel (rull 1×15 m)', enhet: 'rull', pris: 1190 },
+  'monebeslag': { id: 'monebeslag', navn: 'Mønebeslag/mønekappe (stål)', enhet: 'lm', pris: 160 },
+  'vindskibeslag': { id: 'vindskibeslag', navn: 'Vindskibeslag (stål, 2 m)', enhet: 'lm', pris: 95 },
+  takrenne: { id: 'takrenne', navn: 'Takrenne 125 mm stål (lakkert)', enhet: 'lm', pris: 129 },
+  nedlop: { id: 'nedlop', navn: 'Nedløpsrør 87 mm stål inkl. bend', enhet: 'lm', pris: 159 },
+  rennekrok: { id: 'rennekrok', navn: 'Rennekrok (fotkrok) for 125 mm renne', enhet: 'stk', pris: 29 },
+  'renne-ende': { id: 'renne-ende', navn: 'Renneløp/endebunn-sett', enhet: 'stk', pris: 149 },
+
+  // ── Beslag og festemidler ─────────────────────────────────────────
+  'stolpesko-innstop': { id: 'stolpesko-innstop', navn: 'Stolpesko for innstøping, justerbar (varmforsinket)', enhet: 'stk', pris: 189 },
+  stolpehodebeslag: { id: 'stolpehodebeslag', navn: 'Stolpehodebeslag/U-beslag for drager (varmforsinket)', enhet: 'stk', pris: 139 },
+  'bolt-m12': { id: 'bolt-m12', navn: 'Bolt M12 varmforsinket m/ mutter og 2 skiver', enhet: 'stk', pris: 32 },
+  'franskskrue-12': { id: 'franskskrue-12', navn: 'Franskskrue 12×200 mm m/ skive (varmforsinket)', enhet: 'stk', pris: 18 },
+  bjelkesko: { id: 'bjelkesko', navn: 'Bjelkesko 48 mm (varmforsinket)', enhet: 'stk', pris: 29 },
+  spikerplate: { id: 'spikerplate', navn: 'Spikerplate/takstolplate 100×200 mm', enhet: 'stk', pris: 22 },
+  kamspiker: { id: 'kamspiker', navn: 'Kamspiker 40×4,0 mm varmforsinket (pk 250)', enhet: 'stk', pris: 189 },
+  betongskrue: { id: 'betongskrue', navn: 'Betongskrue/ekspansjonsbolt M10×120 for svill', enhet: 'stk', pris: 16 },
+  hulband: { id: 'hulband', navn: 'Hullbånd/vindkryss stål 40×2 mm (rull 10 m)', enhet: 'rull', pris: 249 },
+  'bandstrammer': { id: 'bandstrammer', navn: 'Båndstrammer for vindkryss', enhet: 'stk', pris: 89 },
+
+  // ── Fundament ─────────────────────────────────────────────────────
+  'pilarror-250': { id: 'pilarror-250', navn: 'Pilarrør (forskalingsrør) Ø250 mm, 1,2 m', enhet: 'stk', pris: 189 },
+  'pilarror-300': { id: 'pilarror-300', navn: 'Pilarrør (forskalingsrør) Ø300 mm, 1,2 m', enhet: 'stk', pris: 249 },
+  'betong-sekk': { id: 'betong-sekk', navn: 'Ferdigbetong B30, sekk 25 kg', enhet: 'stk', pris: 109 },
+  'betong-m3': { id: 'betong-m3', navn: 'Ferdigbetong B30 levert (bil), per m³', enhet: 'stk', pris: 2650 },
+  armeringsnett: { id: 'armeringsnett', navn: 'Armeringsnett K131 (5×2 m)', enhet: 'stk', pris: 349 },
+  'markisolasjon-xps': { id: 'markisolasjon-xps', navn: 'Markisolasjon XPS 50 mm', enhet: 'm²', pris: 155 },
+  'grus-pukk': { id: 'grus-pukk', navn: 'Pukk/kult 16–32 mm (drenerende), per m³ levert', enhet: 'stk', pris: 590 },
+  svillmembran: { id: 'svillmembran', navn: 'Svillmembran (fuktsperre) 150 mm', enhet: 'lm', pris: 14 },
+  radonsperre: { id: 'radonsperre', navn: 'Radon-/fuktsperre 0,2 mm PE', enhet: 'm²', pris: 22 },
+
+  // ── Terrasse/pergola (veiledende 2026, byggevarehus): impregnert terrassebord ca. 260 kr/m² ved
+  // 28 mm, 48×248 trappevangeemne ca. 115 kr/lm. Alias-nøkler beholdes for templater med egne navn.
+  'terrassebord-28x145': { id: 'terrassebord-28x145', navn: 'Terrassebord 28×145 mm', enhet: 'lm', pris: 38 },
+  'terrassebord-21x95': { id: 'terrassebord-21x95', navn: 'Terrassebord 21×95 mm', enhet: 'lm', pris: 19 },
+  pilarror: { id: 'pilarror', navn: 'Pilarrør (forskalingsrør) Ø200 mm, 1,2 m', enhet: 'stk', pris: 140 },
+  'betong-25kg': { id: 'betong-25kg', navn: 'Ferdigbetong B30, sekk 25 kg', enhet: 'stk', pris: 95 },
+  'bjelke-48x248': { id: 'bjelke-48x248', navn: 'Bjelke 48×248 mm (trappevange)', enhet: 'lm', pris: 115 },
+
+  // ── Lekter/bord til varmepumpehus o.l. (veiledende 2026) ──
+  'lekt-23x73': { id: 'lekt-23x73', navn: 'Lekt 23×73 mm', enhet: 'lm', pris: 13 },
+  'lekt-23x98': { id: 'lekt-23x98', navn: 'Bord 23×98 mm', enhet: 'lm', pris: 17 },
+  'lekt-36x73': { id: 'lekt-36x73', navn: 'Lekt 36×73 mm', enhet: 'lm', pris: 18 },
+  'lekt-36x98': { id: 'lekt-36x98', navn: 'Lekt 36×98 mm', enhet: 'lm', pris: 24 },
+
+  // ── Bod/utedo/vedskjul (småhus) – veiledende 2026, byggevarehus inkl. mva ──
+  'bord-19x198': { id: 'bord-19x198', navn: 'Bord 19×198 mm (impregnert)', enhet: 'lm', pris: 34 },
+  'bord-19x223': { id: 'bord-19x223', navn: 'Bord 19×223 mm (impregnert)', enhet: 'lm', pris: 39 },
+  stolpefot: { id: 'stolpefot', navn: 'Vinkelbeslag/forankring m/ betongskrue', enhet: 'stk', pris: 49 },
+  hengsel: { id: 'hengsel', navn: 'T-hengsel 400 mm, varmforsinket', enhet: 'stk', pris: 129 },
+  vrider: { id: 'vrider', navn: 'Vrider/hasp med overfall', enhet: 'stk', pris: 149 },
+  hasp: { id: 'hasp', navn: 'Hasp med krok', enhet: 'stk', pris: 79 },
+  insektnett: { id: 'insektnett', navn: 'Insektnett (glassfiber/alu)', enhet: 'm²', pris: 59 },
+  toalettsete: { id: 'toalettsete', navn: 'Toalettsete med lokk', enhet: 'stk', pris: 449 },
+  lufteror: { id: 'lufteror', navn: 'Lufterør Ø110 m/ hatt og takmansjett', enhet: 'stk', pris: 690 },
+  dorullholder: { id: 'dorullholder', navn: 'Dorullholder', enhet: 'stk', pris: 129 },
+  pukk: { id: 'pukk', navn: 'Pukk 0–32 (sekk 40 kg)', enhet: 'stk', pris: 89 },
+
+  // ── Vegg og garasje ───────────────────────────────────────────────
+  vindsperre: { id: 'vindsperre', navn: 'Vindsperre (diffusjonsåpen duk)', enhet: 'm²', pris: 22 },
+  'garasjeport-2500': { id: 'garasjeport-2500', navn: 'Leddport/seksjonsport 2500 mm bred inkl. motor', enhet: 'stk', pris: 18900 },
+  'garasjeport-3000': { id: 'garasjeport-3000', navn: 'Leddport/seksjonsport 3000 mm bred inkl. motor', enhet: 'stk', pris: 22900 },
+  'garasjeport-2400': { id: 'garasjeport-2400', navn: 'Leddport/seksjonsport 2400 mm bred inkl. motor', enhet: 'stk', pris: 17900 },
+  'garasjeport-2700': { id: 'garasjeport-2700', navn: 'Leddport/seksjonsport 2700 mm bred inkl. motor', enhet: 'stk', pris: 19900 },
+  'beslag-port': { id: 'beslag-port', navn: 'Beslag/foring rundt port (vannbrett + listverk)', enhet: 'stk', pris: 690 },
 }
 
 export function prisFor(id: string): number {

@@ -17,9 +17,16 @@ import { startVippsBetaling, sjekkVippsStatus, losInnTilgangskode, vippsBelopFor
 import type { DesignerProsjekt, Vare } from '../../../types/designerProsjekt'
 import { MAKS_DESIGN_PER_TYPE, entitlements, paaFrossenPlan } from '../../../types/designerProsjekt'
 import type { DesignConfig } from '../../../designer/types'
-import DesignerViewport, { type ViewApi, type PartInfo, type ViewPreset } from './DesignerViewport'
+import DesignerViewport, { type ViewApi, type PartInfo, type ViewPreset, type Innfelt } from './DesignerViewport'
+import { TRINN, TRINN_NAVN } from '../../../designer/byggetrinn'
 import Tegning2DView from './Tegning2DView'
 import ForesporselModal from './ForesporselModal'
+import ByggestedPanel from './ByggestedPanel'
+import { dinEgen } from './navnGrammatikk'
+import StatikkPanel from './StatikkPanel'
+import ByggeplanForhandsvisning from './ByggeplanForhandsvisning'
+import { byggestedTekst, overforByggested, skrivByggested, type Byggested } from '../../../designer/byggested'
+import { hentBeregningsgrunnlag, statikkOppsummering } from '../../../designer/plan-typer'
 import type { ForesporselType } from '../../../types/foresporsel'
 
 const formatKr = (n: number) => `${n.toLocaleString('nb-NO')} kr`
@@ -68,6 +75,12 @@ function HoldBtn({ action, title, icon, className }: { action: () => void; title
  * produkt der det faktisk gjelder.
  */
 const STANDARD_LEVERANSER: Array<'ferdig' | 'materialpakke' | 'plan'> = ['ferdig', 'plan']
+
+/** Små produkter uten snø-/vindlast – «Byggested» vises ikke for disse. */
+const UTEN_BYGGESTED = new Set(['plantekasse', 'postkassestativ', 'postkassestativer'])
+
+/** Byggestedet følger med når kunden bytter produkt eller starter nytt design. */
+const medByggested = (base: DesignConfig, fra: DesignConfig): DesignConfig => overforByggested(base, fra)
 
 // Testkode som låser opp alle leveranser uten betaling. Finnes KUN når
 // VITE_DESIGNER_DEMO_CODE er satt (lokal .env og test-deploys). I produksjon
@@ -292,12 +305,23 @@ export default function DesignerPage() {
   const prevTemplateIdRef = useRef(template?.id)
   if (template && template.id !== prevTemplateIdRef.current) {
     prevTemplateIdRef.current = template.id
-    setConfig({ ...template.defaultConfig })
+    setConfig((c) => medByggested({ ...template.defaultConfig }, c))
   }
   const [dragLabel, setDragLabel] = useState<string | null>(null)
   const [shadows, setShadows] = useState(true)
   const [viewMode, setViewMode] = useState<'assembled' | 'explode' | 'parts' | 'tegning'>('assembled')
   const [explodeAmt, setExplodeAmt] = useState(1) // manuell splittgrad (0–1.5)
+  // Byggetrinn-visning («Bygg steg for steg») og hva modellen inneholder.
+  const [modellInfo, setModellInfo] = useState<{ trinn: number[]; parts: string[] }>({ trinn: [], parts: [] })
+  const [byggetrinn, setByggetrinn] = useState<number | null>(null)
+  const [trinnSpill, setTrinnSpill] = useState(false)
+  // Smal skjerm (mobil): andre overlegg → andre innfelt for innrammingen.
+  const [smal, setSmal] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 820)
+  useEffect(() => {
+    const f = () => setSmal(window.innerWidth <= 820)
+    window.addEventListener('resize', f)
+    return () => window.removeEventListener('resize', f)
+  }, [])
   const [showcase, setShowcase] = useState(false) // «vis frem»-animasjon
   const [showHandles, setShowHandles] = useState(true)
   const [lightIntensity, setLightIntensity] = useState(1)
@@ -433,7 +457,9 @@ export default function DesignerPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const bom = useMemo(() => (template ? template.beregn(cfg) : null), [template, cfg, prisVersjon])
 
-  const tegning = useMemo(() => (template?.tegning2D ? template.tegning2D(cfg) : null), [template, cfg])
+  // Nøkkel for å bygge forhåndsvisning/2D-ark på nytt når designet endres.
+  const planNokkel = JSON.stringify({ id: template?.id, cfg, overrides, navn: currentDesign?.navn, prisVersjon })
+  const [visPlan, setVisPlan] = useState(false)
 
   const endrePris = (id: string, verdi: number) => {
     settPris(id, verdi)
@@ -445,7 +471,7 @@ export default function DesignerPage() {
     if (!template) return
     setFrozenView(false)
     preFrozenRef.current = null
-    setConfig({ ...template.defaultConfig })
+    setConfig((c) => medByggested({ ...template.defaultConfig }, c))
     setCodeUnlockAll(false)
     setAdminVisning(false)
     setCodeErr(false)
@@ -468,27 +494,32 @@ export default function DesignerPage() {
 
   const chooseProduct = (id: string) => navigate(`/designverktoy/${id}`)
 
-  const planArgs = (): PlanArgs | null => {
+  const planArgs = (medBilder = true): PlanArgs | null => {
     if (!template || !bom) return null
+    const v = medBilder ? viewApi.current : null
+    // Bilder i fast format (uavhengig av skjermen): forside + ett per byggetrinn.
+    const trinnBilder = v && modellInfo.trinn.length > 1
+      ? modellInfo.trinn.map((t) => ({ trinn: t, bilde: v.snapshot(0, 'iso', { bredde: 1100, hoyde: 780, maksTrinn: t }) }))
+      : []
     return {
       template,
-      config,
+      config: cfg,
       bom,
       designNavn: currentDesign?.navn,
+      kunde: firebaseUser?.displayName ?? undefined,
       montering: template.montering?.(cfg) ?? [],
       deler: template.kappliste?.(cfg) ?? [],
-      raad: (() => {
-        const r = template.raad?.(cfg) ?? []
-        const b = template.byggeregler?.(cfg)
-        return b ? [...r, `Byggeregler – ${b.tittel}: ${b.punkter.join(' ')}`] : r
-      })(),
+      raad: template.raad?.(cfg) ?? [],
+      byggeregler: template.byggeregler?.(cfg),
       images: {
-        assembled: viewApi.current?.snapshot(0, 'iso') ?? '',
-        exploded: viewApi.current?.snapshot(1, 'iso') ?? '',
+        assembled: v?.snapshot(0, 'iso', { bredde: 1700, hoyde: 1100 }) ?? undefined,
+        trinn: trinnBilder,
       },
-      // Byggeplanen bruker det lette arbeidsrisset. Det komplette søknadssettet
-      // (plan + fasader + snitt) lastes ned via egen «byggesøknad-hefte»-knapp.
-      tegning: template.tegning2D?.(cfg),
+      // Søknadssettet (plan + fasader + snitt) foretrekkes som formtegninger.
+      tegning: template.soknadTegning?.(cfg) ?? template.tegning2D?.(cfg),
+      konfig: [...konfigTekst(template, cfg, overrides).split('\n'), ...(visByggested ? byggestedTekst(cfg) : [])].filter(Boolean),
+      // Bare templatets eget anslag – byggeplanen anslår ellers ut fra modellen.
+      arbeidstimer: bom.arbeidstimer,
     }
   }
 
@@ -754,7 +785,7 @@ export default function DesignerPage() {
     if (!template) return
     setFrozenView(false)
     preFrozenRef.current = null
-    setConfig({ ...template.defaultConfig })
+    setConfig((c) => medByggested({ ...template.defaultConfig }, c))
     setOverrides({})
     setCurrentDesignId(null)
     setCodeUnlockAll(false)
@@ -824,6 +855,141 @@ export default function DesignerPage() {
 
   const patch = (p: Partial<DesignConfig>) => setConfig((c) => ({ ...c, ...p }) as DesignConfig)
 
+  // ── Bygg steg for steg ──
+  const trinnListe = modellInfo.trinn
+  const trinnIndeks = byggetrinn === null ? -1 : trinnListe.indexOf(byggetrinn)
+  const startTrinn = () => {
+    setShowcase(false)
+    setViewMode('assembled')
+    setByggetrinn(trinnListe[0] ?? null)
+    setTrinnSpill(true)
+  }
+  const stoppTrinn = () => { setByggetrinn(null); setTrinnSpill(false) }
+  const gaTilTrinn = (i: number) => {
+    setTrinnSpill(false)
+    if (i >= trinnListe.length) { setByggetrinn(trinnListe[trinnListe.length - 1] ?? null); return }
+    setByggetrinn(trinnListe[Math.max(0, i)] ?? null)
+  }
+  useEffect(() => {
+    if (!trinnSpill || byggetrinn === null) return
+    const i = trinnListe.indexOf(byggetrinn)
+    if (i < 0 || i >= trinnListe.length - 1) { setTrinnSpill(false); return }
+    const t = window.setTimeout(() => setByggetrinn(trinnListe[i + 1]), 1500)
+    return () => window.clearTimeout(t)
+  }, [trinnSpill, byggetrinn, trinnListe])
+  // Ny modell (produkt/mål) avslutter byggetrinn-visningen.
+  useEffect(() => { setByggetrinn(null); setTrinnSpill(false) }, [produktId])
+
+  // ── Angre/gjør om (Ctrl/Cmd+Z, Shift+Ctrl/Cmd+Z) ──
+  // Endringer i rask rekkefølge (slider-dra) slås sammen til ett steg.
+  const historikk = useRef<{ fortid: Array<{ c: DesignConfig; o: Record<string, { treslag: string; farge: string }> }>; fremtid: Array<{ c: DesignConfig; o: Record<string, { treslag: string; farge: string }> }>; sist: { c: DesignConfig; o: Record<string, { treslag: string; farge: string }> } | null; tid: number; hopp: boolean }>({ fortid: [], fremtid: [], sist: null, tid: 0, hopp: false })
+  const [, setHistVersjon] = useState(0)
+  useEffect(() => {
+    const h = historikk.current
+    const naa = { c: config, o: overrides }
+    if (h.hopp) { h.hopp = false; h.sist = naa; return }
+    if (h.sist && (JSON.stringify(h.sist.c) !== JSON.stringify(config) || JSON.stringify(h.sist.o) !== JSON.stringify(overrides))) {
+      const t = Date.now()
+      if (t - h.tid > 600) {
+        h.fortid.push(h.sist)
+        if (h.fortid.length > 80) h.fortid.shift()
+      }
+      h.tid = t
+      h.fremtid = []
+      setHistVersjon((v) => v + 1)
+    }
+    h.sist = naa
+  }, [config, overrides])
+  useEffect(() => {
+    const h = historikk.current
+    h.fortid = []; h.fremtid = []; h.sist = null
+    setHistVersjon((v) => v + 1)
+  }, [produktId])
+  const angre = () => {
+    const h = historikk.current
+    const forrige = h.fortid.pop()
+    if (!forrige || frozenView) return
+    if (h.sist) h.fremtid.push(h.sist)
+    h.hopp = true
+    h.tid = 0
+    setConfig(forrige.c)
+    setOverrides(forrige.o)
+    setHistVersjon((v) => v + 1)
+  }
+  const gjorOm = () => {
+    const h = historikk.current
+    const neste = h.fremtid.pop()
+    if (!neste || frozenView) return
+    if (h.sist) h.fortid.push(h.sist)
+    h.hopp = true
+    h.tid = 0
+    setConfig(neste.c)
+    setOverrides(neste.o)
+    setHistVersjon((v) => v + 1)
+  }
+  const kanAngre = historikk.current.fortid.length > 0 && !frozenView
+  const kanGjorOm = historikk.current.fremtid.length > 0 && !frozenView
+  useEffect(() => {
+    const tast = (e: KeyboardEvent) => {
+      const el = e.target as HTMLElement | null
+      if (el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.isContentEditable)) return
+      if (!(e.metaKey || e.ctrlKey)) return
+      const k = e.key.toLowerCase()
+      if (k === 'z' && !e.shiftKey) { e.preventDefault(); angre() }
+      else if ((k === 'z' && e.shiftKey) || k === 'y') { e.preventDefault(); gjorOm() }
+    }
+    window.addEventListener('keydown', tast)
+    return () => window.removeEventListener('keydown', tast)
+  })
+
+  // ── Del design (lenke med designet kodet i URL-en) ──
+  const delDesign = async () => {
+    if (!template) return
+    const data = JSON.stringify({ c: config, o: overrides })
+    const kode = btoa(unescape(encodeURIComponent(data))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+    const url = `${window.location.origin}/designverktoy/${template.id}?d=${kode}`
+    try {
+      if (navigator.share && smal) await navigator.share({ title: `${currentDesign?.navn ?? template.navn} – Minio`, url })
+      else { await navigator.clipboard.writeText(url); flash('Lenke til designet er kopiert') }
+    } catch {
+      window.prompt('Kopier lenken til designet:', url)
+    }
+  }
+  const delParamHandtert = useRef(false)
+  useEffect(() => {
+    if (!template || delParamHandtert.current) return
+    const d = searchParams.get('d')
+    delParamHandtert.current = true
+    if (!d) return
+    try {
+      const json = decodeURIComponent(escape(atob(d.replace(/-/g, '+').replace(/_/g, '/'))))
+      const v = JSON.parse(json) as { c?: DesignConfig; o?: Record<string, { treslag: string; farge: string }> }
+      if (v.c && typeof v.c === 'object') {
+        // Vent til nullstillingen ved produktvalg har kjørt.
+        window.setTimeout(() => {
+          setConfig({ ...template.defaultConfig, ...v.c } as DesignConfig)
+          setOverrides(v.o ?? {})
+          flash('Delt design åpnet')
+        }, 0)
+      }
+    } catch { flash('Kunne ikke lese den delte lenken') }
+    searchParams.delete('d')
+    setSearchParams(searchParams, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [template])
+
+  // Byggested (kommune/moh/sk) er felles for alle produkter. Tomme felt
+  // fjernes fra config i stedet for å lagres som undefined.
+  const settByggested = (b: Byggested) => setConfig((c) => skrivByggested(c as DesignConfig, b))
+  const visByggested = !!template && !UTEN_BYGGESTED.has(template.id)
+  const innfelt: Innfelt = smal ? { topp: 54, hoyre: 58, bunn: 56, venstre: 8 } : { topp: 66, hoyre: 84, bunn: 74, venstre: configOpen ? 36 : 12 }
+  const harDel = (...k: string[]) => modellInfo.parts.some((p) => k.includes(p))
+  const lagKnapper = { kledning: harDel('kledning', 'vegg'), tak: harDel('tak'), gulv: harDel('gulv') }
+  const harLag = lagKnapper.kledning || lagKnapper.tak || lagKnapper.gulv
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const beregning = useMemo(() => (template ? hentBeregningsgrunnlag(template, cfg) : undefined), [template, cfg, prisVersjon])
+  const statikk = statikkOppsummering(beregning)
+
   // Prislogikk for forespørsel/oppsummering (materialestimat + skalert arbeidstid).
   const estimatKr = bom?.estimatKr ?? 0
   const refEstimat = template ? template.beregn(template.defaultConfig).estimatKr : 0
@@ -866,7 +1032,7 @@ export default function DesignerPage() {
                 <AuthShot src={template.bilde} alt={`${template.navn} tegnet i Minios 3D-designverktøy`} />
               )}
               {/* h1: produktsiden er en egen landingsside, og trenger én toppoverskrift. */}
-              <h1>Tegn din egen {template.navn.toLowerCase()} i 3D</h1>
+              <h1>Tegn {dinEgen(template.id, template.navn)} i 3D</h1>
               <p>{template.beskrivelse}</p>
               <AuthFakta>
                 <span><Icon name="faCheckCircle" /> Gratis å designe</span>
@@ -1097,6 +1263,23 @@ export default function DesignerPage() {
                     ))}
                 </Section>
 
+                {visByggested && (
+                  <Section id="byggested" title="Byggested – snø, frost og grunn" open={openSection === 'byggested'} onToggle={toggleSection}>
+                    <ByggestedPanel config={cfg} onChange={settByggested} disabled={frozenView} />
+                  </Section>
+                )}
+
+                {beregning && beregning.kontroller.length > 0 && (
+                  <Section
+                    id="statikk"
+                    title={statikk ? `Statikk · maks ${Math.round(statikk.maks * 100)} %` : 'Statikk'}
+                    open={openSection === 'statikk'}
+                    onToggle={toggleSection}
+                  >
+                    <StatikkPanel grunnlag={beregning} />
+                  </Section>
+                )}
+
                 <Section id="materialer" title="Materialer" open={openSection === 'materialer'} onToggle={toggleSection}>
                   {template.materialer.map((m) => (
                     <SubGroup key={m.key}>
@@ -1248,6 +1431,10 @@ export default function DesignerPage() {
                     )}
                   </OptRow>
                 )}
+                <PreviewLink type="button" onClick={() => setVisPlan(true)}>
+                  <Icon name="faBookOpen" /> {unlocked ? 'Bla i byggeplanen' : 'Se hva byggeplanen inneholder'}
+                  <Icon name="faChevronRight" />
+                </PreviewLink>
               </OptList>
             </RailActions>
 
@@ -1290,6 +1477,9 @@ export default function DesignerPage() {
             apiRef={viewApi}
             showcase={showcase}
             onInteract={() => setShowcase(false)}
+            innfelt={innfelt}
+            byggetrinn={byggetrinn}
+            onModellInfo={setModellInfo}
           />
 
           {is3D && (
@@ -1370,28 +1560,32 @@ export default function DesignerPage() {
                 )
               })()}
             </ModeBar>
-            {is3D && (
+            {is3D && harLag && byggetrinn === null && (
               <ModeBar title="Vis eller skjul lag for å se konstruksjonen">
-                <ModeBtn $active={!hideKledning} onClick={() => setHideKledning((s) => !s)} title="Vis/skjul kledning">
-                  <Icon name={hideKledning ? 'faEyeSlash' : 'faEye'} /> Kledning
-                </ModeBtn>
-                <ModeBtn $active={!hideTak} onClick={() => setHideTak((s) => !s)} title="Vis/skjul tak">
-                  <Icon name={hideTak ? 'faEyeSlash' : 'faEye'} /> Tak
-                </ModeBtn>
-                <ModeBtn $active={!hideGulv} onClick={() => setHideGulv((s) => !s)} title="Vis/skjul gulv">
-                  <Icon name={hideGulv ? 'faEyeSlash' : 'faEye'} /> Gulv
-                </ModeBtn>
+                {lagKnapper.kledning && (
+                  <ModeBtn $active={!hideKledning} onClick={() => setHideKledning((v) => !v)} title="Vis/skjul kledning">
+                    <Icon name={hideKledning ? 'faEyeSlash' : 'faEye'} /> Kledning
+                  </ModeBtn>
+                )}
+                {lagKnapper.tak && (
+                  <ModeBtn $active={!hideTak} onClick={() => setHideTak((v) => !v)} title="Vis/skjul tak">
+                    <Icon name={hideTak ? 'faEyeSlash' : 'faEye'} /> Tak
+                  </ModeBtn>
+                )}
+                {lagKnapper.gulv && (
+                  <ModeBtn $active={!hideGulv} onClick={() => setHideGulv((v) => !v)} title="Vis/skjul gulv">
+                    <Icon name={hideGulv ? 'faEyeSlash' : 'faEye'} /> Gulv
+                  </ModeBtn>
+                )}
               </ModeBar>
             )}
             <ModeBar>
               <ModeBtn $active={viewMode === 'parts'} onClick={() => setViewMode('parts')} title="Delevisning">
                 Delevisning
               </ModeBtn>
-              {template.tegning2D && (
-                <ModeBtn $active={viewMode === 'tegning'} onClick={() => setViewMode('tegning')} title="2D-arbeidstegning">
-                  2D-tegning
-                </ModeBtn>
-              )}
+              <ModeBtn $active={viewMode === 'tegning'} onClick={() => setViewMode('tegning')} title="2D-tegninger i målestokk">
+                2D-tegning
+              </ModeBtn>
             </ModeBar>
           </ModeBarWrap>
 
@@ -1470,12 +1664,11 @@ export default function DesignerPage() {
             )
           })()}
 
-          {viewMode === 'tegning' && tegning && (
+          {viewMode === 'tegning' && (
             <Tegning2DView
-              tegning={tegning}
+              lagArgs={() => planArgs(false)}
+              nokkel={planNokkel}
               unlocked={unlocked}
-              produktNavn={template.navn}
-              designNavn={currentDesign?.navn}
               onExportPdf={() => exportPlan('pdf')}
               onExportPrint={() => exportPlan('print')}
             />
@@ -1567,16 +1760,16 @@ export default function DesignerPage() {
               </NavRelative>
 
               <NavGroup>
-                <HoldBtn action={() => nav(() => viewApi.current?.orbit(0, -ORBIT_STEP))} title="Vipp opp" icon="faChevronUp" />
+                <HoldBtn action={() => nav(() => viewApi.current?.orbit(0, -ORBIT_STEP))} title="Vipp opp" icon="faChevronUp" className="pil" />
                 <NavPadMid>
-                  <HoldBtn action={() => nav(() => viewApi.current?.orbit(ORBIT_STEP, 0))} title="Roter venstre" icon="faArrowLeft" />
+                  <HoldBtn action={() => nav(() => viewApi.current?.orbit(ORBIT_STEP, 0))} title="Roter venstre" icon="faArrowLeft" className="pil" />
                   <NavBtn onClick={() => nav(() => viewApi.current?.setView('iso'))} title="Nullstill vinkel" aria-label="Nullstill vinkel"><Icon name="faHome" /></NavBtn>
-                  <HoldBtn action={() => nav(() => viewApi.current?.orbit(-ORBIT_STEP, 0))} title="Roter høyre" icon="faArrowRight" />
+                  <HoldBtn action={() => nav(() => viewApi.current?.orbit(-ORBIT_STEP, 0))} title="Roter høyre" icon="faArrowRight" className="pil" />
                 </NavPadMid>
-                <HoldBtn action={() => nav(() => viewApi.current?.orbit(0, ORBIT_STEP))} title="Vipp ned" icon="faChevronDown" />
+                <HoldBtn action={() => nav(() => viewApi.current?.orbit(0, ORBIT_STEP))} title="Vipp ned" icon="faChevronDown" className="pil" />
               </NavGroup>
 
-              <NavGroup>
+              <NavGroup className="zoom">
                 <HoldBtn action={() => nav(() => viewApi.current?.zoom(ZOOM_IN))} title="Zoom inn" icon="faPlus" />
                 <HoldBtn action={() => nav(() => viewApi.current?.zoom(ZOOM_OUT))} title="Zoom ut" icon="faMinus" />
               </NavGroup>
@@ -1584,13 +1777,43 @@ export default function DesignerPage() {
           )}
 
           {/* Samlet verktøylinje under modellen */}
-          {is3D && (
+          {is3D && byggetrinn !== null && (
+            <TrinnBar role="group" aria-label="Bygg steg for steg">
+              <TrinnTopp>
+                <span>Trinn {trinnIndeks + 1} av {trinnListe.length}</span>
+                <b>{TRINN_NAVN[TRINN[byggetrinn]]}</b>
+              </TrinnTopp>
+              <TrinnPrikker>
+                {trinnListe.map((t, i) => (
+                  <button key={t} type="button" aria-label={`Trinn ${i + 1}: ${TRINN_NAVN[TRINN[t]]}`} data-aktiv={i <= trinnIndeks} onClick={() => gaTilTrinn(i)} />
+                ))}
+              </TrinnPrikker>
+              <TrinnKnapper>
+                <ToolIcon onClick={() => gaTilTrinn(trinnIndeks - 1)} disabled={trinnIndeks <= 0} title="Forrige trinn" aria-label="Forrige trinn"><Icon name="faArrowLeft" /></ToolIcon>
+                <ToolIcon $active={trinnSpill} onClick={() => (trinnSpill ? setTrinnSpill(false) : trinnIndeks >= trinnListe.length - 1 ? startTrinn() : setTrinnSpill(true))} title={trinnSpill ? 'Pause' : 'Spill av'} aria-label={trinnSpill ? 'Pause' : 'Spill av'}><Icon name={trinnSpill ? 'faPause' : 'faPlay'} /></ToolIcon>
+                <ToolIcon onClick={() => gaTilTrinn(trinnIndeks + 1)} disabled={trinnIndeks >= trinnListe.length - 1} title="Neste trinn" aria-label="Neste trinn"><Icon name="faArrowRight" /></ToolIcon>
+                <ToolDivider />
+                <ToolBtn onClick={stoppTrinn} title="Avslutt byggetrinn"><Icon name="faXmark" /> Ferdig</ToolBtn>
+              </TrinnKnapper>
+            </TrinnBar>
+          )}
+
+          {is3D && byggetrinn === null && (
             <Toolbar>
-              <ToolBtn $active={paintMode} onClick={() => setPaintMode((s) => !s)} title="Mal materiale på deler">
+              <ToolIcon onClick={angre} disabled={!kanAngre} title="Angre (Ctrl/⌘+Z)" aria-label="Angre"><Icon name="faUndo" /></ToolIcon>
+              <ToolIcon onClick={gjorOm} disabled={!kanGjorOm} title="Gjør om (Shift+Ctrl/⌘+Z)" aria-label="Gjør om"><Icon name="faRedo" /></ToolIcon>
+              <ToolDivider />
+              <ToolBtn $active={paintMode} onClick={() => setPaintMode((v) => !v)} title="Mal materiale på deler">
                 <Icon name={paintMode ? 'faCheck' : 'faPalette'} /> {paintMode ? 'Ferdig' : 'Mal'}
               </ToolBtn>
+              {trinnListe.length > 1 && (
+                <ToolBtn onClick={startTrinn} title="Se hvordan det bygges, trinn for trinn">
+                  <Icon name="faLayerGroup" /> <span className="lang">Bygg steg for steg</span><span className="kort">Byggetrinn</span>
+                </ToolBtn>
+              )}
               <ToolDivider />
-              <ToolIcon $active={showcase} onClick={() => setShowcase((v) => !v)} title={showcase ? 'Stopp visning' : 'Vis frem (roter)'}><Icon name={showcase ? 'faPause' : 'faPlay'} /></ToolIcon>
+              <ToolIcon $active={showcase} onClick={() => setShowcase((v) => !v)} title={showcase ? 'Stopp visning' : 'Vis frem (roter)'} aria-label={showcase ? 'Stopp visning' : 'Vis frem'}><Icon name={showcase ? 'faPause' : 'faPlay'} /></ToolIcon>
+              <ToolIcon onClick={() => void delDesign()} title="Del designet (kopier lenke)" aria-label="Del designet"><Icon name="faShareNodes" /></ToolIcon>
             </Toolbar>
           )}
 
@@ -1735,7 +1958,7 @@ export default function DesignerPage() {
           produktNavn={template.navn}
           designNavn={currentDesign?.navn ?? template.navn}
           sammendrag={bom.sammendrag}
-          konfigurasjon={konfigTekst(template, cfg, overrides)}
+          konfigurasjon={[konfigTekst(template, cfg, overrides), ...(visByggested ? byggestedTekst(cfg) : [])].join('\n')}
           config={cfg}
           overrides={overrides}
           maal={maalTekst}
@@ -1754,6 +1977,18 @@ export default function DesignerPage() {
           // lenken i e-posten til admin på en eldre versjon.
           designId={dirty ? undefined : currentDesign?.id}
           onClose={() => setForesporsel(null)}
+        />
+      )}
+
+      {visPlan && (
+        <ByggeplanForhandsvisning
+          lagArgs={() => planArgs(true)}
+          nokkel={planNokkel}
+          laast={!unlocked}
+          pris={formatKr(template.fraPris)}
+          onKjop={() => { setVisPlan(false); exportPlan('pdf') }}
+          onLastNed={() => { setVisPlan(false); exportPlan('pdf') }}
+          onClose={() => setVisPlan(false)}
         />
       )}
 
@@ -1786,6 +2021,25 @@ export default function DesignerPage() {
  * Unntak som IKKE skal nøytraliseres: Vipps-oransje (merkevare), gizmo-aksene
  * i DesignerViewport (rød/grønn/blå = X/Y/Z) og PartBar-gradienten (trelast).
  */
+const PreviewLink = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 0.1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px dashed rgba(185, 191, 240, 0.35);
+  border-radius: 10px;
+  background: transparent;
+  color: #b9bff0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  svg:last-child { margin-left: auto; font-size: 0.7rem; }
+  &:hover { background: rgba(91, 99, 196, 0.12); border-style: solid; }
+`
+
 const RailHeadTop = styled.div`
   display: flex;
   align-items: center;
@@ -2333,9 +2587,13 @@ const Body = styled.div`
   min-height: 0;
   overflow: hidden;
 
+  /* Mobil: hele siden ruller, 3D-scenen står fast øverst (sticky) så man
+     ser modellen endre seg mens man justerer. */
   @media (max-width: 820px) {
     flex-direction: column;
-    overflow: visible;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 `
 
@@ -2354,7 +2612,12 @@ const Stage = styled.div`
 
   @media (max-width: 820px) {
     order: 1;
-    min-height: 44vh;
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    flex: 0 0 auto;
+    height: 46vh;
+    min-height: 300px;
     box-shadow:
       inset 0 26px 46px -34px rgba(10, 12, 16, 0.26),
       inset 0 -26px 46px -34px rgba(10, 12, 16, 0.26);
@@ -2363,7 +2626,20 @@ const Stage = styled.div`
 
 const Toolbar = styled.div`
   position: absolute;
+  z-index: 5;
   bottom: 18px;
+  @media (max-width: 820px) {
+    bottom: 10px;
+    left: 58px !important;
+    right: 58px;
+    transform: none !important;
+    justify-content: center;
+    padding: 0.25rem;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+  }
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -2398,6 +2674,10 @@ const NavRail = styled.div`
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
     right: 10px;
     bottom: 10px;
+  }
+  /* Berøringsskjerm: dra/klyp roterer og zoomer – vis bare vinkelmeny og «hjem». */
+  @media (max-width: 820px) {
+    .pil, .zoom { display: none; }
   }
 `
 
@@ -2491,10 +2771,18 @@ const ToolIcon = styled.button<{ $active?: boolean }>`
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
   &:hover { ${({ $active }) => (!$active ? 'background: rgba(0,0,0,0.06);' : '')} }
+  &:disabled { opacity: 0.32; cursor: default; background: transparent; }
 `
 
 const ToolBtn = styled.button<{ $active?: boolean; $primary?: boolean }>`
+  .kort { display: none; }
+  @media (max-width: 820px) {
+    padding: 0 0.65rem;
+    .lang { display: none; }
+    .kort { display: inline; }
+  }
   display: inline-flex;
+  white-space: nowrap;
   align-items: center;
   gap: 0.45rem;
   height: 36px;
@@ -2510,6 +2798,55 @@ const ToolBtn = styled.button<{ $active?: boolean; $primary?: boolean }>`
   &:hover { ${({ $primary, $active }) => ($primary ? 'background:#4b53b0;' : $active ? '' : 'background: rgba(0,0,0,0.06);')} }
 `
 
+const TrinnBar = styled.div`
+  position: absolute;
+  z-index: 6;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(460px, calc(100% - 140px));
+  padding: 0.6rem 0.7rem 0.5rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(40, 30, 20, 0.18);
+  color: #1a1d21;
+  @media (max-width: 820px) {
+    bottom: 10px;
+    width: calc(100% - 20px);
+  }
+`
+const TrinnTopp = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0 0.2rem;
+  span { font-size: 0.72rem; font-weight: 700; color: #5b63c4; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap; }
+  b { font-size: 0.88rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+`
+const TrinnPrikker = styled.div`
+  display: flex;
+  gap: 4px;
+  margin: 0.5rem 0.2rem 0.35rem;
+  button {
+    flex: 1;
+    height: 5px;
+    border: none;
+    border-radius: 999px;
+    background: #dfe2e8;
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.25s;
+  }
+  button[data-aktiv='true'] { background: #5b63c4; }
+`
+const TrinnKnapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+`
 const ToolDivider = styled.span`
   width: 1px;
   height: 22px;
@@ -2603,6 +2940,20 @@ const ModeBarWrap = styled.div`
   z-index: 5;
   display: flex;
   gap: 10px;
+
+  /* Mobil: én rad som kan sveipes sidelengs i stedet for å kuttes. */
+  @media (max-width: 820px) {
+    top: 8px;
+    left: 0;
+    right: 104px;
+    transform: none;
+    gap: 6px;
+    padding: 0 10px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+    & > * { flex-shrink: 0; }
+  }
 `
 
 const ModeBar = styled.div`
@@ -3418,7 +3769,9 @@ const SummaryRail = styled.aside<{ $open: boolean }>`
   @media (max-width: 820px) {
     order: 3;
     width: 100%;
-    max-height: 60vh;
+    max-height: none;
+    overflow: visible;
+    flex-shrink: 0;
     border-right: none;
     border-top: 1px solid rgba(0, 0, 0, 0.28);
   }
@@ -3444,7 +3797,7 @@ const RailScroll = styled.div`
   &::-webkit-scrollbar { width: 8px; }
   &::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 8px; }
 
-  @media (max-width: 820px) { min-width: 0; }
+  @media (max-width: 820px) { min-width: 0; overflow: visible; flex: 0 0 auto; }
 `
 
 /* «Hva vil du gjøre?» – festet nederst, over eksport-footeren (skroller ikke
@@ -3462,7 +3815,7 @@ const RailActions = styled.div`
   &::-webkit-scrollbar { width: 8px; }
   &::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 8px; }
 
-  @media (max-width: 820px) { min-width: 0; max-height: none; }
+  @media (max-width: 820px) { min-width: 0; max-height: none; overflow: visible; }
 `
 
 const RailFooter = styled.div`
@@ -3472,7 +3825,13 @@ const RailFooter = styled.div`
   border-top: 1px solid rgba(255, 255, 255, 0.07);
   background: #1a1d21;
 
-  @media (max-width: 820px) { min-width: 0; }
+  @media (max-width: 820px) {
+    min-width: 0;
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    box-shadow: 0 -10px 24px rgba(0, 0, 0, 0.35);
+  }
 `
 
 /* Konfigblokk i venstre rail – rammer inn trekkspillet og fryse-overlegget. */

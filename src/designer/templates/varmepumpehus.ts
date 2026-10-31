@@ -1,798 +1,987 @@
 import * as THREE from 'three'
-import type { Bom, BomLine, BuildOptions, DesignConfig, KapplisteDel, ProductTemplate, Tegning2D } from '../types'
-import { TRESLAG, resolveColor, treslagValg, fargeValg } from '../materials'
+import type { Bom, BomLine, BuildOptions, Byggeregler, DesignConfig, ProductTemplate, Tegning2D } from '../types'
+import type { Beregningsgrunnlag, KapplisteDelPlan, MonteringSteg } from '../plan-typer'
+import { TRESLAG, treslagValg, fargeValg } from '../materials'
 import { PRISER, prisFor } from '../priser'
+import { snolastForConfig } from '../byggested'
+import { VB0_STANDARD, fmt, snolastTak, vindOppdrift, vindlast } from '../laster'
+import type { Taktekke } from '../laster'
+import { kontrollerBjelke, kontrollerSoyle, linjelaster, taklaster, tverrsnitt } from '../dimensjonering'
+import type { Medlemskontroll, Tverrsnitt } from '../dimensjonering'
+import { lagBeregningsrapport, tilPlanVedlegg } from '../beregningsgrunnlag'
+import { fmtGrader } from '../geometri'
+import {
+  basis, byggMesher, ende, f0, lagMatFabrikk, lmLinje, lmPerPris, plasser, prisme, prof, samleKappliste, stegTilTekst,
+} from './smaa-felles'
+import type { Stav, V2 } from './smaa-felles'
 
 /**
- * Varmepumpehus – parametrisk template.
+ * Varmepumpehus – parametrisk template (Minio bygger det ferdig).
  *
- * Hele huset bygges av lekt (23×48, eller 36×48 ved «forsterket»). Hvert hjørne
- * er to laminerte lekter forskjøvet så spjeldene får en skulder å feste mot.
- * Kledningen er skrå spjeld (louvre): lekt kløyvd i to i 45° og montert som
- * skråstilte, horisontale blad – slipper luft gjennom, men skygger for regn.
- * Pulttak med fall framover, valgbar takvinkel, spjeldspalte, taktype (over/
- * underligger, faspanel, takpapp), kvalitet, mål, treslag og farge.
+ * KONSTRUKSJON (alle mål i meter i koden, cm i config):
+ *  - Såle i U-form (front + to sider, åpen bak mot veggen), gjæret 45° i
+ *    fronthjørnene. Standard: lekt 23×48 flatt. Forsterket: 48×98 flatt.
+ *  - Fire hjørnebein av to lekter limt flate mot flate og forskjøvet én
+ *    lekttykkelse (T), så spjeldene får en skulder å skrus mot. Bak-beina har
+ *    to lekter innerst (96 mm) og står 48 mm bak bakplanet – den flaten skrus
+ *    til husveggen.
+ *  - Skrå spjeld (lameller): lekt T×48 kløyvd på langs med sagbladet tiltet
+ *    45° → to like trapes-blad per lekt. Montert med 45° skråflate som faller
+ *    UTOVER, så regn renner ut og luft passerer. Spjeldene på sidene følger
+ *    takfallet med et hjørneklipp parallelt med strekkeren.
+ *  - Front-stivere 11×36 bak frontspjeldene (c/c ≤ 600). På sidene er det et
+ *    skråstag fra bakre bunn til fremre topp, som også holder hvert spjeld.
+ *  - Tak: én sidestrekker (sperre) på hver side, båret av ytre lamell i bein-
+ *    ene og kappet loddrett i begge ender. Tverrbord (åser) på høykant oppå
+ *    strekkerne; antall og høyde dimensjoneres for snølast (NS-EN 1991-1-3 +
+ *    NS-EN 1995-1-1). Takbord langs fallet: over/underligger, faspanel eller
+ *    takpapp på tett bordunderlag. Fall FRAMOVER (bort fra veggen).
+ *
+ * Utedelen (varmepumpas utedel) vises som kontekst, og klaringene rundt den
+ * kontrolleres mot vanlige krav i produsentenes monteringsanvisninger.
  */
 
 export interface VarmepumpehusConfig {
-  kvalitet: string // 'standard' (23×48) | 'forsterket' (36×48 ramme)
-  bredde: number // cm (x)
-  hoyde: number // cm (y) – fronthøyde
-  dybde: number // cm (z)
+  kvalitet: string // 'standard' (lekt 23×48) | 'forsterket' (36×48 + såle 48×98)
+  bredde: number // cm (x) – utvendig mellom beinas ytterflater
+  hoyde: number // cm – fri høyde foran (bakken → underkant sidestrekker i frontplanet)
+  dybde: number // cm – frontplan → bakplan (bak-beina står 4,8 cm bak dette, mot veggen)
   takvinkel: number // grader
-  spileGap: number // cm – luftspalte mellom spjeldbladene
+  spileGap: number // cm – luftspalte mellom spjeldene
   taktype: string // 'overunder' | 'faspanel' | 'takpapp'
+  utedel: string // 'kompakt' | 'standard' | 'stor' | 'egen'
+  utB: number // cm – egen utedel
+  utH: number
+  utD: number
+  utMont: number // cm – utedelens underkant over bakken (veggkonsoll/bakkestativ)
+  visUtedel: boolean
   treslag: string
   farge: string
   [key: string]: DesignConfig[string]
 }
 
-const SVINN = 1.1 // 10 % kapp/svinn
+const SVINN = 1.1
+const W = 0.048 // lektbredde
+const OVERHENG_F = 0.05 // takutstikk foran sperre-/strekkerende
+const TV_UT = 0.05 // tverrbordene stikker 5 cm ut forbi strekkerne
+const VEGGAVSTAND = 0.1 // utedelens bakkant fra veggen (konsoll/stativ)
+const STIV_T = 0.011
+const STIV_B = 0.036
+const STIV_MAKS = 0.6
+
+/** Vanlige klaringer (produsentenes monteringsanvisninger – varierer per modell). */
+export const KLARING = {
+  side: { min: 0.1, anbefalt: 0.15 },
+  front: { min: 0.15, anbefalt: 0.2 },
+  topp: { min: 0.1, anbefalt: 0.15 },
+  vegg: VEGGAVSTAND,
+  service: 0.3,
+}
+
+/** Typiske utedeler (B × H × D, meter). Sjekk alltid målene på din modell. */
+const UTEDELER: Record<string, { navn: string; B: number; H: number; D: number }> = {
+  kompakt: { navn: 'Kompakt (2,5–3,5 kW)', B: 0.8, H: 0.55, D: 0.29 },
+  standard: { navn: 'Standard (4–6 kW)', B: 0.84, H: 0.65, D: 0.33 },
+  stor: { navn: 'Stor / nordisk modell', B: 0.95, H: 0.85, D: 0.37 },
+}
+
+const rad = (g: number) => (g * Math.PI) / 180
 const cm = (v: number) => v / 100
+const opp5 = (m: number) => Math.ceil(m * 20 - 1e-9) * 5 // meter → cm rundet opp til 5
 
-// Lekt 23×48 mm – hele huset bygges av denne (meter).
-const LEKT_T = 0.023
-const LEKT_W = 0.048
-
-// Skrå spjeld (louvre): lekt kløyvd i to → 45°-kile. Dybde = lekttykkelse,
-// bakhøyde = tykkelse + liten loddrett flate (settes pr. build ut fra kvalitet).
-const BLADE_FLAT = 0.002 // liten loddrett flate på tynne ytterkant
-
-// Tak / strekkere.
-const ROOF_OVERHANG = 0.05 // 5 cm utstikk foran
-const CROSS_OUT = 0.05 // tverrbord stikker 5 cm ut på hver side
-
-const lektProfil = '23 × 48 mm'
-const spjeldProfil = '23 × 48 mm (kløyvd 45°)'
-const stiffProfil = '11 × 36 mm'
-const takProfil = '21 × 98 mm'
-// Beina løftes én lekttykkelse opp fra bakken (hviler på sålen).
-const LEG_LIFT = LEKT_T
-// Vertikal stiver bak spjeldene: 11×36 mm, én pr. påbegynt 60 cm spjeldspenn.
-const STIFF_T = 0.011
-const STIFF_W = 0.036
-const STIFF_MAX_SPAN = 0.6
-// ── Materialdeler (delt kilde for materialliste + kappliste) ───────
-// Alle fysiske deler regnes ut fra samme geometri som 3D-modellen, slik at
-// hvert bord telles. Lengder i meter.
-interface Del {
-  navn: string
-  profil: string
-  lengdeM: number
-  antall: number
-  mat: string // pris-id
-  kløyvd?: boolean // 23×48 kløyvd i to → 2 spiler pr. lekt-lengde
+function utedelMaal(c: VarmepumpehusConfig) {
+  if (c.utedel === 'egen') return { navn: 'Egen utedel', B: cm(num(c.utB, 84)), H: cm(num(c.utH, 65)), D: cm(num(c.utD, 33)) }
+  return UTEDELER[c.utedel] ?? UTEDELER.standard
 }
+const num = (v: unknown, d: number) => (typeof v === 'number' && Number.isFinite(v) ? v : d)
 
-// Bladlengder på én spjeldvegg – speiler klippingen i buildMesh mot takflaten.
-function spjeldBlader(len: number, alongOffset: number, topX0: number, topX1: number, pitch: number, yStart: number, bladeH: number): number[] {
-  const x0 = alongOffset - len / 2
-  const x1 = alongOffset + len / 2
-  const maxTop = Math.max(topX0, topX1)
-  const sloped = Math.abs(topX1 - topX0) > 1e-9
-  const res: number[] = []
-  for (let yb = yStart; yb + bladeH <= maxTop + 1e-6; yb += pitch) {
-    const need = yb + bladeH
-    let cx0 = x0
-    let cx1 = x1
-    if (sloped) {
-      const xc = x0 + ((need - topX0) / (topX1 - topX0)) * (x1 - x0)
-      if (topX1 > topX0) cx0 = Math.max(x0, xc)
-      else cx1 = Math.min(x1, xc)
-    } else if (topX0 < need) {
-      continue
-    }
-    const clen = cx1 - cx0
-    if (clen > 0.02) res.push(clen)
-  }
-  return res
-}
+// ── Materialvalg ────────────────────────────────────────────────────
 
-function deler(c: VarmepumpehusConfig): Del[] {
-  const w = c.bredde / 100
-  const h = c.hoyde / 100
-  const d = c.dybde / 100
-  const dz = d / 2
-  const wx = w / 2
-  const roofRad = (c.takvinkel * Math.PI) / 180
-  const tanR = Math.tan(roofRad)
-  const cosR = Math.cos(roofRad)
-  // Forsterket: hele huset i 36×48 i stedet for 23×48.
+function virke(c: VarmepumpehusConfig) {
   const forsterket = c.kvalitet === 'forsterket'
-  const T = forsterket ? 0.036 : LEKT_T // lekt-tykkelse
-  const W = LEKT_W // 48 mm bredde
-  const bladeH = BLADE_FLAT + T // 45°-kile, skalerer med tykkelsen
-  const LEKT = forsterket ? 'stolpe-36x48' : 'stolpe-23x48'
-  const lektP = forsterket ? '36 × 48 mm' : lektProfil
-  const spjeldP = forsterket ? '36 × 48 mm (kløyvd 45°)' : spjeldProfil
-  const yFrontTop = T + h
-  const roofTop = (z: number) => yFrontTop + (dz - z) * tanR
-  const yStart = T // sålens overkant
-  const out: Del[] = []
-  const push = (navn: string, profil: string, lengdeM: number, antall: number, mat: string, kløyvd = false) => {
-    if (lengdeM > 0.001 && antall > 0) out.push({ navn, profil, lengdeM, antall, mat, kløyvd })
+  const T = forsterket ? 0.036 : 0.023
+  return {
+    forsterket,
+    T,
+    lektProfil: prof(forsterket ? 36 : 23, 48),
+    lektPris: forsterket ? 'stolpe-36x48' : 'lekt-23x48',
+    // Såle: flatt under begge beinlamellene (2T ≤ sålebredde).
+    saaleH: forsterket ? 0.048 : 0.023,
+    saaleB: forsterket ? 0.098 : 0.048,
+    saaleProfil: forsterket ? prof(48, 98) : prof(23, 48),
+    saalePris: forsterket ? 'stolpe-48x98' : 'lekt-23x48',
   }
+}
 
-  // Hjørnebein. Lengde = høyeste (bakre) hjørne av lamina (skråkappet topp).
-  const legLen = (zLo: number) => roofTop(zLo) - T
-  push('Hjørnebein front, ytre', lektP, legLen(dz - W), 2, LEKT)
-  push('Hjørnebein front, indre', lektP, legLen(dz - T - W), 2, LEKT)
-  push('Hjørnebein bak, ytre', lektP, legLen(-(dz + W)), 2, LEKT)
-  // Bak indre bord er dobbelt bredt = 2 lekt limt på bredden (2 hjørner × 2).
-  push('Hjørnebein bak, indre (2 limt)', lektP, legLen(-(dz + T)), 4, LEKT)
+/** Spjeldblad: trapes T dypt, a foran og a+T bak (45° skråflate). */
+function blad(T: number) {
+  const a = (W - T) / 2 // 12,5 mm (23) / 6 mm (36)
+  return { a, h: a + T }
+}
 
-  // Såle / bunnramme (flatt).
-  push('Såle front', lektP, w, 1, LEKT)
-  push('Såle side', lektP, d + W, 2, LEKT)
+function tekke(c: VarmepumpehusConfig) {
+  if (c.taktype === 'takpapp') return { bord: prof(21, 98), t: 0.021, b: 0.098, pris: 'bord-21x98', last: 'takpapp' as Taktekke }
+  if (c.taktype === 'faspanel') return { bord: prof(19, 98), t: 0.019, b: 0.098, pris: 'bord-19x98', last: 'bord' as Taktekke }
+  return { bord: prof(21, 98), t: 0.021, b: 0.098, pris: 'bord-21x98', last: 'bord' as Taktekke }
+}
 
-  // Spjeld (kløyvd → 2 blad pr. lekt-lengde). Antall følger spalten.
-  const gapM = (typeof c.spileGap === 'number' ? c.spileGap : 4) / 100
-  const pitch = bladeH + gapM
-  const frontTop = roofTop(dz)
-  const frontLen = w - 2 * T
-  const sideLen = d - W
-  const sideZc = W / 2
-  const rX0 = sideZc - sideLen / 2
-  const rX1 = sideZc + sideLen / 2
-  const front = spjeldBlader(frontLen, 0, frontTop, frontTop, pitch, yStart, bladeH)
-  push('Spjeld front', spjeldP, frontLen, front.length, LEKT, true)
-  const side = [
-    ...spjeldBlader(sideLen, sideZc, roofTop(-rX0), roofTop(-rX1), pitch, yStart, bladeH),
-    ...spjeldBlader(sideLen, -sideZc, roofTop(-rX1), roofTop(-rX0), pitch, yStart, bladeH),
-  ]
-  const sideGrp = new Map<number, number>()
-  side.forEach((L) => {
-    const cmL = Math.round(L * 100)
-    sideGrp.set(cmL, (sideGrp.get(cmL) ?? 0) + 1)
-  })
-  sideGrp.forEach((cnt, cmL) => push('Spjeld side (skråkappes)', spjeldP, cmL / 100, cnt, LEKT, true))
+const pris = (id: string) => prisFor(id)
+const prisNavn = (id: string) => PRISER[id]?.navn ?? id
 
-  // Vertikale stivere (11×36) – én pr. påbegynt 60 cm, høyde følger takflaten.
-  const stiver = (len: number, topX0: number, topX1: number, alongOffset: number) => {
-    const nStiff = Math.max(0, Math.ceil(len / STIFF_MAX_SPAN) - 1)
-    const x0 = alongOffset - len / 2
-    const x1 = alongOffset + len / 2
-    const sloped = Math.abs(topX1 - topX0) > 1e-9
-    for (let s = 1; s <= nStiff; s++) {
-      const lx = x0 + (s * len) / (nStiff + 1)
-      const topLx = sloped ? topX0 + ((topX1 - topX0) * (lx - x0)) / (x1 - x0) : topX0
-      push('Vertikal stiver', stiffProfil, topLx - yStart, 1, 'lekt-11x36')
+function rammePris(T: number, h: number): string {
+  const t = Math.round(T * 1000)
+  const hh = Math.round(h * 1000)
+  if (hh === 48) return t === 36 ? 'stolpe-36x48' : 'lekt-23x48'
+  return `lekt-${t}x${hh}`
+}
+
+// ── Statikk (snø på taket) ──────────────────────────────────────────
+
+const RAMMEHOYDER = [0.048, 0.073, 0.098]
+
+interface Statikk {
+  hR: number // sidestrekker-høyde
+  /** 2 = strekkeren forsterkes med en innerlekt (to lag limt/skrudd). */
+  lagR: number
+  hT: number // tverrbord-høyde
+  nTv: number // antall tverrbord
+  ok: boolean
+  melding: string
+  bord: Medlemskontroll
+  tverrbord: Medlemskontroll
+  strekker: Medlemskontroll
+  bein: Medlemskontroll
+  sk: ReturnType<typeof snolastForConfig>
+}
+
+function statikk(c: VarmepumpehusConfig): Statikk {
+  const v = virke(c)
+  const T = v.T
+  const w = cm(c.bredde)
+  const d = cm(c.dybde)
+  const a = Math.max(0, Math.min(60, c.takvinkel))
+  const tk = tekke(c)
+  const sk = snolastForConfig(c)
+  const flater = taklaster({ sk: sk.sk, vinkelGrader: a, tekke: tk.last })
+  const roofW = w + 2 * TV_UT
+  const run = d + W + OVERHENG_F // horisontal takdybde (vegg → frontkant)
+  const tvT = (h: number): Tverrsnitt => tverrsnitt(Math.round(T * 1000), Math.round(h * 1000), 1, 'C24', rammePris(T, h))
+  // Takbord: bærende bredde (underligger bærer også halve overliggere).
+  const bordTv = tverrsnitt(98, Math.round(tk.t * 1000), 1, 'C24', tk.pris)
+  const bordTrib = c.taktype === 'overunder' ? 0.16 : tk.b
+
+  let best: { kost: number; s: Statikk } | undefined
+  let siste: Statikk | undefined
+  for (let n = 2; n <= 8; n++) {
+    const s = (run - T) / (n - 1) // horisontal c/c mellom tverrbordene
+    const bord = kontrollerBjelke(bordTv, {
+      spennM: s,
+      vinkelGrader: a,
+      laster: linjelaster(flater, bordTrib),
+      tjenesteklasse: 3,
+      nedboyning: 'tak',
+      opplegglengdeMm: T * 1000,
+      ccM: bordTrib,
+    })
+    const trib = n === 2 ? s / 2 + T / 2 + 0.02 : s
+    const finn = (lag: (h: number, n: number) => Medlemskontroll, maksLag = 1) => {
+      let k: Medlemskontroll | undefined
+      for (let n = 1; n <= maksLag; n++) {
+        for (const h of RAMMEHOYDER) {
+          k = lag(h, n)
+          if (k.ok) return { h, n, k }
+        }
+      }
+      return { h: RAMMEHOYDER[RAMMEHOYDER.length - 1], n: maksLag, k: k as Medlemskontroll }
+    }
+    const tv = finn((h) =>
+      kontrollerBjelke(tvT(h), {
+        spennM: w - T,
+        laster: linjelaster(flater, trib),
+        tjenesteklasse: 2,
+        nedboyning: 'tak',
+        sidestottet: true,
+        opplegglengdeMm: T * 1000,
+        ccM: s,
+      }),
+    )
+    // Sidestrekker: punktlaster fra tverrbordene → ekvivalent jevnt fordelt last
+    // med samme maksimalmoment (fritt opplagt mellom front- og bakbein).
+    const L = d
+    const zFront = d / 2 + OVERHENG_F
+    const zs = Array.from({ length: n }, (_, i) => zFront - T / 2 - i * s)
+    const tribI = zs.map((_, i) => (i === 0 || i === n - 1 ? s / 2 + T / 2 : s))
+    const pos = zs.map((z) => d / 2 - W / 2 - z) // avstand fra frontopplegg
+    let M1 = 0
+    for (let k = 0; k <= 40; k++) {
+      const x = (k / 40) * L
+      let RA = 0
+      let M = 0
+      pos.forEach((p, i) => {
+        if (p <= 0 || p >= L) return
+        const P = tribI[i] * (roofW / 2)
+        RA += (P * (L - p)) / L
+      })
+      M = RA * x
+      pos.forEach((p, i) => {
+        if (p <= 0 || p >= L || p > x) return
+        M -= tribI[i] * (roofW / 2) * (x - p)
+      })
+      M1 = Math.max(M1, M)
+    }
+    const tribEq = Math.max(0.05, (8 * M1) / (L * L))
+    const st = finn((h, lag) =>
+      kontrollerBjelke(tverrsnitt(Math.round(T * 1000), Math.round(h * 1000), lag, 'C24', rammePris(T, h)), {
+        spennM: L,
+        vinkelGrader: a,
+        laster: linjelaster(flater, tribEq),
+        tjenesteklasse: 3,
+        nedboyning: 'tak',
+        sidestottet: true,
+        opplegglengdeMm: W * 1000,
+      }),
+    2)
+    const qA = flater.reduce((sum, f) => sum + f.qk, 0)
+    const legA = (roofW * run) / 4
+    // Beina er holdt av spjeldene (skrudd c/c ≈ 75 mm) og skråstaget i begge
+    // retninger. Konservativt: knekklengde 0,5 m om begge akser.
+    const beinL = Math.max(0.3, cm(c.hoyde))
+    const bein = kontrollerSoyle(tverrsnitt(Math.round(T * 1000), 48, 2, 'C24', v.lektPris), {
+      lengdeM: beinL,
+      knekklengdefaktor: Math.min(1, 0.5 / beinL),
+      avstivetSvakAkse: true,
+      svakAkseLengdeM: Math.min(0.5, beinL),
+      NGk: flater.filter((f) => f.type === 'egen').reduce((sum, f) => sum + f.qk, 0) * legA + 0.05,
+      NQk: flater.filter((f) => f.type !== 'egen').map((f) => ({ type: 'sno' as const, Nk: f.qk * legA, navn: f.navn })),
+      tjenesteklasse: 3,
+    })
+    void qA
+    const ok = bord.ok && tv.k.ok && st.k.ok && bein.ok
+    const res: Statikk = {
+      hR: st.h,
+      lagR: st.n,
+      hT: tv.h,
+      nTv: n,
+      ok,
+      melding: ok
+        ? `Taket holder for snølast sk = ${fmt(sk.sk, 1)} kN/m² med ${n} tverrbord ${prof(Math.round(T * 1000), Math.round(tv.h * 1000))} og sidestrekkere ${st.n > 1 ? '2 × ' : ''}${prof(Math.round(T * 1000), Math.round(st.h * 1000))}.`
+        : `Taket holder IKKE for sk = ${fmt(sk.sk, 1)} kN/m² med disse målene – velg «Forsterket», mindre bredde eller kontakt oss.`,
+      bord: { ...bord, navn: 'Takbord' },
+      tverrbord: { ...tv.k, navn: 'Tverrbord (åse)' },
+      strekker: { ...st.k, navn: 'Sidestrekker' },
+      bein: { ...bein, navn: 'Hjørnebein' },
+      sk,
+    }
+    siste = res
+    if (ok) {
+      const kost = n * tv.h * roofW + 2 * st.h * st.n * run
+      if (!best || kost < best.kost - 1e-9) best = { kost, s: res }
     }
   }
-  stiver(frontLen, frontTop, frontTop, 0)
-  stiver(sideLen, roofTop(-rX0), roofTop(-rX1), sideZc)
-  stiver(sideLen, roofTop(-rX1), roofTop(-rX0), -sideZc)
+  return best?.s ?? (siste as Statikk)
+}
 
-  // Diagonalstiver (45°) – én pr. side.
-  const zHit = (yFrontTop + dz * tanR - yStart - dz) / (1 + tanR)
-  const zEnd = Math.min(dz, zHit)
-  push('Diagonalstiver (45°)', lektP, (zEnd + dz) * Math.SQRT2, 2, LEKT)
+// ── Geometri ────────────────────────────────────────────────────────
 
-  // Takstrekkere + tverrbord.
-  const run = d + ROOF_OVERHANG + W
-  const slope = run / cosR
-  push('Sidestrekker', lektP, slope, 2, LEKT)
-  const crossLen = 2 * (wx + T + CROSS_OUT)
-  push('Tverrbord (tak)', lektP, crossLen, 2, LEKT)
+interface Geo {
+  w: number
+  d: number
+  h: number
+  T: number
+  a: number
+  tanA: number
+  cosA: number
+  sinA: number
+  yS: number
+  zFront: number
+  zBack: number
+  roofW: number
+  st: Statikk
+  /** Underkant sidestrekker (= topp ytre beinlamell og sidespjeld). */
+  L0: (z: number) => number
+  /** Overkant sidestrekker (= underkant tverrbord, topp indre lamell). */
+  L1: (z: number) => number
+  /** Underkant takbord. */
+  L2: (z: number) => number
+  blad: { a: number; h: number }
+  pitch: number
+  gap: number
+  ut: { navn: string; B: number; H: number; D: number }
+  utMont: number
+  /** Utedelens plassering (verdens-z for bak- og forkant). */
+  utZ0: number
+  utZ1: number
+  klaring: { side: number; front: number; topp: number }
+}
 
-  // Taktekking.
-  const roofW = crossLen
-  if (c.taktype === 'takpapp') {
-    push('Takbord (underlag)', takProfil, slope, Math.max(1, Math.round(roofW / 0.098)), 'bord-21x98')
-  } else if (c.taktype === 'faspanel') {
-    push('Faspanel (tak)', takProfil, slope, Math.max(1, Math.round(roofW / 0.1)), 'bord-21x98')
+function geo(c: VarmepumpehusConfig): Geo {
+  const v = virke(c)
+  const T = v.T
+  const w = cm(c.bredde)
+  const d = cm(c.dybde)
+  const h = cm(c.hoyde)
+  const a = Math.max(0, Math.min(60, c.takvinkel))
+  const tanA = Math.tan(rad(a))
+  const cosA = Math.cos(rad(a))
+  const sinA = Math.sin(rad(a))
+  const st = statikk(c)
+  const L0 = (z: number) => h + (d / 2 - z) * tanA
+  const L1 = (z: number) => L0(z) + st.hR / cosA
+  const L2 = (z: number) => L1(z) + st.hT / cosA
+  const bl = blad(T)
+  const gap = Math.max(0.01, cm(num(c.spileGap, 4)))
+  const ut = utedelMaal(c)
+  const utMont = cm(num(c.utMont, 30))
+  const zBack = -d / 2 - W
+  const utZ0 = zBack + VEGGAVSTAND
+  const utZ1 = utZ0 + ut.D
+  const innerW = w - 4 * T
+  return {
+    w, d, h, T, a, tanA, cosA, sinA,
+    yS: v.saaleH,
+    zFront: d / 2 + OVERHENG_F,
+    zBack,
+    roofW: w + 2 * TV_UT,
+    st, L0, L1, L2,
+    blad: bl,
+    pitch: bl.h + gap,
+    gap,
+    ut,
+    utMont,
+    utZ0,
+    utZ1,
+    klaring: {
+      side: (innerW - ut.B) / 2,
+      front: d / 2 - T - STIV_T - utZ1,
+      topp: L1(utZ1) - (utMont + ut.H),
+    },
+  }
+}
+
+/** Anbefalte utvendige mål (cm) for en utedel – brukes av utedel-valgene. */
+function anbefalt(ut: { B: number; H: number; D: number }, T = 0.023, mont = 0.3, vinkel = 22.5, hR = 0.048) {
+  const w = ut.B + 2 * KLARING.side.anbefalt + 4 * T
+  const d = KLARING.front.anbefalt + T + STIV_T - W + VEGGAVSTAND + ut.D
+  const dc = opp5(d)
+  const tanA = Math.tan(rad(vinkel))
+  const zFront = dc / 200 // d/2 i meter
+  const utZ1 = -zFront - W + VEGGAVSTAND + ut.D
+  const h = mont + ut.H + KLARING.topp.anbefalt - (zFront - utZ1) * tanA - hR / Math.cos(rad(vinkel))
+  return { bredde: opp5(w), dybde: dc, hoyde: Math.max(50, opp5(h)) }
+}
+
+// ── Stavliste (én kilde for 3D, kappliste og materialliste) ─────────
+
+const X: [number, number, number] = [1, 0, 0]
+const Y: [number, number, number] = [0, 1, 0]
+const Z: [number, number, number] = [0, 0, 1]
+
+function konstruer(c: VarmepumpehusConfig): { staver: Stav[]; g: Geo } {
+  const g = geo(c)
+  const v = virke(c)
+  const { w, d, T, yS, tanA, cosA, sinA, L0, L1 } = g
+  const st = g.st
+  const Tmm = Math.round(T * 1000)
+  const staver: Stav[] = []
+  const add = (s: Omit<Stav, 'kvalitet'> & { kvalitet?: string }) => staver.push({ kvalitet: 'Impregnert', ...s })
+
+  // ── Såle (U-form, gjæret 45° foran) ──
+  const sB = v.saaleB
+  const sH = v.saaleH
+  const saaleFront = prisme(
+    [[0, d / 2 - sB], [0, d / 2], [sH, d / 2], [sH, d / 2 - sB]],
+    (_y, z) => -w / 2 + (d / 2 - z),
+    (_y, z) => w / 2 - (d / 2 - z),
+  )
+  add({ navn: 'Såle front', profil: v.saaleProfil, pris: v.saalePris, lengdeMm: w * 1000, endeA: ende(45, 'gjaering'), endeB: ende(45, 'gjaering'), part: 'ramme', pid: 'saale-front', geom: saaleFront, darken: 0.88, explode: new THREE.Vector3(0, -0.3, 0.2), kategori: 'konstruksjon', merknad: 'Ligger flatt. Gjæres 45° i begge ender.' })
+  ;[1, -1].forEach((sx) => {
+    // Lokal x = verdens z (bak → front), lokal z = verdens x.
+    const prof2: V2[] = [[0, sx * (w / 2 - sB)], [0, sx * (w / 2)], [sH, sx * (w / 2)], [sH, sx * (w / 2 - sB)]]
+    const geom = plasser(
+      prisme(prof2, () => g.zBack, (_y, x) => d / 2 - (w / 2 - Math.abs(x))),
+      basis(Z, Y, X),
+    )
+    add({ navn: 'Såle side', profil: v.saaleProfil, pris: v.saalePris, lengdeMm: (d / 2 - g.zBack) * 1000, endeA: ende(0), endeB: ende(45, 'gjaering'), part: 'ramme', pid: `saale-${sx > 0 ? 'h' : 'v'}`, geom, darken: 0.88, explode: new THREE.Vector3(sx * 0.2, -0.3, 0), kategori: 'konstruksjon', merknad: 'Gjæres 45° foran, rett kapp bak (mot veggen).' })
+  })
+
+  // ── Hjørnebein (to lamelllag, forskjøvet T) ──
+  // Lokal x = verdens y (opp), lokal y = verdens z, lokal z = verdens x.
+  const lamell = (navn: string, pid: string, x0: number, x1: number, z0: number, z1: number, topp: (z: number) => number, sx: number, sz: number) => {
+    const geom = plasser(
+      prisme([[z0, x0], [z1, x0], [z1, x1], [z0, x1]], () => yS, (z) => topp(z)),
+      basis(Y, Z, X),
+    )
+    const lengde = Math.max(topp(z0), topp(z1)) - yS
+    add({ navn, profil: v.lektProfil, pris: v.lektPris, lengdeMm: lengde * 1000, endeA: ende(0), endeB: ende(g.a, 'gjaering', 'skråkapp i takvinkelen over 48 mm-siden'), part: 'ramme', pid, geom, darken: 0.9, explode: new THREE.Vector3(sx * 0.25, 0, sz * 0.25), kategori: 'konstruksjon' })
+  }
+  ;[1, -1].forEach((sx) => {
+    const xo0 = sx > 0 ? w / 2 - T : -w / 2
+    const xo1 = sx > 0 ? w / 2 : -w / 2 + T
+    const xi0 = sx > 0 ? w / 2 - 2 * T : -w / 2 + T
+    const xi1 = sx > 0 ? w / 2 - T : -w / 2 + 2 * T
+    const s = sx > 0 ? 'h' : 'v'
+    // Front
+    lamell('Hjørnebein front, ytre', `bein-f${s}-y`, xo0, xo1, d / 2 - W, d / 2, L0, sx, 1)
+    lamell('Hjørnebein front, indre', `bein-f${s}-i`, xi0, xi1, d / 2 - T - W, d / 2 - T, L1, sx, 1)
+    // Bak (ytre står W bak bakplanet – mot veggen)
+    lamell('Hjørnebein bak, ytre', `bein-b${s}-y`, xo0, xo1, -d / 2 - W, -d / 2, L0, sx, -1)
+    lamell('Hjørnebein bak, indre bakre', `bein-b${s}-ib`, xi0, xi1, -d / 2 + T - 2 * W, -d / 2 + T - W, L1, sx, -1)
+    lamell('Hjørnebein bak, indre fremre', `bein-b${s}-if`, xi0, xi1, -d / 2 + T - W, -d / 2 + T, L1, sx, -1)
+  })
+
+  // ── Spjeld ──
+  const bl = g.blad
+  const vSpjeld = { profil: `${v.lektProfil} kløyvd 45°`, pris: v.lektPris, lmFaktor: 0.5, part: 'spiler', kategori: 'kledning' as const }
+  // Front: mellom de ytre lamellene, fra sålen og opp under tverrbordet.
+  const frontLen = w - 2 * T
+  for (let i = 0, yb = yS; ; i++, yb += g.pitch) {
+    if (yb + bl.a > L1(d / 2) - 0.002 || yb + bl.h > L1(d / 2 - T) - 0.002) break
+    const geom = prisme(
+      [[yb, d / 2], [yb + bl.a, d / 2], [yb + bl.h, d / 2 - T], [yb, d / 2 - T]],
+      () => -frontLen / 2,
+      () => frontLen / 2,
+    )
+    add({ navn: 'Spjeld front', ...vSpjeld, lengdeMm: frontLen * 1000, endeA: ende(0), endeB: ende(0), pid: `spjeld-f-${i}`, geom, explode: new THREE.Vector3(0, 0, 0.35) })
+  }
+  // Sider: fra bak-beinet til front-beinet; øverste blad får hjørneklipp
+  // parallelt med strekkeren (planet z = d/2 − (y − h)/tan α).
+  const zA = -d / 2
+  const zB = d / 2 - W
+  const kryss = L0(zB) // knekknivå: over dette klippes enden etter takfallet
+  const zKutt = (y: number) => (tanA > 1e-6 ? d / 2 - (y - g.h) / tanA : y <= g.h + 1e-9 ? Infinity : -Infinity)
+  ;[1, -1].forEach((sx) => {
+    const s = sx > 0 ? 'h' : 'v'
+    for (let i = 0, yb = yS; ; i++, yb += g.pitch) {
+      const topp = yb + bl.h
+      if (zKutt(topp) < zA + 0.06) break // for kort – ikke plass under strekkeren
+      const xo = sx * (w / 2)
+      const xi = sx * (w / 2 - T)
+      const klipp = topp > kryss + 1e-6
+      const geom = plasser(
+        prisme(
+          [[yb, xo], [yb + bl.a, xo], [yb + bl.h, xi], [yb, xi]],
+          () => zA,
+          (y) => Math.min(zB, zKutt(y)),
+          klipp ? [kryss] : [],
+        ),
+        basis(Z, Y, X),
+      )
+      const lengde = Math.min(zB, zKutt(yb)) - zA
+      add({
+        navn: klipp ? 'Spjeld side, klippet' : 'Spjeld side',
+        ...vSpjeld,
+        lengdeMm: lengde * 1000,
+        endeA: ende(0),
+        endeB: klipp ? ende(90 - g.a, 'gjaering', `hjørneklipp parallelt med takfallet (${fmtGrader(g.a)})`) : ende(0),
+        pid: `spjeld-${s}-${i}`,
+        geom,
+        explode: new THREE.Vector3(sx * 0.35, 0, 0),
+      })
+    }
+  })
+
+  // ── Front-stivere (11×36) bak frontspjeldene ──
+  const nStiv = Math.max(0, Math.ceil(frontLen / STIV_MAKS - 1e-9) - 1)
+  for (let k = 1; k <= nStiv; k++) {
+    const x = -frontLen / 2 + (k * frontLen) / (nStiv + 1)
+    const top = L1(d / 2 - T) - 0.002
+    const z0 = d / 2 - T - STIV_T
+    const geom = plasser(prisme([[z0, x - STIV_B / 2], [d / 2 - T, x - STIV_B / 2], [d / 2 - T, x + STIV_B / 2], [z0, x + STIV_B / 2]], () => yS, () => top), basis(Y, Z, X))
+    add({ navn: 'Stiver bak frontspjeld', profil: prof(11, 36), pris: 'lekt-11x36', lengdeMm: (top - yS) * 1000, endeA: ende(0), endeB: ende(0), part: 'stiver', pid: `stiver-${k}`, geom, darken: 0.85, explode: new THREE.Vector3(0, 0, 0.2), kategori: 'konstruksjon' })
+  }
+
+  // ── Skråstag på sidene (indre lag, mellom indre lameller) ──
+  const { zb, zf, beta, yc0 } = stag(g)
+  const cb = Math.cos(beta)
+  const sb = Math.sin(beta)
+  ;[1, -1].forEach((sx) => {
+    const x0 = sx > 0 ? w / 2 - 2 * T : -w / 2 + T
+    const x1 = x0 + T
+    // Lokal x langs staget (opp/fram), lokal y vinkelrett, lokal z = verdens x.
+    const eU: [number, number, number] = [0, sb, cb]
+    const eV: [number, number, number] = [0, cb, -sb]
+    const geom = plasser(
+      prisme(
+        [[-W / 2, x0], [W / 2, x0], [W / 2, x1], [-W / 2, x1]],
+        (vv) => (vv * sb) / cb,
+        (vv) => (zf - zb + vv * sb) / cb,
+      ),
+      basis(eU, eV, X, [0, yc0, zb]),
+    )
+    const lengde = ((zf - zb) + (W / 2) * sb * 2) / cb
+    add({ navn: 'Skråstag side', profil: v.lektProfil, pris: v.lektPris, lengdeMm: lengde * 1000, endeA: ende((beta * 180) / Math.PI, 'gjaering', 'loddrett kapp mot beinet'), endeB: ende((beta * 180) / Math.PI, 'gjaering', 'loddrett kapp mot beinet'), part: 'stiver', pid: `stag-${sx > 0 ? 'h' : 'v'}`, geom, darken: 0.85, explode: new THREE.Vector3(sx * 0.2, 0, 0), kategori: 'konstruksjon', merknad: `Stagvinkel ${fmtGrader((beta * 180) / Math.PI)} fra vannrett – begge ender kappes loddrett.` })
+  })
+
+  // ── Tak ──
+  // Skrå ramme: lokal x langs fallet (fram/ned), lokal y vinkelrett opp, origo
+  // på L0-linja i frontplanet. Loddrett kapp ved verdens z = Z.
+  const eU: [number, number, number] = [0, -sinA, cosA]
+  const eV: [number, number, number] = [0, cosA, sinA]
+  const O: [number, number, number] = [0, g.h, d / 2]
+  const lodd = (Zv: number) => (vv: number) => (Zv - d / 2 - vv * sinA) / cosA
+  const skraa = (v0: number, v1: number, x0: number, x1: number, zA0: number, zA1: number) =>
+    plasser(prisme([[v0, x0], [v1, x0], [v1, x1], [v0, x1]], lodd(zA0), lodd(zA1)), basis(eU, eV, X, O))
+  // Lengde spiss–spiss langs staven (loddkutt gjør den ene kanten lengst).
+  const loddLengde = (v0: number, v1: number) => Math.max(lodd(g.zFront)(v0), lodd(g.zFront)(v1)) - Math.min(lodd(g.zBack)(v0), lodd(g.zBack)(v1))
+
+  const hR = st.hR
+  const hT = st.hT
+  const rProfil = prof(Tmm, Math.round(hR * 1000))
+  const tProfil = prof(Tmm, Math.round(hT * 1000))
+  ;[1, -1].forEach((sx) => {
+    const x0 = sx > 0 ? w / 2 - T : -w / 2
+    add({ navn: 'Sidestrekker', profil: rProfil, pris: rammePris(T, hR), lengdeMm: loddLengde(0, hR) * 1000, endeA: ende(g.a, 'gjaering', 'loddkutt'), endeB: ende(g.a, 'gjaering', 'loddkutt'), part: 'tak', pid: `strekker-${sx > 0 ? 'h' : 'v'}`, geom: skraa(0, hR, x0, x0 + T, g.zBack, g.zFront), darken: 0.86, explode: new THREE.Vector3(sx * 0.2, 0.25, 0), kategori: 'tak', merknad: `Loddkutt ${fmtGrader(g.a)} i begge ender. Hviler på ytre beinlamell foran og bak.` })
+  })
+  // Forsterket strekker: innerlekt i samme høyde, mellom de indre lamellene,
+  // limt og skrudd til strekkeren (to lag samvirker).
+  if (st.lagR > 1) {
+    const zb2 = -d / 2 + T
+    const zf2 = d / 2 - T - W
+    const lengde = (Math.max(lodd(zf2)(0), lodd(zf2)(hR)) - Math.min(lodd(zb2)(0), lodd(zb2)(hR))) * 1000
+    ;[1, -1].forEach((sx) => {
+      const x0 = sx > 0 ? w / 2 - 2 * T : -w / 2 + T
+      add({ navn: 'Sidestrekker, innerlekt', profil: rProfil, pris: rammePris(T, hR), lengdeMm: lengde, endeA: ende(g.a, 'gjaering', 'loddkutt'), endeB: ende(g.a, 'gjaering', 'loddkutt'), part: 'tak', pid: `strekker-i-${sx > 0 ? 'h' : 'v'}`, geom: skraa(0, hR, x0, x0 + T, zb2, zf2), darken: 0.83, explode: new THREE.Vector3(sx * 0.15, 0.25, 0), kategori: 'tak', merknad: 'Limes og skrus til sidestrekkeren (A4 5,0×50 c/c 150) – sammen bærer de taket.' })
+    })
+  }
+  // Tverrbord på høykant oppå strekkerne. u-posisjoner langs fallet.
+  const uFront = lodd(g.zFront)(hR + hT) // topp-forkant flukter med frontenden
+  const uBack = lodd(g.zBack)(hR) // bunn-bakkant flukter med veggen
+  const nTv = st.nTv
+  const uC = Array.from({ length: nTv }, (_, i) => uFront - T / 2 - (i * (uFront - T - uBack)) / (nTv - 1))
+  uC.forEach((u, i) => {
+    const prof2: V2[] = [
+      [hR, u - T / 2],
+      [hR + hT, u - T / 2],
+      [hR + hT, u + T / 2],
+      [hR, u + T / 2],
+    ]
+    // Tverrbordet går langs verdens x: lokal x = verdens x, profil i (v, u).
+    const geom = plasser(prisme(prof2, () => -g.roofW / 2, () => g.roofW / 2), basis(X, eV, eU, O))
+    add({ navn: 'Tverrbord (åse)', profil: tProfil, pris: rammePris(T, hT), lengdeMm: g.roofW * 1000, endeA: ende(0), endeB: ende(0), part: 'tak', pid: `tverrbord-${i}`, geom, darken: 0.8, explode: new THREE.Vector3(0, 0.35, 0), kategori: 'tak', merknad: 'På høykant oppå strekkerne, 5 cm utstikk hver side. Skrus ned i strekkeren med 2 skruer.' })
+  })
+  // Takbord langs fallet, loddrett kapp foran og bak.
+  const tk = tekke(c)
+  const vB = hR + hT
+  const takbord = (navn: string, x0: number, x1: number, v0: number, pid: string, darken: number, merknad?: string) =>
+    add({ navn, profil: tk.bord, pris: tk.pris, lengdeMm: loddLengde(v0, v0 + tk.t) * 1000, endeA: ende(g.a, 'gjaering', 'loddkutt'), endeB: ende(g.a, 'gjaering', 'loddkutt'), part: 'tak', pid, geom: skraa(v0, v0 + tk.t, x0, x1, g.zBack, g.zFront), darken, explode: new THREE.Vector3(0, 0.55, 0), kategori: 'tak', merknad })
+  const R = g.roofW
+  if (c.taktype === 'overunder') {
+    const b = 0.098
+    const nU = Math.max(2, Math.ceil((R - b) / 0.156 - 1e-9) + 1)
+    const P = (R - b) / (nU - 1)
+    for (let i = 0; i < nU; i++) takbord('Takbord underligger', -R / 2 + i * P, -R / 2 + i * P + b, vB, `tak-u-${i}`, 0.82)
+    for (let i = 0; i < nU - 1; i++) {
+      const xc = -R / 2 + b / 2 + (i + 0.5) * P
+      takbord('Takbord overligger', xc - b / 2, xc + b / 2, vB + tk.t, `tak-o-${i}`, 1, `Overlapp ${f0(((b - (P - b)) / 2) * 1000)} mm på hver side.`)
+    }
   } else {
-    const target = 0.098
-    const nU = Math.max(2, Math.round((roofW + target) / (2 * target)))
-    push('Takbord underligger', takProfil, slope, nU, 'bord-21x98')
-    push('Takbord overligger', takProfil, slope, nU - 1, 'bord-21x98')
+    const dekk = c.taktype === 'faspanel' ? 0.09 : 0.098 // faspanel: dekkbredde etter not/fjær
+    const n = Math.max(1, Math.ceil(R / dekk - 1e-9))
+    for (let i = 0; i < n; i++) {
+      const x0 = -R / 2 + i * dekk
+      const x1 = Math.min(R / 2, x0 + (c.taktype === 'faspanel' ? 0.098 : dekk)) - (c.taktype === 'faspanel' && i < n - 1 ? 0.008 : 0)
+      const sist = i === n - 1 && R - i * dekk < dekk - 0.002
+      takbord(c.taktype === 'faspanel' ? 'Faspanel (tak)' : 'Takbord (underlag)', x0, Math.max(x0 + 0.01, x1), vB, `tak-${i}`, i % 2 ? 0.97 : 1, sist ? `Siste bord kløyves til ${f0((R - i * dekk) * 1000)} mm.` : undefined)
+    }
+    if (c.taktype === 'takpapp') {
+      const papp = new THREE.MeshStandardMaterial({ color: 0x2b2b2b, roughness: 0.95, metalness: 0.02 })
+      staver.push({ navn: 'Takpapp', profil: 'takbelegg', lengdeMm: loddLengde(vB + tk.t, vB + tk.t + 0.004) * 1000, part: 'tak', pid: 'tak-papp', geom: skraa(vB + tk.t, vB + tk.t + 0.004, -R / 2, R / 2, g.zBack, g.zFront), materiale: papp, ikkeKapp: true, explode: new THREE.Vector3(0, 0.7, 0) })
+    }
   }
-
-  return out
+  return { staver, g }
 }
 
-// ── Beregning (materialliste + estimat) ────────────────────────────
-
-function beregn(c: VarmepumpehusConfig): Bom {
-  const faktor = TRESLAG[c.treslag]?.prisFaktor ?? 1
-  const del = deler(c)
-
-  // Løpemeter pr. materialtype (kløyvde spjeld teller halv lekt-lengde å kjøpe).
-  const lmByMat = new Map<string, number>()
-  del.forEach((p) => {
-    const lmv = p.lengdeM * p.antall * (p.kløyvd ? 0.5 : 1)
-    lmByMat.set(p.mat, (lmByMat.get(p.mat) ?? 0) + lmv)
-  })
-
-  // Takpapp-areal (kun takpapp).
-  const w = c.bredde / 100
-  const d = c.dybde / 100
-  const cosR = Math.cos((c.takvinkel * Math.PI) / 180)
-  const T = c.kvalitet === 'forsterket' ? 0.036 : LEKT_T
-  const run = d + ROOF_OVERHANG + LEKT_W
-  const roofW = 2 * (w / 2 + T + CROSS_OUT)
-  const takArealM2 = c.taktype === 'takpapp' ? roofW * (run / cosR) : 0
-
-  // Kostnad: trevirke × treslag-faktor + evt. papp + skruer, alt inkl. svinn.
-  let woodKr = 0
-  let totalLm = 0
-  lmByMat.forEach((lmv, mat) => {
-    totalLm += lmv
-    woodKr += lmv * prisFor(mat) * faktor
-  })
-  const skruer = Math.round(totalLm * 5 + 30)
-  // Trelim til de laminerte hjørnebeina (limflate = beinlengder). ~12 lm pr. flaske.
-  const beinLm = del.filter((p) => p.navn.startsWith('Hjørnebein')).reduce((a, p) => a + p.lengdeM * p.antall, 0)
-  const limFlasker = Math.max(1, Math.ceil(beinLm / 12))
-  const veggSkruer = 4 // 2 pr. bak-bein × 2 bein (6×80 til veggen)
-  const estimatKr =
-    Math.round(
-      ((woodKr + takArealM2 * prisFor('takpapp')) * SVINN +
-        skruer * prisFor('skrue') +
-        limFlasker * prisFor('trelim') +
-        veggSkruer * prisFor('skrue-6x80')) /
-        10,
-    ) * 10
-
-  // Materialliste = handleliste for byggevarehuset: total lengde pr. materialtype
-  // inkl. 10 % kapp/svinn. (Kappliste-fanen viser hvert enkelt bord.)
-  const rekkefolge = ['stolpe-36x48', 'stolpe-23x48', 'bord-21x98', 'lekt-11x36']
-  const linjer: BomLine[] = [...lmByMat.entries()]
-    .sort((a, b) => rekkefolge.indexOf(a[0]) - rekkefolge.indexOf(b[0]))
-    .map(([mat, lmv]) => ({
-      navn: PRISER[mat]?.navn ?? mat,
-      antall: Math.round(lmv * SVINN * 10) / 10,
-      enhet: 'lm',
-      kommentar: 'inkl. 10 % svinn',
-    }))
-  if (takArealM2 > 0) linjer.push({ navn: PRISER['takpapp'].navn, antall: Math.round(takArealM2 * SVINN * 10) / 10, enhet: 'm²', kommentar: 'over underlag' })
-  linjer.push({ navn: 'Skruer', spesifikasjon: 'rustfri A4', antall: skruer, enhet: 'stk' })
-  linjer.push({ navn: PRISER['trelim'].navn, antall: limFlasker, enhet: 'stk', kommentar: 'til laminering av hjørnebein' })
-  linjer.push({ navn: PRISER['skrue-6x80'].navn, antall: veggSkruer, enhet: 'stk', kommentar: 'gjennom bak-beina til veggen' })
-
-  const sammendrag = `${c.bredde}×${c.dybde}×${c.hoyde} cm · ${c.takvinkel}° tak · ${c.taktype} · ${c.kvalitet} · ${TRESLAG[c.treslag]?.label ?? c.treslag}`
-  return { linjer, estimatKr, sammendrag, arealM2: (c.bredde * c.dybde) / 10000, maal: `${c.bredde} × ${c.dybde} × ${c.hoyde} cm` }
-}
-
-// ── Målsatt 2D-tegning (plan + oppriss) ────────────────────────────
-// Bygges av de samme parametrene som 3D-modellen. Fronten er lavest,
-// baksiden løftes av takfallet (pulttak). Mål i cm.
-function tegning2D(c: VarmepumpehusConfig): Tegning2D {
-  const B = c.bredde
-  const D = c.dybde
-  const Hf = c.hoyde // fronthøyde
-  const fall = Math.round(D * Math.tan((c.takvinkel * Math.PI) / 180))
-  const Hb = Hf + fall // bakhøyde
-  const takT = 6 // tegnet taktykkelse
-  const utstikkSide = 5 // tverrbord stikker ut på hver side
-  const utstikkFront = Math.round(ROOF_OVERHANG * 100)
-
-  // Forfra: front-flate B × Hf, med takkappe på toppen.
-  const forfra: Tegning2D['riss'][number] = {
-    id: 'forfra',
-    navn: 'Forfra',
-    bredde: B + 2 * utstikkSide,
-    hoyde: Hf + takT,
-    former: [
-      { type: 'rect', x: utstikkSide, y: takT, w: B, h: Hf },
-      { type: 'rect', x: 0, y: 0, w: B + 2 * utstikkSide, h: takT },
-    ],
-    maal: [
-      { x1: utstikkSide, y1: takT + Hf, x2: utstikkSide + B, y2: takT + Hf, label: `${B} cm`, offset: 26 },
-      { x1: utstikkSide, y1: takT, x2: utstikkSide, y2: takT + Hf, label: `${Hf} cm`, offset: 24 },
-    ],
+/** Utedelen (kontekst – medfølger ikke) med vifte, gitter og stativ. */
+function byggUtedel(group: THREE.Group, g: Geo) {
+  const { B, H, D } = g.ut
+  const y0 = g.utMont
+  const zc = (g.utZ0 + g.utZ1) / 2
+  const kropp = new THREE.MeshStandardMaterial({ color: 0xe6e6e2, roughness: 0.55, metalness: 0.15 })
+  const mork = new THREE.MeshStandardMaterial({ color: 0x2a2d31, roughness: 0.7, metalness: 0.2 })
+  const stal = new THREE.MeshStandardMaterial({ color: 0x8b9096, roughness: 0.5, metalness: 0.6 })
+  const add = (geom: THREE.BufferGeometry, m: THREE.Material, navn: string, pid: string) => {
+    const mesh = new THREE.Mesh(geom, m)
+    mesh.castShadow = true
+    mesh.receiveShadow = true
+    mesh.userData.part = 'utedel'
+    mesh.userData.pid = pid
+    mesh.userData.info = { navn, profil: '', lengdeCm: 0 }
+    mesh.userData.kontekst = true // vises i alle byggetrinn, ikke en del av leveransen
+    group.add(mesh)
+    return mesh
   }
-
-  // Fra siden: front (venstre) lav, bakside (høyre) høy – takfallet synes.
-  const sett = [
-    [utstikkFront, Hb], // takutstikk foran, nede
-    [utstikkFront, Hb - Hf], // front-eave
-    [utstikkFront + D, 0], // bak-topp
-    [utstikkFront + D, Hb], // bak, nede
-    [utstikkFront, Hb], // tilbake til start (bunn)
-  ] as Array<[number, number]>
-  const fraSiden: Tegning2D['riss'][number] = {
-    id: 'siden',
-    navn: 'Fra siden',
-    bredde: D + utstikkFront + 6,
-    hoyde: Hb,
-    former: [
-      { type: 'poly', points: sett },
-      // takplate langs fallet
-      { type: 'line', points: [[0, Hb - Hf - 1], [utstikkFront + D, -1]], tynn: true },
-    ],
-    maal: [
-      { x1: utstikkFront, y1: Hb, x2: utstikkFront + D, y2: Hb, label: `${D} cm`, offset: 26 },
-      { x1: utstikkFront, y1: Hb - Hf, x2: utstikkFront, y2: Hb, label: `${Hf} cm`, offset: 24 },
-      { x1: utstikkFront + D, y1: 0, x2: utstikkFront + D, y2: Hb, label: `${Hb} cm`, offset: 24 },
-    ],
-    tekster: [{ x: utstikkFront + D * 0.4, y: Hb - Hf - 8, tekst: `${c.takvinkel}° fall` }],
+  const k = add(new THREE.BoxGeometry(B, H, D), kropp, 'Utedel varmepumpe (medfølger ikke)', 'utedel')
+  k.receiveShadow = false
+  k.position.set(0, y0 + H / 2, zc)
+  // Viftegitter foran (vifta sitter normalt til venstre, servicedeksel til høyre).
+  const r = Math.min(H * 0.4, B * 0.3)
+  const gitter = add(new THREE.CylinderGeometry(r, r, 0.006, 40), mork, 'Viftegitter (medfølger ikke)', 'utedel-gitter')
+  gitter.rotation.x = Math.PI / 2
+  gitter.position.set(-B * 0.12, y0 + H / 2, g.utZ1 + 0.003)
+  // Stativ/konsoll ned til bakken.
+  if (y0 > 0.02) {
+    ;[-1, 1].forEach((s, i) => {
+      const fot = add(new THREE.BoxGeometry(0.04, y0, D * 0.9), stal, 'Bakkestativ (medfølger ikke)', `utedel-stativ-${i}`)
+      fot.position.set(s * (B / 2 - 0.08), y0 / 2, zc)
+    })
   }
-
-  // Ovenfra (plan): B × D.
-  const ovenfra: Tegning2D['riss'][number] = {
-    id: 'plan',
-    navn: 'Ovenfra (plan)',
-    bredde: B,
-    hoyde: D,
-    former: [{ type: 'rect', x: 0, y: 0, w: B, h: D }],
-    maal: [
-      { x1: 0, y1: D, x2: B, y2: D, label: `${B} cm`, offset: 26 },
-      { x1: 0, y1: 0, x2: 0, y2: D, label: `${D} cm`, offset: 24 },
-    ],
-  }
-
-  return { riss: [forfra, fraSiden, ovenfra] }
 }
-
-// ── Kappliste ──────────────────────────────────────────────────────
-
-function kappliste(c: VarmepumpehusConfig): KapplisteDel[] {
-  const map = new Map<string, KapplisteDel>()
-  deler(c).forEach((p) => {
-    const L = Math.round(p.lengdeM * 100)
-    const key = `${p.navn}|${p.profil}|${L}`
-    const ex = map.get(key)
-    if (ex) ex.antall += p.antall
-    else map.set(key, { navn: p.navn, profil: p.profil, lengdeCm: L, antall: p.antall })
-  })
-  return [...map.values()]
-}
-
-// ── 3D-modell ──────────────────────────────────────────────────────
 
 function buildMesh(c: VarmepumpehusConfig, opts?: BuildOptions): THREE.Group {
   const group = new THREE.Group()
-  const tex = opts?.woodTexture ?? null
-
-  const meshMat = (pid: string, darken = 1) => {
-    const ov = opts?.overrides?.[pid]
-    const treslag = ov?.treslag ?? c.treslag
-    const farge = ov?.farge ?? c.farge
-    const base = new THREE.Color(resolveColor(treslag, farge)).multiplyScalar(darken)
-    const m = new THREE.MeshStandardMaterial({ color: base, roughness: 0.82, metalness: 0.03 })
-    if (tex) m.map = tex
-    return m
-  }
-  const scale = 0.01
-  const w = c.bredde * scale
-  const h = c.hoyde * scale
-  const d = c.dybde * scale
-
-  // Forsterket: hele huset bygges i 36×48 i stedet for 23×48. Alle mål er
-  // proporsjonale med lekttykkelsen, så modellen skalerer konsistent.
-  // eslint-disable-next-line no-shadow
-  const LEKT_T = c.kvalitet === 'forsterket' ? 0.036 : 0.023
-  // eslint-disable-next-line no-shadow
-  const LEG_OVERLAP = LEKT_T
-  // eslint-disable-next-line no-shadow
-  const LEG_LIFT = LEKT_T
-  // eslint-disable-next-line no-shadow
-  const BLADE_D = LEKT_T
-  // eslint-disable-next-line no-shadow
-  const BLADE_H = BLADE_FLAT + LEKT_T // 45°-kile, skalerer med tykkelsen
-  const frameProfil = c.kvalitet === 'forsterket' ? '36 × 48 mm' : lektProfil
-
-  // Takfall (pulttak med fall framover): fronten er forankret (= hoyde), og
-  // bakenden løftes når vinkelen øker. roofTop(z) er overkanten – samme linje
-  // som strekkernes overkant – som både bein og spjeld følger, foran og bak.
-  const roofRad = (c.takvinkel * Math.PI) / 180
-  const tanR = Math.tan(roofRad)
-  const yFrontTop = LEG_LIFT + h // fronthøyde ved frontplanet (z = d/2)
-  const roofTop = (z: number) => yFrontTop + (d / 2 - z) * tanR
-
-  // ── Hjørnebein (to laminerte lekter, forskjøvet) ─────────────────
-  // Bygges fra bunnen: først de fire hjørnene. Hvert hjørne er to 23×48-lekter
-  // limt flate-mot-flate (46 mm i x, ytterflate flukter x=±w/2), men forskjøvet
-  // LEG_OVERLAP (~23 mm) langs z i forhold til hverandre. Forskyvningen lager en
-  // 23 mm skulder som spjeldene fester mot: front-beina skyves framover (+z ut),
-  // bak-beina bakover (−z). Bak-beinas indre bord er dobbelt så bredt (96 mm).
-  const corners: Array<{ sx: number; sz: number }> = [
-    { sx: -1, sz: 1 }, // front-venstre
-    { sx: 1, sz: 1 }, // front-høyre
-    { sx: -1, sz: -1 }, // bak-venstre
-    { sx: 1, sz: -1 }, // bak-høyre
-  ]
-  corners.forEach(({ sx, sz }, idx) => {
-    const front = sz > 0
-    const navn = front ? 'Hjørnebein front' : 'Hjørnebein bak'
-    const explode = new THREE.Vector3(sx, -0.15, sz).normalize().multiplyScalar(0.3)
-    // xNr: 0 = ytre lamina (ved sideplanet), 1 = indre lamina (limt innenfor).
-    const addLamina = (nr: number, xNr: number, zCenter: number, lenZ: number) => {
-      const pid = `ramme-${idx}-${nr}`
-      const zLo = zCenter - lenZ / 2
-      const zHi = zCenter + lenZ / 2
-      // Sideprofil (z, y): loddrette sider, bunn ved LEG_LIFT, topp kappet skrått
-      // langs takflaten (roofTop) – samme vinkel som strekkerne.
-      const shape = new THREE.Shape()
-      shape.moveTo(zLo, LEG_LIFT)
-      shape.lineTo(zHi, LEG_LIFT)
-      shape.lineTo(zHi, roofTop(zHi))
-      shape.lineTo(zLo, roofTop(zLo))
-      shape.closePath()
-      const g = new THREE.ExtrudeGeometry(shape, { depth: LEKT_T, bevelEnabled: false })
-      g.rotateY(-Math.PI / 2) // profil i z-y, ekstrudert langs x (tykkelse)
-      g.translate(sx * (w / 2 - LEKT_T / 2 - xNr * LEKT_T) + LEKT_T / 2, 0, 0)
-      const mat = meshMat(pid, 0.9)
-      mat.side = THREE.DoubleSide
-      const lek = new THREE.Mesh(g, mat)
-      lek.castShadow = true
-      lek.receiveShadow = true
-      lek.userData.part = 'ramme'
-      lek.userData.pid = pid
-      lek.userData.info = { navn, profil: nr === 1 && !front ? `${c.kvalitet === 'forsterket' ? 36 : 23} × 96 mm (2 lekt)` : frameProfil, lengdeCm: Math.round((roofTop(zCenter) - LEG_LIFT) * 100) }
-      lek.userData.explode = explode
-      group.add(lek)
-    }
-    // Kun den ytre lamina på bak-beina skyves 48 mm lenger bak enn bak-planet.
-    const backShift = front ? 0 : LEKT_W
-    // Ytre lamina: 48 mm bred, ytterflate flukter med front/bak-planet (z=±d/2).
-    addLamina(0, 0, sz * (d / 2 + backShift - LEKT_W / 2), LEKT_W)
-    // Indre lamina: limt innenfor, forskjøvet LEG_OVERLAP så det står fram en
-    // 23 mm skulder. Front-bein skyves innover (−), bak-bein utover (+).
-    // Bak-bein: dobbelt bredt indre bord (96 mm).
-    const innerLen = front ? LEKT_W : 2 * LEKT_W
-    const shoulderShift = front ? -LEG_OVERLAP : LEG_OVERLAP
-    addLamina(1, 1, sz * (d / 2 + shoulderShift - innerLen / 2), innerLen)
-  })
-
-  // ── Bunnramme / såle (footer) ────────────────────────────────────
-  // Flate bord som ligger flatt: venstre (bak→front), front (venstre→høyre) og
-  // høyre (front→bak) – U-form, åpen bak. Geringes 45° i de to fronthjørnene.
-  // 48 mm bredde flukter med ytterplanet; tykkelsen følger lekten (23/36 mm).
-  const FW = LEKT_W // 48 mm bredde (ligger flatt)
-  const FH = LEKT_T // sålens tykkelse (høyde)
-  const wx = w / 2
-  const dz = d / 2
-  const footerBoard = (nr: number, pts: Array<[number, number]>, navn: string, lengdeCm: number) => {
-    const shape = new THREE.Shape()
-    shape.moveTo(pts[0][0], pts[0][1])
-    for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i][0], pts[i][1])
-    shape.closePath()
-    const g = new THREE.ExtrudeGeometry(shape, { depth: FH, bevelEnabled: false })
-    g.rotateX(Math.PI / 2) // fotavtrykk i x-z, ekstrudert oppover i y
-    g.translate(0, FH, 0)
-    const pid = `footer-${nr}`
-    const mat = meshMat(pid, 0.9)
-    mat.side = THREE.DoubleSide
-    const m = new THREE.Mesh(g, mat)
-    m.castShadow = true
-    m.receiveShadow = true
-    m.userData.part = 'ramme'
-    m.userData.pid = pid
-    m.userData.info = { navn, profil: frameProfil, lengdeCm: Math.round(lengdeCm) }
-    m.userData.explode = new THREE.Vector3(0, -0.4, 0)
-    group.add(m)
-  }
-  const backZ = dz + LEKT_W // sålen går helt bak til bak-beina (48 mm bak bak-planet)
-  // Front (geret begge ender).
-  footerBoard(0, [[-wx, dz], [wx, dz], [wx - FW, dz - FW], [-wx + FW, dz - FW]], 'Såle front', c.bredde)
-  // Venstre (geret front, butt bak – helt bak).
-  footerBoard(1, [[-wx, dz], [-wx + FW, dz - FW], [-wx + FW, -backZ], [-wx, -backZ]], 'Såle venstre', c.dybde)
-  // Høyre (geret front, butt bak – helt bak).
-  footerBoard(2, [[wx, dz], [wx, -backZ], [wx - FW, -backZ], [wx - FW, dz - FW]], 'Såle høyre', c.dybde)
-
-  // ── Spjeld (louvre-blad: 23×48 kløyvd 45°) ───────────────────────
-  // Kilesnitt (rettvinklet trekant): flat bunn, 48 mm skråflate som vender
-  // opp-og-ut, ytterkant i flukt med ytterplanet (lokal z=0), stikker BL innover.
-  // Legges fra topp av sålen og itereres oppover med konfigurerbar luftspalte.
-  // 23×48-plank kløyvd i to. Kile: bunn/dybde = 23 mm, skråflate (hypotenus) =
-  // 33.2 mm → bakhøyde ≈ 24 mm. Dybden 23 mm flukter med skulderforskyvningen
-  // (ytre↔indre plank). Liten loddrett flate på tynne ytterkant før 90°-hjørnet.
-  const gapM = (typeof c.spileGap === 'number' ? c.spileGap : 4) / 100
-  const pitch = BLADE_H + gapM
-  const yStart = FH // topp av sålen
-  const bladeShape = new THREE.Shape()
-  bladeShape.moveTo(0, 0) // ytre bunn (ved planet – 90°-hjørne)
-  bladeShape.lineTo(0, BLADE_FLAT) // liten loddrett flate på tynne ytterkant
-  bladeShape.lineTo(-BLADE_D, BLADE_H) // 45° skråflate opp til indre topp
-  bladeShape.lineTo(-BLADE_D, 0) // indre bunn (bakre loddrett kant)
-  bladeShape.closePath()
-  const makeBladeGeom = (len: number) => {
-    const g = new THREE.ExtrudeGeometry(bladeShape, { depth: len, bevelEnabled: false })
-    g.rotateY(-Math.PI / 2) // ekstrudering (Z=lengde) → lokal x; skråflate ut mot lokal +z
-    g.translate(len / 2, 0, 0)
-    return g
-  }
-  // topX0/topX1 = takflatens høyde ved bladenes to lokale x-ender (x0 = −len/2,
-  // x1 = +len/2). Bladene klippes så de følger den skrå takflaten (foran/bak).
-  const bladeWall = (len: number, alongOffset: number, prefix: string, navn: string, lengdeCm: number, ry: number, px: number, pz: number, topX0: number, topX1: number) => {
-    const wall = new THREE.Group()
-    const x0 = alongOffset - len / 2
-    const x1 = alongOffset + len / 2
-    const maxTop = Math.max(topX0, topX1)
-    const sloped = Math.abs(topX1 - topX0) > 1e-9
-    let i = 0
-    for (let yb = yStart; yb + BLADE_H <= maxTop + 1e-6; yb += pitch, i++) {
-      const need = yb + BLADE_H
-      let cx0 = x0
-      let cx1 = x1
-      if (sloped) {
-        const xc = x0 + ((need - topX0) / (topX1 - topX0)) * (x1 - x0)
-        if (topX1 > topX0) cx0 = Math.max(x0, xc)
-        else cx1 = Math.min(x1, xc)
-      } else if (topX0 < need) {
-        continue
-      }
-      const clen = cx1 - cx0
-      if (clen <= 0.02) continue
-      const pid = `${prefix}-${i}`
-      const mat = meshMat(pid)
-      mat.side = THREE.DoubleSide
-      const m = new THREE.Mesh(makeBladeGeom(clen), mat)
-      m.position.set((cx0 + cx1) / 2, yb, 0)
-      m.castShadow = true
-      m.receiveShadow = true
-      m.userData.part = 'spiler'
-      m.userData.pid = pid
-      wall.add(m)
-    }
-    // Vertikal stiver (11×36) bak spjeldene når spennet er over 60 cm.
-    // Antall = én pr. påbegynt 60 cm, jevnt fordelt; høyden følger takflaten.
-    const nStiff = Math.max(0, Math.ceil(len / STIFF_MAX_SPAN) - 1)
-    for (let s = 1; s <= nStiff; s++) {
-      const lx = x0 + (s * len) / (nStiff + 1)
-      const topLx = sloped ? topX0 + ((topX1 - topX0) * (lx - x0)) / (x1 - x0) : topX0
-      const sh = topLx - yStart
-      if (sh <= 0.02) continue
-      const spid = `${prefix}-stiver-${s}`
-      const sm = new THREE.Mesh(new THREE.BoxGeometry(STIFF_W, sh, STIFF_T), meshMat(spid, 0.85))
-      sm.position.set(lx, (yStart + topLx) / 2, -BLADE_D - STIFF_T / 2)
-      sm.castShadow = true
-      sm.receiveShadow = true
-      sm.userData.part = 'stiver'
-      sm.userData.pid = spid
-      wall.add(sm)
-    }
-    wall.rotation.y = ry
-    wall.position.set(px, 0, pz)
-    wall.userData.info = { navn, profil: spjeldProfil, lengdeCm: Math.round(lengdeCm) }
-    wall.userData.explode = new THREE.Vector3(px, 0, pz).normalize().multiplyScalar(0.4)
-    group.add(wall)
-  }
-  // Bladene (23 mm dype) ligger i ytre-lamina-sjiktet: ytterkant i flukt med
-  // ytre plank, innerkant i flukt med indre plank. De butter mot beina:
-  // Front: mot ytre laminas innerflate i x (LEKT_T pr. side).
-  const frontLen = w - 2 * LEKT_T
-  // Side: fra front-beinets bakkant (d/2−48) til bak-planet (−d/2).
-  const sideLen = d - LEKT_W
-  const sideZc = LEKT_W / 2 // sentrum mellom front-beinets bakkant og bak-planet
-  // Front: flat overkant ved frontplanet. Sider: overkant følger takfallet
-  // (lokal x → verdens z: høyre z=−x, venstre z=+x).
-  const frontTop = roofTop(dz)
-  const rX0 = sideZc - sideLen / 2
-  const rX1 = sideZc + sideLen / 2
-  bladeWall(frontLen, 0, 'spile-front', 'Spjeld front', frontLen * 100, 0, 0, dz, frontTop, frontTop)
-  bladeWall(sideLen, sideZc, 'spile-hoyre', 'Spjeld side', sideLen * 100, Math.PI / 2, wx, 0, roofTop(-rX0), roofTop(-rX1))
-  bladeWall(sideLen, -sideZc, 'spile-venstre', 'Spjeld side', sideLen * 100, -Math.PI / 2, -wx, 0, roofTop(-rX1), roofTop(-rX0))
-
-  // ── Diagonale avstivere på sidene (23×48, X-kryss) ───────────────
-  // Innsiden av spjeldene. To diagonaler (sidens to diagonaler): bak-bunn →
-  // front-topp, og front-bunn → bak-topp. På begge sider.
-  const addBrace = (zA: number, yA: number, zB: number, yB: number, tag: string) => {
-    const len = Math.hypot(zB - zA, yB - yA)
-    const ang = Math.atan2(yB - yA, zB - zA)
-    // Endene kappes loddrett (langs de loddrette beina) → 45°-snitt på selve
-    // bordet. Loddrett høyde av 48 mm-bredden = LEKT_W / cos(vinkel).
-    const Wv = LEKT_W / Math.cos(ang)
-    // Sideprofil (z, y): parallellogram med langsider langs diagonalen og
-    // loddrette ender ved zA (bak-bein) og zB (front-bein).
-    const pts: Array<[number, number]> = [
-      [zA, yA - Wv / 2],
-      [zB, yB - Wv / 2],
-      [zB, yB + Wv / 2],
-      [zA, yA + Wv / 2],
-    ]
-    const inX = wx - BLADE_D // innerkant av spjeldene
-    ;[1, -1].forEach((sgn) => {
-      const pid = `diag-${tag}-${sgn > 0 ? 'h' : 'v'}`
-      const shape = new THREE.Shape()
-      shape.moveTo(pts[0][0], pts[0][1])
-      for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i][0], pts[i][1])
-      shape.closePath()
-      const g = new THREE.ExtrudeGeometry(shape, { depth: LEKT_T, bevelEnabled: false })
-      g.rotateY(-Math.PI / 2) // profil i z-y, ekstrudert langs x (tykkelse)
-      g.translate(sgn > 0 ? inX : -inX + LEKT_T, 0, 0)
-      const mat = meshMat(pid, 0.85)
-      mat.side = THREE.DoubleSide
-      const m = new THREE.Mesh(g, mat)
-      m.castShadow = true
-      m.receiveShadow = true
-      m.userData.part = 'stiver'
-      m.userData.pid = pid
-      m.userData.info = { navn: 'Diagonalstiver', profil: frameProfil, lengdeCm: Math.round(len * 100) }
-      m.userData.explode = new THREE.Vector3(sgn * 0.4, 0, 0)
-      group.add(m)
-    })
-  }
-  // Alltid 45°: fra bak-bunn stiger den 45° til den møter takstrekkeren (takflaten),
-  // begrenset til fronten.
-  const tR = Math.tan(roofRad)
-  const zHit = (yFrontTop + dz * tR - yStart - dz) / (1 + tR)
-  const zEnd = Math.min(dz, zHit)
-  addBrace(-dz, yStart, zEnd, yStart + (zEnd + dz), 'a')
-
-  // ── Skruehull i bak-beina (veggmontering) ────────────────────────
-  // Ø6 mm gjennom bak-beinets ytre lamina for en 6×80 treskrue inn i veggen.
-  // Plasseres i glipene mellom spjeldene (øvre + nedre feste).
-  const screwR = 0.003 // 6 mm diameter
-  const backOuterZ = -(dz + LEKT_W / 2) // z-senter for bak-beinets ytre lamina
-  const backLegH = roofTop(backOuterZ) - LEG_LIFT
-  const gapCenterY = (frac: number) => {
-    const i = Math.max(0, Math.round((frac * backLegH - BLADE_H - gapM / 2) / pitch))
-    return yStart + i * pitch + BLADE_H + gapM / 2 // senter av glipen
-  }
-  const screwMat = new THREE.MeshStandardMaterial({ color: 0x140f0b, roughness: 0.95 })
-  ;[-1, 1].forEach((sx) => {
-    ;[0.22, 0.82].forEach((frac, k) => {
-      const hole = new THREE.Mesh(new THREE.CylinderGeometry(screwR, screwR, LEKT_W + 0.006, 16), screwMat)
-      hole.rotation.x = Math.PI / 2 // akse langs z (inn i veggen)
-      hole.position.set(sx * (wx - LEKT_T / 2), gapCenterY(frac), backOuterZ)
-      hole.userData.part = 'ramme'
-      hole.userData.pid = `skruehull-${sx > 0 ? 'h' : 'v'}-${k}`
-      hole.userData.info = { navn: 'Skruehull (Ø6, vegg)', profil: 'for 6 × 80 mm', lengdeCm: 0 }
-      group.add(hole)
-    })
-  })
-
-  // ── Sidestrekkere (bærer takfallet) ──────────────────────────────
-  // Montert utenpå hver side, skrå etter takvinkelen (default 22.5°) med fall
-  // framover. Strekker seg 5 cm lenger enn dybden (utstikk foran). Begge ender
-  // kappes loddrett; bakenden flukter med bak-beinets bakkant.
-  const STRETCH_T = LEKT_T // 23 mm tykk (ut fra siden)
-  const STRETCH_H = LEKT_W // 48 mm høy
-  const overhang = 0.05 // 5 cm utstikk foran
-  const zBack = -(d / 2 + LEKT_W) // flukter med bak-beinets bakkant
-  const zFront = d / 2 + overhang
-  const run = zFront - zBack
-  const cosR = Math.cos(roofRad)
-  const Hc = STRETCH_H / cosR // loddrett høyde av kappet
-  // Overkant = roofTop(z) (samme linje som bein og spjeld); underkant Hc lavere.
-  // Begge ender kappes loddrett.
-  const pts: Array<[number, number]> = [
-    [zBack, roofTop(zBack)],
-    [zFront, roofTop(zFront)],
-    [zFront, roofTop(zFront) - Hc], // loddrett frontkapp
-    [zBack, roofTop(zBack) - Hc], // loddrett bakkapp
-  ]
-  ;[1, -1].forEach((sgn) => {
-    const pid = `strekker-${sgn > 0 ? 'h' : 'v'}`
-    const shape = new THREE.Shape()
-    shape.moveTo(pts[0][0], pts[0][1])
-    for (let i = 1; i < pts.length; i++) shape.lineTo(pts[i][0], pts[i][1])
-    shape.closePath()
-    const g = new THREE.ExtrudeGeometry(shape, { depth: STRETCH_T, bevelEnabled: false })
-    g.rotateY(-Math.PI / 2) // profil i z-y, ekstrudert langs x (tykkelse)
-    g.translate(sgn > 0 ? wx + STRETCH_T : -wx, 0, 0) // utenpå siden
-    const mat = meshMat(pid, 0.85)
-    mat.side = THREE.DoubleSide
-    const m = new THREE.Mesh(g, mat)
-    m.castShadow = true
-    m.receiveShadow = true
-    m.userData.part = 'tak'
-    m.userData.pid = pid
-    m.userData.info = { navn: 'Sidestrekker', profil: frameProfil, lengdeCm: Math.round((run / cosR) * 100) }
-    m.userData.explode = new THREE.Vector3(sgn * 0.4, 0.2, 0)
-    group.add(m)
-  })
-
-  // ── Tverrbord mellom strekkerne (avstivning for taket) ───────────
-  // 15 cm fra front og 15 cm fra bak, liggende i takflaten (samme vinkel som
-  // strekkerne). Stikker 5 cm ut på hver side. Halvt-i-halvt mot strekkerne.
-  const sinR = Math.sin(roofRad)
-  const CROSS_T = LEKT_T // 23 mm tykk (langs fallet)
-  const CROSS_W = LEKT_W // 48 mm høyde (på høykant, vinkelrett på takflaten – som strekkerne)
-  const crossOut = 0.05 // 5 cm utstikk hver side
-  const crossLen = 2 * (wx + STRETCH_T + crossOut)
-  ;[
-    { z: zFront - 0.15, tag: 'front' },
-    { z: zBack + 0.15, tag: 'bak' },
-  ].forEach(({ z, tag }) => {
-    const yc = roofTop(z)
-    const pid = `tverrbord-${tag}`
-    const cb = new THREE.Mesh(new THREE.BoxGeometry(crossLen, CROSS_W, CROSS_T), meshMat(pid, 0.8))
-    cb.rotation.x = roofRad // på høykant i takflaten (vinkelrett på fallet)
-    cb.position.set(0, yc - (CROSS_W / 2) * cosR, z - (CROSS_W / 2) * sinR) // overkant i flukt med takflaten
-    cb.castShadow = true
-    cb.receiveShadow = true
-    cb.userData.part = 'tak'
-    cb.userData.pid = pid
-    cb.userData.info = { navn: 'Tverrbord (tak)', profil: frameProfil, lengdeCm: Math.round(crossLen * 100) }
-    cb.userData.explode = new THREE.Vector3(0, 0.3, 0)
-    group.add(cb)
-  })
-
-  // ── Tak ──────────────────────────────────────────────────────────
-  // Ligger på strekkerne i takflaten. Front/bak kappes loddrett i flukt med
-  // strekker-endene (zFront/zBack); sidene går ut til endene av tverrbordene.
-  // Bordene går langs fallet (front→bak) og flislegges på tvers (x). Tre typer:
-  // over/underligger, faspanel eller takpapp.
-  const roofW = crossLen
-  const roofX0 = -roofW / 2
-  const roofBoard = (xc: number, width: number, yOff: number, thick: number, pid: string, darken: number, mat?: THREE.Material) => {
-    const shape = new THREE.Shape()
-    shape.moveTo(zFront, roofTop(zFront) + yOff)
-    shape.lineTo(zBack, roofTop(zBack) + yOff)
-    shape.lineTo(zBack, roofTop(zBack) + yOff + thick)
-    shape.lineTo(zFront, roofTop(zFront) + yOff + thick)
-    shape.closePath()
-    const g = new THREE.ExtrudeGeometry(shape, { depth: width, bevelEnabled: false })
-    g.rotateY(-Math.PI / 2) // profil i z-y, ekstrudert langs x (bordbredde)
-    g.translate(xc + width / 2, 0, 0)
-    // Bytt om UV slik at åringen løper langs bordet (fallet), ikke på tvers.
-    const uv = g.attributes.uv
-    if (uv) {
-      for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getY(i), uv.getX(i))
-      uv.needsUpdate = true
-    }
-    const material = mat ?? meshMat(pid, darken)
-    if (!mat) material.side = THREE.DoubleSide
-    const m = new THREE.Mesh(g, material)
-    m.castShadow = true
-    m.receiveShadow = true
-    m.userData.part = 'tak'
-    m.userData.pid = pid
-    m.userData.info = { navn: 'Tak', profil: takProfil, lengdeCm: Math.round((run / cosR) * 100) }
-    m.userData.explode = new THREE.Vector3(0, 0.5, 0)
-    group.add(m)
-  }
-  if (c.taktype === 'takpapp') {
-    roofBoard(0, roofW, 0, LEKT_T, 'tak-underlag', 0.95) // tett underlag
-    const papp = new THREE.MeshStandardMaterial({ color: 0x2b2b2b, roughness: 0.95, metalness: 0.02, side: THREE.DoubleSide })
-    roofBoard(0, roofW, LEKT_T, 0.004, 'tak-papp', 1, papp)
-  } else if (c.taktype === 'faspanel') {
-    const spor = 0.005 // liten V-fals mellom bordene
-    const n = Math.max(1, Math.round(roofW / 0.1))
-    const aw = (roofW - spor * (n - 1)) / n
-    for (let i = 0; i < n; i++) {
-      roofBoard(roofX0 + aw / 2 + i * (aw + spor), aw, 0, 0.017, `tak-fas-${i}`, 1)
-    }
-  } else {
-    // Over/underligger: dekker hele bredden. Underligger i begge kanter (starter
-    // og slutter likt), jevn glipe; overligger sentrert over hver glipe og dekker
-    // den med overlapp. Antall/senteravstand tilpasses så bredden går opp.
-    const th = LEKT_T
-    const target = 0.098 // ønsket bordbredde
-    const nU = Math.max(2, Math.round((roofW + target) / (2 * target)))
-    const P = (roofW - target) / (nU - 1) // senteravstand – kantbord flukter med kantene
-    const ow = P - 0.2 * target // overligger dekker glipa med overlapp
-    for (let i = 0; i < nU; i++) {
-      roofBoard(roofX0 + target / 2 + i * P, target, 0, th, `tak-under-${i}`, 0.82)
-    }
-    for (let i = 0; i < nU - 1; i++) {
-      roofBoard(roofX0 + target / 2 + P / 2 + i * P, ow, th, th, `tak-over-${i}`, 1)
-    }
-  }
-
+  const { staver, g } = konstruer(c)
+  byggMesher(group, staver, lagMatFabrikk(c.treslag, c.farge, opts))
+  if (c.visUtedel !== false) byggUtedel(group, g)
   return group
 }
 
-export const varmepumpehus: ProductTemplate<VarmepumpehusConfig> = {
+// ── Kappliste / materialliste ───────────────────────────────────────
+
+function kappliste(c: VarmepumpehusConfig): KapplisteDelPlan[] {
+  return samleKappliste(konstruer(c).staver)
+}
+
+function beregn(c: VarmepumpehusConfig): Bom {
+  const faktor = TRESLAG[c.treslag]?.prisFaktor ?? 1
+  const { staver, g } = konstruer(c)
+  const lm = lmPerPris(staver)
+  const rekkefolge = ['stolpe-48x98', 'stolpe-36x48', 'lekt-23x48', 'lekt-23x73', 'lekt-23x98', 'lekt-36x73', 'lekt-36x98', 'bord-21x98', 'bord-19x98', 'lekt-11x36']
+  const linjer: BomLine[] = [...lm.entries()]
+    .sort((a, b) => rekkefolge.indexOf(a[0]) - rekkefolge.indexOf(b[0]))
+    .map(([id, l]) => lmLinje(prisNavn(id), l, SVINN, { spesifikasjon: 'impregnert, C24/NTR AB' }))
+  let woodKr = 0
+  lm.forEach((l, id) => (woodKr += l * pris(id) * faktor))
+  const takArealM2 = c.taktype === 'takpapp' ? g.roofW * ((g.zFront - g.zBack) / g.cosA) : 0
+  const antDeler = staver.filter((s) => !s.ikkeKapp).length
+  const skruer = Math.ceil((antDeler * 2.4 + 20) / 50) * 50
+  const limFlasker = 1
+  const veggSkruer = 4
+  if (takArealM2 > 0) linjer.push({ navn: PRISER['takpapp'].navn, spesifikasjon: 'underlagsbelegg/takpapp m/ pappspiker', antall: Math.round(takArealM2 * 1.25 * 10) / 10, enhet: 'm²', kommentar: 'inkl. omlegg og brett over kantene' })
+  linjer.push({ navn: 'Skruer', spesifikasjon: 'rustfri A4, 4,0×40 og 5,0×70', antall: skruer, enhet: 'stk' })
+  linjer.push({ navn: PRISER['trelim'].navn, antall: limFlasker, enhet: 'stk', kommentar: 'laminering av hjørnebeina' })
+  linjer.push({ navn: PRISER['skrue-6x80'].navn, spesifikasjon: 'eller 6×100 i plugg (mur/betong)', antall: veggSkruer, enhet: 'stk', kommentar: '2 per bak-bein, gjennom ytre lamell inn i veggen' })
+  const estimatKr = Math.round(((woodKr + takArealM2 * 1.25 * prisFor('takpapp')) * SVINN + skruer * prisFor('skrue') + limFlasker * prisFor('trelim') + veggSkruer * prisFor('skrue-6x80')) / 10) * 10
+  const takNavn = c.taktype === 'takpapp' ? 'takpapp' : c.taktype === 'faspanel' ? 'faspanel' : 'over/underligger'
+  return {
+    linjer,
+    estimatKr,
+    sammendrag: `${c.bredde} × ${c.dybde} × ${c.hoyde} cm · ${fmt(c.takvinkel, 1)}° fall framover · ${takNavn} · ${g.ut.navn.toLowerCase()} · ${TRESLAG[c.treslag]?.label ?? c.treslag}`,
+    arealM2: (c.bredde * c.dybde) / 10000,
+    maal: `${c.bredde} × ${c.dybde} × ${c.hoyde} cm`,
+    arbeidstimer: Math.round((3 + antDeler * 0.06) * 2) / 2,
+  }
+}
+
+// ── Statikkvedlegg ───────────────────────────────────────────────────
+
+function beregningsgrunnlag(c: VarmepumpehusConfig): Beregningsgrunnlag {
+  const { staver, g } = konstruer(c)
+  const st = g.st
+  const vind = vindlast(VB0_STANDARD, 2, Math.max(2, g.L2(g.zBack)))
+  // Egenvekt huset (5 kN/m³ impregnert virke).
+  const kN = staver.reduce((s, p) => {
+    const m = p.profil.match(/(\d+)\s*×\s*(\d+)/)
+    if (!m) return s
+    return s + (p.lengdeMm / 1000) * (Number(m[1]) / 1000) * (Number(m[2]) / 1000) * 5 * (p.lmFaktor ?? 1)
+  }, 0)
+  const takA = g.roofW * (g.zFront - g.zBack)
+  const oppdrift = vindOppdrift(vind.qp, takA, kN, 1.2)
+  return tilPlanVedlegg(
+    lagBeregningsrapport({
+      produkt: 'varmepumpehus',
+      tittel: 'Varmepumpehus – tak og bein',
+      snolast: { mark: st.sk, tak: snolastTak(st.sk.sk, g.a) },
+      vind,
+      forutsetninger: [
+        { navn: 'Takvinkel', verdi: fmt(g.a, 1), enhet: '°' },
+        { navn: 'Takflate (horisontal)', verdi: fmt(takA, 2), enhet: 'm²' },
+        { navn: 'Tverrbord', verdi: `${st.nTv} stk ${prof(Math.round(g.T * 1000), Math.round(st.hT * 1000))}`, kilde: 'Valgt av beregningen' },
+        { navn: 'Egenvekt huset', verdi: fmt(kN, 2), enhet: 'kN', kilde: 'Fra kapplista, 5 kN/m³' },
+        { navn: 'Tjenesteklasse', verdi: '3 (takbord, bein, strekkere) / 2 (tverrbord under tak)' },
+        { navn: 'Knekklengde bein', verdi: '0,5', enhet: 'm', kilde: 'Beina holdes av spjeld og skråstag i begge retninger' },
+      ],
+      deler: { Takbord: st.bord, 'Tverrbord (åse)': st.tverrbord, Sidestrekker: st.strekker, Hjørnebein: st.bein },
+      merknader: [
+        `Netto vindoppløft på taket (bruddgrense, cp,net 1,2): ${fmt(Math.max(0, oppdrift), 2)} kN. ${oppdrift > 0 ? 'Huset må forankres: 2 stk 6×80 (6×100 i plugg) gjennom hvert bak-bein inn i veggen, og sålen foran festes til helle/bakke med vinkelbeslag eller bakkeplugg.' : 'Egenvekten er større enn oppløftet, men fest likevel bak-beina til veggen.'}`,
+        'Snø og is som raser fra hustaket er IKKE med i beregningen. Plasser ikke huset under takfot uten snøfanger – raset kan gi mange ganger sk.',
+        'Spjeld, stivere og skråstag er ikke regnet bærende for snø – de avstiver beina og holder formen.',
+      ],
+      ekstraAdvarsler: st.ok ? [] : [st.melding],
+    }),
+  )
+}
+
+// ── Byggeregler / klaring ───────────────────────────────────────────
+
+function klaringPunkter(g: Geo): { ok: boolean; punkter: string[] } {
+  const k = g.klaring
+  const mm = (v: number) => `${f0(v * 1000)} mm`
+  const p: string[] = []
+  let ok = true
+  const sjekk = (navn: string, verdi: number, min: number, anb: number) => {
+    if (verdi < min - 1e-6) {
+      ok = false
+      p.push(`✗ ${navn}: ${mm(verdi)} – under minimum ${mm(min)} (anbefalt ${mm(anb)}).`)
+    } else if (verdi < anb - 1e-6) p.push(`! ${navn}: ${mm(verdi)} – OK, men anbefalt er ${mm(anb)}.`)
+    else p.push(`✓ ${navn}: ${mm(verdi)} (anbefalt ≥ ${mm(anb)}).`)
+  }
+  sjekk('Klaring på hver side av utedelen', k.side, KLARING.side.min, KLARING.side.anbefalt)
+  sjekk('Klaring fra viftegitteret til frontspjeldene', k.front, KLARING.front.min, KLARING.front.anbefalt)
+  sjekk('Klaring over utedelen (til tverrbordet)', k.topp, KLARING.topp.min, KLARING.topp.anbefalt)
+  return { ok, punkter: p }
+}
+
+function byggeregler(c: VarmepumpehusConfig): Byggeregler {
+  const g = geo(c)
+  const kl = klaringPunkter(g)
+  const fri = (g.gap / g.pitch) * 100
+  return {
+    sokfri: true,
+    tittel: kl.ok ? 'Ikke søknadspliktig – klaringene er OK' : 'Ikke søknadspliktig – men for liten klaring rundt utedelen',
+    punkter: [
+      `Utedel: ${g.ut.navn}, ${f0(g.ut.B * 1000)} × ${f0(g.ut.H * 1000)} × ${f0(g.ut.D * 1000)} mm (B × H × D), underkant ${f0(g.utMont * 100)} cm over bakken.`,
+      ...kl.punkter,
+      `Spjeldene har ${f0(fri)} % fri åpning (${f0(g.gap * 1000)} mm spalte, ${f0(g.blad.h * 1000)} mm blad). Hold minst ca. 50 % for å ikke strupe luftmengden.`,
+      'Produsentene krever fri utblåsning foran viften (ofte 500 mm uten hindring) og 100–300 mm bak/til siden. Et lamellhus er et hinder – les monteringsanvisningen for DIN modell, og spør installatøren om garantivilkårene før du bygger inn utedelen.',
+      'Servicesiden (ventiler/koblinger, normalt til høyre) må være tilgjengelig – huset er laget for å skrus løs fra veggen og løftes av.',
+      'Varmepumpehus er ikke søknadspliktig (ikke bygning). Utedelens støy mot nabo vurderes etter kommunens praksis (ofte T-1442: 45 dB(A) om natten utenfor naboens soverom).',
+    ],
+  }
+}
+
+// ── Montering ────────────────────────────────────────────────────────
+
+function monteringPlan(c: VarmepumpehusConfig): MonteringSteg[] {
+  const g = geo(c)
+  const v = virke(c)
+  const Tmm = f0(g.T * 1000)
+  const st = g.st
+  return [
+    {
+      tittel: 'Kapp og kløyv',
+      trinn: 'fundament',
+      tekst: `Kapp alt etter kapplista. Spjeld: kløyv lekt ${v.lektProfil} på langs med sagbladet tiltet 45° og anlegget ${f0(g.blad.a * 1000)} mm fra bladet – to like blad per lekt (${f0(g.blad.a * 1000)} mm foran, ${f0(g.blad.h * 1000)} mm bak). Beinlamellene skråkappes ${fmtGrader(g.a)} i toppen, strekkerne og takbordene får loddkutt ${fmtGrader(g.a)} i begge ender.`,
+      verktoy: ['Bordsirkelsag med skråstilling', 'Kapp-/gjæringssag', 'Vinkel og tommestokk'],
+      tidTimer: 1.5,
+    },
+    {
+      tittel: 'Legg sålen',
+      trinn: 'bjelkelag',
+      tekst: `Legg sålen (${v.saaleProfil} flatt) i U-form: front ${f0(g.w * 100)} cm og to sider, gjæret 45° i fronthjørnene og limt/skrudd. Sjekk diagonalene – rammen skal være i vinkel. Sålen står på et drenert grus-/pukklag eller heller, ikke rett på jord.`,
+      tidTimer: 0.5,
+    },
+    {
+      tittel: 'Lim hjørnebeina',
+      trinn: 'reisverk',
+      tekst: `Lim og skru indre lamell til ytre (D4-lim + 4,0×40 A4 c/c 150), forskjøvet ${Tmm} mm så det står en skulder ut mot spjeldene. Bak-beina har to indre lekter side om side. La limet herde.`,
+      tidTimer: 0.5,
+    },
+    {
+      tittel: 'Reis beina',
+      trinn: 'reisverk',
+      tekst: `Skru beina ned i sålen fra undersiden (2 skruer per lamell). Fronthøyden til underkant strekker er ${f0(g.h * 100)} cm; bak-beina er høyest. Bak-beinas bakre lamell står 48 mm bak bakplanet og skal ligge an mot veggen.`,
+      tidTimer: 0.5,
+    },
+    {
+      tittel: 'Monter skråstag og stivere',
+      trinn: 'reisverk',
+      tekst: `Skråstagene (${fmtGrader(stag(g).grader)} fra vannrett) skrus mellom de indre lamellene på hver side, fra bunnen bak til toppen foran. Front: ${Math.max(0, Math.ceil((g.w - 2 * g.T) / STIV_MAKS - 1e-9) - 1)} stiver(e) 11×36 bak frontspjeldene. Kontroller at huset står i lodd og vinkel.`,
+      tidTimer: 0.5,
+    },
+    {
+      tittel: 'Tak',
+      trinn: 'tak',
+      tekst: `Taket legges før spjeldene (lettere å komme til). Legg sidestrekkerne (${prof(Math.round(g.T * 1000), Math.round(st.hR * 1000))}) på de ytre lamellene og skru dem til de indre.${st.lagR > 1 ? ' Lim og skru en innerlekt i samme dimensjon inn mot hver strekker, mellom de indre lamellene.' : ''} Skru ${st.nTv} tverrbord (${prof(Math.round(g.T * 1000), Math.round(st.hT * 1000))}) på høykant oppå strekkerne med 5 cm utstikk hver side – fremste flukter med frontenden, bakerste med veggen. Legg takbordene langs fallet${c.taktype === 'takpapp' ? ', rull ut takpapp med 10 cm omlegg og brett den ned over kantene' : c.taktype === 'overunder' ? ' – underliggere først, så overliggere over hver glipe' : ' med fjæren opp i fallet'}.`,
+      tidTimer: 1,
+    },
+    {
+      tittel: 'Skru på spjeldene',
+      trinn: 'kledning',
+      tekst: `Start nederst på sålen og arbeid oppover med ${f0(g.gap * 1000)} mm spalte (lag en avstandskloss). Skråflaten skal VENDE OPP OG FALLE UTOVER (45°). Forbor og skru 2 skruer i hver ende, og én i hver stiver/skråstag. De øverste sidespjeldene klippes parallelt med takfallet.`,
+      verktoy: ['Avstandskloss', 'Drill med forsenker'],
+      tidTimer: 1.5,
+      advarsel: 'Feil vei montert spjeld leder regn inn mot utedelen.',
+    },
+    {
+      tittel: 'Sett huset over utedelen og fest det',
+      trinn: 'ferdig',
+      tekst: 'Løft huset over utedelen, skyv bak-beina inntil veggen og fest med 2 stk 6×80 gjennom hvert bak-bein (forbor Ø6 i spalten mellom spjeldene). Fest sålen foran med vinkelbeslag til helle eller bakkeplugg. Sjekk at avrimingsvannet renner fritt ut under utedelen.',
+      tidTimer: 0.5,
+      advarsel: 'Strømmen til utedelen skal være av når du jobber tett på den.',
+    },
+  ]
+}
+/** Skråstaget på sidene: fra bunnen bak (mot sålen) til toppen foran (under strekkeren). */
+function stag(g: Geo) {
+  const zb = -g.d / 2 + g.T
+  const zf = g.d / 2 - g.T - W
+  let beta = Math.atan2(g.L0(zf) - g.yS, zf - zb)
+  let yc0 = 0
+  for (let it = 0; it < 8; it++) {
+    const halv = W / (2 * Math.cos(beta))
+    yc0 = g.yS + halv + 0.002
+    const yc1 = g.L0(zf) - halv - 0.004
+    beta = Math.atan2(yc1 - yc0, zf - zb)
+  }
+  return { zb, zf, beta, yc0, grader: (beta * 180) / Math.PI }
+}
+
+// ── 2D-tegning ───────────────────────────────────────────────────────
+
+function tegning2D(c: VarmepumpehusConfig): Tegning2D {
+  const g = geo(c)
+  const cmv = (m: number) => Math.round(m * 1000) / 10
+  const B = cmv(g.w)
+  const zF = g.zFront
+  const zB = g.zBack
+  const topp = (z: number) => g.L2(z) + tekke(c).t / g.cosA
+  const Hb = cmv(topp(zB))
+  const R = cmv(g.roofW)
+  const ox = (R - B) / 2
+  // Forfra: y ned fra toppen (Hb).
+  const yv = (m: number) => Hb - cmv(m)
+  const spjeldLinjer: Tegning2D['riss'][number]['former'] = []
+  for (let yb = g.yS; yb + g.blad.a <= g.L1(g.d / 2) - 0.002; yb += g.pitch) {
+    spjeldLinjer.push({ type: 'rect', x: ox + cmv(g.T), y: yv(yb + g.blad.a), w: B - 2 * cmv(g.T), h: cmv(g.blad.a), tynn: true })
+  }
+  const ut = g.ut
+  // Utedelen tegnes stiplet bare når den får plass (ellers viser byggereglene ✗).
+  const passer = g.klaring.topp > 0 && g.klaring.side > 0 && g.klaring.front > 0
+  const forfra = {
+    id: 'forfra',
+    navn: 'Forfra',
+    type: 'fasade' as const,
+    bredde: R,
+    hoyde: Hb,
+    former: [
+      // Bein (ytre lamell) – sett forfra skjuler de høyere bak-beina seg bak strekkerne.
+      { type: 'rect' as const, x: ox, y: yv(g.L0(g.d / 2)), w: cmv(g.T), h: cmv(g.L0(g.d / 2)) },
+      { type: 'rect' as const, x: ox + B - cmv(g.T), y: yv(g.L0(g.d / 2)), w: cmv(g.T), h: cmv(g.L0(g.d / 2)) },
+      // Sidestrekkerne stiger bakover – synlige som bånd fra fronten til bakkant.
+      { type: 'rect' as const, x: ox, y: yv(g.L1(zB)), w: cmv(g.T), h: cmv(g.L1(zB) - g.L0(g.d / 2)) },
+      { type: 'rect' as const, x: ox + B - cmv(g.T), y: yv(g.L1(zB)), w: cmv(g.T), h: cmv(g.L1(zB) - g.L0(g.d / 2)) },
+      { type: 'rect' as const, x: ox, y: yv(g.yS), w: B, h: cmv(g.yS) },
+      // Fremre tverrbord og takflaten (fra frontkant opp til bakkant).
+      { type: 'rect' as const, x: 0, y: yv(g.L2(zF)), w: R, h: cmv(g.L2(zF) - g.L1(zF)) },
+      { type: 'poly' as const, points: [[0, yv(g.L2(zF))], [R, yv(g.L2(zF))], [R, yv(topp(zB))], [0, yv(topp(zB))], [0, yv(g.L2(zF))]] as Array<[number, number]>, tynn: true },
+      ...spjeldLinjer,
+      ...(passer ? [{ type: 'rect' as const, x: R / 2 - cmv(ut.B) / 2, y: yv(g.utMont + ut.H), w: cmv(ut.B), h: cmv(ut.H), dashed: true }] : []),
+    ],
+    maal: [
+      { x1: ox, y1: Hb, x2: ox + B, y2: Hb, label: `${f0(B)} cm`, offset: 22 },
+      { x1: 0, y1: yv(topp(zF)), x2: R, y2: yv(topp(zF)), label: `${f0(R)} cm (tak)`, offset: -18 },
+      { x1: ox + B, y1: yv(g.h), x2: ox + B, y2: Hb, label: `${f0(cmv(g.h))} cm`, offset: 22 },
+      { x1: R / 2 - cmv(ut.B) / 2, y1: yv(g.utMont), x2: R / 2 - cmv(ut.B) / 2, y2: Hb, label: `${f0(cmv(g.utMont))} cm`, offset: -14 },
+    ],
+    tekster: passer ? [{ x: R / 2 - 18, y: yv(g.utMont + ut.H / 2), tekst: 'utedel (stiplet)' }] : [],
+  }
+  // Fra siden: z fra veggen (venstre) mot front (høyre).
+  const xs = (z: number) => cmv(z - zB)
+  const D = cmv(zF - zB)
+  const side = {
+    id: 'siden',
+    navn: 'Fra siden (vegg til venstre)',
+    type: 'snitt' as const,
+    bredde: D,
+    hoyde: Hb,
+    former: [
+      { type: 'poly' as const, points: [[xs(zB), yv(g.L0(zB))], [xs(zF), yv(g.L0(zF))], [xs(zF), yv(topp(zF))], [xs(zB), yv(topp(zB))], [xs(zB), yv(g.L0(zB))]] as Array<[number, number]> },
+      { type: 'rect' as const, x: xs(zB), y: yv(g.L0(zB)), w: cmv(W), h: cmv(g.L0(zB) - g.yS) },
+      { type: 'rect' as const, x: xs(g.d / 2 - W), y: yv(g.L0(g.d / 2 - W)), w: cmv(W), h: cmv(g.L0(g.d / 2 - W) - g.yS) },
+      { type: 'rect' as const, x: xs(zB), y: yv(g.yS), w: cmv(g.d / 2 - zB), h: cmv(g.yS) },
+      { type: 'line' as const, points: [[xs(-g.d / 2 + g.T), yv(g.yS + 0.03)], [xs(g.d / 2 - g.T - W), yv(g.L0(g.d / 2 - g.T - W) - 0.03)]] as Array<[number, number]>, tynn: true },
+      ...(passer ? [{ type: 'rect' as const, x: xs(g.utZ0), y: yv(g.utMont + ut.H), w: cmv(ut.D), h: cmv(ut.H), dashed: true }] : []),
+      { type: 'line' as const, points: [[0, 0], [0, Hb]] as Array<[number, number]>, dashed: true },
+    ],
+    maal: [
+      { x1: xs(-g.d / 2), y1: Hb, x2: xs(g.d / 2), y2: Hb, label: `${c.dybde} cm`, offset: 22 },
+      { x1: xs(zF), y1: yv(g.L0(g.d / 2)), x2: xs(zF), y2: Hb, label: `${f0(cmv(g.h))} cm`, offset: 18 },
+      { x1: 0, y1: yv(topp(zB)), x2: 0, y2: Hb, label: `${f0(Hb)} cm`, offset: -18 },
+      { x1: xs(g.utZ1), y1: yv(g.utMont + ut.H / 2), x2: xs(g.d / 2 - g.T), y2: yv(g.utMont + ut.H / 2), label: `${f0(g.klaring.front * 1000)} mm`, offset: 0 },
+    ],
+    tekster: [
+      { x: D * 0.35, y: yv(topp(0)) - 4, tekst: `${fmtGrader(g.a)} fall` },
+      { x: 1, y: Hb * 0.5, tekst: 'vegg' },
+    ],
+  }
+  // Plan: x mot høyre, z (vegg øverst).
+  const plan = {
+    id: 'plan',
+    navn: 'Ovenfra (plan, uten tak)',
+    type: 'plan' as const,
+    bredde: B,
+    hoyde: D,
+    former: [
+      { type: 'rect' as const, x: 0, y: 0, w: B, h: cmv(g.d / 2 - zB) },
+      { type: 'rect' as const, x: B / 2 - cmv(ut.B) / 2, y: cmv(g.utZ0 - zB), w: cmv(ut.B), h: cmv(ut.D), dashed: true },
+      { type: 'line' as const, points: [[0, 0], [B, 0]] as Array<[number, number]>, dashed: true },
+      // Takets omriss (stiplet) – utstikk foran og til sidene.
+      { type: 'rect' as const, x: -ox, y: 0, w: R, h: D, dashed: true, tynn: true },
+    ],
+    maal: [
+      { x1: 0, y1: D, x2: B, y2: D, label: `${c.bredde} cm`, offset: 18 },
+      { x1: -ox, y1: 0, x2: B + ox, y2: 0, label: `${f0(R)} cm (tak)`, offset: -14 },
+      { x1: 0, y1: 0, x2: 0, y2: cmv(g.d / 2 - zB), label: `${f0(cmv(g.d / 2 - zB))} cm`, offset: -18 },
+      { x1: cmv(2 * g.T), y1: cmv(g.utZ0 - zB + ut.D / 2), x2: B / 2 - cmv(ut.B) / 2, y2: cmv(g.utZ0 - zB + ut.D / 2), label: `${f0(g.klaring.side * 1000)} mm`, offset: 0 },
+    ],
+    tekster: [{ x: B / 2 - 6, y: -2, tekst: 'vegg' }],
+  }
+  return { riss: [forfra, side, plan] }
+}
+
+// ── Template ─────────────────────────────────────────────────────────
+
+const utedelValg = (id: string) => {
+  const u = UTEDELER[id]
+  return { id, label: u.navn, note: `${f0(u.B * 1000)} × ${f0(u.H * 1000)} × ${f0(u.D * 1000)} mm – setter anbefalte mål`, patch: { ...anbefalt(u) } }
+}
+const DEF = anbefalt(UTEDELER.standard)
+
+export const varmepumpehus: ProductTemplate<VarmepumpehusConfig> & {
+  beregningsgrunnlag: (c: VarmepumpehusConfig) => Beregningsgrunnlag
+  monteringPlan: (c: VarmepumpehusConfig) => MonteringSteg[]
+} = {
   id: 'varmepumpehus',
   navn: 'Varmepumpehus',
   ikon: 'faFan',
-  beskrivelse: 'Tegn varmepumpekassen i 3D – skrå spjeld som slipper ut varmluft men skygger for regn. Velg størrelse, takvinkel og taktype.',
+  beskrivelse: 'Tegn varmepumpehuset i 3D rundt din utedel – skrå 45°-spjeld som slipper luften fritt ut, men skygger for regn og snø. Velg utedel, takvinkel og taktype; klaringen og snølasten sjekkes automatisk.',
   bilde: '/images/products/varmepumpehus-3d.webp',
   tilgjengelig: true,
   fraPris: 199,
   leveranser: ['ferdig', 'plan'],
   defaultConfig: {
     kvalitet: 'standard',
-    bredde: 90,
-    hoyde: 60,
-    dybde: 50,
+    bredde: DEF.bredde,
+    hoyde: DEF.hoyde,
+    dybde: DEF.dybde,
     takvinkel: 22.5,
     spileGap: 4,
-    taktype: 'faspanel',
+    taktype: 'overunder',
+    utedel: 'standard',
+    utB: 84,
+    utH: 65,
+    utD: 33,
+    utMont: 30,
+    visUtedel: true,
     treslag: 'impregnert',
     farge: 'ubehandlet',
   },
+  presets: [
+    { id: 'kompakt', navn: 'Kompakt', beskrivelse: 'Liten utedel, faspanel-tak', config: { utedel: 'kompakt', ...anbefalt(UTEDELER.kompakt), taktype: 'faspanel', kvalitet: 'standard', takvinkel: 22.5 } },
+    { id: 'standard', navn: 'Standard', beskrivelse: 'Vanlig 4–6 kW, bordtak', config: { utedel: 'standard', ...DEF, taktype: 'overunder', kvalitet: 'standard', takvinkel: 22.5 } },
+    { id: 'stor', navn: 'Stor utedel', beskrivelse: 'Forsterket, takpapp', config: { utedel: 'stor', ...anbefalt(UTEDELER.stor, 0.036), taktype: 'takpapp', kvalitet: 'forsterket', takvinkel: 15 } },
+    { id: 'lav', navn: 'Lav takvinkel', beskrivelse: 'Moderne, 10° takpapp, sort', config: { utedel: 'standard', ...anbefalt(UTEDELER.standard, 0.023, 0.3, 10), taktype: 'takpapp', takvinkel: 10, farge: 'sort' } },
+  ],
   dimensjoner: [
     { key: 'bredde', label: 'Bredde', min: 70, max: 200, step: 5, axis: 'x' },
-    { key: 'hoyde', label: 'Høyde (front)', min: 50, max: 200, step: 5, axis: 'y' },
+    { key: 'hoyde', label: 'Fri høyde foran', min: 50, max: 200, step: 5, axis: 'y' },
     { key: 'dybde', label: 'Dybde', min: 40, max: 150, step: 5, axis: 'z' },
-    { key: 'takvinkel', label: 'Takvinkel', min: 0, max: 45, step: 0.5, unit: '°', axis: 'y', handle: false },
-    { key: 'spileGap', label: 'Spalte spjeld', min: 2, max: 10, step: 0.5, unit: 'cm', axis: 'y', handle: false },
+    { key: 'takvinkel', label: 'Takvinkel (fall framover)', min: 0, max: 45, step: 0.5, unit: '°', axis: 'y', handle: false, markers: [10, 15, 22.5, 30] },
+    { key: 'spileGap', label: 'Spalte mellom spjeld', min: 2, max: 8, step: 0.5, unit: 'cm', axis: 'y', handle: false },
+    { key: 'utMont', label: 'Utedel over bakken', min: 0, max: 60, step: 5, axis: 'y', handle: false },
+    { key: 'utB', label: 'Utedel bredde', min: 60, max: 130, step: 1, axis: 'x', handle: false, visibleWhen: (c) => c.utedel === 'egen' },
+    { key: 'utH', label: 'Utedel høyde', min: 40, max: 140, step: 1, axis: 'y', handle: false, visibleWhen: (c) => c.utedel === 'egen' },
+    { key: 'utD', label: 'Utedel dybde', min: 20, max: 60, step: 1, axis: 'z', handle: false, visibleWhen: (c) => c.utedel === 'egen' },
   ],
   materialer: [
     { key: 'treslag', label: 'Treslag', choices: treslagValg(['impregnert', 'gran', 'royal', 'lerk', 'kebony']) },
@@ -800,65 +989,67 @@ export const varmepumpehus: ProductTemplate<VarmepumpehusConfig> = {
   ],
   alternativer: [
     {
+      key: 'utedel',
+      label: 'Utedel (varmepumpe)',
+      choices: [utedelValg('kompakt'), utedelValg('standard'), utedelValg('stor'), { id: 'egen', label: 'Egne mål', note: 'Skriv inn målene fra databladet' }],
+    },
+    {
       key: 'kvalitet',
       label: 'Kvalitet',
       choices: [
-        { id: 'standard', label: 'Standard', note: 'Ramme i 23×48 lekt.' },
-        { id: 'forsterket', label: 'Forsterket', note: 'Kraftigere 36×48 ramme (strekkere, tverrbord, diagonal og såle).' },
+        { id: 'standard', label: 'Standard', note: 'Lekt 23×48, såle 23×48.' },
+        { id: 'forsterket', label: 'Forsterket', note: 'Lekt 36×48 og såle 48×98 – for store hus og mye snø.' },
       ],
     },
     {
       key: 'taktype',
       label: 'Taktype',
       choices: [
-        { id: 'overunder', label: 'Over/underligger' },
-        { id: 'faspanel', label: 'Faspanel' },
-        { id: 'takpapp', label: 'Takpapp' },
+        { id: 'overunder', label: 'Over/underligger', note: 'Tett bordtak, min. ca. 15° fall.' },
+        { id: 'faspanel', label: 'Faspanel', note: 'Pent, men bør ha ≥ 20° fall.' },
+        { id: 'takpapp', label: 'Takpapp', note: 'Tettest – tåler lav takvinkel.' },
       ],
     },
   ],
+  valg: [{ key: 'visUtedel', label: 'Vis utedelen', note: 'Viser utedelen og klaringen rundt den (medfølger ikke).' }],
   parts: [
     { key: 'spiler', label: 'Spjeld' },
-    { key: 'ramme', label: 'Hjørnebein' },
-    { key: 'stiver', label: 'Stivere' },
+    { key: 'ramme', label: 'Bein og såle' },
+    { key: 'stiver', label: 'Stivere og skråstag' },
     { key: 'tak', label: 'Tak' },
-    { key: 'bakvegg', label: 'Bakpanel' },
   ],
   beregn,
   kappliste,
   tegning2D,
-  raad: (c) => [
-    'Kløyv lektene på skrå i 45° på sirkelsag med skråstilt blad – hver 23×48 gir to spjeldblad.',
-    'Sørg for god luftspalte rundt varmepumpa – de skrå spjeldene gir ventilasjon, men hold minst 10–15 cm klaring til viften.',
-    'Bruk rustfrie (A4/syrefaste) skruer utendørs, og forbor i endene så spjeldene ikke sprekker.',
-    'Monter spjeldene skrånende nedover-ut med ~4 cm luft imellom, så regn renner av mens lufta slipper gjennom.',
-    'Lim og skru hjørnebeina (to lekter flate-mot-flate) for stive hjørner. Bruk vinkelbeslag der bein møter sålen om du vil ha ekstra styrke.',
-    c.takvinkel < 8
-      ? 'Lav takvinkel: bruk takpapp for å hindre at vann blir stående.'
-      : 'Takvinkelen gir god avrenning – utstikket foran gjør at vannet drypper klar av spjeldene.',
-    'La impregnert virke tørke noen uker før du eventuelt beiser eller maler.',
-  ],
+  byggeregler,
+  beregningsgrunnlag,
+  monteringPlan,
+  montering: (c) => stegTilTekst(monteringPlan(c)),
+  raad: (c) => {
+    const g = geo(c)
+    const r = [
+      `Spjeldene har 45° skråflate som faller utover. Kløyv lekt ${virke(c).lektProfil} med bladet tiltet 45° – to like blad per lekt – og monter med ${f0(g.gap * 1000)} mm spalte (${f0((g.gap / g.pitch) * 100)} % fri åpning).`,
+      'Hold utblåsningen fri: viften blåser kald luft rett fram. Ikke plasser noe foran huset, og hold minst 0,5 m fritt foran spjeldene.',
+      'Utedelen bør stå på veggkonsoll eller bakkestativ minst 30 cm over bakken (over vanlig snødybde), og avrimingsvannet må kunne renne fritt bort – huset har ingen bunn.',
+      'Brøyt/kost bort snø foran og på sidene etter snøfokk – tette spjeld gir dårligere virkningsgrad og kan gi isdannelse.',
+      'Plasser ikke huset under takfot uten snøfanger – snø og is som raser fra taket kan knuse taket på huset.',
+      'Bruk rustfrie A4-skruer og forbor i endene på spjeldene så de ikke sprekker. Lim beinlamellene med D4-lim.',
+      'La 1–2 cm luft mellom takets bakkant og veggen, og fest huset så det kan skrus løs for service.',
+      'La impregnert virke tørke noen uker før beis/maling.',
+    ]
+    if (c.taktype === 'overunder' && c.takvinkel < 15) r.unshift(`Takvinkel ${fmt(c.takvinkel, 1)}° er lav for bordtak – velg takpapp eller øk vinkelen til minst 15°.`)
+    if (c.taktype === 'faspanel' && c.takvinkel < 20) r.unshift(`Takvinkel ${fmt(c.takvinkel, 1)}° er lav for faspanel – velg takpapp eller øk vinkelen til minst 20°.`)
+    if (c.taktype === 'takpapp' && c.takvinkel < 5) r.unshift('Takpapp trenger minst ca. 5° fall (1:12) – ellers blir vannet stående.')
+    if (!g.st.ok) r.unshift(g.st.melding)
+    return r
+  },
   buildMesh,
   bounds: (c) => {
-    const vinkel = (c.takvinkel * Math.PI) / 180
-    // Høyest bak: fronthøyde + fall over hele dybden (+ bak-bein) opp til takflaten.
-    const backTop = LEG_LIFT + cm(c.hoyde) + (cm(c.dybde) + LEKT_W) * Math.tan(vinkel)
-    return {
-      x: cm(c.bredde) + 0.12,
-      y: backTop + 0.06,
-      z: cm(c.dybde) + 0.2, // utstikk foran + bak-bein
-    }
+    const g = new THREE.Group()
+    const { staver, g: gg } = konstruer(c)
+    byggMesher(g, staver, () => new THREE.MeshBasicMaterial())
+    if (c.visUtedel !== false) byggUtedel(g, gg)
+    const s = new THREE.Box3().setFromObject(g).getSize(new THREE.Vector3())
+    return { x: s.x, y: s.y, z: s.z }
   },
-  montering: () => [
-    'Kapp alle materialene etter kapplista. VINKELKAPP: kløyv spjeld-lektene på skrå i 45° (2 spiler pr. lekt), og skråkapp toppen av hjørnebeina i takvinkelen.',
-    'Bygg de fire hjørnebeina av to 23×48 limt flate-mot-flate, forskjøvet 23 mm så det står fram en skulder. Bak-beina har dobbelt indre bord (2 × 23×48 limt).',
-    'Legg sålen (23×48 flatt) i U-form – venstre, front og høyre. De to fronthjørnene skjøtes med 45° gjæring.',
-    'Reis hjørnebeina på sålen (løftet 23 mm). Front lavere enn bak, slik at takflaten får fall framover i valgt takvinkel.',
-    'Skru de skrå spjeldene på front og de to sidene med valgt luftspalte (skråflaten opp-og-ut). Sidespjeldene skråkappes etter takfallet. Sett en vertikal stiver (11×36) bak spjeldene for hver påbegynte 60 cm.',
-    'Fest diagonalstiveren (23×48) på innsiden av sidespjeldene, fra bunn bak opp til front i 45°. Endene kappes loddrett (45°-snitt) så de flukter langs beina.',
-    'Monter sidestrekkerne utenpå sidene i takvinkelen (begge ender kappes loddrett; bakenden flukter med bak-beinet). Legg tverrbordene på høykant mellom strekkerne, halvt-i-halvt, 15 cm fra front og bak.',
-    'Legg taket (over/underligger, faspanel eller takpapp) på strekkerne. Front- og bakkant kappes loddrett i flukt med strekker-endene; sidene går ut til endene av tverrbordene.',
-    'Veggmontering: forbor Ø6 mm hull i bak-beinas ytre lekt (i glipene mellom spjeldene, ett øvre og ett nedre pr. bein) og fest huset til veggen med 6×80 treskruer i solide fester/plugger.',
-    'Sett huset på plass over varmepumpa med god klaring til vifte og rør, og fest det stødig.',
-  ],
 }

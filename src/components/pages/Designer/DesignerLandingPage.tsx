@@ -67,14 +67,14 @@ const STEG = [
   },
 ]
 
-// Speiler innholdet i byggeplanen fra src/designer/pdf.ts.
+// Speiler innholdet i byggeplanen (src/designer/plan-ark.ts).
 const INNHOLD = [
-  { ikon: 'faClipboardList', tittel: 'Materialliste', tekst: 'Alt du trenger å handle, med dimensjoner og antall.' },
-  { ikon: 'faRulerCombined', tittel: 'Kappliste', tekst: 'Hver del med lengde og profil – kapp rett første gang.' },
-  { ikon: 'faPencilRuler', tittel: 'Målsatt arbeidstegning', tekst: 'Plan og oppriss i 2D med mål og målestokk.' },
-  { ikon: 'faCubes', tittel: 'Monteringsanvisning', tekst: 'Rekkefølgen, steg for steg, med råd om sammenføyninger.' },
-  { ikon: 'faCube', tittel: '3D-visning', tekst: 'Se designet fra alle kanter – også delt opp i enkeltdeler.' },
-  { ikon: 'faPrint', tittel: 'PDF og utskrift', tekst: 'Last ned eller skriv ut og ta med til byggeplassen.' },
+  { ikon: 'faPencilRuler', tittel: 'Tegningssett i målestokk', tekst: 'Plan, oppriss og snitt i 1:20–1:100 med målekjeder, akser og tegningshode – tegnet fra 3D-modellen din.' },
+  { ikon: 'faRulerCombined', tittel: 'Kappliste med vinkler', tekst: 'Hver del med posisjon, lengde i mm og kappvinkel – pluss hvilke lengder du bør kjøpe.' },
+  { ikon: 'faClipboardList', tittel: 'Materialliste', tekst: 'Gruppert etter fundament, konstruksjon, tak og kledning, med kvalitet og ca-pris.' },
+  { ikon: 'faCubes', tittel: 'Montering trinn for trinn', tekst: 'Illustrert rekkefølge fra fundament til tak, med verktøyliste, tidsbruk og HMS.' },
+  { ikon: 'faCube', tittel: 'Konstruksjonsdetaljer', tekst: 'Stolpefot, opplegg og takfot i 1:5/1:10 med dine dimensjoner.' },
+  { ikon: 'faSnowflake', tittel: 'Byggested og byggesak', tekst: 'Dimensjonert for snølasten der du bor, med standarder og veiledning om søknadsplikt.' },
 ]
 
 const VEIER = [
@@ -88,7 +88,7 @@ const VEIER = [
   {
     ikon: 'faTruck',
     tittel: 'Bestill ferdig',
-    tekst: 'Mindre produkter som plantekasser, varmepumpehus og vedskjul kan du be oss bygge etter designet ditt.',
+    tekst: `Mindre produkter – ${listeNavn(TEMPLATES.filter(kanBestillesFerdig).map((t) => t.navn.toLowerCase()))} – kan du be oss bygge etter designet ditt.`,
     til: '/produkter',
     cta: 'Se produktene',
   },
