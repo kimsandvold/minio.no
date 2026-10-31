@@ -1,5 +1,11 @@
-import jsPDF from 'jspdf'
-import html2canvas from 'html2canvas'
+/**
+ * jsPDF + html2canvas (~400 kB) lastes først når noen faktisk lager en PDF –
+ * ikke når designverktøyet åpnes. Utskrift-variantene trenger dem ikke.
+ */
+async function lastPdfBiblioteker() {
+  const [{ jsPDF }, { default: html2canvas }] = await Promise.all([import('jspdf'), import('html2canvas')])
+  return { jsPDF, html2canvas }
+}
 import type { Bom, Byggeregler, DesignConfig, KapplisteDel, ProductTemplate, Riss2D, Tegning2D, Tittelfelt } from './types'
 import { T2D, fellesScale, rissSvg, skalastavSvg, tittelfeltHtml } from './tegningSvg'
 
@@ -363,6 +369,7 @@ export function planUtskrift(a: PlanArgs) {
 
 /** Lager en ren, salgbar PDF direkte (uten nettleserens utskrifts-header). */
 export async function planPdf(a: PlanArgs) {
+  const biblioteker = lastPdfBiblioteker()
   const html = buildPlanHtml(a, false)
   // Rendrer planen skjult i en iframe og fanger den til PDF.
   const iframe = document.createElement('iframe')
@@ -386,6 +393,7 @@ export async function planPdf(a: PlanArgs) {
     setTimeout(res, 4000)
   })
 
+  const { jsPDF, html2canvas } = await biblioteker
   const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' })
   const pw = 210
   const ph = 297
@@ -626,6 +634,7 @@ export function byggesoknadUtskrift(a: SoknadArgs) {
 
 /** Genererer søknadsheftet som PDF – én A4-side per ark. */
 export async function byggesoknadPdf(a: SoknadArgs) {
+  const biblioteker = lastPdfBiblioteker()
   const html = buildSoknadHtml(a, false)
   const iframe = document.createElement('iframe')
   iframe.style.cssText = 'position:fixed;left:-9999px;top:0;width:820px;height:1160px;border:0;'
@@ -647,6 +656,7 @@ export async function byggesoknadPdf(a: SoknadArgs) {
     setTimeout(res, 4000)
   })
 
+  const { jsPDF, html2canvas } = await biblioteker
   const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' })
   const pw = 210
   const ph = 297

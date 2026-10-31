@@ -6,7 +6,22 @@ export const allProducts: Product[] = productsData as Product[]
 /** Products shown in listings and carousels. Unlisted ones stay reachable by URL and via search. */
 const listedProducts = allProducts.filter(p => !p.unlisted)
 
-const SIMULATED_DELAY = 400
+/** Synkrone oppslag – dataene er statisk JSON, så sidene kan rendre med en gang. */
+export function getListedProducts(): Product[] {
+  return listedProducts
+}
+
+export function getProductBySlug(slug: string): Product | undefined {
+  return allProducts.find(p => p.slug === slug)
+}
+
+export function getFeaturedProducts(): Product[] {
+  return allProducts.filter(p => p.isFeatured)
+}
+
+// Dataene er statisk JSON – en kunstig forsinkelse gir bare skjelett-blink over
+// den prerendrede siden og senere LCP. 0 = svar i neste tick.
+const SIMULATED_DELAY = 0
 
 function simulateFetch<T>(data: T): Promise<T> {
   return new Promise(resolve => setTimeout(() => resolve(data), SIMULATED_DELAY))

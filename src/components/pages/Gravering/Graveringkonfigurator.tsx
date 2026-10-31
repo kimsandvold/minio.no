@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useAuthContext } from '../../../context/AuthContext'
 import { useMediaQuery } from '../../../hooks/useMediaQuery'
 import { designerSymbols } from '../../../data/designerSymbols'
+import { loadDesignerFont } from '../../../data/designerFonts'
 import { erJulegavesesong } from '../../../data/sesong'
 import {
   fraPris,
@@ -152,6 +153,10 @@ const kr = (n: number) => `${n.toLocaleString('nb-NO')} kr`
  */
 export default function Graveringkonfigurator() {
   const personlig = usePersonligTekst()
+  // Skriftvelgeren viser alle graveringsskriftene – hent dem (og bare dem).
+  useEffect(() => {
+    loadDesignerFont(...graveringFonter)
+  }, [])
   const [kategori, settKategori] = useState<MalKategori>(() => (erJulegavesesong() ? 'jul' : 'klassisk'))
   /**
    * Malens rå tekst, med tokens. Vi tar vare på den ved siden av den utfylte

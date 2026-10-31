@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo } from 'react'
 import { designerSymbols } from '../../../data/designerSymbols'
-import { loadDesignerFonts } from '../../../data/designerFonts'
+import { loadDesignerFont } from '../../../data/designerFonts'
 import { produkt, type Valg } from '../../../data/gravering'
 import { aarer, borsting, graveringGeometri, motivFelt, narv, type Primitiv } from './graveringGeometri'
 import { byggMotiv } from './graveringMotiv'
@@ -64,10 +64,11 @@ export default function GraveringPreview({ valg, dekorativ, visOmriss, utenSkygg
   const flate = p.flater.find((f) => f.id === valg.flate) ?? p.flater[0]
   const maalTekst = useTekstmaal(valg.font)
 
-  // Graveringsskriftene er Google-fonter som ikke lastes globalt.
+  // Graveringsskriftene er Google-fonter som ikke lastes globalt. Hent bare
+  // skriften som vises – ikke alle ~30 designer-fontene.
   useEffect(() => {
-    loadDesignerFonts()
-  }, [])
+    loadDesignerFont(valg.font)
+  }, [valg.font])
 
   const geo = useMemo(
     () => graveringGeometri(p.form, variant.bredde, variant.hoyde),

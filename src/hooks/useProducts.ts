@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
 import type { Product } from '../types/product'
 import {
-  fetchAllProducts,
   fetchRandomProducts,
-  fetchFeaturedProduct,
-  fetchFeaturedProducts,
-  fetchProductBySlug,
+  getFeaturedProducts,
+  getListedProducts,
+  getProductBySlug,
 } from '../data/products'
 
 interface UseProductsResult<T> {
@@ -13,18 +12,12 @@ interface UseProductsResult<T> {
   loading: boolean
 }
 
+// Produktdataene er statisk JSON i bunten. Hookene under svarer derfor
+// synkront: da matcher første render den prerendrede HTML-en, i stedet for å
+// bytte den ut med skjeletter og så med innholdet igjen (blink, CLS, sen LCP).
+
 export function useAllProducts(): UseProductsResult<Product[]> {
-  const [data, setData] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchAllProducts().then(products => {
-      setData(products)
-      setLoading(false)
-    })
-  }, [])
-
-  return { data, loading }
+  return { data: getListedProducts(), loading: false }
 }
 
 export function useRandomProducts(count: number, excludeSlug?: string): UseProductsResult<Product[]> {
@@ -42,48 +35,13 @@ export function useRandomProducts(count: number, excludeSlug?: string): UseProdu
 }
 
 export function useFeaturedProduct(): UseProductsResult<Product | undefined> {
-  const [data, setData] = useState<Product | undefined>()
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchFeaturedProduct().then(product => {
-      setData(product)
-      setLoading(false)
-    })
-  }, [])
-
-  return { data, loading }
+  return { data: getFeaturedProducts()[0], loading: false }
 }
 
 export function useFeaturedProducts(): UseProductsResult<Product[]> {
-  const [data, setData] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    fetchFeaturedProducts().then(products => {
-      setData(products)
-      setLoading(false)
-    })
-  }, [])
-
-  return { data, loading }
+  return { data: getFeaturedProducts(), loading: false }
 }
 
 export function useProductBySlug(slug: string | undefined): UseProductsResult<Product | undefined> {
-  const [data, setData] = useState<Product | undefined>()
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    if (!slug) {
-      setLoading(false)
-      return
-    }
-    setLoading(true)
-    fetchProductBySlug(slug).then(product => {
-      setData(product)
-      setLoading(false)
-    })
-  }, [slug])
-
-  return { data, loading }
+  return { data: slug ? getProductBySlug(slug) : undefined, loading: false }
 }

@@ -32,6 +32,9 @@ export default defineConfig({
         manualChunks(id) {
           if (!id.includes('node_modules')) return
           if (id.includes('three')) return 'three'
+          // Firestore i egen bit: Auth (innloggingsstatus) trengs på alle sider,
+          // Firestore bare på sider som leser/skriver data.
+          if (/\/(@firebase\/firestore|firebase\/firestore|@firebase\/webchannel-wrapper)\//.test(id)) return 'firestore'
           if (id.includes('firebase')) return 'firebase'
           if (id.includes('@splidejs')) return 'splide'
           // Må stå før react-reglene: react-leaflet inneholder «react» i stien,

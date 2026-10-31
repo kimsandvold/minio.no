@@ -2,6 +2,10 @@ import styled, { keyframes } from 'styled-components'
 import { Link } from 'react-router-dom'
 import type { Product } from '../../types/product'
 import { kortNavn, kortPris } from '../../utils/produktTekst'
+import { produktSrcSet } from '../../utils/produktBilder'
+
+/** Kortet er ~halve skjermbredden på mobil/nettbrett, maks ~400 px ellers. */
+const KORT_SIZES = '(max-width: 960px) 50vw, 400px'
 
 interface Props {
   produkt: Product
@@ -18,8 +22,10 @@ export default function ProduktKort({ produkt, medBeskrivelse }: Props) {
   return (
     <Kort to={`/produkter/${produkt.slug}`}>
       <Bilde>
-        <img src={forste?.src} alt={forste?.alt ?? ''} loading="lazy" />
-        {andre && <img className="andre" src={andre.src} alt="" loading="lazy" aria-hidden="true" />}
+        <img src={forste?.src} srcSet={produktSrcSet(forste?.src)} sizes={KORT_SIZES} alt={forste?.alt ?? ''} loading="lazy" />
+        {andre && (
+          <img className="andre" src={andre.src} srcSet={produktSrcSet(andre.src)} sizes={KORT_SIZES} alt="" loading="lazy" aria-hidden="true" />
+        )}
         {produkt.regularPrice && <Merke>Tilbud</Merke>}
       </Bilde>
       <Navn>{kortNavn(produkt.title)}</Navn>

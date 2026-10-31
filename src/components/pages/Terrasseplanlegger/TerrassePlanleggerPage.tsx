@@ -128,7 +128,7 @@ const TERRASSE_BREADCRUMB = {
 const Hero = styled.section`
   min-height: 28vh;
   background-color: #ffffff;
-  background-image: url('/images/terrasse/terrasseplanlegger-promo.png');
+  background-image: url('/images/terrasse/terrasseplanlegger-promo.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -43,19 +43,39 @@ export const designerFonts: DesignerFont[] = [
 ]
 
 let fontsLoaded = false
+const lastedeFamilier = new Set<string>()
 
+function googleFamilyParam(family: string): string {
+  // Inter lastes her (ikke globalt) – dørskilt-malene bruker vektene 300 og 600.
+  return `family=${family.replace(/ /g, '+')}:wght@${family === 'Inter' ? '300;400;600;700' : '400;700'}`
+}
+
+function leggTilStilark(families: string[]): void {
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.href = `https://fonts.googleapis.com/css2?${families.map(googleFamilyParam).join('&')}&display=swap`
+  document.head.appendChild(link)
+}
+
+/** Alle designer-fontene på én gang – til fontvelgeren i skiltdesigneren. */
 export function loadDesignerFonts(): void {
   if (fontsLoaded) return
   fontsLoaded = true
+  const families = designerFonts.filter(f => f.google && !lastedeFamilier.has(f.family)).map(f => f.family)
+  families.forEach(f => lastedeFamilier.add(f))
+  if (families.length > 0) leggTilStilark(families)
+}
 
-  // Inter lastes her (ikke globalt) – dørskilt-malene bruker vektene 300 og 600.
-  const googleFonts = designerFonts
-    .filter(f => f.google)
-    .map(f => `family=${f.family.replace(/ /g, '+')}:wght@${f.family === 'Inter' ? '300;400;600;700' : '400;700'}`)
-    .join('&')
-
-  const link = document.createElement('link')
-  link.rel = 'stylesheet'
-  link.href = `https://fonts.googleapis.com/css2?${googleFonts}&display=swap`
-  document.head.appendChild(link)
+/**
+ * Bare de oppgitte fontene, i ett stilark. Brukes der få skrifter vises (f.eks.
+ * graveringsforhåndsvisningen på forsiden), så siden slipper å hente alle ~30.
+ */
+export function loadDesignerFont(...families: string[]): void {
+  if (fontsLoaded) return
+  const nye = families.filter(
+    (family) => !lastedeFamilier.has(family) && designerFonts.some(f => f.google && f.family === family),
+  )
+  if (nye.length === 0) return
+  nye.forEach(f => lastedeFamilier.add(f))
+  leggTilStilark(nye)
 }

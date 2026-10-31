@@ -202,11 +202,18 @@ export default function ProduktDetailPage() {
                 {product.images.length > 1 ? (
                   <SplideCarousel>
                     {product.images.map((img, i) => (
-                      <img key={i} src={img.src} alt={img.alt} loading="lazy" />
+                      // Første bilde er sidens LCP-element – ikke lazy.
+                      <img
+                        key={i}
+                        src={img.src}
+                        alt={img.alt}
+                        loading={i === 0 ? 'eager' : 'lazy'}
+                        fetchPriority={i === 0 ? 'high' : undefined}
+                      />
                     ))}
                   </SplideCarousel>
                 ) : (
-                  <img src={product.images[0].src} alt={product.images[0].alt} loading="lazy" />
+                  <img src={product.images[0].src} alt={product.images[0].alt} fetchPriority="high" />
                 )}
               </ImageWrap>
               <Info>

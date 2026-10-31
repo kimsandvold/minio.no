@@ -299,6 +299,7 @@ export default function Footer() {
                 scrolling="auto"
                 allowFullScreen
                 title="Nyhetsbrev"
+                loading="lazy"
               />
             </FooterSection>
           </NewsletterSection>
