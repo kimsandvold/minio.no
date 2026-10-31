@@ -99,7 +99,8 @@ const LINJE: Record<Linjetype, Stil> = {
   senter: { bredde: 0.13, strek: FARGE.gra, stiplet: [5, 1, 0.6, 1] },
 }
 
-export const MALESTOKKER = [1, 2, 5, 10, 20, 50, 100, 200, 500]
+/** Standard målestokker (NS-ISO 5455): 1:25 med, så tegninger som akkurat ikke får plass i 1:20 slipper å falle til 1:50. */
+export const MALESTOKKER = [1, 2, 5, 10, 20, 25, 50, 100, 200, 500]
 
 /** Talltekst i mm med mellomrom som tusenskille (norsk), f.eks. 12 000. */
 export function mm(v: number): string {
@@ -109,8 +110,8 @@ export function mm(v: number): string {
 
 // ── Marg rundt geometrien (ark-mm) ──────────────────────────────────────
 
-const MAAL_AVST = 7 // første målelinje fra geometrien
-const MAAL_STEG = 6.5 // mellom nivåene
+const MAAL_AVST = 6 // første målelinje fra geometrien
+const MAAL_STEG = 5.5 // mellom nivåene (målekjeder tett, som på arbeidstegninger)
 
 interface Marg { v: number; h: number; o: number; u: number }
 

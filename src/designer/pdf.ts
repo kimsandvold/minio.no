@@ -78,7 +78,7 @@ function hentLogo(): Promise<{ data: string; forhold: number } | null> {
  * Gjør et PNG-snapshot (gjennomsiktig bakgrunn) om til JPEG på lys flate,
  * nedskalert – holder PDF-en liten uten synlig kvalitetstap.
  */
-async function tilJpeg(data: string | undefined, maksBredde = 1500, bakgrunn = '#f2f1ee'): Promise<string | undefined> {
+async function tilJpeg(data: string | undefined, maksBredde = 1500, bakgrunn = '#f2f1ee', lysOpp = true): Promise<string | undefined> {
   if (!data) return undefined
   try {
     const img = new Image()
@@ -88,13 +88,49 @@ async function tilJpeg(data: string | undefined, maksBredde = 1500, bakgrunn = '
     c.width = Math.max(1, Math.round(img.naturalWidth * s))
     c.height = Math.max(1, Math.round(img.naturalHeight * s))
     const ctx = c.getContext('2d')!
+    ctx.drawImage(img, 0, 0, c.width, c.height)
+    if (lysOpp) eksponer(ctx, c.width, c.height)
+    // Legg den (ev. lysnede) modellen på lys bakgrunn.
+    ctx.globalCompositeOperation = 'destination-over'
     ctx.fillStyle = bakgrunn
     ctx.fillRect(0, 0, c.width, c.height)
-    ctx.drawImage(img, 0, 0, c.width, c.height)
+    ctx.globalCompositeOperation = 'source-over'
     return c.toDataURL('image/jpeg', 0.86)
   } catch {
     return undefined
   }
+}
+
+/**
+ * Automatisk eksponering for PDF-renderet: mørkbeisede modeller (f.eks. svart
+ * vedskjul) blir nesten svarte på papir. Måler snitt-luminansen til de synlige
+ * (ikke-gjennomsiktige) pikslene og løfter mellomtonene med en gamma-kurve
+ * til snittet er ca. 0,35. Lyse modeller røres ikke. Påvirker bare PDF-bildet.
+ */
+function eksponer(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  const d = ctx.getImageData(0, 0, w, h)
+  const p = d.data
+  let sum = 0
+  let n = 0
+  for (let i = 0; i < p.length; i += 16) {
+    if (p[i + 3] < 200) continue
+    sum += (0.2126 * p[i] + 0.7152 * p[i + 1] + 0.0722 * p[i + 2]) / 255
+    n++
+  }
+  if (n < 100) return
+  const snitt = sum / n
+  const MAAL = 0.35
+  if (snitt >= MAAL - 0.02) return
+  const g = Math.max(0.5, Math.log(MAAL) / Math.log(Math.max(0.02, snitt)))
+  const lut = new Uint8ClampedArray(256)
+  for (let v = 0; v < 256; v++) lut[v] = Math.round(255 * Math.pow(v / 255, g))
+  for (let i = 0; i < p.length; i += 4) {
+    if (p[i + 3] === 0) continue
+    p[i] = lut[p[i]]
+    p[i + 1] = lut[p[i + 1]]
+    p[i + 2] = lut[p[i + 2]]
+  }
+  ctx.putImageData(d, 0, 0)
 }
 
 // ── Komposisjon ─────────────────────────────────────────────────────────

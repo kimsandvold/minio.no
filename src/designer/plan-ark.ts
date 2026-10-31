@@ -280,6 +280,19 @@ class Skriver {
     if (this.y + h > BUNN) { this.ny(); return true }
     return false
   }
+  /**
+   * Ny hoveddel: ny side bare når det er lite plass igjen (< 45 % av sida).
+   * Slik blir ikke en sum-linje eller et par tabellrader stående alene på en
+   * ellers tom side før neste del, og det lages aldri en blank side.
+   */
+  nyDel(behov?: number) {
+    if (this.y <= TOPP + 2) return
+    const igjen = BUNN - this.y
+    // Kort del som nesten får plass: start heller på ny side enn å la et par linjer henge alene.
+    const forKort = behov !== undefined && behov > igjen - 6 && behov < BUNN - TOPP
+    if (igjen < (BUNN - TOPP) * 0.45 || forKort) this.ny()
+    else this.y += 6
+  }
   seksjon(nr: string, tittel: string, ingress?: string) {
     if (this.y > TOPP + 2) this.plass(40)
     const f = this.f
@@ -328,28 +341,41 @@ interface Kolonne { tittel: string; b: number; juster?: 'left' | 'right' | 'cent
 type Celle = string | { tekst: string; vekt?: 'bold' | 'normal'; farge?: string }
 
 /** Tabell med linjebryting, gjentatt tabellhode og gruppe-rader. */
-function tabell(s: Skriver, kol: Kolonne[], rader: Array<Celle[] | { gruppe: string; hoyre?: string }>, opts: { str?: number } = {}) {
+function tabell(s: Skriver, kol: Kolonne[], rader: Array<Celle[] | { gruppe: string; hoyre?: string }>, opts: { str?: number; x?: number; bredde?: number } = {}) {
+  const X0 = opts.x ?? SL
+  const BR = opts.bredde ?? BREDDE
   const str = opts.str ?? 8
   const lh = str * 0.4
   const hode = () => {
     const f = s.f
-    let x = SL
+    let x = X0
     for (const k of kol) {
       const tx = k.juster === 'right' ? x + k.b - 1.5 : k.juster === 'center' ? x + k.b / 2 : x + 1.5
       f.tekst(k.tittel.toUpperCase(), tx, s.y + 4, { str: 6.5, vekt: 'bold', farge: C.dempet, juster: k.juster ?? 'left' })
       x += k.b
     }
-    f.strek(SL, s.y + 6, SL + BREDDE, s.y + 6, { bredde: 0.35, strek: C.tekst })
+    f.strek(X0, s.y + 6, X0 + BR, s.y + 6, { bredde: 0.35, strek: C.tekst })
     s.y += 7.5
   }
+  // Høyde per rad (uten luft) – til å unngå at et par rader havner alene på en ny side.
+  const radLinjer = rader.map((r) => (Array.isArray(r) ? Math.max(1, ...r.map((c, i) => brytTekst(s.f, typeof c === 'string' ? c : c.tekst, kol[i].b - 3, str, typeof c === 'string' ? undefined : c.vekt).length)) : 0))
   s.plass(18)
+  const PAD = 2.6
+  let pad = PAD
+  {
+    const total = 7.5 + 1 + radLinjer.reduce((sum, n, i) => sum + (Array.isArray(rader[i]) ? n * lh + PAD : 6.8), 0)
+    const over = s.y + total - BUNN
+    const nRad = radLinjer.filter((n) => n > 0).length
+    // Tabellen ville sprukket med bare litt: stram radhøyden (ned til 1,2 mm luft) så den får plass.
+    if (over > 0 && nRad > 0 && over <= nRad * (PAD - 1.2)) pad = PAD - over / nRad - 0.05
+  }
   hode()
   for (const r of rader) {
     if (!Array.isArray(r)) {
       if (s.plass(14)) hode()
-      s.f.rekt(SL, s.y, BREDDE, 6, { strek: null, fyll: C.lys })
-      s.f.tekst(r.gruppe, SL + 1.5, s.y + 4.1, { str: 8.2, vekt: 'bold', farge: C.tekst })
-      if (r.hoyre) s.f.tekst(r.hoyre, SL + BREDDE - 1.5, s.y + 4.1, { str: 8.2, vekt: 'bold', farge: C.tekst, juster: 'right' })
+      s.f.rekt(X0, s.y, BR, 6, { strek: null, fyll: C.lys })
+      s.f.tekst(r.gruppe, X0 + 1.5, s.y + 4.1, { str: 8.2, vekt: 'bold', farge: C.tekst })
+      if (r.hoyre) s.f.tekst(r.hoyre, X0 + BR - 1.5, s.y + 4.1, { str: 8.2, vekt: 'bold', farge: C.tekst, juster: 'right' })
       s.y += 6.8
       continue
     }
@@ -358,9 +384,9 @@ function tabell(s: Skriver, kol: Kolonne[], rader: Array<Celle[] | { gruppe: str
       return brytTekst(s.f, t, kol[i].b - 3, str, typeof c === 'string' ? undefined : c.vekt)
     })
     const n = Math.max(1, ...celler.map((c) => c.length))
-    const h = n * lh + 2.6
+    const h = n * lh + pad
     if (s.plass(h + 1)) hode()
-    let x = SL
+    let x = X0
     celler.forEach((linjer, i) => {
       const k = kol[i]
       const c = r[i]
@@ -368,12 +394,12 @@ function tabell(s: Skriver, kol: Kolonne[], rader: Array<Celle[] | { gruppe: str
       const farge = typeof c === 'string' ? C.tekst : c.farge ?? C.tekst
       linjer.forEach((l, j) => {
         const tx = k.juster === 'right' ? x + k.b - 1.5 : k.juster === 'center' ? x + k.b / 2 : x + 1.5
-        s.f.tekst(l, tx, s.y + 1.3 + lh * (j + 0.85), { str, vekt, farge, juster: k.juster ?? 'left' })
+        s.f.tekst(l, tx, s.y + pad / 2 + lh * (j + 0.85), { str, vekt, farge, juster: k.juster ?? 'left' })
       })
       x += k.b
     })
     s.y += h
-    s.f.strek(SL, s.y, SL + BREDDE, s.y, { bredde: 0.12, strek: C.linje })
+    s.f.strek(X0, s.y, X0 + BR, s.y, { bredde: 0.12, strek: C.linje })
   }
   s.y += 3
 }
@@ -404,52 +430,101 @@ export interface Ark {
   side?: number
 }
 
-function layoutFor(tgs: Tegning[]): { rows: number; cols: number; M: number } {
-  let best: { rows: number; cols: number; M: number } | null = null
-  const opsjoner = tgs.length === 1 ? [[1, 1]] : tgs.length === 2 ? [[1, 2], [2, 1]] : tgs.length === 3 ? [[1, 3], [2, 2]] : [[2, 2], [1, 4]]
-  for (const [rows, cols] of opsjoner) {
+interface Layout { rows: number; cols: number; M: number; fyll: number }
+
+/** Mulige rutenett for n tegninger (balansert: ingen tomme rader/kolonner). */
+function rutenett(n: number): Array<[number, number]> {
+  if (n === 1) return [[1, 1]]
+  const ut: Array<[number, number]> = []
+  for (let rows = 1; rows <= n; rows++) {
+    const cols = Math.ceil(n / rows)
+    if ((rows - 1) * cols >= n || rows * (cols - 1) >= n) continue
+    ut.push([rows, cols])
+  }
+  return ut
+}
+
+/** Fyllingsgrad: tegningenes ark-areal inkl. målekjeder/påskrifter i målestokk M, andel av tegneflaten. */
+function fyllingsgrad(tgs: Tegning[], M: number): number {
+  const a = tgs.reduce((sum, t) => {
+    const st = tegningStorrelse(t, t.malestokk ?? M)
+    return sum + st.w * st.h
+  }, 0)
+  return Math.min(1, a / (TA.w * TA.h))
+}
+
+/**
+ * Beste rutenett for en gruppe tegninger: felles målestokk (største som får
+ * alle inn i sin celle), valgt for størst fyllingsgrad.
+ */
+function layoutFor(tgs: Tegning[]): Layout {
+  let best: Layout | null = null
+  for (const [rows, cols] of rutenett(tgs.length)) {
     const w = TA.w / cols - 4
     const h = TA.h / rows - 9
     const M = Math.max(...tgs.map((t) => t.malestokk ?? velgMalestokk(t, w, h)))
-    if (!best || M < best.M) best = { rows, cols, M }
+    const fyll = fyllingsgrad(tgs, M)
+    if (!best || fyll > best.fyll + 1e-9) best = { rows, cols, M, fyll }
   }
   return best!
 }
 
-/** Fordeler tegninger på ark: planer alene, oppriss/snitt sammen når målestokken tåler det. */
+/** «Kostnad» for et ekstra ark, i andel av tegneflaten (avveier færre ark mot større tegninger). */
+const ARK_KOST = 0.4
+
+/**
+ * Fordeler tegninger (i rekkefølge) på ark med dynamisk programmering:
+ * maksimerer Σ fyllingsgrad − ARK_KOST · antall ark. Da havner f.eks. fire små
+ * fasader på ett ark når de ellers ville stått nesten tomme, mens tegninger som
+ * blir vesentlig større alene får egne ark. Mål: tegningene fyller ~60–80 %.
+ * Detaljer blandes ikke med andre riss, maks tre per ark, og krympes aldri
+ * forbi det de ville fått alene (min. 1:10).
+ */
 function planleggArk(tgs: Tegning[], prefiks: string, startNr: number, navnFor: (tgs: Tegning[]) => string): Ark[] {
-  const ark: Ark[] = []
-  let i = 0
-  let nr = startNr
-  while (i < tgs.length) {
-    const alene = (t: Tegning) => t.malestokk ?? velgMalestokk(t, TA.w - 4, TA.h - 9)
-    let valgt = 1
-    if (tgs[i].type !== 'plan') {
-      for (let c = Math.min(tgs[i].type === 'detalj' ? 3 : 4, tgs.length - i); c > 1; c--) {
-        const gruppe = tgs.slice(i, i + c)
-        if (gruppe.some((t) => t.type === 'plan')) continue
-        if (gruppe.some((t) => (t.type === 'detalj') !== (tgs[i].type === 'detalj'))) continue
-        const lay = layoutFor(gruppe)
-        const maksAlene = Math.max(...gruppe.map(alene))
-        // Detaljer skal ikke krympes; oppriss tåler ett målestokktrinn.
-        // Detaljer: to på samme ark så lenge de holder 1:10 eller bedre.
-        if (tgs[i].type === 'detalj' ? lay.M <= Math.max(maksAlene, 10) : lay.M <= maksAlene * 2) { valgt = c; break }
-      }
+  const n = tgs.length
+  const alene = (t: Tegning) => t.malestokk ?? velgMalestokk(t, TA.w - 4, TA.h - 9)
+  const lovlig = (i: number, j: number): Layout | null => {
+    const gruppe = tgs.slice(i, j)
+    const detalj = gruppe[0].type === 'detalj'
+    if (gruppe.length > (detalj ? 3 : 4)) return null
+    if (gruppe.some((t) => (t.type === 'detalj') !== detalj)) return null
+    const lay = layoutFor(gruppe)
+    if (detalj && gruppe.length > 1 && lay.M > Math.max(Math.max(...gruppe.map(alene)), 10)) return null
+    return lay
+  }
+  const best: number[] = new Array(n + 1).fill(-Infinity)
+  const fra: number[] = new Array(n + 1).fill(0)
+  best[0] = 0
+  for (let j = 1; j <= n; j++) {
+    for (let i = Math.max(0, j - 4); i < j; i++) {
+      if (best[i] === -Infinity) continue
+      const lay = lovlig(i, j)
+      if (!lay) continue
+      const v = best[i] + lay.fyll - ARK_KOST
+      if (v > best[j] + 1e-9) { best[j] = v; fra[j] = i }
     }
-    const gruppe = tgs.slice(i, i + valgt)
+  }
+  const grenser: Array<[number, number]> = []
+  for (let j = n; j > 0; j = fra[j]) grenser.unshift([fra[j], j])
+  const ark: Ark[] = []
+  let nr = startNr
+  for (const [i, j] of grenser) {
+    const gruppe = tgs.slice(i, j)
     const lay = layoutFor(gruppe)
     const cw = TA.w / lay.cols
     const ch = TA.h / lay.rows
     const celler = gruppe.map((tg, k) => {
       const r = Math.floor(k / lay.cols)
       const c = k % lay.cols
-      return { tg, M: tg.malestokk ?? lay.M, x: TA.x + c * cw, y: TA.y + r * ch, w: cw, h: ch }
+      // Siste rad med færre tegninger sentreres.
+      const iRad = Math.min(lay.cols, gruppe.length - r * lay.cols)
+      const dx = ((lay.cols - iRad) * cw) / 2
+      return { tg, M: tg.malestokk ?? lay.M, x: TA.x + dx + c * cw, y: TA.y + r * ch, w: cw, h: ch }
     })
     const merker = new Set<string>()
     for (const tg of gruppe) for (const e of tg.el) if (e.t === 'pos') merker.add(e.merke)
     ark.push({ nr: `${prefiks}-${String(nr).padStart(2, '0')}`, tittel: navnFor(gruppe), celler, merker: [...merker].sort() })
     nr++
-    i += valgt
   }
   return ark
 }
@@ -662,12 +737,32 @@ function prosjektinfo(s: Skriver, inn: PlanInn, ark: Ark[], seksjoner: Array<[st
   }
 
   s.under('Tegningsliste')
-  tabell(s, [
-    { tittel: 'Nr.', b: 18 },
-    { tittel: 'Tegning', b: 103 },
-    { tittel: 'Målestokk', b: 30 },
-    { tittel: 'Side', b: 26, juster: 'right' },
-  ], ark.map((a) => [{ tekst: a.nr, vekt: 'bold' }, a.tittel, malestokkTekst(a), a.side !== undefined ? String(a.side + 1) : '']))
+  const tlRader = ark.map((a): Celle[] => [{ tekst: a.nr, vekt: 'bold' }, a.tittel, malestokkTekst(a), a.side !== undefined ? String(a.side + 1) : ''])
+  if (tlRader.length <= 8) {
+    tabell(s, [
+      { tittel: 'Nr.', b: 18 },
+      { tittel: 'Tegning', b: 103 },
+      { tittel: 'Målestokk', b: 30 },
+      { tittel: 'Side', b: 26, juster: 'right' },
+    ], tlRader)
+  } else {
+    // Lang tegningsliste: to spalter side om side, så den ikke sprenger siden.
+    const halv = Math.ceil(tlRader.length / 2)
+    const sp = (BREDDE - 6) / 2
+    const kol: Kolonne[] = [
+      { tittel: 'Nr.', b: 13 },
+      { tittel: 'Tegning', b: sp - 13 - 17 - 10 },
+      { tittel: 'Målestokk', b: 17 },
+      { tittel: 'Side', b: 10, juster: 'right' },
+    ]
+    s.plass(7.5 + halv * 6.4 + 4)
+    const y0 = s.y
+    tabell(s, kol, tlRader.slice(0, halv), { x: SL, bredde: sp })
+    const y1 = s.y
+    s.y = y0
+    tabell(s, kol, tlRader.slice(halv), { x: SL + sp + 6, bredde: sp })
+    s.y = Math.max(y1, s.y)
+  }
 
 }
 
@@ -988,6 +1083,7 @@ function montering(s: Skriver, inn: PlanInn) {
     const tx = SL + (bilde ? bildeW + 5 : 0)
     const tw = BREDDE - (bilde ? bildeW + 5 : 0)
     let y = startY
+    let brutt = false
     for (const st of g.steg) {
       const full = y > startY + 50
       const x = full ? SL : tx
@@ -995,7 +1091,7 @@ function montering(s: Skriver, inn: PlanInn) {
       const tLinjer = st.tittel ? brytTekst(s.f, st.tittel, w - 9, 8.8, 'bold') : []
       const linjer = brytTekst(s.f, st.tekst, w - 9, 8.4)
       const h = tLinjer.length * 3.8 + linjer.length * 3.6 + (st.advarsel ? 6 : 0) + 3
-      if (y + h > BUNN) { s.ny(); y = s.y }
+      if (y + h > BUNN) { s.ny(); y = s.y; brutt = true }
       s.f.sirkel(x + 3, y + 2.6, 2.8, { strek: null, fyll: C.tekst })
       s.f.tekst(String(nr++), x + 3, y + 2.7, { str: 7.4, vekt: 'bold', farge: '#ffffff', juster: 'center', grunnlinje: 'middle' })
       let ly = y + 3.6
@@ -1007,7 +1103,8 @@ function montering(s: Skriver, inn: PlanInn) {
       }
       y = ly + 2
     }
-    s.y = Math.max(y, bilde ? startY + 52 : y) + 3
+    // Etter sideskift gjelder ikke bildets høyde fra forrige side.
+    s.y = Math.max(y, bilde && !brutt ? startY + 52 : y) + 3
   }
 }
 
@@ -1093,23 +1190,33 @@ function grunnlag(s: Skriver, inn: PlanInn) {
 
 // ── Råd ─────────────────────────────────────────────────────────────────
 
+const FESTEMIDLER = [
+  'Bruk varmforsinkede eller rustfrie (A4) skruer og beslag utendørs – impregnert virke korroderer vanlig stål.',
+  'Forbor nær endene for å unngå sprekker, og senk skruehodene i synlige flater.',
+  'Bærende forbindelser (sperrer, bjelker, stolper) skal ha beslag eller bolter som angitt – ikke bare skruer i endeved.',
+]
+const OVERFLATE = [
+  'La impregnert virke tørke noen uker før behandling, ellers fester ikke olje eller beis seg.',
+  'Forsegl endeved ekstra – det er der vannet trekker inn og råte starter.',
+  'Olje gir et naturlig uttrykk og fornyes årlig; beis/dekkbeis beskytter lenger mot UV og gråning.',
+  'Hev konstruksjonen fra bakken og unngå stående vann – konstruktiv trebeskyttelse varer lengst.',
+  'Se over skruer, beslag og tekking hvert år, og skift ut skadde bord tidlig.',
+]
+
+/** Omtrentlig høyde (mm) av råd-delen – til å unngå at halen havner alene på en ny side. */
+function raadHoyde(s: Skriver, inn: PlanInn): number {
+  const lh = 8.6 * 0.42
+  const pk = (l: string[]) => l.reduce((sum, p) => sum + brytTekst(s.f, p, BREDDE - 6, 8.6).length * lh + 1.4, 0) + 1
+  return 15 + (inn.raad.length ? 9.5 + pk(inn.raad) : 0) + 9.5 + pk(FESTEMIDLER) + 9.5 + pk(OVERFLATE)
+}
+
 function raad(s: Skriver, inn: PlanInn) {
   s.seksjon('7', 'Råd om utførelse og vedlikehold')
   if (inn.raad.length) { s.under('Råd for ditt prosjekt'); s.punkter(inn.raad, { str: 8.6 }) }
   s.under('Festemidler')
-  s.punkter([
-    'Bruk varmforsinkede eller rustfrie (A4) skruer og beslag utendørs – impregnert virke korroderer vanlig stål.',
-    'Forbor nær endene for å unngå sprekker, og senk skruehodene i synlige flater.',
-    'Bærende forbindelser (sperrer, bjelker, stolper) skal ha beslag eller bolter som angitt – ikke bare skruer i endeved.',
-  ], { str: 8.6 })
+  s.punkter(FESTEMIDLER, { str: 8.6 })
   s.under('Overflatebehandling i norsk klima')
-  s.punkter([
-    'La impregnert virke tørke noen uker før behandling, ellers fester ikke olje eller beis seg.',
-    'Forsegl endeved ekstra – det er der vannet trekker inn og råte starter.',
-    'Olje gir et naturlig uttrykk og fornyes årlig; beis/dekkbeis beskytter lenger mot UV og gråning.',
-    'Hev konstruksjonen fra bakken og unngå stående vann – konstruktiv trebeskyttelse varer lengst.',
-    'Se over skruer, beslag og tekking hvert år, og skift ut skadde bord tidlig.',
-  ], { str: 8.6 })
+  s.punkter(OVERFLATE, { str: 8.6 })
 }
 
 // ── Hovedfunksjon ───────────────────────────────────────────────────────
@@ -1189,16 +1296,16 @@ function tegnPlan(dok: Dok, inn: PlanInn, ref?: Sidetall): PlanResultat & Sideta
   const s = new Skriver(dok)
   seksjonSider.push([String(s.sider[0] + 1), 'Materialliste'])
   materialliste(s, inn)
-  s.ny()
+  s.nyDel()
   seksjonSider.push([String(s.sider[s.sider.length - 1] + 1), 'Kappliste og kappeplan'])
   kappliste(s, inn, pos)
-  s.ny()
+  s.nyDel()
   seksjonSider.push([String(s.sider[s.sider.length - 1] + 1), 'Montering trinn for trinn'])
   montering(s, inn)
-  s.ny()
+  s.nyDel()
   seksjonSider.push([String(s.sider[s.sider.length - 1] + 1), inn.beregning ? 'Beregningsvedlegg og byggesak' : 'Konstruksjonsgrunnlag og byggesak'])
   grunnlag(s, inn)
-  s.ny()
+  s.nyDel(raadHoyde(s, inn))
   seksjonSider.push([String(s.sider[s.sider.length - 1] + 1), 'Råd om utførelse og vedlikehold'])
   raad(s, inn)
 
