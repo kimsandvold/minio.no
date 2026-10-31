@@ -1,0 +1,14 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "terrasseScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "modus", "order": "ASCENDING" },
+        { "fieldPath": "dag", "order": "ASCENDING" },
+        { "fieldPath": "poeng", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

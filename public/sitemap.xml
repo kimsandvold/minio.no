@@ -135,6 +135,12 @@
     <changefreq>monthly</changefreq>
   </url>
   <url>
+    <loc>https://minio.no/underholdning/tool-terrasse.html</loc>
+    <lastmod>2026-10-31</lastmod>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://minio.no/underholdning/tool-stack.html</loc>
     <lastmod>2026-10-30</lastmod>
     <priority>0.4</priority>

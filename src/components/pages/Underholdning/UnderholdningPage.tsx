@@ -29,6 +29,17 @@ interface Spill {
 
 const SPILL: Spill[] = [
   {
+    href: '/underholdning/tool-terrasse.html',
+    tittel: 'Terrassemester',
+    beskrivelse:
+      'Legg terrassebord på bjelkelaget, fyll rader og kolonner og skru dem fast. Tre minutter på do eller uendelig – og utfordre kompisen på de samme plankene.',
+    ferdighet: 'Logikk',
+    tid: '3 min / uendelig',
+    maal: '3 000 poeng',
+    bilde: '/images/underholdning/terrasse.webp',
+    nytt: true,
+  },
+  {
     href: '/underholdning/tool-stack.html',
     tittel: 'Stabelmester',
     beskrivelse: 'Slipp plankene og kapp bort det som stikker ut. Treff på millimeteren og stabl høyest mulig.',
@@ -36,7 +47,6 @@ const SPILL: Spill[] = [
     tid: 'ca. 2 min',
     maal: '25 planker',
     bilde: '/images/underholdning/stack.webp',
-    nytt: true,
   },
   {
     href: '/underholdning/tool-nails.html',
@@ -87,6 +97,8 @@ const SPILL: Spill[] = [
 
 /** Toppen fremhever det nyeste spillet – eller det første, om ingen er nye. */
 const UTVALGT = SPILL.find((s) => s.nytt) ?? SPILL[0]
+/** Rutenettet viser resten – det utvalgte står allerede i toppen. */
+const RESTEN = SPILL.filter((s) => s !== UTVALGT)
 
 export default function UnderholdningPage() {
   useSEO({
@@ -112,7 +124,7 @@ export default function UnderholdningPage() {
                   <Primaerknapp href={UTVALGT.href}>
                     <Icon name="faPlay" /> Spill {UTVALGT.tittel}
                   </Primaerknapp>
-                  <Sekundaerknapp href="#spill">Se alle spillene</Sekundaerknapp>
+                  <Sekundaerknapp href="#spill">Se flere spill</Sekundaerknapp>
                 </Handlinger>
                 <Fakta>
                   <li><strong>{SPILL.length}</strong> spill</li>
@@ -156,12 +168,12 @@ export default function UnderholdningPage() {
         <Spillseksjon id="spill" aria-labelledby="alle-spill">
           <Wrap>
             <SeksjonHode>
-              <h2 id="alle-spill">Alle spillene</h2>
+              <h2 id="alle-spill">Flere spill</h2>
               <p>Én runde tar noen minutter. Rekorden din lagres i nettleseren – så du kan prøve igjen. Og igjen.</p>
             </SeksjonHode>
 
             <Rutenett>
-              {SPILL.map((spill, i) => (
+              {RESTEN.map((spill, i) => (
                 <Kort key={spill.href} href={spill.href} className="spillkort">
                   <Tavle>
                     <Nummer>{String(i + 1).padStart(2, '0')}</Nummer>
