@@ -48,6 +48,8 @@ async function readRoutes() {
     const routes = locs
       .filter((u) => u.startsWith(SITE_URL))
       .map((u) => new URL(u).pathname)
+      // Statiske sider (spillene i public/) finnes allerede som filer.
+      .filter((p) => !p.endsWith('.html'))
     // Unik liste, forsiden først.
     return [...new Set(routes)].sort((a, b) => a.length - b.length)
   } catch (e) {
@@ -57,21 +59,29 @@ async function readRoutes() {
 }
 
 // Liten statisk server med SPA-fallback til index.html.
-function startServer() {
+//
+// Fallbacken er det UBERØRTE Vite-skallet, lest inn én gang før noe prerendres.
+// Forsiden prerendres først og overskriver dist/index.html; leste vi fila på
+// nytt, ville alle andre ruter starte fra forsidens snapshot og arve det den
+// la inn i <head> (bl.a. et render-blokkerende Google Fonts-ark med ~30
+// graveringsfonter) – og det ville havnet i hver eneste prerendrede side.
+function startServer(shell) {
   return new Promise((resolve) => {
     const server = createServer(async (req, res) => {
       try {
         const url = decodeURIComponent((req.url || '/').split('?')[0])
         let filePath = join(distDir, url)
         let ext = extname(filePath)
+        let data
         if (!ext) {
-          filePath = join(distDir, 'index.html') // SPA-fallback
+          data = shell // SPA-fallback – alltid det rene skallet
           ext = '.html'
+        } else {
+          data = await readFile(filePath).catch(() => {
+            ext = '.html'
+            return shell
+          })
         }
-        const data = await readFile(filePath).catch(async () => {
-          ext = '.html'
-          return readFile(join(distDir, 'index.html'))
-        })
         res.writeHead(200, { 'Content-Type': MIME[ext] || 'application/octet-stream' })
         res.end(data)
       } catch {
@@ -95,12 +105,18 @@ async function main() {
     return
   }
 
-  const server = await startServer()
-  const base = `http://localhost:${PORT}`
+  const shell = await readFile(join(distDir, 'index.html'))
+  const server = await startServer(shell)
+
+  // 3D-sidene (three.js/WebGL) får av og til headless Chromium til å henge, og
+  // da feiler alle ruter etter den. Vi starter derfor nettleseren på nytt og
+  // prøver ruta én gang til når noe går galt.
+  const launch = () =>
+    puppeteer.launch({ headless: 'new', protocolTimeout: 90000, args: ['--no-sandbox', '--disable-setuid-sandbox'] })
 
   let browser
   try {
-    browser = await puppeteer.launch({ headless: 'new', args: ['--no-sandbox', '--disable-setuid-sandbox'] })
+    browser = await launch()
   } catch (e) {
     console.warn('[prerender] kunne ikke starte Chromium – hopper over prerender:', e.message)
     server.close()
@@ -108,63 +124,89 @@ async function main() {
   }
 
   let ok = 0
+  const feilet = []
   for (const route of routes) {
-    const page = await browser.newPage()
-    try {
-      await page.goto(base + route, { waitUntil: 'networkidle2', timeout: 60000 })
-      // Bekreft at useSEO har kjørt for nettopp DENNE ruta: canonical-pathname
-      // skal matche, og appen skal ha rendret innhold i #root.
-      await page
-        .waitForFunction(
-          (expected) => {
-            const root = document.querySelector('#root')
-            const canonical = document.querySelector('link[rel="canonical"]')
-            if (!root || root.children.length === 0 || !canonical) return false
-            try {
-              return new URL(canonical.href).pathname === expected
-            } catch {
-              return false
-            }
-          },
-          { timeout: 15000 },
-          route,
-        )
-        .catch(() => {})
-      // Liten margin så resten av JSON-LD/meta rekker å settes.
-      await new Promise((r) => setTimeout(r, 300))
-
-      // styled-components bruker CSSOM insertRule i produksjon ("speedy mode"),
-      // så <style data-styled> står tom i outerHTML. Da lastes den statiske HTML-en
-      // helt ustilt (kjempelogo, synlig skip-link, rå login-knapp) til JS-bunten
-      // rekker å re-injisere stilene → hvitt blink ved lasting. Skriv reglene
-      // tilbake som tekst før snapshot, så prerendret HTML er ferdig stilt.
-      await page.evaluate(() => {
-        document.querySelectorAll('style[data-styled]').forEach((tag) => {
-          const sheet = tag.sheet
-          if (!sheet || sheet.cssRules.length === 0) return
-          const css = Array.from(sheet.cssRules)
-            .map((rule) => rule.cssText)
-            .join('')
-          if (tag.textContent !== css) tag.textContent = css
-        })
-      })
-
-      const html = await page.evaluate(() => '<!DOCTYPE html>\n' + document.documentElement.outerHTML)
-      const outDir = route === '/' ? distDir : join(distDir, route)
-      await mkdir(outDir, { recursive: true })
-      await writeFile(join(outDir, 'index.html'), html, 'utf-8')
-      ok++
-      console.log(`[prerender] ✓ ${route}`)
-    } catch (e) {
-      console.warn(`[prerender] ✗ ${route}: ${e.message}`)
-    } finally {
-      await page.close()
+    for (let forsok = 1; forsok <= 2; forsok++) {
+      let page
+      try {
+        page = await browser.newPage()
+        await snapshot(page, route)
+        ok++
+        console.log(`[prerender] ✓ ${route}`)
+        break
+      } catch (e) {
+        console.warn(`[prerender] ✗ ${route} (forsøk ${forsok}): ${e.message}`)
+        if (forsok === 2) {
+          feilet.push(route)
+        } else {
+          await browser.close().catch(() => {})
+          browser = await launch()
+          page = undefined
+        }
+      } finally {
+        await page?.close().catch(() => {})
+      }
     }
   }
 
   await browser.close()
   server.close()
   console.log(`[prerender] ferdig – ${ok}/${routes.length} ruter prerendret`)
+  if (feilet.length) console.warn(`[prerender] IKKE prerendret: ${feilet.join(', ')}`)
+}
+
+async function snapshot(page, route) {
+  await page.goto(`http://localhost:${PORT}${route}`, { waitUntil: 'networkidle2', timeout: 60000 })
+  // Bekreft at useSEO har kjørt for nettopp DENNE ruta: canonical-pathname
+  // skal matche, og appen skal ha rendret innhold i #root.
+  await page
+    .waitForFunction(
+      (expected) => {
+        const root = document.querySelector('#root')
+        const canonical = document.querySelector('link[rel="canonical"]')
+        if (!root || root.children.length === 0 || !canonical) return false
+        try {
+          return new URL(canonical.href).pathname === expected
+        } catch {
+          return false
+        }
+      },
+      { timeout: 15000 },
+      route,
+    )
+    .catch(() => {})
+  // Liten margin så resten av JSON-LD/meta rekker å settes.
+  await new Promise((r) => setTimeout(r, 300))
+
+  // styled-components bruker CSSOM insertRule i produksjon ("speedy mode"),
+  // så <style data-styled> står tom i outerHTML. Da lastes den statiske HTML-en
+  // helt ustilt (kjempelogo, synlig skip-link, rå login-knapp) til JS-bunten
+  // rekker å re-injisere stilene → hvitt blink ved lasting. Skriv reglene
+  // tilbake som tekst før snapshot, så prerendret HTML er ferdig stilt.
+  await page.evaluate(() => {
+    document.querySelectorAll('style[data-styled]').forEach((tag) => {
+      const sheet = tag.sheet
+      if (!sheet || sheet.cssRules.length === 0) return
+      const css = Array.from(sheet.cssRules)
+        .map((rule) => rule.cssText)
+        .join('')
+      if (tag.textContent !== css) tag.textContent = css
+    })
+  })
+
+  // Google Fonts-ark som appen legger inn i <head> under kjøring (graverings-/
+  // designerfonter) ville blitt render-blokkerende <link>-er i statisk HTML.
+  // Fjern dem – komponentene legger dem inn igjen når JS-en tar over.
+  await page.evaluate(() => {
+    document
+      .querySelectorAll('link[rel="stylesheet"][href*="fonts.googleapis.com"]')
+      .forEach((link) => link.remove())
+  })
+
+  const html = await page.evaluate(() => '<!DOCTYPE html>\n' + document.documentElement.outerHTML)
+  const outDir = route === '/' ? distDir : join(distDir, route)
+  await mkdir(outDir, { recursive: true })
+  await writeFile(join(outDir, 'index.html'), html, 'utf-8')
 }
 
 main().catch((e) => {

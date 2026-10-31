@@ -56,7 +56,9 @@ export function useSEO({ title, description, ogImage, ogImageAlt, noindex, keywo
   const { pathname, search } = useLocation()
   const fullUrl = `${SITE_URL}${pathname}${search}`
   // Kanonisk URL skal ikke inneholde spørrestreng (?utm=…) – unngår duplikat-kanoniske.
-  const canonicalUrl = `${SITE_URL}${pathname}`
+  // Apache sender /kontakt → /kontakt/ (prerendret mappe); kanonisk skal likevel
+  // være uten avsluttende skråstrek, som i sitemap og prerendret HTML.
+  const canonicalUrl = `${SITE_URL}${pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname}`
   const imageUrl = `${SITE_URL}${ogImage || DEFAULT_OG_IMAGE}`
   const jsonLdKey = jsonLd ? JSON.stringify(jsonLd) : ''
   const stableJsonLd = useMemo(() => jsonLd, [jsonLdKey])
