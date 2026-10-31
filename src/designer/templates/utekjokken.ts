@@ -566,7 +566,7 @@ export const utekjokken: ProductTemplate<UtekjokkenConfig> = {
   tilgjengelig: true,
   fraPris: 349,
   // Materialpakke tilbys ikke – bygging og byggeplan.
-  leveranser: ['ferdig', 'plan'],
+  leveranser: ['plan'],
   defaultConfig: {
     form: 'rett',
     bredde: 280,

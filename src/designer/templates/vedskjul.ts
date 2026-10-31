@@ -710,7 +710,7 @@ export const vedskjul: ProductTemplate<VedskjulConfig> = {
   bilde: '/images/products/vedskjul-3d.webp',
   tilgjengelig: true,
   fraPris: 349,
-  leveranser: ['ferdig', 'plan'],
+  leveranser: ['plan'],
   defaultConfig: {
     bredde: 360,
     dybde: 180,

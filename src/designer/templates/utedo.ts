@@ -637,7 +637,7 @@ export const utedo: ProductTemplate<UtedoConfig> = {
   beskrivelse: 'Tegn utedoen i 3D – konstruksjon bygget opp steg for steg.',
   tilgjengelig: true,
   fraPris: 349,
-  leveranser: ['ferdig', 'plan'],
+  leveranser: ['plan'],
   defaultConfig: {
     bredde: 100,
     dybde: 110,

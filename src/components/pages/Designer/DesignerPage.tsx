@@ -1183,17 +1183,15 @@ export default function DesignerPage() {
             <RailActions>
               <OptTitle>Hva vil du gjøre?</OptTitle>
               <OptList>
-                <OptRow
-                  $disabled={!kanLeveranse('ferdig')}
-                  disabled={!kanLeveranse('ferdig')}
-                  onClick={() => kanLeveranse('ferdig') && setForesporsel('ferdig')}
-                >
-                  <OptIco><Icon name="faHammer" /></OptIco>
-                  <OptText><b>Forespør om bygging</b><em>Vi bygger og leverer</em></OptText>
-                  {kanLeveranse('ferdig')
-                    ? (<><OptPrice><span>fra</span>{formatKr(prisFerdig)}</OptPrice><OptArrow><Icon name="faChevronRight" /></OptArrow></>)
-                    : (<OptNa>Ikke tilgjengelig</OptNa>)}
-                </OptRow>
+                {/* Kun små produkter bygges ferdig – store prosjekter er bygg selv / snekker. */}
+                {kanLeveranse('ferdig') && (
+                  <OptRow onClick={() => setForesporsel('ferdig')}>
+                    <OptIco><Icon name="faHammer" /></OptIco>
+                    <OptText><b>Forespør om bygging</b><em>Vi bygger og leverer</em></OptText>
+                    <OptPrice><span>fra</span>{formatKr(prisFerdig)}</OptPrice>
+                    <OptArrow><Icon name="faChevronRight" /></OptArrow>
+                  </OptRow>
+                )}
                 {/* Vises kun for produkter som faktisk tilbyr kapping. */}
                 {kanLeveranse('materialpakke') && (
                   <OptRow onClick={() => setForesporsel('materialpakke')}>
