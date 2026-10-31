@@ -3,17 +3,19 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#1a1a1a" />
+    <meta name="color-scheme" content="dark" />
     <title>Minio Underholdning - Sag Rytme</title>
     <meta name="description" content="Sag planker i perfekt rytme! Treff kuttelinjene for combo-bonus og vinn 10% rabattkode fra Minio."/>
     <meta name="keywords" content="Minio, spill, sag, rytme, timing, Lillehammer, håndverk, rabattkode"/>
     <meta name="author" content="Minio"/>
     <meta name="robots" content="index, follow"/>
-    <link rel="canonical" href="https://www.minio.no/underholdning/tool-saw.html"/>
+    <link rel="canonical" href="https://minio.no/underholdning/tool-saw.html"/>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
-    <link rel="apple-touch-icon" href="/favicon.ico"/>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <link rel="apple-touch-icon" href="/favicon.svg"/>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-E4J774CTXF"></script>
@@ -26,12 +28,10 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website"/>
-    <meta property="og:url" content="https://www.minio.no/underholdning/tool-saw.html"/>
+    <meta property="og:url" content="https://minio.no/underholdning/tool-saw.html"/>
     <meta property="og:title" content="Sag Rytme – Minio Underholdning"/>
     <meta property="og:description" content="Sag planker i perfekt rytme! Treff kuttelinjene og vinn 10% rabattkode!"/>
-    <meta property="og:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
-    <meta property="og:image:width" content="1200"/>
-    <meta property="og:image:height" content="630"/>
+    <meta property="og:image" content="https://minio.no/images/hero/carport-elbil-forside.webp"/>
     <meta property="og:image:alt" content="Sag Rytme - Minio spill"/>
     <meta property="og:site_name" content="Minio"/>
     <meta property="og:locale" content="nb_NO"/>
@@ -40,16 +40,22 @@
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:title" content="Sag Rytme – Klarer du å slå meg?"/>
     <meta name="twitter:description" content="Sag planker i perfekt rytme! Test deg selv!"/>
-    <meta name="twitter:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
+    <meta name="twitter:image" content="https://minio.no/images/hero/carport-elbil-forside.webp"/>
 
     <style>
         :root {
             --dark-bg: #202020;
             --darker-bg: #1a1a1a;
             --text-light: #f9f9f9;
+            --text-muted: rgba(255, 255, 255, 0.62);
             --accent: #1da1f2;
+            --gold: #ffd700;
             --success: #4caf50;
             --error: #e53935;
+            --header-h: 56px;
+            --ok-w: 100px;
+            --good-w: 60px;
+            --perfect-w: 30px;
         }
 
         * {
@@ -64,6 +70,7 @@
             height: 100%;
             overflow: hidden;
             touch-action: manipulation;
+            overscroll-behavior: none;
         }
 
         body {
@@ -78,23 +85,40 @@
             -webkit-user-select: none;
         }
 
+        main {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .visually-hidden {
+            position: absolute !important;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            clip-path: inset(50%);
+            white-space: nowrap;
+        }
+
         /* Animated starfield background */
         .stars-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             overflow: hidden;
             z-index: 0;
         }
 
         .stars {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background: radial-gradient(ellipse at bottom, #1a1a2e 0%, #0a0a12 100%);
         }
 
@@ -102,10 +126,7 @@
         .stars::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background-repeat: repeat;
         }
 
@@ -146,22 +167,25 @@
 
         /* Logo */
         .logo {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
+            line-height: 0;
         }
 
         .logo img {
-            height: 50px;
+            height: 40px;
             width: auto;
+            display: block;
         }
 
         h1 {
             font-size: 2.2rem;
             font-weight: 800;
             margin-bottom: 0.5rem;
+            text-align: center;
         }
 
         .home-link {
-            margin-top: 2rem;
+            margin-top: 1.5rem;
             display: inline-block;
             padding: 0.75rem 1.5rem;
             background: rgba(47, 47, 47, 0.8);
@@ -171,7 +195,7 @@
             font-weight: 500;
             border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.2s;
+            transition: background-color 0.2s, border-color 0.2s;
         }
 
         .home-link:hover,
@@ -183,15 +207,15 @@
         .high-score-display {
             margin-top: 1rem;
             font-size: 0.9rem;
-            color: rgba(255,255,255,0.5);
+            color: var(--text-muted);
         }
 
         .high-score-display span {
-            color: #ffd700;
+            color: var(--gold);
             font-weight: 700;
         }
 
-        /* Unified Header - combines navigation and game stats */
+        /* Unified header */
         .unified-header {
             position: fixed;
             top: 0;
@@ -201,19 +225,22 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.5rem 0.75rem;
+            gap: 0.5rem;
+            padding: 0.5rem max(0.75rem, env(safe-area-inset-right)) 0.5rem max(0.75rem, env(safe-area-inset-left));
             background: var(--darker-bg);
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            height: 56px;
+            height: var(--header-h);
         }
 
-        .header-left {
+        .header-left,
+        .header-right {
             display: flex;
             align-items: center;
             gap: 0.4rem;
         }
 
-        .header-home {
+        .header-home,
+        .icon-btn {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -221,16 +248,21 @@
             height: 36px;
             background: rgba(47, 47, 47, 0.8);
             border-radius: 8px;
+            border: none;
             text-decoration: none;
             color: var(--text-light);
             font-size: 1rem;
-            transition: all 0.2s;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
         }
 
         .header-home:hover,
-        .header-home:active {
+        .icon-btn:hover {
             background: rgba(29, 161, 242, 0.3);
         }
+
+        .icon-btn[hidden] { display: none; }
 
         .game-nav {
             display: flex;
@@ -249,7 +281,7 @@
             text-decoration: none;
             color: var(--text-light);
             font-size: 1rem;
-            transition: all 0.2s;
+            transition: background-color 0.2s;
             border: 2px solid transparent;
         }
 
@@ -262,16 +294,10 @@
             background: rgba(29, 161, 242, 0.15);
         }
 
-        .header-center {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
         .header-stats {
             display: none;
             align-items: center;
-            gap: 1rem;
+            gap: 0.9rem;
         }
 
         .header-stats.visible {
@@ -280,7 +306,7 @@
 
         .header-stat {
             text-align: center;
-            min-width: 45px;
+            min-width: 42px;
         }
 
         .header-stat-value {
@@ -288,12 +314,21 @@
             font-weight: 800;
             color: var(--text-light);
             line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .header-stat-value.bump {
+            animation: bump 0.25s ease-out;
+        }
+
+        @keyframes bump {
+            50% { transform: scale(1.2); color: var(--gold); }
         }
 
         .header-stat-label {
             font-size: 0.55rem;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.5);
+            color: var(--text-muted);
             letter-spacing: 0.3px;
         }
 
@@ -304,7 +339,7 @@
 
         .header-life {
             font-size: 0.9rem;
-            transition: all 0.3s;
+            transition: opacity 0.3s, transform 0.3s;
         }
 
         .header-life.lost {
@@ -312,14 +347,17 @@
             transform: scale(0.7);
         }
 
-
         @media (max-width: 480px) {
+            :root { --header-h: 50px; }
+
             .unified-header {
-                padding: 0.4rem 0.5rem;
-                height: 50px;
+                padding-top: 0.4rem;
+                padding-bottom: 0.4rem;
+                gap: 0.3rem;
             }
 
-            .header-home {
+            .header-home,
+            .icon-btn {
                 width: 32px;
                 height: 32px;
                 font-size: 0.9rem;
@@ -331,93 +369,45 @@
                 font-size: 0.9rem;
             }
 
-            .header-stat {
-                min-width: 38px;
-            }
+            .header-stats { gap: 0.5rem; }
+            .header-stat { min-width: 34px; }
+            .header-stat-value { font-size: 0.95rem; }
+            .header-stat-label { font-size: 0.5rem; }
+            .header-life { font-size: 0.7rem; }
 
-            .header-stat-value {
-                font-size: 0.95rem;
-            }
-
-            .header-stat-label {
-                font-size: 0.5rem;
-            }
-
-            .header-life {
-                font-size: 0.75rem;
-            }
-
+            /* Make room for stats while playing */
+            body.is-playing .game-nav { display: none; }
         }
 
         @media (max-width: 360px) {
-            .game-nav {
-                gap: 0.2rem;
-            }
-
+            .game-nav { gap: 0.2rem; }
             .game-nav-item {
                 width: 26px;
                 height: 26px;
                 font-size: 0.8rem;
             }
-
-            .header-stats {
-                gap: 0.5rem;
-            }
-
-            .header-stat {
-                min-width: 32px;
-            }
-
-            .header-stat-value {
-                font-size: 0.85rem;
-            }
+            .header-stat { min-width: 30px; }
+            .header-stat-value { font-size: 0.85rem; }
         }
 
         /* Game container */
         .game-container {
             width: 100%;
             max-width: 420px;
-            height: calc(100% - 56px);
+            height: calc(100% - var(--header-h));
             max-height: 700px;
             display: flex;
             flex-direction: column;
             position: relative;
-            margin: 0 auto;
-            margin-top: 56px;
+            margin: var(--header-h) auto 0;
+            padding: 0.5rem 0.5rem max(0.5rem, env(safe-area-inset-bottom));
             z-index: 1;
         }
 
-        @media (max-width: 480px) {
-            .game-container {
-                height: calc(100% - 50px);
-                margin-top: 50px;
-                max-height: none;
-            }
-        }
-
-        /* Combo display */
-        .combo-display {
-            position: fixed;
-            top: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: #ffd700;
-            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
-            transition: all 0.2s;
-            z-index: 100;
-        }
-
-        .combo-display.pulse {
-            transform: translateX(-50%) scale(1.3);
-        }
+        .game-container[hidden] { display: none; }
 
         @media (max-width: 480px) {
-            .combo-display {
-                top: 62px;
-                font-size: 1.3rem;
-            }
+            .game-container { max-height: none; }
         }
 
         /* Game area */
@@ -429,6 +419,115 @@
             position: relative;
             border: 2px solid rgba(255, 255, 255, 0.1);
             box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.5);
+            touch-action: none;
+            cursor: pointer;
+            will-change: transform;
+        }
+
+        .fx-canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+
+        /* Target progress */
+        .goal {
+            position: absolute;
+            top: 12px;
+            left: 14px;
+            right: 14px;
+            z-index: 30;
+            pointer-events: none;
+        }
+
+        .goal-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .goal-label strong { color: var(--gold); }
+
+        .goal-track {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .goal-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ff8c00, var(--gold));
+            border-radius: 3px;
+            transition: width 0.3s ease-out;
+        }
+
+        .goal.reached .goal-fill {
+            background: linear-gradient(90deg, #2e7d32, var(--success));
+        }
+
+        /* Combo display */
+        .combo-display {
+            position: absolute;
+            top: 46px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--gold);
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            transition: transform 0.2s;
+            z-index: 40;
+            pointer-events: none;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .combo-display[hidden] { display: none; }
+
+        .combo-display.pulse {
+            transform: translateX(-50%) scale(1.3);
+        }
+
+        /* Hit zone guides */
+        .hit-zone {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            height: 110px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 3;
+        }
+
+        .hit-zone.ok {
+            width: var(--ok-w);
+            background: rgba(33, 150, 243, 0.08);
+            border-left: 1px dashed rgba(33, 150, 243, 0.35);
+            border-right: 1px dashed rgba(33, 150, 243, 0.35);
+        }
+
+        .hit-zone.perfect {
+            width: var(--perfect-w);
+            background: rgba(255, 215, 0, 0.12);
+        }
+
+        .cut-zone {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            background: rgba(255, 255, 255, 0.12);
+            z-index: 4;
+            pointer-events: none;
         }
 
         /* Saw blade */
@@ -438,6 +537,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             z-index: 10;
+            pointer-events: none;
         }
 
         .saw-blade {
@@ -450,6 +550,7 @@
                 0 0 20px rgba(0, 0, 0, 0.5),
                 inset 0 0 20px rgba(255, 255, 255, 0.1);
             animation: spin 0.5s linear infinite;
+            opacity: 0.92;
         }
 
         .saw-blade::before {
@@ -463,15 +564,13 @@
             background: radial-gradient(circle, #222 0%, #111 100%);
             border-radius: 50%;
             border: 3px solid #444;
+            z-index: 1;
         }
 
         .saw-blade::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             background: repeating-conic-gradient(
                 from 0deg,
                 transparent 0deg 10deg,
@@ -486,52 +585,30 @@
         }
 
         .saw-blade.cutting {
-            animation: spin 0.1s linear infinite;
-            filter: brightness(1.2);
+            animation-duration: 0.1s;
+            filter: brightness(1.3);
         }
 
-        /* Cut line indicator */
-        .cut-zone {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            background: rgba(255, 255, 255, 0.1);
-            z-index: 5;
-        }
-
-        .cut-zone::before,
-        .cut-zone::after {
-            content: '';
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            border-left: 8px solid transparent;
-            border-right: 8px solid transparent;
-        }
-
-        .cut-zone::before {
-            top: 10px;
-            border-top: 10px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .cut-zone::after {
-            bottom: 10px;
-            border-bottom: 10px solid rgba(255, 255, 255, 0.3);
+        .game-area.paused .saw-blade {
+            animation-play-state: paused;
         }
 
         /* Wood plank */
         .plank-container {
             position: absolute;
             top: 50%;
-            transform: translateY(-50%);
+            left: 50%;
             height: 60px;
             display: flex;
             align-items: center;
+            z-index: 6;
+            pointer-events: none;
+            will-change: transform;
+        }
+
+        .plank-container.leaving {
+            transition: opacity 0.25s ease-out;
+            opacity: 0;
         }
 
         .plank {
@@ -554,10 +631,7 @@
         .plank::before {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+            inset: 0;
             background: repeating-linear-gradient(
                 90deg,
                 transparent 0px,
@@ -574,13 +648,12 @@
             top: 0;
             bottom: 0;
             width: 3px;
-            background: linear-gradient(180deg,
-                #ff4444 0%,
-                #ff6666 50%,
-                #ff4444 100%
-            );
+            margin-left: -1.5px;
+            background: #ff4444;
             box-shadow: 0 0 10px rgba(255, 68, 68, 0.5);
             z-index: 2;
+            opacity: 0.7;
+            transition: background-color 0.1s, box-shadow 0.1s, opacity 0.1s;
         }
 
         .cut-line::before {
@@ -593,65 +666,100 @@
             color: #ff4444;
         }
 
+        .cut-line.next {
+            opacity: 1;
+            box-shadow: 0 0 14px rgba(255, 68, 68, 0.8);
+        }
+
+        .cut-line.in-zone {
+            background: var(--gold);
+            box-shadow: 0 0 16px rgba(255, 215, 0, 0.9);
+        }
+
+        .cut-line.in-zone::before { color: var(--gold); }
+
+        .cut-line.cut {
+            width: 5px;
+            margin-left: -2.5px;
+            background: #2a1a10;
+            box-shadow: inset 0 0 3px #000;
+            opacity: 1;
+        }
+
+        .cut-line.cut::before { content: none; }
+
+        .cut-line.missed {
+            background: rgba(120, 120, 120, 0.6);
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .cut-line.missed::before { content: '✕'; color: #f44336; }
+
         /* Feedback text */
-        .feedback {
+        .feedback,
+        .level-toast {
             position: absolute;
-            top: 30%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 2rem;
             font-weight: 800;
             opacity: 0;
             pointer-events: none;
             text-shadow: 0 0 20px currentColor;
-            z-index: 100;
+            z-index: 60;
+            white-space: nowrap;
         }
 
-        .feedback.show {
+        .feedback {
+            top: 30%;
+            font-size: 2rem;
+        }
+
+        .level-toast {
+            top: 70%;
+            font-size: 1.1rem;
+            color: var(--accent);
+        }
+
+        .feedback.show,
+        .level-toast.show {
             animation: feedbackPop 0.6s ease-out forwards;
         }
 
-        .feedback.perfect {
-            color: #ffd700;
-        }
+        .level-toast.show { animation-duration: 1.2s; }
 
-        .feedback.good {
-            color: #4caf50;
-        }
-
-        .feedback.ok {
-            color: #2196f3;
-        }
-
-        .feedback.miss {
-            color: #f44336;
-        }
+        .feedback.perfect { color: var(--gold); }
+        .feedback.good { color: #4caf50; }
+        .feedback.ok { color: #2196f3; }
+        .feedback.miss,
+        .feedback.early { color: #f44336; }
 
         @keyframes feedbackPop {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.5);
-            }
-            20% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1.2);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -70%) scale(1);
-            }
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -70%) scale(1); }
         }
 
-        /* Sawdust particles */
-        .sawdust {
+        /* Onboarding hint */
+        .hint {
             position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #d4b584;
-            border-radius: 50%;
+            top: calc(50% - 105px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: max-content;
+            max-width: 90%;
+            padding: 0.45rem 0.8rem;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.55);
+            color: #fff;
+            font-size: 0.85rem;
+            text-align: center;
+            z-index: 45;
             pointer-events: none;
-            z-index: 50;
+            transition: opacity 0.3s;
         }
+
+        .hint.hidden { opacity: 0; }
 
         /* Tap zone */
         .tap-zone {
@@ -659,11 +767,12 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 120px;
+            height: 130px;
             display: flex;
             align-items: center;
             justify-content: center;
             background: linear-gradient(180deg, transparent 0%, rgba(29, 161, 242, 0.1) 100%);
+            z-index: 20;
         }
 
         .tap-button {
@@ -681,23 +790,22 @@
                 0 8px 25px rgba(255, 107, 53, 0.4),
                 inset 0 2px 10px rgba(255, 255, 255, 0.2),
                 0 0 0 3px rgba(139, 69, 19, 0.3);
-            transition: all 0.1s;
+            transition: transform 0.08s, box-shadow 0.08s;
             display: flex;
             align-items: center;
             justify-content: center;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
             -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            user-select: none;
+            touch-action: none;
+            font-family: inherit;
+            margin-bottom: 14px;
         }
 
-        .tap-button:active,
-        .tap-button:focus {
+        .tap-button.pressed {
             transform: scale(0.92);
             box-shadow:
                 0 4px 15px rgba(255, 107, 53, 0.4),
                 inset 0 2px 10px rgba(255, 255, 255, 0.2);
-            outline: none;
         }
 
         .tap-button.flash {
@@ -705,10 +813,13 @@
             border-color: #1b5e20;
         }
 
-        /* Desktop hover */
+        .tap-button.flash-bad {
+            background: linear-gradient(145deg, #9e9e9e 0%, #616161 100%);
+            border-color: #424242;
+        }
+
         @media (hover: hover) {
             .tap-button:hover {
-                transform: scale(1.05);
                 box-shadow:
                     0 12px 35px rgba(255, 107, 53, 0.5),
                     inset 0 2px 10px rgba(255, 255, 255, 0.2),
@@ -716,7 +827,6 @@
             }
         }
 
-        /* Mobile: larger tap area */
         @media (max-width: 480px) {
             .tap-button {
                 width: 110px;
@@ -727,67 +837,95 @@
 
         .spacebar-hint {
             position: absolute;
-            bottom: 8px;
+            bottom: 6px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.72rem;
+            color: rgba(255, 255, 255, 0.45);
             white-space: nowrap;
         }
 
         /* Speed indicator */
         .speed-bar {
             position: absolute;
-            bottom: 130px;
+            bottom: 140px;
             left: 1rem;
             right: 1rem;
             height: 4px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 2px;
             overflow: hidden;
+            z-index: 20;
         }
 
         .speed-fill {
             height: 100%;
+            width: 20%;
             background: linear-gradient(90deg, #4caf50, #ffc107, #f44336);
             border-radius: 2px;
             transition: width 0.3s;
         }
 
-        /* Screens */
-        .screen {
-            position: fixed;
-            top: 56px;
-            left: 0;
-            width: 100%;
-            height: calc(100% - 56px);
+        /* Pause overlay */
+        .pause-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 80;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
+            gap: 1rem;
+            background: rgba(10, 10, 18, 0.78);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            cursor: default;
+        }
+
+        .pause-overlay[hidden] { display: none; }
+
+        .pause-overlay h2 {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        .pause-overlay p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        /* Screens */
+        .screen {
+            position: fixed;
+            top: var(--header-h);
+            left: 0;
+            width: 100%;
+            height: calc(100% - var(--header-h));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 1.5rem max(1.5rem, env(safe-area-inset-bottom));
             z-index: 1;
             overflow-y: auto;
         }
 
+        /* Center vertically when there is room, scroll from the top when not */
+        .screen > :first-child { margin-top: auto; }
+        .screen > :last-child { margin-bottom: auto; }
+
         @media (max-width: 480px) {
-            .screen {
-                top: 50px;
-                height: calc(100% - 50px);
-                padding: 1rem;
-                justify-content: flex-start;
-                padding-top: 1.5rem;
-            }
+            .screen { padding: 1.25rem 1rem max(1.25rem, env(safe-area-inset-bottom)); }
+            h1 { font-size: 1.9rem; }
         }
 
-        .screen.hidden {
+        .screen[hidden] {
             display: none;
         }
 
         .screen-subtitle {
             font-size: 1rem;
-            color: rgba(255, 255, 255, 0.6);
-            margin-bottom: 1.5rem;
+            color: var(--text-muted);
+            margin-bottom: 1.25rem;
             text-align: center;
         }
 
@@ -795,10 +933,11 @@
             background: linear-gradient(135deg, rgba(255, 215, 0, 0.15) 0%, rgba(255, 165, 0, 0.1) 100%);
             border: 1px solid rgba(255, 215, 0, 0.3);
             border-radius: 12px;
-            padding: 1rem 1.5rem;
-            margin-bottom: 2rem;
+            padding: 0.9rem 1.25rem;
+            margin-bottom: 1.25rem;
             text-align: center;
-            max-width: 320px;
+            max-width: 340px;
+            width: 100%;
         }
 
         .reward-teaser-icon {
@@ -812,23 +951,24 @@
         }
 
         .reward-teaser-text strong {
-            color: #ffd700;
+            color: var(--gold);
         }
 
         .instructions {
+            list-style: none;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            max-width: 320px;
+            padding: 1.1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            max-width: 340px;
             width: 100%;
         }
 
         .instruction-item {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
+            gap: 0.9rem;
+            margin-bottom: 0.75rem;
         }
 
         .instruction-item:last-child {
@@ -836,20 +976,20 @@
         }
 
         .instruction-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: rgba(29, 161, 242, 0.2);
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             flex-shrink: 0;
         }
 
         .instruction-text {
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.8);
+            color: rgba(255, 255, 255, 0.85);
             line-height: 1.4;
         }
 
@@ -858,13 +998,9 @@
         }
 
         /* Hide keyboard hint on touch devices */
-        .desktop-only {
-            display: flex;
-        }
-
         @media (hover: none) and (pointer: coarse) {
             .desktop-only {
-                display: none;
+                display: none !important;
             }
         }
 
@@ -872,10 +1008,16 @@
             padding: 1rem 3rem;
             font-size: 1.2rem;
             font-weight: 700;
+            font-family: inherit;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: default;
         }
 
         .btn-primary {
@@ -884,45 +1026,61 @@
             box-shadow: 0 4px 20px rgba(29, 161, 242, 0.4);
         }
 
-        .btn-primary:hover, .btn-primary:active {
+        .btn-primary:not(:disabled):hover,
+        .btn-primary:not(:disabled):active {
             transform: scale(1.05);
             box-shadow: 0 6px 30px rgba(29, 161, 242, 0.5);
+        }
+
+        .btn-small {
+            padding: 0.6rem 1.4rem;
+            font-size: 1rem;
         }
 
         /* Game over screen */
         .final-score {
             font-size: 4rem;
             font-weight: 800;
-            color: #ffd700;
+            color: var(--gold);
             text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
-            margin: 0.5rem 0;
+            margin: 0.25rem 0;
+            font-variant-numeric: tabular-nums;
+            line-height: 1.1;
         }
+
+        .best-line {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .best-line strong { color: var(--gold); }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            margin: 1.5rem 0;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.6rem;
+            margin: 1.25rem 0;
             width: 100%;
-            max-width: 320px;
+            max-width: 360px;
         }
 
         .stat-item {
             background: rgba(255, 255, 255, 0.05);
             border-radius: 12px;
-            padding: 1rem;
+            padding: 0.8rem 0.3rem;
             text-align: center;
         }
 
         .stat-value {
-            font-size: 1.5rem;
+            font-size: 1.35rem;
             font-weight: 800;
             color: #1da1f2;
+            font-variant-numeric: tabular-nums;
         }
 
         .stat-label {
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.65rem;
+            color: var(--text-muted);
             text-transform: uppercase;
             margin-top: 0.3rem;
         }
@@ -934,9 +1092,11 @@
             border-radius: 50px;
             font-size: 0.9rem;
             font-weight: 700;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
             animation: pulse 1s ease-in-out infinite;
         }
+
+        .high-score-badge[hidden] { display: none; }
 
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
@@ -948,10 +1108,11 @@
             background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(56, 142, 60, 0.2) 100%);
             border: 2px solid #4caf50;
             border-radius: 16px;
-            padding: 1.5rem;
-            margin: 1rem 0;
+            padding: 1.25rem 1.5rem;
+            margin: 0 0 1.25rem;
             text-align: center;
-            max-width: 320px;
+            max-width: 340px;
+            width: 100%;
             animation: glowPulse 2s ease-in-out infinite;
         }
 
@@ -960,7 +1121,7 @@
             50% { box-shadow: 0 0 40px rgba(76, 175, 80, 0.5); }
         }
 
-        .discount-reveal h3 {
+        .discount-reveal h2 {
             color: #4caf50;
             font-size: 1.2rem;
             margin-bottom: 0.5rem;
@@ -973,19 +1134,35 @@
             background: rgba(0, 0, 0, 0.3);
             padding: 0.5rem 1.5rem;
             border-radius: 8px;
-            font-family: monospace;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
             letter-spacing: 3px;
             margin: 0.5rem 0;
             display: inline-block;
+            user-select: all;
+            -webkit-user-select: all;
         }
 
         .discount-desc {
             font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.7);
+            color: rgba(255, 255, 255, 0.75);
         }
 
-        /* Screen shake */
-        .shake {
+        .copy-btn {
+            margin-top: 0.6rem;
+            padding: 0.45rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            font: inherit;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .copy-btn:hover { background: rgba(255,255,255,0.16); }
+
+        /* Screen shake (driven from JS for intensity control) */
+        .game-area.shake {
             animation: shake 0.3s ease-in-out;
         }
 
@@ -995,155 +1172,215 @@
             75% { transform: translateX(5px); }
         }
 
-        /* Responsive */
+        /* Short screens */
         @media (max-height: 600px) {
-            .game-header {
-                padding: 0.5rem 1rem;
-            }
             .tap-button {
                 width: 80px;
                 height: 80px;
                 font-size: 1.2rem;
             }
-            .tap-zone {
-                height: 100px;
-            }
-            .speed-bar {
-                bottom: 110px;
-            }
+            .tap-zone { height: 108px; }
+            .speed-bar { bottom: 114px; }
             .saw-blade {
                 width: 60px;
                 height: 60px;
             }
-            .plank-container {
-                height: 50px;
-            }
-            .plank {
-                height: 100%;
-            }
+            .plank-container { height: 50px; }
+            .hit-zone { height: 90px; }
+            .hint { top: calc(50% - 90px); }
         }
 
         @media (max-height: 500px) {
-            .game-header {
-                padding: 0.25rem 0.75rem;
-            }
-            .game-header .logo img {
-                height: 18px;
-            }
             .tap-button {
-                width: 70px;
-                height: 70px;
-                font-size: 1.1rem;
+                width: 66px;
+                height: 66px;
+                font-size: 1.05rem;
+                margin-bottom: 10px;
             }
-            .tap-zone {
-                height: 85px;
+            .tap-zone { height: 86px; }
+            .speed-bar { bottom: 92px; }
+            .goal { top: 6px; }
+            .combo-display { top: 32px; font-size: 1.2rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .stars::before,
+            .stars::after,
+            .high-score-badge,
+            .discount-reveal {
+                animation: none;
             }
-            .speed-bar {
-                bottom: 95px;
-            }
+            .saw-blade { animation-duration: 2s; }
+            .saw-blade.cutting { animation-duration: 2s; }
+            .game-area.shake { animation: none; }
+            .header-stat-value.bump { animation: none; }
+            .feedback.show,
+            .level-toast.show { animation-name: fadeOnly; }
+            .combo-display.pulse { transform: translateX(-50%); }
+            .btn-primary:not(:disabled):hover,
+            .btn-primary:not(:disabled):active { transform: none; }
+        }
+
+        @keyframes fadeOnly {
+            0% { opacity: 0; }
+            15% { opacity: 1; }
+            100% { opacity: 0; }
         }
     </style>
 </head>
 
 <body>
     <!-- Animated background -->
-    <div class="stars-container">
+    <div class="stars-container" aria-hidden="true">
         <div class="stars"></div>
     </div>
 
+    <!-- Unified Header -->
+    <header class="unified-header" id="unified-header">
+        <div class="header-left">
+            <a href="/underholdning" class="header-home" data-leave title="Alle spill" aria-label="Tilbake til alle spill">🏠</a>
+            <nav class="game-nav" aria-label="Andre spill">
+                <a href="tool-quiz.html" class="game-nav-item" data-leave title="Verktøy Quiz" aria-label="Verktøy Quiz">🌍</a>
+                <a href="tool-game.html" class="game-nav-item" data-leave title="Finn Verktøyet" aria-label="Finn Verktøyet">🔨</a>
+                <a href="tool-nails.html" class="game-nav-item" data-leave title="Spiker'n" aria-label="Spiker'n">🪵</a>
+                <a href="tool-saw.html" class="game-nav-item active" title="Sag Rytme" aria-label="Sag Rytme" aria-current="page">🪚</a>
+                <a href="tool-maze.html" class="game-nav-item" data-leave title="Verktøyjakt" aria-label="Verktøyjakt">👷</a>
+                <a href="tool-stack.html" class="game-nav-item" data-leave title="Stabelmester" aria-label="Stabelmester">📏</a>
+            </nav>
+        </div>
+        <div class="header-right">
+            <div class="header-stats" id="header-stats">
+                <div class="header-lives" id="header-lives" role="img" aria-label="3 liv igjen">
+                    <span class="header-life" aria-hidden="true">❤️</span>
+                    <span class="header-life" aria-hidden="true">❤️</span>
+                    <span class="header-life" aria-hidden="true">❤️</span>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value" id="score-display">0</div>
+                    <div class="header-stat-label">Poeng</div>
+                </div>
+                <div class="header-stat">
+                    <div class="header-stat-value" id="level-display">1</div>
+                    <div class="header-stat-label">Nivå</div>
+                </div>
+            </div>
+            <button type="button" class="icon-btn" id="pause-btn" aria-label="Pause" title="Pause (P)" hidden>⏸</button>
+            <button type="button" class="icon-btn" id="mute-btn" aria-pressed="false" aria-label="Slå av lyd" title="Lyd av/på (M)">🔊</button>
+        </div>
+    </header>
+
+    <main>
     <!-- Start Screen -->
-    <div class="screen" id="start-screen">
+    <section class="screen" id="start-screen" aria-labelledby="start-title">
         <div class="logo">
-            <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+            <img src="/images/branding/logo_navbar.svg" alt="Minio" width="545" height="148">
         </div>
 
-        <h1>Sag Rytme</h1>
+        <h1 id="start-title">Sag Rytme</h1>
         <p class="screen-subtitle">Sag planker i perfekt rytme!</p>
 
         <div class="reward-teaser">
-            <div class="reward-teaser-icon">🎁</div>
+            <div class="reward-teaser-icon" aria-hidden="true">🎁</div>
             <div class="reward-teaser-text">
                 Nå <strong>5000 poeng</strong> og få en <strong>10% rabattkode</strong> på varmepumpehus!
             </div>
         </div>
 
-        <div class="instructions">
-            <div class="instruction-item">
-                <div class="instruction-icon">🪵</div>
-                <div class="instruction-text">Planker glir forbi sagbladet</div>
-            </div>
-            <div class="instruction-item">
-                <div class="instruction-icon">🎯</div>
-                <div class="instruction-text">Trykk når kuttelinjen treffer sagbladet</div>
-            </div>
-            <div class="instruction-item">
-                <div class="instruction-icon">⚡</div>
-                <div class="instruction-text">Perfekt timing = combo bonus!</div>
-            </div>
-            <div class="instruction-item">
-                <div class="instruction-icon">💀</div>
-                <div class="instruction-text">Miss 3 kutt og spillet er over</div>
-            </div>
-            <div class="instruction-item desktop-only">
-                <div class="instruction-icon">⌨️</div>
-                <div class="instruction-text">Bruk <strong>mellomrom</strong> for å sage!</div>
-            </div>
-        </div>
+        <ul class="instructions">
+            <li class="instruction-item">
+                <div class="instruction-icon" aria-hidden="true">🪵</div>
+                <div class="instruction-text">Planker glir mot sagbladet</div>
+            </li>
+            <li class="instruction-item">
+                <div class="instruction-icon" aria-hidden="true">🎯</div>
+                <div class="instruction-text">Sag når den <strong>røde kuttelinjen</strong> er midt i sagbladet – den lyser gult når du er i sonen</div>
+            </li>
+            <li class="instruction-item">
+                <div class="instruction-icon" aria-hidden="true">⚡</div>
+                <div class="instruction-text">Treff på rad gir combo – opptil 10x poeng!</div>
+            </li>
+            <li class="instruction-item">
+                <div class="instruction-icon" aria-hidden="true">💔</div>
+                <div class="instruction-text">Slipper du forbi 3 kuttelinjer, er spillet over</div>
+            </li>
+            <li class="instruction-item desktop-only">
+                <div class="instruction-icon" aria-hidden="true">⌨️</div>
+                <div class="instruction-text">Sag med <strong>mellomrom</strong>, pause med <strong>P</strong></div>
+            </li>
+        </ul>
 
-        <button class="btn btn-primary" onclick="startGame()">▶ Start</button>
+        <button type="button" class="btn btn-primary" id="start-btn">▶ Start</button>
 
         <div class="high-score-display" id="highScoreDisplay">
-            Rekord: <span id="highScoreValue">0</span>
+            Din rekord: <span id="highScoreValue">0</span>
         </div>
 
-        <a href="/" class="home-link">← Tilbake til minio.no</a>
-    </div>
+        <a href="/underholdning" class="home-link">← Alle spill</a>
+    </section>
 
     <!-- Game Screen -->
-    <div class="game-container" id="game-container" style="display: none;">
-        <div class="combo-display" id="combo-display" style="display: none;">1x</div>
+    <div class="game-container" id="game-container" hidden>
+        <div class="game-area" id="game-area" role="application" aria-label="Sag Rytme spillområde. Trykk eller bruk mellomrom for å sage.">
+            <div class="goal" id="goal" aria-hidden="true">
+                <div class="goal-label">
+                    <span id="goal-text">Rabattkode: 0 / 5000</span>
+                    <span>Rekord: <strong id="best-ingame">0</strong></span>
+                </div>
+                <div class="goal-track"><div class="goal-fill" id="goal-fill"></div></div>
+            </div>
 
-        <div class="game-area" id="game-area">
-            <div class="cut-zone"></div>
+            <div class="combo-display" id="combo-display" aria-hidden="true" hidden>1x</div>
 
-            <div class="saw-container">
+            <div class="hit-zone ok" aria-hidden="true"></div>
+            <div class="hit-zone perfect" aria-hidden="true"></div>
+            <div class="cut-zone" aria-hidden="true"></div>
+
+            <div class="saw-container" aria-hidden="true">
                 <div class="saw-blade" id="saw-blade"></div>
             </div>
 
-            <div class="plank-container" id="plank-container">
-                <!-- Planks generated by JS -->
+            <div class="hint" id="hint" aria-hidden="true">Sag når den røde linjen er midt i bladet</div>
+
+            <div class="feedback" id="feedback" aria-hidden="true"></div>
+            <div class="level-toast" id="level-toast" aria-hidden="true"></div>
+
+            <div class="speed-bar" aria-hidden="true">
+                <div class="speed-fill" id="speed-fill"></div>
             </div>
 
-            <div class="feedback" id="feedback"></div>
-
-            <div class="speed-bar">
-                <div class="speed-fill" id="speed-fill" style="width: 20%;"></div>
-            </div>
+            <canvas class="fx-canvas" id="fx-canvas" aria-hidden="true"></canvas>
 
             <div class="tap-zone">
-                <button class="tap-button" id="tap-button" ontouchstart="handleTap(event)" onmousedown="handleTap(event)">
-                    SAG!
-                </button>
+                <button type="button" class="tap-button" id="tap-button" aria-label="Sag">SAG!</button>
                 <div class="spacebar-hint desktop-only">eller trykk mellomrom</div>
+            </div>
+
+            <div class="pause-overlay" id="pause-overlay" hidden>
+                <h2>Pause</h2>
+                <p>Spillet venter på deg.</p>
+                <button type="button" class="btn btn-primary btn-small" id="resume-btn">▶ Fortsett</button>
             </div>
         </div>
     </div>
 
     <!-- Game Over Screen -->
-    <div class="screen hidden" id="gameover-screen">
+    <section class="screen" id="gameover-screen" aria-labelledby="gameover-title" hidden>
         <div class="logo">
-            <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+            <img src="/images/branding/logo_navbar.svg" alt="Minio" width="545" height="148">
         </div>
 
-        <h1>Spillet er over!</h1>
+        <h1 id="gameover-title">Spillet er over!</h1>
 
-        <div id="high-score-badge" class="high-score-badge" style="display: none;">
-            🏆 Ny rekord!
-        </div>
+        <div id="high-score-badge" class="high-score-badge" hidden>🏆 Ny rekord!</div>
 
         <div class="final-score" id="final-score">0</div>
+        <div class="best-line" id="best-line"></div>
 
         <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-value" id="stat-level">1</div>
+                <div class="stat-label">Nivå</div>
+            </div>
             <div class="stat-item">
                 <div class="stat-value" id="stat-cuts">0</div>
                 <div class="stat-label">Kutt</div>
@@ -1160,427 +1397,702 @@
 
         <div id="discount-container"></div>
 
-        <button class="btn btn-primary" onclick="restartGame()">▶ Spill igjen</button>
+        <button type="button" class="btn btn-primary" id="restart-btn">▶ Spill igjen</button>
 
-        <a href="/" class="home-link">← Tilbake til minio.no</a>
-    </div>
+        <a href="/underholdning" class="home-link">← Alle spill</a>
+    </section>
+    </main>
 
-    <!-- Unified Header -->
-    <header class="unified-header" id="unified-header">
-        <div class="header-left">
-            <a href="index.html" class="header-home" onclick="return confirmLeave(this)" title="Tilbake">🏠</a>
-            <nav class="game-nav">
-                <a href="tool-quiz.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøy Quiz">🌍</a>
-                <a href="tool-game.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Finn Verktøyet">🔨</a>
-                <a href="tool-nails.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Spiker'n">🪵</a>
-                <a href="tool-saw.html" class="game-nav-item active" title="Sag Rytme">🪚</a>
-                <a href="tool-maze.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøyjakt">👷</a>
-            </nav>
-        </div>
-        <div class="header-stats" id="header-stats">
-            <div class="header-lives" id="header-lives">
-                <span class="header-life">❤️</span>
-                <span class="header-life">❤️</span>
-                <span class="header-life">❤️</span>
-            </div>
-            <div class="header-stat">
-                <div class="header-stat-value" id="score-display">0</div>
-                <div class="header-stat-label">Poeng</div>
-            </div>
-            <div class="header-stat">
-                <div class="header-stat-value" id="level-display">1</div>
-                <div class="header-stat-label">Nivå</div>
-            </div>
-        </div>
-    </header>
+    <div class="visually-hidden" aria-live="polite" id="sr-status"></div>
 
     <script>
-        // Game state
-        let score = 0;
-        let combo = 0;
-        let maxCombo = 0;
-        let lives = 3;
-        let level = 1;
-        let totalCuts = 0;
-        let perfectCuts = 0;
-        let isPlaying = false;
-        let plankSpeed = 2; // pixels per frame
-        let gameLoopId = null;
-        let highScore = parseInt(localStorage.getItem('sawRhythmHighScore')) || 0;
+    (function () {
+        'use strict';
 
-        // Show high score on start screen
-        document.getElementById('highScoreValue').textContent = highScore;
+        // ---------- Config ----------
+        const TARGET_SCORE = 5000;          // reward threshold (unchanged)
+        const DISCOUNT_CODE = 'VPH10';      // reward code (unchanged)
+        const BASE_SPEED = 120;             // px/s at level 1 (old: 2 px/frame @ 60 Hz)
+        const SPEED_PER_LEVEL = 18;         // px/s added per level
+        const MAX_SPEED = 470;              // px/s
+        const WINDOW_PERFECT = 15;          // px at base speed
+        const WINDOW_GOOD = 30;
+        const WINDOW_OK = 50;
+        const NEXT_PLANK_DELAY = 0.35;      // s after the last cut line is resolved
+        const STORAGE_HS = 'sawRhythmHighScore';
+        const STORAGE_MUTE = 'sawRhythmMuted';
 
-        // DOM elements
-        const gameContainer = document.getElementById('game-container');
-        const startScreen = document.getElementById('start-screen');
-        const gameoverScreen = document.getElementById('gameover-screen');
-        const gameArea = document.getElementById('game-area');
-        const plankContainer = document.getElementById('plank-container');
-        const scoreDisplay = document.getElementById('score-display');
-        const comboDisplay = document.getElementById('combo-display');
-        const headerStats = document.getElementById('header-stats');
-        const headerLives = document.getElementById('header-lives');
-        const levelDisplay = document.getElementById('level-display');
-        const speedFill = document.getElementById('speed-fill');
-        const feedback = document.getElementById('feedback');
-        const sawBlade = document.getElementById('saw-blade');
-        const tapButton = document.getElementById('tap-button');
+        const reducedMotionMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+        let reducedMotion = reducedMotionMq.matches;
+        reducedMotionMq.addEventListener?.('change', (e) => { reducedMotion = e.matches; });
 
-        // Plank state
-        let currentPlank = null;
-        let plankX = 0;
-        let cutLines = [];
+        // ---------- Storage (may throw in private mode / blocked storage) ----------
+        function storageGet(key) {
+            try { return window.localStorage.getItem(key); } catch (_) { return null; }
+        }
+        function storageSet(key, value) {
+            try { window.localStorage.setItem(key, String(value)); } catch (_) { /* ignore */ }
+        }
+
+        // ---------- DOM ----------
+        const $ = (id) => document.getElementById(id);
+        const startScreen = $('start-screen');
+        const gameoverScreen = $('gameover-screen');
+        const gameContainer = $('game-container');
+        const gameArea = $('game-area');
+        const scoreDisplay = $('score-display');
+        const levelDisplay = $('level-display');
+        const comboDisplay = $('combo-display');
+        const headerStats = $('header-stats');
+        const headerLives = $('header-lives');
+        const speedFill = $('speed-fill');
+        const feedback = $('feedback');
+        const levelToast = $('level-toast');
+        const sawBlade = $('saw-blade');
+        const tapButton = $('tap-button');
+        const hint = $('hint');
+        const goal = $('goal');
+        const goalText = $('goal-text');
+        const goalFill = $('goal-fill');
+        const bestIngame = $('best-ingame');
+        const pauseBtn = $('pause-btn');
+        const muteBtn = $('mute-btn');
+        const pauseOverlay = $('pause-overlay');
+        const resumeBtn = $('resume-btn');
+        const startBtn = $('start-btn');
+        const restartBtn = $('restart-btn');
+        const srStatus = $('sr-status');
+        const canvas = $('fx-canvas');
+        const ctx2d = canvas.getContext('2d');
+
+        // ---------- State ----------
+        // state: 'start' | 'playing' | 'paused' | 'over'
+        let state = 'start';
+        let score = 0, combo = 0, maxCombo = 0, lives = 3, level = 1;
+        let totalCuts = 0, perfectCuts = 0;
+        let speed = BASE_SPEED;
+        let highScore = parseInt(storageGet(STORAGE_HS), 10) || 0;
+        let rewardAnnounced = false;
+        let firstCutDone = false;
+        let gameOverAt = 0;
+
+        // Plank: offset of the plank's left edge relative to the saw centre (px)
+        let plank = null;          // { el, wrap, width, lines: [{x, el, done}] }
+        let plankOffset = 0;
         let nextCutIndex = 0;
+        let nextPlankTimer = -1;   // seconds until next plank; -1 = not scheduled
 
-        // Prevent zoom on double tap
-        document.addEventListener('touchstart', function(e) {
-            if (e.touches.length > 1) e.preventDefault();
-        }, { passive: false });
+        let rafId = 0;
+        let lastTs = 0;
+        let lastFrameTs = 0;
+        const timeouts = new Set();
 
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(e) {
-            const now = Date.now();
-            if (now - lastTouchEnd <= 300) e.preventDefault();
-            lastTouchEnd = now;
-        }, { passive: false });
+        function later(fn, ms) {
+            const id = setTimeout(() => { timeouts.delete(id); fn(); }, ms);
+            timeouts.add(id);
+            return id;
+        }
+        function clearLater() {
+            timeouts.forEach(clearTimeout);
+            timeouts.clear();
+        }
 
-        // Keyboard support for desktop
-        document.addEventListener('keydown', function(e) {
-            if (e.code === 'Space' || e.key === ' ') {
-                e.preventDefault();
-                if (isPlaying) {
-                    handleTap(e);
-                } else if (!startScreen.classList.contains('hidden')) {
-                    startGame();
-                } else if (!gameoverScreen.classList.contains('hidden')) {
-                    restartGame();
-                }
+        $('highScoreValue').textContent = highScore;
+
+        // ---------- Audio (Web Audio, created on first user gesture) ----------
+        let audioCtx = null, master = null, noiseBuf = null;
+        let muted = storageGet(STORAGE_MUTE) === '1';
+
+        function ensureAudio() {
+            if (muted) return null;
+            if (!audioCtx) {
+                const AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return null;
+                try {
+                    audioCtx = new AC();
+                } catch (_) { return null; }
+                master = audioCtx.createGain();
+                master.gain.value = 0.55;
+                master.connect(audioCtx.destination);
+                const len = Math.floor(audioCtx.sampleRate * 0.6);
+                noiseBuf = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+                const data = noiseBuf.getChannelData(0);
+                for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
             }
-        });
+            if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+            return audioCtx;
+        }
+
+        function envGain(ac, t, peak, attack, decay) {
+            const g = ac.createGain();
+            g.gain.setValueAtTime(0.0001, t);
+            g.gain.exponentialRampToValueAtTime(peak, t + attack);
+            g.gain.exponentialRampToValueAtTime(0.0001, t + attack + decay);
+            g.connect(master);
+            return g;
+        }
+
+        function tone(type, f0, f1, peak, dur, delay) {
+            const ac = ensureAudio();
+            if (!ac) return;
+            const t = ac.currentTime + (delay || 0);
+            const o = ac.createOscillator();
+            o.type = type;
+            o.frequency.setValueAtTime(f0, t);
+            if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+            o.connect(envGain(ac, t, peak, 0.01, dur));
+            o.start(t);
+            o.stop(t + dur + 0.05);
+        }
+
+        function sfxCut(quality) {
+            const ac = ensureAudio();
+            if (!ac) return;
+            const t = ac.currentTime;
+            // Rasp: filtered noise sweeping down
+            const n = ac.createBufferSource();
+            n.buffer = noiseBuf;
+            const bp = ac.createBiquadFilter();
+            bp.type = 'bandpass';
+            bp.Q.value = 1.4;
+            bp.frequency.setValueAtTime(3200, t);
+            bp.frequency.exponentialRampToValueAtTime(900, t + 0.22);
+            n.connect(bp);
+            bp.connect(envGain(ac, t, 0.5, 0.005, 0.22));
+            n.start(t);
+            n.stop(t + 0.3);
+            // Blade whine
+            const o = ac.createOscillator();
+            o.type = 'sawtooth';
+            o.frequency.setValueAtTime(240, t);
+            o.frequency.exponentialRampToValueAtTime(150, t + 0.2);
+            const lp = ac.createBiquadFilter();
+            lp.type = 'lowpass';
+            lp.frequency.value = 1400;
+            o.connect(lp);
+            lp.connect(envGain(ac, t, 0.08, 0.005, 0.2));
+            o.start(t);
+            o.stop(t + 0.25);
+            // Chime rising with combo
+            if (quality === 'perfect' || quality === 'good') {
+                const step = Math.min(combo, 12);
+                const f = 660 * Math.pow(2, step / 12);
+                tone('sine', f, f, quality === 'perfect' ? 0.16 : 0.08, 0.18, 0.02);
+            }
+        }
+
+        function sfxMiss() { tone('triangle', 160, 70, 0.35, 0.28); }
+        function sfxEarly() { tone('square', 200, 180, 0.05, 0.08); }
+        function sfxLevel() {
+            tone('sine', 523, 523, 0.12, 0.12);
+            tone('sine', 784, 784, 0.12, 0.18, 0.1);
+        }
+        function sfxReward() {
+            [523, 659, 784, 1047].forEach((f, i) => tone('sine', f, f, 0.12, 0.2, i * 0.09));
+        }
+        function sfxGameOver() {
+            tone('triangle', 330, 110, 0.25, 0.6);
+        }
+
+        function updateMuteBtn() {
+            muteBtn.textContent = muted ? '🔇' : '🔊';
+            muteBtn.setAttribute('aria-pressed', String(muted));
+            muteBtn.setAttribute('aria-label', muted ? 'Slå på lyd' : 'Slå av lyd');
+        }
+        function toggleMute() {
+            muted = !muted;
+            storageSet(STORAGE_MUTE, muted ? '1' : '0');
+            if (audioCtx && master) {
+                master.gain.setValueAtTime(muted ? 0 : 0.55, audioCtx.currentTime);
+            }
+            updateMuteBtn();
+        }
+        updateMuteBtn();
+
+        function vibrate(pattern) {
+            if (reducedMotion) return;
+            try { navigator.vibrate?.(pattern); } catch (_) { /* ignore */ }
+        }
+
+        // ---------- FX canvas (high-DPI) ----------
+        let cw = 0, ch = 0, dpr = 1;
+        function resizeCanvas() {
+            const rect = gameArea.getBoundingClientRect();
+            dpr = Math.min(window.devicePixelRatio || 1, 3);
+            cw = rect.width;
+            ch = rect.height;
+            canvas.width = Math.max(1, Math.round(cw * dpr));
+            canvas.height = Math.max(1, Math.round(ch * dpr));
+            ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+        if ('ResizeObserver' in window) {
+            new ResizeObserver(resizeCanvas).observe(gameArea);
+        } else {
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        const particles = [];
+        const SAWDUST_COLORS = ['#d4b584', '#c4a574', '#e6cfa0', '#b89564'];
+
+        function spawnSawdust(count, power) {
+            const cx = cw / 2, cy = ch / 2;
+            const n = reducedMotion ? Math.ceil(count / 3) : count;
+            for (let i = 0; i < n; i++) {
+                const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.1;
+                const v = (140 + Math.random() * 260) * power;
+                particles.push({
+                    x: cx + (Math.random() - 0.5) * 6,
+                    y: cy + (Math.random() - 0.5) * 20,
+                    vx: Math.cos(angle) * v,
+                    vy: Math.sin(angle) * v - 60,
+                    life: 0,
+                    maxLife: 0.5 + Math.random() * 0.5,
+                    size: 1.5 + Math.random() * 3,
+                    color: SAWDUST_COLORS[(Math.random() * SAWDUST_COLORS.length) | 0],
+                });
+            }
+            if (particles.length > 400) particles.splice(0, particles.length - 400);
+        }
+
+        function updateParticles(dt) {
+            ctx2d.clearRect(0, 0, cw, ch);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.life += dt;
+                if (p.life >= p.maxLife) { particles.splice(i, 1); continue; }
+                p.vy += 900 * dt;          // gravity
+                p.vx *= Math.pow(0.2, dt);  // drag
+                p.x += p.vx * dt;
+                p.y += p.vy * dt;
+                ctx2d.globalAlpha = 1 - p.life / p.maxLife;
+                ctx2d.fillStyle = p.color;
+                ctx2d.beginPath();
+                ctx2d.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx2d.fill();
+            }
+            ctx2d.globalAlpha = 1;
+        }
+
+        // ---------- Screen shake (time based) ----------
+        let shakeTime = 0, shakeDur = 0, shakeMag = 0;
+        function shake(mag, dur) {
+            if (reducedMotion) return;
+            shakeMag = Math.max(shakeMag * (shakeTime / (shakeDur || 1)), mag);
+            shakeDur = dur;
+            shakeTime = dur;
+        }
+        function updateShake(dt) {
+            if (shakeTime <= 0) return;
+            shakeTime = Math.max(0, shakeTime - dt);
+            const k = shakeTime / shakeDur;
+            const m = shakeMag * k;
+            gameArea.style.transform = k > 0
+                ? `translate(${(Math.random() * 2 - 1) * m}px, ${(Math.random() * 2 - 1) * m}px)`
+                : '';
+        }
+
+        // ---------- Difficulty ----------
+        function speedForLevel(lvl) {
+            return Math.min(BASE_SPEED + (lvl - 1) * SPEED_PER_LEVEL, MAX_SPEED);
+        }
+        // Windows widen slightly with speed so the timing window (ms) shrinks smoothly, not brutally
+        function windowScale() {
+            return 1 + (speed - BASE_SPEED) / 700;
+        }
+        function applyLevelVisuals() {
+            const s = windowScale();
+            gameArea.style.setProperty('--ok-w', (WINDOW_OK * 2 * s) + 'px');
+            gameArea.style.setProperty('--perfect-w', (WINDOW_PERFECT * 2 * s) + 'px');
+            const pct = 20 + 80 * (speed - BASE_SPEED) / (MAX_SPEED - BASE_SPEED);
+            speedFill.style.width = Math.min(100, pct) + '%';
+            levelDisplay.textContent = level;
+        }
+
+        // ---------- Plank ----------
+        function spawnPlank() {
+            // Fade out the previous plank instead of yanking it away
+            if (plank) {
+                const old = plank.wrap;
+                old.classList.add('leaving');
+                later(() => old.remove(), 300);
+            }
+
+            const numCuts = Math.min(2 + Math.floor(level / 2), 6);
+            const baseSpacing = 80 + Math.max(0, 30 - level * 2);
+            // From level 4 the rhythm becomes uneven
+            const jitter = level >= 4 ? Math.min(0.15 + (level - 4) * 0.03, 0.35) : 0;
+            const xs = [];
+            let x = 50 + Math.random() * 25;
+            for (let i = 0; i < numCuts; i++) {
+                xs.push(x);
+                const j = 1 + (Math.random() * 2 - 1) * jitter;
+                x += Math.max(60, baseSpacing * j);
+            }
+            const width = Math.round(x + 25);
+
+            const wrap = document.createElement('div');
+            wrap.className = 'plank-container';
+            const el = document.createElement('div');
+            el.className = 'plank';
+            el.style.width = width + 'px';
+            el.style.backgroundPosition = Math.round(Math.random() * 100) + 'px 0';
+            const lines = xs.map((lx) => {
+                const line = document.createElement('div');
+                line.className = 'cut-line';
+                line.style.left = lx + 'px';
+                el.appendChild(line);
+                return { x: lx, el: line, done: false };
+            });
+            wrap.appendChild(el);
+            gameArea.insertBefore(wrap, sawBlade.parentNode);
+
+            plank = { wrap, el, width, lines };
+            nextCutIndex = 0;
+            nextPlankTimer = -1;
+            // Start just off the right edge
+            plankOffset = gameArea.clientWidth / 2 + 30;
+            markNextLine();
+            renderPlank();
+        }
+
+        function renderPlank() {
+            if (!plank) return;
+            plank.wrap.style.transform = `translate3d(${plankOffset.toFixed(2)}px, -50%, 0)`;
+            const line = plank.lines[nextCutIndex];
+            if (line) {
+                const d = Math.abs(plankOffset + line.x);
+                line.el.classList.toggle('in-zone', d < WINDOW_OK * windowScale());
+            }
+        }
+
+        function markNextLine() {
+            if (!plank) return;
+            plank.lines.forEach((l, i) => {
+                l.el.classList.toggle('next', i === nextCutIndex);
+                if (i !== nextCutIndex) l.el.classList.remove('in-zone');
+            });
+        }
+
+        function resolveLine(kind) {
+            const line = plank.lines[nextCutIndex];
+            line.done = true;
+            line.el.classList.remove('next', 'in-zone');
+            line.el.classList.add(kind === 'miss' ? 'missed' : 'cut');
+            nextCutIndex++;
+            markNextLine();
+            if (nextCutIndex >= plank.lines.length) nextPlankTimer = NEXT_PLANK_DELAY;
+        }
+
+        // ---------- Game flow ----------
+        function setScreen(name) {
+            startScreen.hidden = name !== 'start';
+            gameoverScreen.hidden = name !== 'over';
+            gameContainer.hidden = name !== 'game';
+            const inGame = name === 'game';
+            headerStats.classList.toggle('visible', inGame);
+            pauseBtn.hidden = !inGame;
+            document.body.classList.toggle('is-playing', inGame);
+        }
 
         function startGame() {
-            // Reset state
-            score = 0;
-            combo = 0;
-            maxCombo = 0;
-            lives = 3;
-            level = 1;
-            totalCuts = 0;
-            perfectCuts = 0;
-            plankSpeed = 2;
-            nextCutIndex = 0;
+            if (state === 'playing' || state === 'paused') return;
+            ensureAudio();
+            stopLoop();
+            clearLater();
 
-            // Update UI
+            score = 0; combo = 0; maxCombo = 0; lives = 3; level = 1;
+            totalCuts = 0; perfectCuts = 0;
+            speed = speedForLevel(1);
+            rewardAnnounced = false;
+            restartBtn.disabled = false;
+            particles.length = 0;
+            shakeTime = 0;
+            gameArea.style.transform = '';
+
+            // Remove any planks from an earlier round
+            gameArea.querySelectorAll('.plank-container').forEach((n) => n.remove());
+            plank = null;
+
             scoreDisplay.textContent = '0';
-            comboDisplay.style.display = 'none';
+            comboDisplay.hidden = true;
             comboDisplay.textContent = '1x';
-            levelDisplay.textContent = '1';
-            speedFill.style.width = '20%';
+            bestIngame.textContent = highScore;
+            hint.classList.toggle('hidden', firstCutDone);
+            feedback.className = 'feedback';
+            levelToast.className = 'level-toast';
+            tapButton.classList.remove('flash', 'flash-bad', 'pressed');
+            pauseOverlay.hidden = true;
+            gameArea.classList.remove('paused');
             updateLivesDisplay();
+            updateGoal();
 
-            // Show header stats
-            headerStats.classList.add('visible');
-
-            // Switch screens
-            startScreen.classList.add('hidden');
-            gameoverScreen.classList.add('hidden');
-            gameContainer.style.display = 'flex';
-
-            // Start game
-            isPlaying = true;
+            setScreen('game');
+            resizeCanvas();
+            applyLevelVisuals();
             spawnPlank();
-            gameLoop();
+
+            state = 'playing';
+            announce('Spillet har startet. Nivå 1.');
+            startLoop();
+            tapButton.focus({ preventScroll: true });
         }
 
-        function spawnPlank() {
-            // Clear old plank
-            plankContainer.innerHTML = '';
-            cutLines = [];
-            nextCutIndex = 0;
-
-            // Create plank element
-            const plank = document.createElement('div');
-            plank.className = 'plank';
-
-            // Plank width based on level (longer planks = more cuts)
-            const numCuts = Math.min(2 + Math.floor(level / 2), 6);
-            const plankWidth = 150 + (numCuts * 80);
-            plank.style.width = plankWidth + 'px';
-
-            // Add cut lines
-            const spacing = plankWidth / (numCuts + 1);
-            for (let i = 1; i <= numCuts; i++) {
-                const cutLine = document.createElement('div');
-                cutLine.className = 'cut-line';
-                cutLine.style.left = (i * spacing) + 'px';
-                plank.appendChild(cutLine);
-                cutLines.push(i * spacing);
-            }
-
-            plankContainer.appendChild(plank);
-            currentPlank = plank;
-
-            // Start position (off screen right)
-            const areaWidth = gameArea.offsetWidth;
-            plankX = areaWidth + 50;
-            plankContainer.style.left = plankX + 'px';
+        function startLoop() {
+            stopLoop();
+            lastTs = 0;
+            rafId = requestAnimationFrame(loop);
+        }
+        function stopLoop() {
+            if (rafId) cancelAnimationFrame(rafId);
+            rafId = 0;
         }
 
-        function gameLoop() {
-            if (!isPlaying) return;
+        function loop(ts) {
+            rafId = 0;
+            if (state !== 'playing') return;
+            // Clamp dt so a stalled tab/frame doesn't teleport the plank
+            const dt = lastTs ? Math.min((ts - lastTs) / 1000, 0.05) : 0;
+            lastTs = ts;
+            lastFrameTs = performance.now();
 
-            // Move plank
-            plankX -= plankSpeed;
-            plankContainer.style.left = plankX + 'px';
+            step(dt);
+            updateParticles(dt);
+            updateShake(dt);
 
-            // Check if plank is off screen
-            const areaWidth = gameArea.offsetWidth;
-            const plankWidth = currentPlank.offsetWidth;
+            if (state === 'playing') rafId = requestAnimationFrame(loop);
+        }
 
-            if (plankX + plankWidth < -50) {
-                // Missed remaining cuts
-                const missedCuts = cutLines.length - nextCutIndex;
-                for (let i = 0; i < missedCuts; i++) {
+        function step(dt) {
+            if (!plank) return;
+            plankOffset -= speed * dt;
+
+            // Auto-miss lines that passed the saw
+            const okW = WINDOW_OK * windowScale();
+            while (nextCutIndex < plank.lines.length) {
+                const lineX = plankOffset + plank.lines[nextCutIndex].x;
+                if (lineX < -okW) {
+                    resolveLine('miss');
                     handleMiss();
-                    if (!isPlaying) return;
-                }
-
-                if (isPlaying) {
-                    levelUp();
-                    spawnPlank();
-                }
-            }
-
-            // Check for auto-miss (cut line passed center)
-            const centerX = areaWidth / 2;
-            while (nextCutIndex < cutLines.length) {
-                const cutLineX = plankX + cutLines[nextCutIndex];
-                if (cutLineX < centerX - 50) {
-                    // This cut line passed without being hit
-                    handleMiss();
-                    nextCutIndex++;
-                    if (!isPlaying) return;
+                    if (state !== 'playing') return;
                 } else {
                     break;
                 }
             }
 
-            gameLoopId = requestAnimationFrame(gameLoop);
+            renderPlank();
+
+            if (nextPlankTimer >= 0) {
+                nextPlankTimer -= dt;
+                if (nextPlankTimer < 0) {
+                    levelUp();
+                    spawnPlank();
+                }
+            }
         }
 
-        function handleTap(e) {
-            e.preventDefault();
-            if (!isPlaying) return;
+        function handleTap() {
+            if (state !== 'playing' || !plank) return;
+            ensureAudio();
 
-            // Visual feedback
-            tapButton.classList.add('flash');
-            setTimeout(() => tapButton.classList.remove('flash'), 100);
+            tapButton.classList.add('pressed');
+            later(() => tapButton.classList.remove('pressed'), 90);
 
-            // Check if there's a cut line near center
-            const areaWidth = gameArea.offsetWidth;
-            const centerX = areaWidth / 2;
-
-            if (nextCutIndex >= cutLines.length) {
-                // No more cuts on this plank - bad tap
+            if (nextCutIndex >= plank.lines.length) {
                 handleBadTap();
                 return;
             }
 
-            const cutLineX = plankX + cutLines[nextCutIndex];
-            const distance = Math.abs(cutLineX - centerX);
+            // Position at the exact moment of the tap, not the last rendered frame
+            const sinceFrame = Math.min(Math.max(performance.now() - lastFrameTs, 0), 50) / 1000;
+            const lineX = plankOffset - speed * sinceFrame + plank.lines[nextCutIndex].x;
+            const distance = Math.abs(lineX);
+            const s = windowScale();
 
-            if (distance < 15) {
-                // Perfect!
+            if (distance < WINDOW_PERFECT * s) {
                 handleCut('perfect', 100);
-            } else if (distance < 30) {
-                // Good
+            } else if (distance < WINDOW_GOOD * s) {
                 handleCut('good', 50);
-            } else if (distance < 50) {
-                // OK
+            } else if (distance < WINDOW_OK * s) {
                 handleCut('ok', 25);
             } else {
-                // Too early or wrong timing
                 handleBadTap();
             }
         }
 
         function handleCut(type, points) {
-            nextCutIndex++;
+            resolveLine('cut');
             totalCuts++;
+            if (type === 'perfect') perfectCuts++;
 
-            // Combo
             combo++;
             if (combo > maxCombo) maxCombo = combo;
 
-            // Score with combo multiplier
             const multiplier = Math.min(combo, 10);
-            const earnedPoints = points * multiplier;
-            score += earnedPoints;
+            const earned = points * multiplier;
+            score += earned;
             scoreDisplay.textContent = score;
+            bump(scoreDisplay);
+            updateGoal();
 
-            // Update combo display
             if (combo > 1) {
-                comboDisplay.style.display = 'block';
+                comboDisplay.hidden = false;
                 comboDisplay.textContent = combo + 'x';
                 comboDisplay.classList.add('pulse');
-                setTimeout(() => comboDisplay.classList.remove('pulse'), 200);
+                later(() => comboDisplay.classList.remove('pulse'), 200);
             }
 
-            // Visual feedback
-            showFeedback(type, earnedPoints);
+            if (!firstCutDone) {
+                firstCutDone = true;
+                hint.classList.add('hidden');
+            }
+
+            showFeedback(type, earned);
+            tapButton.classList.add('flash');
+            later(() => tapButton.classList.remove('flash'), 120);
             sawBlade.classList.add('cutting');
-            setTimeout(() => sawBlade.classList.remove('cutting'), 150);
-            createSawdust();
+            later(() => sawBlade.classList.remove('cutting'), 180);
 
-            if (type === 'perfect') {
-                perfectCuts++;
-            }
-
-            // Check level up (all cuts done)
-            if (nextCutIndex >= cutLines.length) {
-                setTimeout(() => {
-                    if (isPlaying) {
-                        levelUp();
-                        spawnPlank();
-                    }
-                }, 300);
-            }
+            const power = type === 'perfect' ? 1.2 : type === 'good' ? 0.9 : 0.6;
+            spawnSawdust(type === 'perfect' ? 34 : 20, power);
+            if (type === 'perfect') shake(2.5, 0.12);
+            sfxCut(type);
         }
 
         function handleMiss() {
             combo = 0;
-            comboDisplay.style.display = 'none';
-            lives--;
+            comboDisplay.hidden = true;
+            lives = Math.max(0, lives - 1);
             updateLivesDisplay();
 
             showFeedback('miss', 0);
-            gameArea.classList.add('shake');
-            setTimeout(() => gameArea.classList.remove('shake'), 300);
+            shake(7, 0.3);
+            vibrate(60);
+            sfxMiss();
 
-            if (lives <= 0) {
-                endGame();
-            }
+            if (lives <= 0) endGame();
         }
 
         function handleBadTap() {
-            // Penalty for tapping at wrong time
+            // Tapping at the wrong time breaks the combo (no life lost)
             combo = 0;
-            comboDisplay.style.display = 'none';
-            showFeedback('miss', 0);
+            comboDisplay.hidden = true;
+            showFeedback('early', 0);
+            tapButton.classList.add('flash-bad');
+            later(() => tapButton.classList.remove('flash-bad'), 120);
+            sfxEarly();
         }
 
         function showFeedback(type, points) {
             const texts = {
-                'perfect': 'PERFEKT! +' + points,
-                'good': 'BRA! +' + points,
-                'ok': 'OK +' + points,
-                'miss': 'MISS!'
+                perfect: 'PERFEKT! +' + points,
+                good: 'BRA! +' + points,
+                ok: 'OK +' + points,
+                miss: 'BOM!',
+                early: 'FOR TIDLIG',
             };
-
             feedback.textContent = texts[type];
             feedback.className = 'feedback ' + type;
-
-            // Trigger animation
-            void feedback.offsetWidth;
+            void feedback.offsetWidth; // restart animation
             feedback.classList.add('show');
-
-            setTimeout(() => {
-                feedback.classList.remove('show');
-            }, 600);
         }
 
-        function createSawdust() {
-            const centerX = gameArea.offsetWidth / 2;
-            const centerY = gameArea.offsetHeight / 2;
-
-            for (let i = 0; i < 12; i++) {
-                const particle = document.createElement('div');
-                particle.className = 'sawdust';
-                particle.style.left = centerX + 'px';
-                particle.style.top = centerY + 'px';
-
-                const angle = (Math.random() * Math.PI) - Math.PI / 2; // Upward spread
-                const velocity = 3 + Math.random() * 5;
-                const vx = Math.cos(angle) * velocity;
-                const vy = Math.sin(angle) * velocity - 2;
-
-                gameArea.appendChild(particle);
-
-                let x = 0, y = 0, opacity = 1;
-                const animate = () => {
-                    x += vx;
-                    y += vy + 0.5; // gravity
-                    opacity -= 0.03;
-
-                    particle.style.transform = `translate(${x}px, ${y}px)`;
-                    particle.style.opacity = opacity;
-
-                    if (opacity > 0) {
-                        requestAnimationFrame(animate);
-                    } else {
-                        particle.remove();
-                    }
-                };
-                requestAnimationFrame(animate);
-            }
+        function bump(el) {
+            el.classList.remove('bump');
+            void el.offsetWidth;
+            el.classList.add('bump');
         }
 
         function updateLivesDisplay() {
-            const hearts = headerLives.querySelectorAll('.header-life');
-            hearts.forEach((heart, index) => {
-                if (index >= lives) {
-                    heart.classList.add('lost');
-                } else {
-                    heart.classList.remove('lost');
-                }
+            headerLives.querySelectorAll('.header-life').forEach((heart, i) => {
+                heart.classList.toggle('lost', i >= lives);
             });
+            headerLives.setAttribute('aria-label', lives + ' liv igjen');
+        }
+
+        function updateGoal() {
+            const reached = score >= TARGET_SCORE;
+            goalFill.style.width = Math.min(100, (score / TARGET_SCORE) * 100) + '%';
+            goal.classList.toggle('reached', reached);
+            goalText.textContent = reached
+                ? '🎁 Rabattkode låst opp!'
+                : 'Rabattkode: ' + score + ' / ' + TARGET_SCORE;
+            if (reached && !rewardAnnounced) {
+                rewardAnnounced = true;
+                showLevelToast('🎁 Rabattkoden er din – fortsett!');
+                announce('Du har nådd ' + TARGET_SCORE + ' poeng og låst opp rabattkoden.');
+                sfxReward();
+            }
+            if (score > highScore) bestIngame.textContent = score;
+        }
+
+        function showLevelToast(text) {
+            levelToast.textContent = text;
+            levelToast.className = 'level-toast';
+            void levelToast.offsetWidth;
+            levelToast.classList.add('show');
         }
 
         function levelUp() {
             level++;
-            levelDisplay.textContent = level;
-
-            // Increase speed
-            plankSpeed = Math.min(2 + (level * 0.3), 8);
-            const speedPercent = Math.min(20 + (level * 10), 100);
-            speedFill.style.width = speedPercent + '%';
+            speed = speedForLevel(level);
+            applyLevelVisuals();
+            bump(levelDisplay);
+            showLevelToast('Nivå ' + level + ' – raskere!');
+            sfxLevel();
+            announce('Nivå ' + level);
         }
 
         function endGame() {
-            isPlaying = false;
-            cancelAnimationFrame(gameLoopId);
+            if (state === 'over') return;
+            state = 'over';
+            gameOverAt = performance.now();
+            stopLoop();
+            clearLater();
+            particles.length = 0;
+            gameArea.style.transform = '';
+            sfxGameOver();
+            vibrate([40, 60, 80]);
 
-            // Check high score
+            const previousBest = highScore;
             const isNewHighScore = score > highScore;
             if (isNewHighScore) {
                 highScore = score;
-                localStorage.setItem('sawRhythmHighScore', highScore);
+                storageSet(STORAGE_HS, highScore);
+            }
+            $('highScoreValue').textContent = highScore;
+
+            $('final-score').textContent = score;
+            $('stat-level').textContent = level;
+            $('stat-cuts').textContent = totalCuts;
+            $('stat-perfect').textContent = perfectCuts;
+            $('stat-max-combo').textContent = maxCombo + 'x';
+            $('high-score-badge').hidden = !isNewHighScore;
+
+            const bestLine = $('best-line');
+            if (isNewHighScore && previousBest > 0) {
+                bestLine.innerHTML = 'Forrige rekord: <strong>' + previousBest + '</strong>';
+            } else if (isNewHighScore) {
+                bestLine.textContent = 'Din første rekord!';
+            } else {
+                bestLine.innerHTML = 'Din rekord: <strong>' + highScore + '</strong>';
             }
 
-            // Update game over screen
-            document.getElementById('final-score').textContent = score;
-            document.getElementById('stat-cuts').textContent = totalCuts;
-            document.getElementById('stat-perfect').textContent = perfectCuts;
-            document.getElementById('stat-max-combo').textContent = maxCombo + 'x';
-
-            document.getElementById('high-score-badge').style.display = isNewHighScore ? 'block' : 'none';
-
-            // Check for discount (5000+ points)
-            const discountContainer = document.getElementById('discount-container');
-            if (score >= 5000) {
+            const discountContainer = $('discount-container');
+            if (score >= TARGET_SCORE) {
                 discountContainer.innerHTML = `
                     <div class="discount-reveal">
-                        <h3>🎉 Gratulerer!</h3>
+                        <h2>🎉 Gratulerer!</h2>
                         <p class="discount-desc">Du låste opp en rabattkode:</p>
-                        <div class="discount-code">VPH10</div>
+                        <div class="discount-code" id="discount-code">${DISCOUNT_CODE}</div>
                         <p class="discount-desc">10% rabatt på varmepumpehus!</p>
+                        <button type="button" class="copy-btn" id="copy-btn">Kopier koden</button>
                     </div>
                 `;
+                $('copy-btn').addEventListener('click', copyCode);
             } else {
-                const pointsNeeded = 5000 - score;
+                const pointsNeeded = TARGET_SCORE - score;
                 discountContainer.innerHTML = `
-                    <div class="reward-teaser" style="margin: 1rem 0;">
+                    <div class="reward-teaser">
                         <div class="reward-teaser-text">
                             Du trenger <strong>${pointsNeeded} poeng til</strong> for å låse opp rabattkoden!
                         </div>
@@ -1588,23 +2100,144 @@
                 `;
             }
 
-            // Hide header stats and show screen
-            headerStats.classList.remove('visible');
-            gameContainer.style.display = 'none';
-            gameoverScreen.classList.remove('hidden');
+            setScreen('over');
+            gameoverScreen.scrollTop = 0;
+            announce('Spillet er over. Du fikk ' + score + ' poeng.' + (isNewHighScore ? ' Ny rekord!' : ''));
+
+            // Avoid an accidental instant restart from a still-mashing player
+            restartBtn.disabled = true;
+            later(() => {
+                restartBtn.disabled = false;
+                restartBtn.focus({ preventScroll: true });
+            }, 700);
         }
 
-        function restartGame() {
-            startGame();
-        }
-
-        // Confirm before leaving during gameplay
-        function confirmLeave(link) {
-            if (isPlaying) {
-                return confirm('Du er midt i et spill. Er du sikker på at du vil forlate?');
+        function copyCode() {
+            const btn = $('copy-btn');
+            const done = () => { btn.textContent = 'Kopiert ✓'; };
+            if (navigator.clipboard?.writeText) {
+                navigator.clipboard.writeText(DISCOUNT_CODE).then(done, () => selectCode());
+            } else {
+                selectCode();
             }
-            return true;
         }
+        function selectCode() {
+            const el = $('discount-code');
+            const range = document.createRange();
+            range.selectNodeContents(el);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+
+        function pauseGame() {
+            if (state !== 'playing') return;
+            state = 'paused';
+            stopLoop();
+            gameArea.classList.add('paused');
+            pauseOverlay.hidden = false;
+            resumeBtn.focus({ preventScroll: true });
+            if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
+        }
+
+        function resumeGame() {
+            if (state !== 'paused') return;
+            state = 'playing';
+            pauseOverlay.hidden = true;
+            gameArea.classList.remove('paused');
+            ensureAudio();
+            tapButton.focus({ preventScroll: true });
+            startLoop();
+        }
+
+        function announce(text) {
+            srStatus.textContent = '';
+            later(() => { srStatus.textContent = text; }, 50);
+        }
+
+        // ---------- Input ----------
+        // Pointer events cover mouse, touch and pen with a single event (no touch+click double fire)
+        gameArea.addEventListener('pointerdown', (e) => {
+            if (pauseOverlay.contains(e.target)) return;
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
+            e.preventDefault();
+            handleTap();
+        });
+        gameArea.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', startGame);
+        resumeBtn.addEventListener('click', resumeGame);
+        pauseBtn.addEventListener('click', () => {
+            if (state === 'playing') pauseGame(); else resumeGame();
+        });
+        muteBtn.addEventListener('click', toggleMute);
+
+        const CUT_KEYS = new Set(['Space', 'Enter', 'NumpadEnter', 'ArrowDown', 'KeyS']);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+            if (e.code === 'KeyM') { toggleMute(); return; }
+
+            if (state === 'playing') {
+                if (e.code === 'KeyP' || e.code === 'Escape') {
+                    e.preventDefault();
+                    pauseGame();
+                    return;
+                }
+                if (CUT_KEYS.has(e.code)) {
+                    e.preventDefault();
+                    if (!e.repeat) handleTap();
+                }
+                return;
+            }
+
+            if (state === 'paused') {
+                if (e.code === 'KeyP' || e.code === 'Escape' || e.code === 'Space' || e.code === 'Enter') {
+                    e.preventDefault();
+                    if (!e.repeat) resumeGame();
+                }
+                return;
+            }
+
+            // Menus: let focused buttons/links behave natively
+            if (e.target.closest && e.target.closest('button, a')) return;
+            if (e.code === 'Space' || e.code === 'Enter') {
+                if (e.repeat) return;
+                if (state === 'start') {
+                    e.preventDefault();
+                    startGame();
+                } else if (state === 'over' && performance.now() - gameOverAt > 700) {
+                    e.preventDefault();
+                    startGame();
+                }
+            }
+        });
+
+        // Swallow Space keyup during play so a focused button doesn't also "click"
+        document.addEventListener('keyup', (e) => {
+            if ((state === 'playing' || state === 'paused') && e.code === 'Space') e.preventDefault();
+        });
+
+        // Pause when the tab is hidden or the window loses focus
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) pauseGame();
+        });
+        window.addEventListener('blur', pauseGame);
+        window.addEventListener('pagehide', pauseGame);
+
+        // Confirm before leaving mid-game
+        document.querySelectorAll('a[data-leave]').forEach((a) => {
+            a.addEventListener('click', (e) => {
+                if (state !== 'playing' && state !== 'paused') return;
+                pauseGame();
+                if (!window.confirm('Du er midt i et spill. Er du sikker på at du vil forlate?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    })();
     </script>
 </body>
 

@@ -1,431 +1,713 @@
-import styled, { keyframes } from 'styled-components'
-import { Link } from 'react-router-dom'
+import styled from 'styled-components'
 import { useSEO } from '../../../hooks/useSEO'
 import PageTransition from '../../shared/PageTransition'
+import Icon from '../../shared/Icon'
+import { Eyebrow, PilLenke, Wrap } from '../../editorial'
 
-const GAMES = [
+/**
+ * Spillhubben. Spillene er statiske HTML-sider i public/underholdning/, så
+ * kortene er vanlige <a>-lenker (ikke router-lenker).
+ *
+ * Nytt spill: legg det til i SPILL med `nytt: true` – da blir det utvalgt i
+ * toppen og får «Nytt»-merke.
+ */
+
+interface Spill {
+  href: string
+  tittel: string
+  beskrivelse: string
+  /** Hva spillet tester – vises over tittelen. */
+  ferdighet: string
+  /** Omtrentlig tid for én runde. */
+  tid: string
+  /** Målet som låser opp rabattkoden. */
+  maal: string
+  /** Mobilskjermbilde fra spillet (public/images/underholdning/). */
+  bilde: string
+  nytt?: boolean
+}
+
+const SPILL: Spill[] = [
   {
-    href: '/underholdning/tool-quiz.html',
-    icon: '🌍',
-    title: 'Verktøy Quiz',
-    description: 'Vet du hvor de kjente verktøymerkene kommer fra? Pek på riktig land!',
-  },
-  {
-    href: '/underholdning/tool-game.html',
-    icon: '🔨',
-    title: 'Finn Verktøyet',
-    description: 'Trykk på riktig verktøy så fort du kan! Test reaksjonsevnen din.',
+    href: '/underholdning/tool-stack.html',
+    tittel: 'Stabelmester',
+    beskrivelse: 'Slipp plankene og kapp bort det som stikker ut. Treff på millimeteren og stabl høyest mulig.',
+    ferdighet: 'Presisjon',
+    tid: 'ca. 2 min',
+    maal: '25 planker',
+    bilde: '/images/underholdning/stack.webp',
+    nytt: true,
   },
   {
     href: '/underholdning/tool-nails.html',
-    icon: '🪵',
-    title: "Spiker'n",
-    description: 'Treff den grønne sonen for å slå spikeren i planken! Timing er alt.',
+    tittel: "Spiker'n",
+    beskrivelse: 'Treff den grønne sonen og slå spikeren i planken. Timing er alt.',
+    ferdighet: 'Timing',
+    tid: 'ca. 3 min',
+    maal: 'Nivå 10',
+    bilde: '/images/underholdning/nails.webp',
   },
   {
     href: '/underholdning/tool-saw.html',
-    icon: '🪚',
-    title: 'Sag Rytme',
-    description: 'Sag planker i perfekt rytme! Treff kuttelinjene for combo-bonus.',
+    tittel: 'Sag Rytme',
+    beskrivelse: 'Sag planker i takt og treff kuttelinjene for combo-bonus.',
+    ferdighet: 'Rytme',
+    tid: 'ca. 3 min',
+    maal: '5000 poeng',
+    bilde: '/images/underholdning/saw.webp',
+  },
+  {
+    href: '/underholdning/tool-game.html',
+    tittel: 'Finn Verktøyet',
+    beskrivelse: 'Trykk på riktig verktøy før det forsvinner. Feil verktøy koster et liv.',
+    ferdighet: 'Reaksjon',
+    tid: '30 sek',
+    maal: '3500 poeng',
+    bilde: '/images/underholdning/game.webp',
   },
   {
     href: '/underholdning/tool-maze.html',
-    icon: '👷',
-    title: 'Verktøyjakt',
-    description: 'Samle verktøy i labyrinten – unngå sinte kunder!',
+    tittel: 'Verktøyjakt',
+    beskrivelse: 'Samle verktøy i labyrinten – og hold deg unna de sinte kundene.',
+    ferdighet: 'Labyrint',
+    tid: 'ca. 5 min',
+    maal: 'Nivå 8',
+    bilde: '/images/underholdning/maze.webp',
+  },
+  {
+    href: '/underholdning/tool-quiz.html',
+    tittel: 'Verktøy Quiz',
+    beskrivelse: 'Vet du hvor de kjente verktøymerkene ble grunnlagt? Pek ut riktig land på kartet.',
+    ferdighet: 'Kunnskap',
+    tid: 'ca. 3 min',
+    maal: '20 av 20 riktige',
+    bilde: '/images/underholdning/quiz.webp',
   },
 ]
 
+/** Toppen fremhever det nyeste spillet – eller det første, om ingen er nye. */
+const UTVALGT = SPILL.find((s) => s.nytt) ?? SPILL[0]
+
 export default function UnderholdningPage() {
   useSEO({
-    title: 'Minio Underholdning – Spill og vinn rabattkode',
-    description: 'Spill morsomme verktøy-spill og vinn 10% rabattkode på varmepumpehus! Quiz, reaksjonsspill, timing-spill og mer fra Minio i Lillehammer.',
-    noindex: true,
+    title: 'Håndverkerspill – gratis verktøyspill i nettleseren | Minio',
+    description:
+      'Gratis verktøyspill for håndverkere og hobbysnekkere: slå inn spikeren, sag i takt, finn riktig verktøy og mer. Spill på mobil eller PC – nå målet og få 10 % rabattkode på varmepumpehus.',
   })
 
   return (
     <PageTransition>
-    <PageWrapper>
-      <StarsContainer>
-        <Stars />
-        <Particles />
-      </StarsContainer>
+      <Side data-surface="dark">
+        <Helt>
+          <Wrap>
+            <HeltGrid>
+              <div>
+                <Eyebrow $lys>Underholdning · {SPILL.length} gratis spill</Eyebrow>
+                <h1>Håndverkerspill for en liten pause.</h1>
+                <HeltIngress>
+                  Spiker, sag og verktøykasse – gjort om til korte spill du rekker på en kaffekopp.
+                  Rett i nettleseren, uten konto.
+                </HeltIngress>
+                <Handlinger>
+                  <Primaerknapp href={UTVALGT.href}>
+                    <Icon name="faPlay" /> Spill {UTVALGT.tittel}
+                  </Primaerknapp>
+                  <Sekundaerknapp href="#spill">Se alle spillene</Sekundaerknapp>
+                </Handlinger>
+                <Fakta>
+                  <li><strong>{SPILL.length}</strong> spill</li>
+                  <li><strong>0 kr</strong> og ingen konto</li>
+                  <li><strong>Mobil</strong> og PC</li>
+                </Fakta>
+              </div>
 
-      <MainContent>
-        <Container>
-          <Logo>
-            <img src="/images/branding/logo_white.svg" alt="Minio" />
-          </Logo>
+              <UtvalgtKort href={UTVALGT.href} className="spillkort">
+                <Tavle>
+                  <Merke>{UTVALGT.nytt ? 'Nytt spill' : 'Ukens spill'}</Merke>
+                  <Skjerm spill={UTVALGT} />
+                </Tavle>
+                <UtvalgtTekst>
+                  <div>
+                    <Kortmeta>{UTVALGT.ferdighet} · {UTVALGT.tid}</Kortmeta>
+                    <h2>{UTVALGT.tittel}</h2>
+                    <p>{UTVALGT.beskrivelse}</p>
+                  </div>
+                  <Rundpil aria-hidden="true"><Icon name="faArrowRight" /></Rundpil>
+                </UtvalgtTekst>
+              </UtvalgtKort>
+            </HeltGrid>
 
-          <Title>Underholdning</Title>
-          <Subtitle>Morsomme verktøy-spill</Subtitle>
+            <Billett aria-label="Slik får du rabattkoden">
+              <BillettVenstre>
+                <BillettTall>10 %</BillettTall>
+                <span>rabatt på<br />varmepumpehus</span>
+              </BillettVenstre>
+              <BillettHoyre>
+                <p>
+                  <strong>Nå målet i ett av spillene</strong>, så låser du opp en rabattkode du kan bruke
+                  i nettbutikken. Målet står på hvert kort.
+                </p>
+                <Kode aria-hidden="true">VPH<span>··</span></Kode>
+              </BillettHoyre>
+            </Billett>
+          </Wrap>
+        </Helt>
 
-          <RewardBanner>
-            🎁 Vinn og få <strong>10% rabattkode</strong> på varmepumpehus!
-          </RewardBanner>
+        <Spillseksjon id="spill" aria-labelledby="alle-spill">
+          <Wrap>
+            <SeksjonHode>
+              <h2 id="alle-spill">Alle spillene</h2>
+              <p>Én runde tar noen minutter. Rekorden din lagres i nettleseren – så du kan prøve igjen. Og igjen.</p>
+            </SeksjonHode>
 
-          <GamesGrid>
-            {GAMES.map((game, i) => (
-              <GameCard
-                key={game.title}
-                href={game.href}
-                $index={i}
-              >
-                <GameIcon>{game.icon}</GameIcon>
-                <GameInfo>
-                  <GameTitle>{game.title}</GameTitle>
-                  <GameDescription>{game.description}</GameDescription>
-                </GameInfo>
-                <GameArrow>→</GameArrow>
-              </GameCard>
-            ))}
-          </GamesGrid>
+            <Rutenett>
+              {SPILL.map((spill, i) => (
+                <Kort key={spill.href} href={spill.href} className="spillkort">
+                  <Tavle>
+                    <Nummer>{String(i + 1).padStart(2, '0')}</Nummer>
+                    {spill.nytt && <Merke>Nytt</Merke>}
+                    <Skjerm spill={spill} />
+                  </Tavle>
+                  <Kortinnhold>
+                    <Kortmeta>{spill.ferdighet} · {spill.tid}</Kortmeta>
+                    <h3>{spill.tittel}</h3>
+                    <p>{spill.beskrivelse}</p>
+                    <Kortbunn>
+                      <Maal>
+                        <Icon name="faTrophy" /> Mål: {spill.maal}
+                      </Maal>
+                      <Spilllenke>
+                        Spill <Icon name="faArrowRight" />
+                      </Spilllenke>
+                    </Kortbunn>
+                  </Kortinnhold>
+                </Kort>
+              ))}
+            </Rutenett>
+          </Wrap>
+        </Spillseksjon>
 
-          <HomeLink to="/">← Tilbake til minio.no</HomeLink>
-        </Container>
-      </MainContent>
-    </PageWrapper>
+        <Leah>
+          <Wrap>
+            <LeahGrid>
+              <div>
+                <Eyebrow>Gjestespill</Eyebrow>
+                <h2>Spill laget av Leah Noelle</h2>
+              </div>
+              <div>
+                <p>
+                  Ikke alle spillene her handler om verktøy. Leah Noelle har laget sine egne – med katter,
+                  spøkelser og bananshake.
+                </p>
+                <PilLenke til="/spill-av-leah-noelle">Til Leah Noelles spill</PilLenke>
+              </div>
+            </LeahGrid>
+          </Wrap>
+        </Leah>
+      </Side>
     </PageTransition>
   )
 }
 
-function Particles() {
-  const colors = ['#a8512c', '#3f7d52', '#fff']
-  const particles = Array.from({ length: 15 }, (_, i) => ({
-    id: i,
-    left: `${Math.random() * 100}%`,
-    delay: `${Math.random() * 8}s`,
-    duration: `${5 + Math.random() * 5}s`,
-    color: colors[Math.floor(Math.random() * colors.length)],
-    size: `${2 + Math.random() * 3}px`,
-  }))
-
+/** Skjermbilde i telefonramme som stikker opp fra hullplaten. */
+function Skjerm({ spill }: { spill: Spill }) {
   return (
-    <>
-      {particles.map((p) => (
-        <Particle
-          key={p.id}
-          style={{
-            left: p.left,
-            animationDelay: p.delay,
-            animationDuration: p.duration,
-            background: p.color,
-            width: p.size,
-            height: p.size,
-          }}
-        />
-      ))}
-    </>
+    <Telefon>
+      <img src={spill.bilde} alt="" loading="lazy" width={390} height={844} />
+    </Telefon>
   )
 }
 
-/* Animations */
+/* ---------- Flater ---------- */
 
-const twinkle = keyframes`
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
+const Side = styled.div`
+  background: ${({ theme }) => theme.colors.deep};
+  color: ${({ theme }) => theme.colors.inkInverted};
 `
 
-const floatParticle = keyframes`
-  0% { opacity: 0; transform: translateY(100vh) scale(0); }
-  10% { opacity: 0.6; }
-  90% { opacity: 0.6; }
-  100% { opacity: 0; transform: translateY(-20vh) scale(1); }
-`
-
-const rewardPulse = keyframes`
-  0%, 100% { box-shadow: 0 0 0 0 rgba(168, 81, 44, 0.3); }
-  50% { box-shadow: 0 0 20px 5px rgba(168, 81, 44, 0.1); }
-`
-
-const fadeInDown = keyframes`
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-`
-
-const fadeInUp = keyframes`
-  from { opacity: 0; transform: translateY(30px); }
-  to { opacity: 1; transform: translateY(0); }
-`
-
-/* Styled Components */
-
-const PageWrapper = styled.div`
-  min-height: 100vh;
-  background: #0a0a12;
-  color: #f9f9f9;
-  overflow-x: hidden;
-`
-
-const StarsContainer = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+const Helt = styled.header`
+  position: relative;
   overflow: hidden;
-  z-index: 0;
+  padding: clamp(8.5rem, 13vw, 10.5rem) 0 clamp(3rem, 6vw, 4.5rem);
+  background:
+    radial-gradient(70% 90% at 0% 0%, rgba(168, 81, 44, 0.24), transparent 60%),
+    radial-gradient(50% 70% at 100% 30%, rgba(224, 137, 95, 0.08), transparent 60%);
+
+  h1 {
+    margin: 0;
+    font-size: clamp(2.8rem, 6.4vw, 5.6rem);
+    font-weight: 600;
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+    max-width: 11ch;
+  }
 `
 
-const Stars = styled.div`
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(ellipse at bottom, #1a1a2e 0%, #0a0a12 100%);
+const HeltGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: clamp(2.5rem, 5vw, 5rem);
+  align-items: center;
 
+  @media (max-width: 960px) {
+    grid-template-columns: 1fr;
+  }
+`
+
+const HeltIngress = styled.p`
+  margin: 1.5rem 0 0;
+  max-width: 40ch;
+  font-size: ${({ theme }) => theme.fontSizes.lg};
+  line-height: 1.55;
+  color: ${({ theme }) => theme.colors.inkInvertedMuted};
+`
+
+const Handlinger = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+`
+
+const knapp = `
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 52px;
+  padding: 0 1.6rem;
+  border-radius: 999px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.2s ease, transform 0.2s ease;
+
+  &:active { transform: scale(0.98); }
+
+  svg { font-size: 0.8em; }
+`
+
+const Primaerknapp = styled.a`
+  ${knapp}
+  background: ${({ theme }) => theme.colors.accentLight};
+  color: ${({ theme }) => theme.colors.deep};
+
+  &:hover { background: #ea9b74; }
+`
+
+const Sekundaerknapp = styled.a`
+  ${knapp}
+  color: ${({ theme }) => theme.colors.inkInverted};
+  box-shadow: inset 0 0 0 1px ${({ theme }) => theme.colors.borderInverted};
+
+  &:hover { background: rgba(255, 255, 255, 0.06); }
+`
+
+const Fakta = styled.ul`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.75rem;
+  margin: 2.5rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.inkInvertedMuted};
+
+  strong {
+    color: ${({ theme }) => theme.colors.inkInverted};
+    font-weight: 600;
+  }
+`
+
+/* ---------- Tavle (illustrasjonsflate med hullplate-mønster) ---------- */
+
+const Tavle = styled.div`
+  position: relative;
+  aspect-ratio: 16 / 10;
+  padding: 8% 12% 4%;
+  background-color: #24211e;
+  background-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.55) 0 2.2px, transparent 2.8px);
+  background-size: 22px 22px;
+  background-position: 11px 11px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.borderInverted};
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(80% 70% at 50% 45%, transparent 40%, rgba(28, 26, 24, 0.75));
+    pointer-events: none;
+  }
+`
+
+const Telefon = styled.div`
+  position: absolute;
+  left: 50%;
+  top: 9%;
+  width: 46%;
+  aspect-ratio: 390 / 844;
+  translate: -50% 0;
+  padding: 2.2%;
+  border-radius: 13% / 6%;
+  background: #0d0c0b;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.12),
+    0 30px 60px -20px rgba(0, 0, 0, 0.9),
+    0 0 80px rgba(224, 137, 95, 0.12);
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top;
+    border-radius: 11% / 5%;
+  }
+
+  .spillkort:hover & {
+    transform: translateY(-5%) rotate(-2deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .spillkort:hover & { transform: none; }
+  }
+`
+
+const Merke = styled.span`
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: ${({ theme }) => theme.colors.accentLight};
+  color: ${({ theme }) => theme.colors.deep};
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: 600;
+`
+
+const Nummer = styled.span`
+  position: absolute;
+  top: 1rem;
+  left: 1.1rem;
+  z-index: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: rgba(250, 247, 242, 0.5);
+`
+
+const kortflate = `
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s ease, border-color 0.35s ease;
+
+  &:hover { transform: translateY(-4px); }
+
+  @media (prefers-reduced-motion: reduce) {
+    &:hover { transform: none; }
+  }
+`
+
+/* ---------- Utvalgt spill ---------- */
+
+const UtvalgtKort = styled.a`
+  ${kortflate}
+  background: ${({ theme }) => theme.colors.deepRaised};
+  border: 1px solid ${({ theme }) => theme.colors.borderInverted};
+  box-shadow: 0 40px 80px -30px rgba(0, 0, 0, 0.7);
+
+  &:hover { border-color: rgba(224, 137, 95, 0.5); }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.focusInverted};
+    outline-offset: 3px;
+  }
+`
+
+const UtvalgtTekst = styled.div`
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.5rem 1.75rem 1.75rem;
+
+  h2 {
+    margin: 0.35rem 0 0;
+    font-size: ${({ theme }) => theme.fontSizes['2xl']};
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+
+  p {
+    margin: 0.5rem 0 0;
+    color: ${({ theme }) => theme.colors.inkInvertedMuted};
+    line-height: 1.5;
+  }
+`
+
+const Rundpil = styled.span`
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: ${({ theme }) => theme.colors.inkInverted};
+  color: ${({ theme }) => theme.colors.deep};
+  transition: transform 0.3s ease;
+
+  .spillkort:hover & { transform: translateX(4px); }
+`
+
+/* ---------- Billett ---------- */
+
+const Billett = styled.section`
+  --perf: 240px;
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  margin-top: clamp(3rem, 6vw, 4.5rem);
+  border-radius: 18px;
+  background: ${({ theme }) => theme.colors.accentSoft};
+  color: ${({ theme }) => theme.colors.accentInk};
+
+  /* Utstansede halvsirkler ved perforeringen */
   &::before,
   &::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-repeat: repeat;
+    left: var(--perf);
+    width: 28px;
+    height: 28px;
+    margin-left: -14px;
+    border-radius: 50%;
+    background: ${({ theme }) => theme.colors.deep};
   }
+  &::before { top: -14px; }
+  &::after { bottom: -14px; }
 
-  &::before {
-    background-image:
-      radial-gradient(1px 1px at 25px 30px, white, transparent),
-      radial-gradient(1px 1px at 50px 120px, white, transparent),
-      radial-gradient(1px 1px at 100px 40px, rgba(255,255,255,0.8), transparent),
-      radial-gradient(1.5px 1.5px at 150px 80px, white, transparent),
-      radial-gradient(1px 1px at 200px 150px, rgba(255,255,255,0.6), transparent),
-      radial-gradient(1.5px 1.5px at 250px 60px, white, transparent),
-      radial-gradient(1px 1px at 300px 180px, rgba(255,255,255,0.7), transparent),
-      radial-gradient(1px 1px at 350px 20px, white, transparent),
-      radial-gradient(1.5px 1.5px at 400px 100px, rgba(255,255,255,0.9), transparent),
-      radial-gradient(1px 1px at 450px 140px, white, transparent);
-    background-size: 500px 200px;
-    animation: ${twinkle} 4s ease-in-out infinite;
-  }
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
 
-  &::after {
-    background-image:
-      radial-gradient(1px 1px at 75px 50px, rgba(255,255,255,0.5), transparent),
-      radial-gradient(1.5px 1.5px at 125px 90px, rgba(255,255,255,0.7), transparent),
-      radial-gradient(1px 1px at 175px 130px, rgba(255,255,255,0.4), transparent),
-      radial-gradient(1px 1px at 225px 170px, rgba(255,255,255,0.6), transparent),
-      radial-gradient(1.5px 1.5px at 275px 30px, rgba(255,255,255,0.8), transparent),
-      radial-gradient(1px 1px at 325px 70px, rgba(255,255,255,0.5), transparent),
-      radial-gradient(1px 1px at 375px 110px, rgba(255,255,255,0.7), transparent),
-      radial-gradient(1.5px 1.5px at 425px 160px, rgba(255,255,255,0.6), transparent);
-    background-size: 450px 200px;
-    animation: ${twinkle} 6s ease-in-out infinite reverse;
+    &::before,
+    &::after { display: none; }
   }
 `
 
-const Particle = styled.div`
-  position: absolute;
-  border-radius: 50%;
-  opacity: 0;
-  filter: blur(1px);
-  animation: ${floatParticle} 8s infinite;
+const BillettVenstre = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 240px;
+  padding: 1.5rem 1.5rem;
+  border-right: 2px dashed rgba(122, 58, 30, 0.3);
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  line-height: 1.3;
+
+  @media (max-width: 640px) {
+    width: auto;
+    border-right: 0;
+    border-bottom: 2px dashed rgba(122, 58, 30, 0.3);
+  }
 `
 
-const MainContent = styled.div`
-  position: relative;
-  z-index: 1;
-  min-height: 100vh;
+const BillettTall = styled.span`
+  font-size: 2.6rem;
+  font-weight: 700;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  white-space: nowrap;
+  color: ${({ theme }) => theme.colors.accent};
+`
+
+const BillettHoyre = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.5rem 1.75rem;
+
+  p {
+    margin: 0;
+    max-width: 56ch;
+    line-height: 1.5;
+  }
+
+  strong { color: ${({ theme }) => theme.colors.ink}; }
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+`
+
+const Kode = styled.span`
+  flex: none;
+  padding: 0.6rem 1rem;
+  border: 2px dashed ${({ theme }) => theme.colors.accent};
+  border-radius: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: ${({ theme }) => theme.colors.accent};
+
+  span { opacity: 0.45; }
+`
+
+/* ---------- Alle spillene ---------- */
+
+const Spillseksjon = styled.section`
+  padding: clamp(3rem, 6vw, 5rem) 0 clamp(4.5rem, 9vw, 7rem);
+  scroll-margin-top: 5rem;
+`
+
+const SeksjonHode = styled.div`
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem 3rem;
+  margin-bottom: clamp(2rem, 4vw, 3rem);
+
+  h2 {
+    margin: 0;
+    font-size: clamp(2.2rem, 4.6vw, 3.6rem);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+  }
+
+  p {
+    margin: 0;
+    max-width: 38ch;
+    color: ${({ theme }) => theme.colors.inkInvertedMuted};
+    line-height: 1.55;
+  }
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+`
+
+const Rutenett = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+  gap: 1.25rem;
+`
+
+const Kort = styled.a`
+  ${kortflate}
+  background: ${({ theme }) => theme.colors.deepRaised};
+  border: 1px solid ${({ theme }) => theme.colors.borderInverted};
+
+  &:hover {
+    border-color: rgba(224, 137, 95, 0.45);
+    box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.8);
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.focusInverted};
+    outline-offset: 3px;
+  }
+`
+
+const Kortinnhold = styled.div`
   display: flex;
   flex-direction: column;
+  flex: 1;
+  padding: 1.25rem 1.5rem 1.4rem;
+
+  h3 {
+    margin: 0.35rem 0 0;
+    font-size: ${({ theme }) => theme.fontSizes.xl};
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+
+  p {
+    margin: 0.5rem 0 0;
+    color: ${({ theme }) => theme.colors.inkInvertedMuted};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    line-height: 1.55;
+  }
+`
+
+const Kortmeta = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.accentLight};
+`
+
+const Kortbunn = styled.div`
+  display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 2rem;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: auto;
+  padding-top: 1.25rem;
 `
 
-const Container = styled.div`
-  max-width: 500px;
-  width: 100%;
-  text-align: center;
-`
-
-const Logo = styled.div`
-  margin-bottom: 1rem;
-  animation: ${fadeInDown} 0.4s ease-out;
-
-  img {
-    height: 45px;
-    width: auto;
-    filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.1));
-  }
-`
-
-const Title = styled.h1`
-  font-size: 2.5rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, #fff 0%, #a8512c 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: ${fadeInDown} 0.4s ease-out 0.05s both;
-
-  @media (max-width: 500px) {
-    font-size: 2rem;
-  }
-`
-
-const Subtitle = styled.p`
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 1rem;
-  animation: ${fadeInDown} 0.4s ease-out 0.1s both;
-`
-
-const RewardBanner = styled.div`
+const Maal = styled.span`
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.6rem 1.2rem;
-  background: linear-gradient(135deg, rgba(168, 81, 44, 0.15) 0%, rgba(76, 175, 80, 0.15) 100%);
-  border: 1px solid rgba(168, 81, 44, 0.3);
-  border-radius: 50px;
-  font-size: 0.85rem;
-  margin-bottom: 2rem;
-  animation: ${fadeInDown} 0.4s ease-out 0.15s both, ${rewardPulse} 2s ease-in-out infinite 0.5s;
+  gap: 0.45rem;
+  font-size: ${({ theme }) => theme.fontSizes.xs};
+  color: ${({ theme }) => theme.colors.inkInvertedMuted};
 
-  strong {
-    color: #3f7d52;
-  }
-
-  @media (max-width: 500px) {
-    font-size: 0.8rem;
-    padding: 0.5rem 1rem;
-  }
+  svg { color: ${({ theme }) => theme.colors.accentLight}; }
 `
 
-const GamesGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`
-
-const GameCard = styled.a<{ $index: number }>`
-  background: rgba(20, 20, 35, 0.8);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 20px;
-  padding: 1.5rem;
-  text-decoration: none;
-  color: #f9f9f9;
-  display: flex;
+const Spilllenke = styled.span`
+  display: inline-flex;
   align-items: center;
-  gap: 1.25rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  animation: ${fadeInUp} 0.35s ease-out both;
-  animation-delay: ${({ $index }) => 0.2 + $index * 0.08}s;
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-    transition: left 0.5s;
-  }
-
-  &:hover::before {
-    left: 100%;
-  }
-
-  &:hover {
-    border-color: #a8512c;
-    transform: translateY(-4px) scale(1.02);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3), 0 0 30px rgba(168, 81, 44, 0.4);
-  }
-
-  @media (max-width: 500px) {
-    padding: 1.25rem;
-  }
-`
-
-const GameIcon = styled.div`
-  width: 70px;
-  height: 70px;
-  background: linear-gradient(135deg, rgba(168, 81, 44, 0.2) 0%, rgba(168, 81, 44, 0.05) 100%);
-  border-radius: 18px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.2rem;
-  flex-shrink: 0;
-  transition: all 0.3s;
-  border: 1px solid rgba(168, 81, 44, 0.2);
-
-  ${GameCard}:hover & {
-    transform: scale(1.1) rotate(-5deg);
-    box-shadow: 0 0 20px rgba(168, 81, 44, 0.4);
-  }
-
-  @media (max-width: 500px) {
-    width: 60px;
-    height: 60px;
-    font-size: 1.8rem;
-  }
-`
-
-const GameInfo = styled.div`
-  text-align: left;
-  flex: 1;
-`
-
-const GameTitle = styled.div`
-  font-size: 1.2rem;
-  font-weight: 700;
-  margin-bottom: 0.3rem;
-
-  @media (max-width: 500px) {
-    font-size: 1.1rem;
-  }
-`
-
-const GameDescription = styled.div`
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
-  line-height: 1.4;
-
-  @media (max-width: 500px) {
-    font-size: 0.8rem;
-  }
-`
-
-const GameArrow = styled.span`
-  font-size: 1.5rem;
-  opacity: 0.3;
-  transition: all 0.3s;
-  flex-shrink: 0;
-
-  ${GameCard}:hover & {
-    opacity: 1;
-    transform: translateX(5px);
-    color: #a8512c;
-  }
-`
-
-const HomeLink = styled(Link)`
-  margin-top: 2.5rem;
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  background: rgba(20, 20, 35, 0.8);
-  color: #f9f9f9;
-  text-decoration: none;
-  font-size: 0.9rem;
+  gap: 0.45rem;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
   font-weight: 500;
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.2s;
-  animation: ${fadeInUp} 0.35s ease-out 0.4s both;
 
-  &:hover {
-    background: #a8512c;
-    border-color: #a8512c;
+  svg {
+    font-size: 0.8em;
+    transition: transform 0.25s ease;
+  }
+
+  .spillkort:hover & svg { transform: translateX(4px); }
+`
+
+/* ---------- Leah Noelle ---------- */
+
+const Leah = styled.section`
+  padding: clamp(3.5rem, 7vw, 5.5rem) 0;
+  background: ${({ theme }) => theme.colors.paper};
+  color: ${({ theme }) => theme.colors.ink};
+
+  h2 {
+    margin: 0;
+    font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+  }
+
+  p {
+    margin: 0 0 1.25rem;
+    color: ${({ theme }) => theme.colors.inkMuted};
+    line-height: 1.6;
+    max-width: 48ch;
+  }
+`
+
+const LeahGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem 4rem;
+  align-items: end;
+
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    grid-template-columns: 1fr;
   }
 `

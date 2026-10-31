@@ -3,17 +3,19 @@
 
 <head>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+    <meta name="theme-color" content="#0a0a12"/>
+    <meta name="color-scheme" content="dark"/>
     <title>Minio Underholdning - Spiker'n</title>
     <meta name="description" content="Slå spikeren i planken med perfekt timing! Et avhengighetsskapende reaksjonsspill fra Minio. Vinn 10% rabattkode!"/>
     <meta name="keywords" content="Minio, spill, spiker, timing, Lillehammer, håndverk, rabattkode"/>
     <meta name="author" content="Minio"/>
     <meta name="robots" content="index, follow"/>
-    <link rel="canonical" href="https://www.minio.no/underholdning/tool-nails.html"/>
+    <link rel="canonical" href="https://minio.no/underholdning/tool-nails.html"/>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
-    <link rel="apple-touch-icon" href="/favicon.ico"/>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <link rel="apple-touch-icon" href="/favicon.svg"/>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-E4J774CTXF"></script>
@@ -26,12 +28,12 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website"/>
-    <meta property="og:url" content="https://www.minio.no/underholdning/tool-nails.html"/>
+    <meta property="og:url" content="https://minio.no/underholdning/tool-nails.html"/>
     <meta property="og:title" content="Spiker'n – Minio Underholdning"/>
     <meta property="og:description" content="Slå spikeren i planken med perfekt timing! Vinn 10% rabattkode!"/>
-    <meta property="og:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
-    <meta property="og:image:width" content="1200"/>
-    <meta property="og:image:height" content="630"/>
+    <meta property="og:image" content="https://minio.no/images/hero/carport-elbil-forside.webp"/>
+    <meta property="og:image:width" content="1535"/>
+    <meta property="og:image:height" content="1024"/>
     <meta property="og:image:alt" content="Spiker'n - Minio spill"/>
     <meta property="og:site_name" content="Minio"/>
     <meta property="og:locale" content="nb_NO"/>
@@ -40,13 +42,13 @@
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:title" content="Spiker'n – Klarer du å slå meg?"/>
     <meta name="twitter:description" content="Slå spikeren i planken med perfekt timing! Test deg selv!"/>
-    <meta name="twitter:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
+    <meta name="twitter:image" content="https://minio.no/images/hero/carport-elbil-forside.webp"/>
 
     <style>
         :root {
-            --dark-bg: #202020;
+            --header-h: 56px;
+            --bg: #0a0a12;
             --darker-bg: #1a1a1a;
-            --light-bg: #f4f4f4;
             --text-light: #f9f9f9;
             --text-dark: #202020;
             --link-bg: #2f2f2f;
@@ -58,9 +60,8 @@
             --wood: #8B4513;
             --wood-light: #A0522D;
             --wood-dark: #5D2E0C;
-            --nail: #888;
-            --nail-light: #aaa;
             --perfect: #FFD700;
+            --focus: #7cc4ff;
         }
 
         * {
@@ -70,34 +71,48 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        html, body {
+            height: 100%;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background: #0a0a12;
+            background: var(--bg);
             color: var(--text-light);
             min-height: 100vh;
+            min-height: 100dvh;
             overflow: hidden;
             touch-action: manipulation;
             user-select: none;
             -webkit-user-select: none;
+            overscroll-behavior: none;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--focus);
+            outline-offset: 2px;
+        }
+
+        .visually-hidden {
+            position: absolute !important;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0 0 0 0);
+            white-space: nowrap;
         }
 
         /* Animated starfield background */
         .stars-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             overflow: hidden;
             z-index: 0;
         }
 
         .stars {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background: radial-gradient(ellipse at bottom, #1a1a2e 0%, #0a0a12 100%);
         }
 
@@ -105,10 +120,7 @@
         .stars::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background-repeat: repeat;
         }
 
@@ -149,60 +161,101 @@
 
         .screen {
             position: fixed;
-            top: 0;
+            top: var(--header-h);
             left: 0;
-            width: 100%;
-            height: 100%;
+            right: 0;
+            bottom: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
+            padding: 1.25rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
             text-align: center;
             z-index: 1;
+            overflow-y: auto;
+            overscroll-behavior: contain;
         }
 
-        .screen.hidden {
+        /* Center content but allow scrolling when content is taller than the screen */
+        .screen > :first-child { margin-top: auto; }
+        .screen > :last-child { margin-bottom: auto; }
+
+        .screen[hidden] {
             display: none;
+        }
+
+        button {
+            font: inherit;
         }
 
         /* Start Screen */
         .logo {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
         }
 
         .logo img {
-            height: 50px;
+            display: block;
+            height: 40px;
             width: auto;
+            margin: 0 auto;
         }
 
         h1 {
             font-size: 2.2rem;
             font-weight: 800;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
         .subtitle {
             font-size: 1rem;
-            opacity: 0.6;
-            margin-bottom: 1.5rem;
+            opacity: 0.65;
+            margin-bottom: 1.25rem;
         }
 
-        .description {
-            max-width: 300px;
-            line-height: 1.6;
-            opacity: 0.7;
-            margin-bottom: 2rem;
-            font-size: 0.95rem;
+        .how-to {
+            list-style: none;
+            max-width: 330px;
+            text-align: left;
+            margin-bottom: 1.25rem;
+            display: grid;
+            gap: 0.55rem;
+            font-size: 0.92rem;
+            line-height: 1.45;
         }
 
-        .nail-preview {
-            font-size: 4rem;
-            margin-bottom: 2rem;
+        .how-to li {
+            display: flex;
+            gap: 0.65rem;
+            align-items: flex-start;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .how-to .step {
+            flex: none;
+            width: 1.6rem;
+            height: 1.6rem;
+            border-radius: 50%;
+            background: rgba(29, 161, 242, 0.18);
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 0.8rem;
+            display: grid;
+            place-items: center;
+        }
+
+        .how-to .c-perfect { color: var(--perfect); }
+        .how-to .c-good { color: var(--success); }
+
+        .mini-meter {
+            display: block;
+            width: 100%;
+            max-width: 330px;
+            height: 10px;
+            border-radius: 5px;
+            margin: 0 auto 1.25rem;
         }
 
         .start-btn {
-            padding: 1rem 2.5rem;
+            padding: 1rem 2.75rem;
             background: var(--accent);
             border: none;
             border-radius: 12px;
@@ -210,18 +263,34 @@
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.15s, background 0.2s;
+            box-shadow: 0 8px 24px rgba(29, 161, 242, 0.35);
         }
+
+        .start-btn:hover { background: var(--accent-hover); }
 
         .start-btn:active {
             transform: scale(0.96);
-            background: var(--accent-hover);
+        }
+
+        .reward-teaser {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(29, 161, 242, 0.2) 100%);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            padding: 0.6rem 1rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 1.25rem;
+            max-width: 330px;
+        }
+
+        .reward-teaser strong {
+            color: var(--success);
         }
 
         .high-score-display {
-            margin-top: 1.5rem;
+            margin-top: 1.1rem;
             font-size: 0.9rem;
-            opacity: 0.5;
+            color: rgba(255,255,255,0.6);
         }
 
         .high-score-display span {
@@ -230,7 +299,7 @@
         }
 
         .home-link {
-            margin-top: 2rem;
+            margin-top: 1.5rem;
             display: inline-block;
             padding: 0.75rem 1.5rem;
             background: var(--link-bg);
@@ -240,7 +309,7 @@
             font-weight: 500;
             border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.2s;
+            transition: background 0.2s, border-color 0.2s;
         }
 
         .home-link:hover,
@@ -252,50 +321,11 @@
         /* Game Screen */
         .game-screen {
             padding: 0;
-            justify-content: flex-start;
+            overflow: hidden;
+            touch-action: none;
+            cursor: pointer;
         }
 
-        .game-header {
-            width: 100%;
-            padding: 0.75rem 1.25rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--darker-bg);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .game-header .logo img {
-            height: 24px;
-            margin-bottom: 0;
-        }
-
-        .stats {
-            display: flex;
-            gap: 1.5rem;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-
-        .stat-value.score {
-            color: var(--success);
-        }
-
-        .stat-label {
-            font-size: 0.65rem;
-            opacity: 0.5;
-            text-transform: uppercase;
-        }
-
-        /* Game Area */
         .game-area {
             flex: 1;
             width: 100%;
@@ -304,82 +334,97 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            padding: 1rem;
+            padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+            margin: 0 !important;
         }
+
+        .game-area.shake {
+            animation: shake 0.22s ease-out;
+        }
+
+        .game-area.shake-big {
+            animation: shakeBig 0.4s ease-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(-3px, 2px); }
+            50% { transform: translate(3px, -2px); }
+            75% { transform: translate(-2px, 1px); }
+        }
+
+        @keyframes shakeBig {
+            0%, 100% { transform: translate(0, 0); }
+            15% { transform: translate(-7px, 3px); }
+            30% { transform: translate(6px, -4px); }
+            45% { transform: translate(-5px, 2px); }
+            60% { transform: translate(4px, -2px); }
+            80% { transform: translate(-2px, 1px); }
+        }
+
+        .progress-pill {
+            font-size: 0.8rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.75);
+            margin-bottom: 1.25rem;
+        }
+
+        .progress-pill strong { color: var(--success); }
+        .progress-pill.unlocked { border-color: rgba(76,175,80,0.5); background: rgba(76,175,80,0.15); }
 
         /* Power meter */
         .power-meter-container {
             width: 100%;
-            max-width: 300px;
-            margin-bottom: 2rem;
+            max-width: 340px;
+            margin-bottom: 1.5rem;
         }
 
         .power-meter-label {
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 2px;
-            opacity: 0.5;
+            color: rgba(255,255,255,0.6);
             margin-bottom: 0.5rem;
         }
 
         .power-meter {
             width: 100%;
-            height: 24px;
-            background: var(--darker-bg);
-            border-radius: 12px;
-            overflow: hidden;
+            height: 28px;
+            border-radius: 14px;
             position: relative;
-            border: 2px solid rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.15);
+            /* Zones are painted from the same ZONES config the scoring uses (set in JS) */
+            background: #333;
         }
 
-        .power-meter-zones {
+        .indicator-track {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-        }
-
-        .zone {
-            height: 100%;
-        }
-
-        .zone.bad-left {
-            width: 35%;
-            background: linear-gradient(90deg, var(--error) 0%, var(--warning) 100%);
-        }
-
-        .zone.good {
-            width: 20%;
-            background: var(--success);
-        }
-
-        .zone.perfect {
-            width: 10%;
-            background: var(--perfect);
-        }
-
-        .zone.good2 {
-            width: 20%;
-            background: var(--success);
-        }
-
-        .zone.bad-right {
-            width: 15%;
-            background: linear-gradient(90deg, var(--warning) 0%, var(--error) 100%);
+            inset: -6px 0;
+            pointer-events: none;
+            will-change: transform;
         }
 
         .power-indicator {
             position: absolute;
-            top: -4px;
-            bottom: -4px;
+            top: 0;
+            bottom: 0;
+            left: -3px;
             width: 6px;
             background: white;
             border-radius: 3px;
-            box-shadow: 0 0 10px rgba(255,255,255,0.8);
-            transition: left 0.016s linear;
-            z-index: 10;
+            box-shadow: 0 0 10px rgba(255,255,255,0.8), 0 0 0 1px rgba(0,0,0,0.4);
+        }
+
+        .zone-ticks {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.45);
+            margin-top: 0.35rem;
+            padding: 0 0.25rem;
         }
 
         /* Nail and plank */
@@ -388,50 +433,64 @@
             flex-direction: column;
             align-items: center;
             position: relative;
-            margin-top: 1.5rem;
+            margin-top: 0.5rem;
         }
 
         .nail-container {
             position: relative;
-            width: 220px;
-            height: 140px;
+            width: 240px;
+            height: 150px;
+        }
+
+        .nail-assembly {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 24px;
+            height: 80px;
+            margin-left: -12px;
+            transform-origin: 50% 100%;
+            transition: transform 0.12s ease-out;
+            z-index: 2;
+        }
+
+        .nail-assembly.reset {
+            transition: none;
+        }
+
+        .nail-assembly.bent {
+            transition: transform 0.35s cubic-bezier(.3,1.6,.5,1);
         }
 
         .nail {
             width: 8px;
-            height: 70px;
-            background: linear-gradient(90deg, #666 0%, #aaa 50%, #666 100%);
-            border-radius: 2px 2px 1px 1px;
+            height: 72px;
+            background: linear-gradient(90deg, #666 0%, #c4c4c4 50%, #666 100%);
+            border-radius: 1px;
             position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            transition: height 0.1s ease-out, top 0.1s ease-out;
-            z-index: 2;
+            top: 8px;
+            left: 8px;
         }
 
         .nail::after {
             content: '';
             position: absolute;
-            bottom: -6px;
+            bottom: -7px;
             left: 50%;
             transform: translateX(-50%);
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            border-top: 8px solid #555;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 8px solid #666;
         }
 
         .nail-head {
             width: 24px;
-            height: 10px;
-            background: linear-gradient(180deg, #bbb 0%, #888 100%);
+            height: 9px;
+            background: linear-gradient(180deg, #ddd 0%, #888 100%);
             border-radius: 3px;
             position: absolute;
             top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 3;
-            transition: top 0.1s ease-out;
+            left: 0;
             box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
 
@@ -440,81 +499,333 @@
         }
 
         @keyframes nailHit {
-            0% { transform: translateX(-50%) scale(1); }
-            50% { transform: translateX(-50%) scale(1.3); box-shadow: 0 0 20px rgba(255,255,255,0.5); }
-            100% { transform: translateX(-50%) scale(1); }
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3, 1.1); box-shadow: 0 0 20px rgba(255,255,255,0.6); }
+            100% { transform: scale(1); }
         }
 
         .plank {
-            width: 220px;
-            height: 60px;
-            background: linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 40%, var(--wood-dark) 100%);
+            width: 240px;
+            height: 62px;
+            background:
+                repeating-linear-gradient(176deg, rgba(0,0,0,0) 0 9px, rgba(0,0,0,0.08) 9px 11px),
+                linear-gradient(180deg, var(--wood-light) 0%, var(--wood) 40%, var(--wood-dark) 100%);
             border-radius: 6px;
             position: absolute;
             bottom: 0;
             left: 0;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.15);
+            z-index: 3;
         }
 
-        .plank::before {
-            content: '';
+        .driven-heads {
             position: absolute;
-            top: 12px;
-            left: 15px;
-            right: 15px;
-            height: 3px;
-            background: rgba(0,0,0,0.15);
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .driven-head {
+            position: absolute;
+            top: 4px;
+            width: 12px;
+            height: 5px;
             border-radius: 2px;
+            background: linear-gradient(180deg, #ccc, #777);
+            opacity: 0.85;
         }
 
-        .plank::after {
-            content: '';
+        .fx-canvas {
             position: absolute;
-            bottom: 15px;
-            left: 20px;
-            right: 20px;
-            height: 2px;
-            background: rgba(0,0,0,0.1);
-            border-radius: 2px;
-        }
-
-        .impact-flash {
-            position: absolute;
-            top: 0;
             left: 50%;
-            transform: translateX(-50%);
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            top: 50%;
+            width: 420px;
+            height: 320px;
+            transform: translate(-50%, -55%);
             pointer-events: none;
             z-index: 10;
         }
 
-        .impact-flash.show {
-            animation: impactFlash 0.2s ease-out;
+        .hit-feedback {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2rem;
+            font-weight: 800;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            z-index: 20;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.6);
         }
 
-        @keyframes impactFlash {
-            0% { background: rgba(255,255,255,0.8); transform: translateX(-50%) scale(0.5); opacity: 1; }
-            100% { background: transparent; transform: translateX(-50%) scale(2); opacity: 0; }
+        .hit-feedback.show {
+            animation: feedbackPop 0.65s ease-out forwards;
         }
 
-        /* Reward teaser */
-        .reward-teaser {
-            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(29, 161, 242, 0.2) 100%);
-            border: 1px solid rgba(76, 175, 80, 0.3);
-            padding: 0.6rem 1rem;
-            border-radius: 10px;
+        .hit-feedback.perfect { color: var(--perfect); }
+        .hit-feedback.good { color: var(--success); }
+        .hit-feedback.ok { color: var(--warning); }
+        .hit-feedback.miss { color: var(--error); }
+        .hit-feedback.level { color: var(--accent); }
+
+        @keyframes feedbackPop {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+            100% { opacity: 0; transform: translate(-50%, -110%) scale(1); }
+        }
+
+        /* Combo display */
+        .combo-display {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            text-align: right;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+        }
+
+        .combo-display.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .combo-count {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--perfect);
+            line-height: 1;
+        }
+
+        .combo-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .miss-warning {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            display: flex;
+            gap: 4px;
+            pointer-events: none;
+        }
+
+        .miss-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid rgba(229, 57, 53, 0.6);
+        }
+
+        .miss-dot.on {
+            background: var(--error);
+            border-color: var(--error);
+        }
+
+        /* Strikes counter */
+        .strikes {
+            margin-top: 1.25rem;
+            text-align: center;
+        }
+
+        .strikes-display {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+        }
+
+        .strike-pip {
+            width: 9px;
+            height: 22px;
+            border-radius: 2px;
+            background: linear-gradient(90deg, #777, #ddd, #777);
+            transition: opacity 0.25s, transform 0.25s;
+        }
+
+        .strike-pip.used {
+            opacity: 0.15;
+            transform: scale(0.8);
+        }
+
+        .strikes-label {
+            margin-top: 0.4rem;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.55);
+        }
+
+        .tap-instruction {
+            margin-top: 1.25rem;
+            font-size: 0.95rem;
+            color: rgba(255,255,255,0.6);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Pause overlay */
+        .pause-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(10, 10, 18, 0.82);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            z-index: 30;
+        }
+
+        .pause-overlay[hidden] { display: none; }
+
+        .pause-overlay h2 {
+            font-size: 1.8rem;
+        }
+
+        .pause-overlay p {
+            color: rgba(255,255,255,0.65);
+        }
+
+        /* End Screen */
+        .end-screen {
+            background: linear-gradient(180deg, rgba(21,21,21,0.92) 0%, rgba(26,26,26,0.92) 50%, rgba(21,21,21,0.92) 100%);
+        }
+
+        .result-card {
+            background: linear-gradient(145deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
+            border-radius: 24px;
+            padding: 1.5rem 1.25rem;
+            text-align: center;
+            max-width: 360px;
+            width: 100%;
+            position: relative;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.5), 0 0 0 2px rgba(29, 161, 242, 0.45);
+            animation: cardIn 0.35s ease-out;
+        }
+
+        @keyframes cardIn {
+            from { opacity: 0; transform: translateY(16px) scale(0.97); }
+            to { opacity: 1; transform: none; }
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .result-header img {
+            height: 26px;
+            width: auto;
+        }
+
+        .result-header span {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: var(--accent);
+            letter-spacing: 1px;
+        }
+
+        .result-reason {
             font-size: 0.85rem;
-            margin-bottom: 1.5rem;
-            max-width: 280px;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 0.5rem;
         }
 
-        .reward-teaser strong {
-            color: var(--success);
+        .result-emoji {
+            font-size: 3rem;
+            margin-bottom: 0.25rem;
         }
 
-        /* Discount code reveal */
+        .result-label {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.55);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .result-score {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--accent);
+            line-height: 1;
+            margin-bottom: 0.25rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .result-best {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.55);
+        }
+
+        .result-stats {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1rem 0;
+            padding: 0.85rem 0;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .result-stat-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .result-stat-value.perfects { color: var(--perfect); }
+        .result-stat-value.combo { color: var(--accent); }
+
+        .result-stat-label {
+            font-size: 0.65rem;
+            color: rgba(255,255,255,0.55);
+            text-transform: uppercase;
+        }
+
+        .new-record {
+            background: var(--perfect);
+            color: var(--text-dark);
+            padding: 0.35rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 0.5rem;
+            animation: recordPulse 1s infinite;
+        }
+
+        .new-record[hidden] { display: none; }
+
+        @keyframes recordPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .result-message {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-subtitle {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.65);
+        }
+
         .discount-reveal {
             background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.1) 100%);
             border: 2px solid var(--success);
@@ -524,15 +835,13 @@
             text-align: center;
         }
 
-        .discount-reveal.hidden {
-            display: none;
-        }
+        .discount-reveal[hidden] { display: none; }
 
         .discount-label {
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            opacity: 0.7;
+            color: rgba(255,255,255,0.8);
             margin-bottom: 0.5rem;
         }
 
@@ -543,11 +852,12 @@
             background: var(--darker-bg);
             padding: 0.5rem 1rem;
             border-radius: 8px;
-            font-family: monospace;
+            border: none;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
             letter-spacing: 2px;
             display: inline-block;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.15s;
         }
 
         .discount-code:active {
@@ -555,243 +865,29 @@
         }
 
         .discount-hint {
-            font-size: 0.7rem;
-            opacity: 0.6;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.65);
             margin-top: 0.5rem;
         }
 
-        /* Feedback */
-        .hit-feedback {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 2rem;
-            font-weight: 800;
-            pointer-events: none;
-            opacity: 0;
-            z-index: 20;
+        .discount-progress {
+            margin-top: 1rem;
+            font-size: 0.82rem;
+            color: rgba(255,255,255,0.7);
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 0.6rem 0.8rem;
         }
 
-        .hit-feedback.show {
-            animation: feedbackPop 0.6s ease-out forwards;
-        }
-
-        .hit-feedback.perfect {
-            color: var(--perfect);
-        }
-
-        .hit-feedback.good {
-            color: var(--success);
-        }
-
-        .hit-feedback.ok {
-            color: var(--warning);
-        }
-
-        .hit-feedback.miss {
-            color: var(--error);
-        }
-
-        @keyframes feedbackPop {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-            20% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
-            100% { opacity: 0; transform: translate(-50%, -80%) scale(1); }
-        }
-
-        /* Tap instruction */
-        .tap-instruction {
-            margin-top: 2rem;
-            font-size: 1rem;
-            opacity: 0.6;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.6; }
-            50% { opacity: 0.3; }
-        }
-
-        /* Combo display */
-        .combo-display {
-            position: absolute;
-            top: 100px;
-            right: 20px;
-            text-align: right;
-        }
-
-        .combo-count {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--perfect);
-            opacity: 0;
-            transition: all 0.2s;
-        }
-
-        .combo-count.show {
-            opacity: 1;
-        }
-
-        .combo-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.5;
-        }
-
-        /* Nails counter */
-        .nails-display {
-            display: flex;
-            gap: 4px;
-            margin-top: 1.5rem;
-        }
-
-        .nail-icon {
-            font-size: 1.2rem;
-            transition: all 0.3s;
-        }
-
-        .nail-icon.used {
-            opacity: 0.2;
-            transform: scale(0.8);
-        }
-
-        /* End Screen */
-        .end-screen {
-            background: linear-gradient(180deg, #151515 0%, #1a1a1a 50%, #151515 100%);
-        }
-
-        .result-card {
-            background: linear-gradient(145deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
-            border-radius: 24px;
-            padding: 2rem 1.5rem;
-            text-align: center;
-            max-width: 340px;
-            width: 100%;
-            position: relative;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.5), 0 0 0 2px rgba(29, 161, 242, 0.3);
-        }
-
-        .result-card::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(135deg, var(--accent) 0%, #0d8ddb 50%, var(--accent) 100%);
-            border-radius: 26px;
-            z-index: -1;
-            opacity: 0.6;
-        }
-
-        .result-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .result-header img {
-            height: 28px;
-        }
-
-        .result-header span {
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--accent);
-            letter-spacing: 1px;
-        }
-
-        .result-emoji {
-            font-size: 3.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .result-label {
-            font-size: 0.75rem;
-            opacity: 0.5;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .result-score {
-            font-size: 4.5rem;
-            font-weight: 800;
-            color: var(--accent);
-            line-height: 1;
-            margin-bottom: 0.5rem;
-        }
-
-        .result-stats {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin: 1rem 0;
-            padding: 1rem 0;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .result-stat {
-            text-align: center;
-        }
-
-        .result-stat-value {
-            font-size: 1.2rem;
-            font-weight: 700;
-        }
-
-        .result-stat-value.perfects {
-            color: var(--perfect);
-        }
-
-        .result-stat-value.combo {
-            color: var(--accent);
-        }
-
-        .result-stat-label {
-            font-size: 0.65rem;
-            opacity: 0.5;
-            text-transform: uppercase;
-        }
-
-        .new-record {
-            background: var(--perfect);
-            color: var(--text-dark);
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            display: inline-block;
-            margin-bottom: 0.5rem;
-            animation: recordPulse 1s infinite;
-        }
-
-        @keyframes recordPulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .result-message {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-
-        .result-subtitle {
-            font-size: 0.95rem;
-            opacity: 0.6;
-        }
+        .discount-progress[hidden] { display: none; }
+        .discount-progress strong { color: var(--success); }
 
         .action-buttons {
             display: flex;
             gap: 0.75rem;
-            margin-top: 1.5rem;
+            margin-top: 1.25rem;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
         .action-btn {
@@ -800,15 +896,19 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.15s, background 0.2s;
             text-decoration: none;
             border: none;
+            display: inline-flex;
+            align-items: center;
         }
 
         .action-btn.primary {
             background: var(--accent);
             color: white;
         }
+
+        .action-btn.primary:hover { background: var(--accent-hover); }
 
         .action-btn.secondary {
             background: var(--link-bg);
@@ -825,23 +925,26 @@
             top: 0;
             left: 0;
             right: 0;
-            z-index: 5000;
+            z-index: 50;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.5rem 0.75rem;
+            gap: 0.5rem;
+            padding: 0 max(0.75rem, env(safe-area-inset-right)) 0 max(0.75rem, env(safe-area-inset-left));
             background: var(--darker-bg);
             border-bottom: 1px solid rgba(255,255,255,0.1);
-            height: 56px;
+            height: var(--header-h);
         }
 
-        .header-left {
+        .header-left,
+        .header-right {
             display: flex;
             align-items: center;
             gap: 0.4rem;
         }
 
-        .header-home {
+        .header-home,
+        .icon-btn {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -852,11 +955,15 @@
             text-decoration: none;
             color: var(--text-light);
             font-size: 1rem;
-            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
         }
 
+        .icon-btn[hidden] { display: none; }
+
         .header-home:hover,
-        .header-home:active {
+        .icon-btn:hover {
             background: rgba(29, 161, 242, 0.3);
         }
 
@@ -877,7 +984,7 @@
             text-decoration: none;
             color: var(--text-light);
             font-size: 1rem;
-            transition: all 0.2s;
+            transition: background 0.2s;
             border: 2px solid transparent;
         }
 
@@ -885,7 +992,7 @@
             background: rgba(29, 161, 242, 0.2);
         }
 
-        .game-nav-item.active {
+        .game-nav-item[aria-current="page"] {
             border-color: var(--accent);
             background: rgba(29, 161, 242, 0.15);
         }
@@ -893,7 +1000,7 @@
         .header-stats {
             display: none;
             align-items: center;
-            gap: 1rem;
+            gap: 0.75rem;
         }
 
         .header-stats.visible {
@@ -902,7 +1009,7 @@
 
         .header-stat {
             text-align: center;
-            min-width: 45px;
+            min-width: 42px;
         }
 
         .header-stat-value {
@@ -910,33 +1017,48 @@
             font-weight: 800;
             color: var(--text-light);
             line-height: 1;
+            font-variant-numeric: tabular-nums;
         }
 
-        .header-stat-value.score {
-            color: var(--success);
+        .header-stat-value.score { color: var(--success); }
+
+        .header-stat-value.bump {
+            animation: bump 0.25s ease-out;
+        }
+
+        @keyframes bump {
+            50% { transform: scale(1.25); }
         }
 
         .header-stat-label {
             font-size: 0.55rem;
             text-transform: uppercase;
-            color: rgba(255,255,255,0.5);
+            color: rgba(255,255,255,0.55);
             letter-spacing: 0.3px;
         }
 
-
-        /* Screen positioning to account for header */
-        .screen {
-            top: 56px !important;
-            height: calc(100% - 56px) !important;
+        .toast {
+            position: fixed;
+            bottom: calc(1.5rem + env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 0.85rem 1.25rem;
+            border-radius: 10px;
+            font-weight: 600;
+            z-index: 200;
+            max-width: calc(100% - 2rem);
+            transition: opacity 0.3s;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
 
         @media (max-width: 480px) {
-            .unified-header {
-                padding: 0.4rem 0.5rem;
-                height: 50px;
-            }
+            :root { --header-h: 50px; }
 
-            .header-home {
+            .unified-header { gap: 0.3rem; }
+
+            .header-home, .icon-btn {
                 width: 32px;
                 height: 32px;
                 font-size: 0.9rem;
@@ -948,62 +1070,42 @@
                 font-size: 0.9rem;
             }
 
-            .header-stat {
-                min-width: 38px;
-            }
+            .header-stats { gap: 0.4rem; }
+            .header-stat { min-width: 34px; }
+            .header-stat-value { font-size: 0.95rem; }
+            .header-stat-label { font-size: 0.5rem; }
 
-            .header-stat-value {
-                font-size: 0.95rem;
-            }
-
-            .header-stat-label {
-                font-size: 0.5rem;
-            }
-
-            .screen {
-                top: 50px !important;
-                height: calc(100% - 50px) !important;
-            }
+            /* Make room for stats while playing: hide the other-game shortcuts */
+            body.playing .game-nav { display: none; }
         }
 
         @media (max-width: 360px) {
-            .game-nav {
-                gap: 0.2rem;
-            }
-
-            .game-nav-item {
-                width: 26px;
-                height: 26px;
-                font-size: 0.8rem;
-            }
-
-            .header-stats {
-                gap: 0.5rem;
-            }
-
-            .header-stat {
-                min-width: 32px;
-            }
-
-            .header-stat-value {
-                font-size: 0.85rem;
-            }
+            .game-nav { gap: 0.2rem; }
+            .game-nav-item { width: 26px; height: 26px; font-size: 0.8rem; }
         }
 
-        /* Mobile adjustments */
         @media (max-height: 700px) {
-            h1 {
-                font-size: 1.8rem;
-            }
+            h1 { font-size: 1.8rem; }
+            .logo { margin-bottom: 0.75rem; }
+            .subtitle { margin-bottom: 0.9rem; }
+            .how-to { margin-bottom: 0.9rem; }
+            .power-meter-container { margin-bottom: 1rem; }
+        }
 
-            .nail-preview {
-                font-size: 3rem;
-                margin-bottom: 1.5rem;
+        @media (prefers-reduced-motion: reduce) {
+            .stars::before, .stars::after,
+            .tap-instruction, .new-record, .result-card {
+                animation: none !important;
             }
-
-            .description {
-                margin-bottom: 1.5rem;
+            .game-area.shake, .game-area.shake-big { animation: none !important; }
+            .hit-feedback.show { animation-duration: 0.9s; }
+            @keyframes feedbackPop {
+                0% { opacity: 0; transform: translate(-50%, -50%); }
+                15%, 70% { opacity: 1; transform: translate(-50%, -50%); }
+                100% { opacity: 0; transform: translate(-50%, -50%); }
             }
+            .nail-head.hit { animation: none; }
+            .header-stat-value.bump { animation: none; }
         }
     </style>
 </head>
@@ -1011,86 +1113,135 @@
 <body>
 
 <!-- Animated background -->
-<div class="stars-container">
+<div class="stars-container" aria-hidden="true">
     <div class="stars"></div>
 </div>
 
-<!-- Start Screen -->
-<div class="screen start-screen" id="startScreen">
-    <div class="logo">
-        <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+<!-- Top Navigation -->
+<header class="unified-header" id="unified-header">
+    <div class="header-left">
+        <a href="/underholdning" class="header-home js-leave" aria-label="Tilbake til underholdning" title="Tilbake til underholdning">←</a>
+        <nav class="game-nav" aria-label="Andre spill">
+            <a href="/underholdning/tool-quiz.html" class="game-nav-item js-leave" title="Verktøy Quiz" aria-label="Verktøy Quiz">🌍</a>
+            <a href="/underholdning/tool-game.html" class="game-nav-item js-leave" title="Finn Verktøyet" aria-label="Finn Verktøyet">🔨</a>
+            <a href="/underholdning/tool-nails.html" class="game-nav-item" aria-current="page" title="Spiker'n" aria-label="Spiker'n">🪵</a>
+            <a href="/underholdning/tool-saw.html" class="game-nav-item js-leave" title="Sag Rytme" aria-label="Sag Rytme">🪚</a>
+            <a href="/underholdning/tool-maze.html" class="game-nav-item js-leave" title="Verktøyjakt" aria-label="Verktøyjakt">👷</a>
+            <a href="/underholdning/tool-stack.html" class="game-nav-item js-leave" title="Stabelmester" aria-label="Stabelmester">📏</a>
+        </nav>
     </div>
-    <h1>Spiker'n!</h1>
+    <div class="header-right">
+        <div class="header-stats" id="header-stats" aria-live="off">
+            <div class="header-stat">
+                <div class="header-stat-value score" id="headerScore">0</div>
+                <div class="header-stat-label">Poeng</div>
+            </div>
+            <div class="header-stat">
+                <div class="header-stat-value" id="headerLevel">1</div>
+                <div class="header-stat-label">Nivå</div>
+            </div>
+        </div>
+        <button type="button" class="icon-btn" id="pauseBtn" aria-label="Pause" title="Pause (P)" hidden>⏸</button>
+        <button type="button" class="icon-btn" id="muteBtn" aria-pressed="false" aria-label="Slå av lyd" title="Lyd av/på (M)">🔊</button>
+    </div>
+</header>
+
+<main>
+<!-- Start Screen -->
+<section class="screen start-screen" id="startScreen" aria-labelledby="gameTitle">
+    <div class="logo">
+        <img src="/images/branding/logo_navbar.svg" alt="Minio" width="545" height="148">
+    </div>
+    <h1 id="gameTitle">Spiker'n!</h1>
     <p class="subtitle">Timing er alt</p>
 
-    <p class="description">
-        Se på måleren øverst. Trykk på skjermen når den hvite markøren er i <strong style="color: var(--success);">grønn</strong> eller <strong style="color: var(--perfect);">gul</strong> sone!
-    </p>
+    <ol class="how-to">
+        <li><span class="step" aria-hidden="true">1</span><span>Markøren sveiper fram og tilbake. Trykk når den er i <strong class="c-perfect">gul</strong> (perfekt) eller <strong class="c-good">grønn</strong> sone.</span></li>
+        <li><span class="step" aria-hidden="true">2</span><span>Hver spiker har et begrenset antall slag. Slå den helt inn før slagene tar slutt – ellers bøyer den seg.</span></li>
+        <li><span class="step" aria-hidden="true">3</span><span>Tre bom på rad, og spillet er over. Farten øker for hver spiker!</span></li>
+    </ol>
+
+    <span class="mini-meter" id="miniMeter" aria-hidden="true"></span>
 
     <div class="reward-teaser">
         🎁 Nå <strong>nivå 10</strong> og lås opp en <strong>10% rabattkode</strong>!
     </div>
 
-    <div class="nail-preview">🪵🔨</div>
+    <button type="button" class="start-btn" id="startBtn">▶ Start</button>
 
-    <button class="start-btn" id="startBtn">▶ Start</button>
+    <p class="high-score-display" id="highScoreDisplay">
+        Din rekord: <span id="highScoreValue">0</span> poeng · nivå <span id="bestLevelValue">0</span>
+    </p>
 
-    <div class="high-score-display" id="highScoreDisplay">
-        Rekord: <span id="highScoreValue">0</span>
-    </div>
-
-    <a href="/" class="home-link">← Tilbake til minio.no</a>
-</div>
+    <a href="/underholdning" class="home-link">← Tilbake til underholdning</a>
+</section>
 
 <!-- Game Screen -->
-<div class="screen game-screen hidden" id="gameScreen">
+<section class="screen game-screen" id="gameScreen" aria-label="Spill" hidden>
     <div class="game-area" id="gameArea">
-        <div class="combo-display" id="comboDisplay" style="display: none;">
+        <div class="miss-warning" id="missWarning" aria-label="Bom på rad">
+            <span class="miss-dot"></span><span class="miss-dot"></span><span class="miss-dot"></span>
+        </div>
+
+        <div class="combo-display" id="comboDisplay" aria-hidden="true">
             <div class="combo-count" id="comboCount">2x</div>
             <div class="combo-label">Combo</div>
         </div>
 
+        <div class="progress-pill" id="progressPill">Spiker 1 · <strong>9</strong> igjen til rabattkoden</div>
+
         <div class="power-meter-container">
-            <div class="power-meter-label">👆 Trykk når markøren er i grønn/gul!</div>
-            <div class="power-meter">
-                <div class="power-meter-zones">
-                    <div class="zone bad-left"></div>
-                    <div class="zone good"></div>
-                    <div class="zone perfect"></div>
-                    <div class="zone good2"></div>
-                    <div class="zone bad-right"></div>
+            <div class="power-meter-label" id="meterLabel">Treff gul eller grønn sone</div>
+            <div class="power-meter" id="powerMeter" role="img" aria-label="Måler med soner: rød, oransje, grønn, gul i midten, grønn, oransje, rød">
+                <div class="indicator-track" id="indicatorTrack">
+                    <div class="power-indicator"></div>
                 </div>
-                <div class="power-indicator" id="powerIndicator"></div>
             </div>
         </div>
 
         <div class="nail-area">
             <div class="nail-container">
-                <div class="impact-flash" id="impactFlash"></div>
-                <div class="nail-head" id="nailHead"></div>
-                <div class="nail" id="nail"></div>
-                <div class="plank"></div>
+                <canvas class="fx-canvas" id="fxCanvas" aria-hidden="true"></canvas>
+                <div class="nail-assembly" id="nailAssembly">
+                    <div class="nail" id="nail"></div>
+                    <div class="nail-head" id="nailHead"></div>
+                </div>
+                <div class="plank" id="plank">
+                    <div class="driven-heads" id="drivenHeads"></div>
+                </div>
             </div>
-            <div class="hit-feedback" id="hitFeedback">PERFEKT!</div>
+            <div class="hit-feedback" id="hitFeedback" aria-hidden="true"></div>
         </div>
 
-        <div class="nails-display" id="nailsDisplay"></div>
+        <div class="strikes">
+            <div class="strikes-display" id="strikesDisplay" aria-hidden="true"></div>
+            <div class="strikes-label" id="strikesLabel">10 slag igjen</div>
+        </div>
 
-        <div class="tap-instruction">👆 Trykk hvor som helst!</div>
+        <p class="tap-instruction" id="tapInstruction">👆 Trykk hvor som helst</p>
+
+        <div class="pause-overlay" id="pauseOverlay" hidden>
+            <h2>Pause</h2>
+            <p>Spillet venter på deg.</p>
+            <button type="button" class="action-btn primary" id="resumeBtn">▶ Fortsett</button>
+        </div>
     </div>
-</div>
+    <p class="visually-hidden" id="srStatus" aria-live="polite"></p>
+</section>
 
 <!-- End Screen -->
-<div class="screen end-screen hidden" id="endScreen">
+<section class="screen end-screen" id="endScreen" aria-labelledby="resultMessage" hidden>
     <div class="result-card">
         <div class="result-header">
-            <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+            <img src="/images/branding/logo_navbar.svg" alt="Minio" width="545" height="148">
             <span>SPIKER'N</span>
         </div>
-        <div class="new-record hidden" id="newRecord">NY REKORD!</div>
-        <div class="result-emoji" id="resultEmoji">🔨</div>
+        <p class="result-reason" id="resultReason"></p>
+        <div class="new-record" id="newRecord" hidden>NY REKORD!</div>
+        <div class="result-emoji" id="resultEmoji" aria-hidden="true">🔨</div>
         <div class="result-label">Poengsum</div>
         <div class="result-score" id="finalScore">0</div>
+        <div class="result-best" id="finalBest"></div>
         <div class="result-stats">
             <div class="result-stat">
                 <div class="result-stat-value perfects" id="finalPerfects">0</div>
@@ -1105,448 +1256,844 @@
                 <div class="result-stat-label">Nivå</div>
             </div>
         </div>
-        <div class="result-message" id="resultMessage">Bra jobbet!</div>
-        <div class="result-subtitle">Klarer du bedre?</div>
+        <h2 class="result-message" id="resultMessage">Bra jobbet!</h2>
+        <p class="result-subtitle" id="resultSubtitle">Klarer du bedre?</p>
 
-        <div class="discount-reveal hidden" id="discountReveal">
+        <div class="discount-reveal" id="discountReveal" hidden>
             <div class="discount-label">🎉 Du låste opp en rabattkode!</div>
-            <div class="discount-code" id="discountCode" onclick="copyDiscountCode()">VPH10</div>
+            <button type="button" class="discount-code" id="discountCode" aria-label="Kopier rabattkoden VPH10">VPH10</button>
             <div class="discount-hint">Trykk for å kopiere • Gjelder 10% rabatt</div>
         </div>
+        <p class="discount-progress" id="discountProgress" hidden></p>
     </div>
 
     <div class="action-buttons">
-        <button class="action-btn primary" id="playAgainBtn">↺ Spill igjen</button>
-        <a href="index.html" class="action-btn secondary">Meny</a>
+        <button type="button" class="action-btn primary" id="playAgainBtn">↺ Spill igjen</button>
+        <a href="/underholdning" class="action-btn secondary">Flere spill</a>
     </div>
-</div>
-
-<!-- Top Navigation -->
-<header class="unified-header" id="unified-header">
-    <div class="header-left">
-        <a href="index.html" class="header-home" onclick="return confirmLeave(this)" title="Tilbake">🏠</a>
-        <nav class="game-nav">
-            <a href="tool-quiz.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøy Quiz">🌍</a>
-            <a href="tool-game.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Finn Verktøyet">🔨</a>
-            <a href="tool-nails.html" class="game-nav-item active" title="Spiker'n">🪵</a>
-            <a href="tool-saw.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Sag Rytme">🪚</a>
-            <a href="tool-maze.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøyjakt">👷</a>
-        </nav>
-    </div>
-    <div class="header-stats" id="header-stats">
-        <div class="header-stat">
-            <div class="header-stat-value score" id="headerScore">0</div>
-            <div class="header-stat-label">Poeng</div>
-        </div>
-        <div class="header-stat">
-            <div class="header-stat-value" id="headerLevel">1</div>
-            <div class="header-stat-label">Nivå</div>
-        </div>
-    </div>
-</header>
+</section>
+</main>
 
 <script>
-    // Game config
-    const TOTAL_NAILS = 10;
-    const BASE_SPEED = 2500; // ms for full sweep
-    const MIN_SPEED = 800;
-    const SPEED_DECREASE = 150; // per level
+(() => {
+    'use strict';
 
-    const POINTS = {
-        perfect: 150,
-        good: 100,
-        ok: 50,
-        miss: 0
+    // ---------- Config ----------
+    const DISCOUNT_LEVEL = 10;          // Reach this level to unlock the code
+    const NAIL_DEPTH = 60;              // Depth needed to drive a nail fully in
+    const BASE_SWEEP = 2500;            // ms for a full back-and-forth at level 1
+    const MIN_SWEEP = 640;              // fastest back-and-forth
+    const SWEEP_FACTOR = 0.9;           // each level is 10% faster
+    const MAX_CONSECUTIVE_MISSES = 3;
+    const UNUSED_STRIKE_BONUS = 20;     // per strike left when a nail is driven in
+
+    // Single source of truth for zones (percent of the meter). Used for both scoring and drawing.
+    const ZONES = [
+        { type: 'miss',    from: 0,  to: 20,  color: '#e53935' },
+        { type: 'ok',      from: 20, to: 35,  color: '#ff9800' },
+        { type: 'good',    from: 35, to: 45,  color: '#4caf50' },
+        { type: 'perfect', from: 45, to: 55,  color: '#FFD700' },
+        { type: 'good',    from: 55, to: 65,  color: '#4caf50' },
+        { type: 'ok',      from: 65, to: 80,  color: '#ff9800' },
+        { type: 'miss',    from: 80, to: 100, color: '#e53935' }
+    ];
+
+    const HITS = {
+        perfect: { points: 150, depth: 30, text: 'PERFEKT!' },
+        good:    { points: 100, depth: 20, text: 'BRA!' },
+        ok:      { points: 50,  depth: 10, text: 'OK' },
+        miss:    { points: 0,   depth: 3,  text: 'BOM!' }
     };
 
-    const ZONES = {
-        perfectStart: 45,
-        perfectEnd: 55,
-        goodStart: 35,
-        goodEnd: 65
+    const STORAGE = {
+        best: 'spikern_highscore',
+        bestLevel: 'spikern_bestlevel',
+        muted: 'spikern_muted'
     };
 
-    // Game state
+    // ---------- Safe storage ----------
+    function readStore(key, fallback) {
+        try {
+            const v = window.localStorage.getItem(key);
+            return v === null ? fallback : v;
+        } catch (e) { return fallback; }
+    }
+    function writeStore(key, value) {
+        try { window.localStorage.setItem(key, String(value)); } catch (e) { /* storage unavailable */ }
+    }
+
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let reducedMotion = reducedMotionQuery.matches;
+    reducedMotionQuery.addEventListener?.('change', (e) => { reducedMotion = e.matches; });
+
+    // ---------- DOM ----------
+    const $ = (id) => document.getElementById(id);
+    const startScreen = $('startScreen');
+    const gameScreen = $('gameScreen');
+    const endScreen = $('endScreen');
+    const gameArea = $('gameArea');
+    const indicatorTrack = $('indicatorTrack');
+    const powerMeter = $('powerMeter');
+    const nailAssembly = $('nailAssembly');
+    const nailHead = $('nailHead');
+    const drivenHeads = $('drivenHeads');
+    const hitFeedback = $('hitFeedback');
+    const headerStats = $('header-stats');
+    const scoreDisplay = $('headerScore');
+    const levelDisplay = $('headerLevel');
+    const comboDisplay = $('comboDisplay');
+    const comboCount = $('comboCount');
+    const strikesDisplay = $('strikesDisplay');
+    const strikesLabel = $('strikesLabel');
+    const progressPill = $('progressPill');
+    const tapInstruction = $('tapInstruction');
+    const missDots = Array.from(document.querySelectorAll('#missWarning .miss-dot'));
+    const pauseOverlay = $('pauseOverlay');
+    const pauseBtn = $('pauseBtn');
+    const muteBtn = $('muteBtn');
+    const srStatus = $('srStatus');
+    const fxCanvas = $('fxCanvas');
+    const playAgainBtn = $('playAgainBtn');
+
+    // Paint the meter from the zone config so visuals always match scoring
+    const zoneGradient = 'linear-gradient(90deg,' + ZONES.map(z => `${z.color} ${z.from}% ${z.to}%`).join(',') + ')';
+    powerMeter.style.background = zoneGradient;
+    $('miniMeter').style.background = zoneGradient;
+
+    // ---------- State ----------
+    let state = 'start';       // 'start' | 'playing' | 'ending' | 'over'
+    let paused = false;
+    let inputLockedUntil = 0;
     let score = 0;
     let level = 1;
-    let nailsLeft = TOTAL_NAILS;
+    let strikesPerNail = 10;
+    let strikesLeft = 10;
     let combo = 0;
     let bestCombo = 0;
     let perfects = 0;
-    let indicatorPosition = 0;
-    let direction = 1;
-    let speed = BASE_SPEED;
-    let animationId = null;
-    let lastTime = 0;
-    let isPlaying = false;
+    let consecutiveMisses = 0;
     let nailDepth = 0;
-    let highScore = parseInt(localStorage.getItem('spikern_highscore') || '0');
+    let position = 0;          // 0..100
+    let direction = 1;
+    let sweepMs = BASE_SWEEP;
+    let rafId = 0;
+    let lastTime = 0;
+    let endReason = '';
+    const timers = new Set();
 
-    // DOM elements
-    const startScreen = document.getElementById('startScreen');
-    const gameScreen = document.getElementById('gameScreen');
-    const endScreen = document.getElementById('endScreen');
-    const powerIndicator = document.getElementById('powerIndicator');
-    const nail = document.getElementById('nail');
-    const nailHead = document.getElementById('nailHead');
-    const impactFlash = document.getElementById('impactFlash');
-    const hitFeedback = document.getElementById('hitFeedback');
-    const headerStats = document.getElementById('header-stats');
-    const scoreDisplay = document.getElementById('headerScore');
-    const levelDisplay = document.getElementById('headerLevel');
-    const comboCount = document.getElementById('comboCount');
-    const nailsDisplay = document.getElementById('nailsDisplay');
-    const gameArea = document.getElementById('gameArea');
-    const highScoreValue = document.getElementById('highScoreValue');
+    let highScore = parseInt(readStore(STORAGE.best, '0'), 10) || 0;
+    let bestLevel = parseInt(readStore(STORAGE.bestLevel, '0'), 10) || 0;
+    let muted = readStore(STORAGE.muted, '0') === '1';
 
-    // Initialize
-    highScoreValue.textContent = highScore;
-
-    // Update indicator position
-    function updateIndicator(timestamp) {
-        if (!isPlaying) return;
-
-        if (!lastTime) lastTime = timestamp;
-        const delta = timestamp - lastTime;
-        lastTime = timestamp;
-
-        // Calculate movement
-        const moveAmount = (delta / speed) * 100 * 2; // *2 because it goes back and forth
-        indicatorPosition += moveAmount * direction;
-
-        // Bounce at edges
-        if (indicatorPosition >= 100) {
-            indicatorPosition = 100;
-            direction = -1;
-        } else if (indicatorPosition <= 0) {
-            indicatorPosition = 0;
-            direction = 1;
-        }
-
-        powerIndicator.style.left = `calc(${indicatorPosition}% - 3px)`;
-
-        animationId = requestAnimationFrame(updateIndicator);
+    function later(fn, ms) {
+        const id = setTimeout(() => { timers.delete(id); fn(); }, ms);
+        timers.add(id);
+        return id;
+    }
+    function clearTimers() {
+        timers.forEach(clearTimeout);
+        timers.clear();
     }
 
-    // Handle tap/click
-    function handleTap() {
-        if (!isPlaying) return;
+    function renderBest() {
+        $('highScoreValue').textContent = highScore;
+        $('bestLevelValue').textContent = bestLevel;
+    }
+    renderBest();
 
-        // Determine hit quality
-        let hitType, points, feedbackText;
+    // ---------- Audio (Web Audio, synthesized, no files) ----------
+    let audioCtx = null;
+    let noiseBuffer = null;
 
-        if (indicatorPosition >= ZONES.perfectStart && indicatorPosition <= ZONES.perfectEnd) {
-            hitType = 'perfect';
-            points = POINTS.perfect;
-            feedbackText = 'PERFEKT!';
-            perfects++;
-            combo++;
-            nailDepth += 30;
-        } else if (indicatorPosition >= ZONES.goodStart && indicatorPosition <= ZONES.goodEnd) {
-            hitType = 'good';
-            points = POINTS.good;
-            feedbackText = 'BRA!';
-            combo++;
-            nailDepth += 20;
-        } else if (indicatorPosition >= 20 && indicatorPosition <= 80) {
-            hitType = 'ok';
-            points = POINTS.ok;
-            feedbackText = 'OK';
-            combo = 0;
-            nailDepth += 10;
-        } else {
-            hitType = 'miss';
-            points = POINTS.miss;
-            feedbackText = 'MISS!';
-            combo = 0;
-            nailDepth += 3;
+    function ensureAudio() {
+        if (muted) return null;
+        const AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        try {
+            if (!audioCtx) {
+                audioCtx = new AC();
+                const len = Math.floor(audioCtx.sampleRate * 0.3);
+                noiseBuffer = audioCtx.createBuffer(1, len, audioCtx.sampleRate);
+                const data = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < len; i++) data[i] = Math.random() * 2 - 1;
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+        } catch (e) { audioCtx = null; }
+        return audioCtx;
+    }
+
+    function tone(freq, dur, { type = 'sine', vol = 0.2, delay = 0, slideTo = null } = {}) {
+        const ctx = ensureAudio();
+        if (!ctx) return;
+        const t = ctx.currentTime + delay;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, t);
+        if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+        gain.gain.setValueAtTime(0.0001, t);
+        gain.gain.exponentialRampToValueAtTime(vol, t + 0.005);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(t);
+        osc.stop(t + dur + 0.02);
+    }
+
+    function noise(dur, { vol = 0.25, freq = 1800, q = 1 } = {}) {
+        const ctx = ensureAudio();
+        if (!ctx || !noiseBuffer) return;
+        const t = ctx.currentTime;
+        const src = ctx.createBufferSource();
+        src.buffer = noiseBuffer;
+        const filter = ctx.createBiquadFilter();
+        filter.type = 'bandpass';
+        filter.frequency.value = freq;
+        filter.Q.value = q;
+        const gain = ctx.createGain();
+        gain.gain.setValueAtTime(vol, t);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        src.connect(filter).connect(gain).connect(ctx.destination);
+        src.start(t);
+        src.stop(t + dur + 0.02);
+    }
+
+    const sfx = {
+        hit(kind) {
+            if (muted) return;
+            // Hammer thump + wood knock
+            tone(kind === 'miss' ? 90 : 140, 0.12, { type: 'sine', vol: 0.35, slideTo: 50 });
+            noise(0.08, { vol: 0.3, freq: kind === 'miss' ? 3200 : 1200, q: 0.8 });
+            if (kind === 'perfect') {
+                tone(1318, 0.25, { type: 'triangle', vol: 0.12, delay: 0.02 });
+                tone(1976, 0.3, { type: 'sine', vol: 0.06, delay: 0.05 });
+            } else if (kind === 'good') {
+                tone(988, 0.15, { type: 'triangle', vol: 0.08, delay: 0.02 });
+            } else if (kind === 'miss') {
+                tone(420, 0.18, { type: 'square', vol: 0.05, slideTo: 300 });
+            }
+        },
+        nailDone() {
+            if (muted) return;
+            [523, 659, 784].forEach((f, i) => tone(f, 0.16, { type: 'triangle', vol: 0.12, delay: 0.06 + i * 0.07 }));
+        },
+        unlock() {
+            if (muted) return;
+            [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, 0.22, { type: 'triangle', vol: 0.12, delay: 0.25 + i * 0.08 }));
+        },
+        gameOver() {
+            if (muted) return;
+            tone(330, 0.5, { type: 'sawtooth', vol: 0.06, slideTo: 110 });
+            tone(220, 0.6, { type: 'triangle', vol: 0.1, delay: 0.1, slideTo: 80 });
+        },
+        click() {
+            if (muted) return;
+            tone(660, 0.06, { type: 'triangle', vol: 0.08 });
         }
+    };
 
-        // Update best combo
-        if (combo > bestCombo) bestCombo = combo;
+    function renderMute() {
+        muteBtn.textContent = muted ? '🔇' : '🔊';
+        muteBtn.setAttribute('aria-pressed', String(muted));
+        muteBtn.setAttribute('aria-label', muted ? 'Slå på lyd' : 'Slå av lyd');
+    }
+    function toggleMute() {
+        muted = !muted;
+        writeStore(STORAGE.muted, muted ? '1' : '0');
+        renderMute();
+        if (!muted) sfx.click();
+    }
+    renderMute();
 
-        // Combo bonus
-        const comboBonus = combo > 1 ? Math.floor(points * (combo - 1) * 0.1) : 0;
-        const totalPoints = points + comboBonus;
+    function vibrate(pattern) {
+        if (reducedMotion || muted) return;
+        try { if (navigator.vibrate) navigator.vibrate(pattern); } catch (e) { /* ignore */ }
+    }
 
-        score += totalPoints;
-        scoreDisplay.textContent = score;
+    // ---------- Particles (high-DPI canvas) ----------
+    const fx = fxCanvas.getContext('2d');
+    let particles = [];
+    let fxRaf = 0;
+    let fxLast = 0;
+    let fxW = 0, fxH = 0;
 
-        // Update combo display
-        const comboDisplay = document.getElementById('comboDisplay');
+    function sizeCanvas() {
+        const rect = fxCanvas.getBoundingClientRect();
+        const dpr = Math.min(window.devicePixelRatio || 1, 3);
+        fxW = rect.width; fxH = rect.height;
+        fxCanvas.width = Math.round(rect.width * dpr);
+        fxCanvas.height = Math.round(rect.height * dpr);
+        fx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function nailTipPoint() {
+        // Point where the nail meets the plank, in canvas coordinates
+        const c = fxCanvas.getBoundingClientRect();
+        const p = $('plank').getBoundingClientRect();
+        return { x: p.left + p.width / 2 - c.left, y: p.top - c.top };
+    }
+
+    function burst(kind) {
+        if (reducedMotion) return;
+        if (!fxW) sizeCanvas();
+        const { x, y } = nailTipPoint();
+        const count = kind === 'perfect' ? 22 : kind === 'good' ? 14 : kind === 'done' ? 30 : 7;
+        const woodColors = ['#c58b4f', '#a0522d', '#d9a066', '#8b4513'];
+        for (let i = 0; i < count; i++) {
+            const spark = (kind === 'perfect' || kind === 'done') && i % 3 === 0;
+            const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.1;
+            const speed = (spark ? 220 : 140) + Math.random() * 160;
+            particles.push({
+                x: x + (Math.random() - 0.5) * 10,
+                y: y - 2,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                life: 0,
+                ttl: 0.45 + Math.random() * 0.4,
+                size: spark ? 2 + Math.random() * 1.5 : 2.5 + Math.random() * 3,
+                rot: Math.random() * Math.PI,
+                vr: (Math.random() - 0.5) * 12,
+                color: spark ? (kind === 'done' ? '#7cc4ff' : '#FFD700') : woodColors[i % woodColors.length],
+                spark
+            });
+        }
+        if (!fxRaf) { fxLast = 0; fxRaf = requestAnimationFrame(stepFx); }
+    }
+
+    function stepFx(t) {
+        const dt = fxLast ? Math.min((t - fxLast) / 1000, 0.05) : 0.016;
+        fxLast = t;
+        fx.clearRect(0, 0, fxW, fxH);
+        particles = particles.filter(p => (p.life += dt) < p.ttl);
+        for (const p of particles) {
+            p.vy += 700 * dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            p.rot += p.vr * dt;
+            const a = 1 - p.life / p.ttl;
+            fx.globalAlpha = a;
+            fx.fillStyle = p.color;
+            if (p.spark) {
+                fx.beginPath();
+                fx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                fx.fill();
+            } else {
+                fx.save();
+                fx.translate(p.x, p.y);
+                fx.rotate(p.rot);
+                fx.fillRect(-p.size, -p.size / 3, p.size * 2, p.size * 0.66);
+                fx.restore();
+            }
+        }
+        fx.globalAlpha = 1;
+        if (particles.length) {
+            fxRaf = requestAnimationFrame(stepFx);
+        } else {
+            fxRaf = 0;
+            fx.clearRect(0, 0, fxW, fxH);
+        }
+    }
+
+    function clearFx() {
+        particles = [];
+        if (fxRaf) cancelAnimationFrame(fxRaf);
+        fxRaf = 0;
+        fx.clearRect(0, 0, fxW, fxH);
+    }
+
+    function shake(big) {
+        if (reducedMotion) return;
+        gameArea.classList.remove('shake', 'shake-big');
+        void gameArea.offsetWidth; // restart animation
+        gameArea.classList.add(big ? 'shake-big' : 'shake');
+    }
+    gameArea.addEventListener('animationend', (e) => {
+        if (e.target === gameArea) gameArea.classList.remove('shake', 'shake-big');
+    });
+
+    // ---------- Rendering helpers ----------
+    function renderIndicator() {
+        indicatorTrack.style.transform = `translateX(${position}%)`;
+    }
+
+    function renderNail(instant) {
+        const depth = Math.min(nailDepth, NAIL_DEPTH);
+        nailAssembly.classList.toggle('reset', !!instant);
+        nailAssembly.classList.remove('bent');
+        nailAssembly.style.transform = `translateY(${depth}px)`;
+        if (instant) {
+            void nailAssembly.offsetWidth;
+            nailAssembly.classList.remove('reset');
+        }
+    }
+
+    function renderStrikes() {
+        if (strikesDisplay.children.length !== strikesPerNail) {
+            strikesDisplay.textContent = '';
+            for (let i = 0; i < strikesPerNail; i++) {
+                const pip = document.createElement('span');
+                pip.className = 'strike-pip';
+                strikesDisplay.appendChild(pip);
+            }
+        }
+        Array.from(strikesDisplay.children).forEach((pip, i) => {
+            pip.classList.toggle('used', i >= strikesLeft);
+        });
+        strikesLabel.textContent = strikesLeft === 1 ? '1 slag igjen' : `${strikesLeft} slag igjen`;
+    }
+
+    function renderMisses() {
+        missDots.forEach((d, i) => d.classList.toggle('on', i < consecutiveMisses));
+    }
+
+    function renderProgress() {
+        const left = DISCOUNT_LEVEL - level;
+        if (left > 0) {
+            progressPill.classList.remove('unlocked');
+            progressPill.innerHTML = `Spiker ${level} · <strong>${left}</strong> ${left === 1 ? 'spiker' : 'spikre'} igjen til rabattkoden`;
+        } else {
+            progressPill.classList.add('unlocked');
+            progressPill.innerHTML = `Spiker ${level} · <strong>Rabattkode låst opp!</strong>`;
+        }
+    }
+
+    function bump(el) {
+        el.classList.remove('bump');
+        void el.offsetWidth;
+        el.classList.add('bump');
+    }
+
+    function showFeedback(text, cls) {
+        hitFeedback.textContent = text;
+        hitFeedback.className = 'hit-feedback ' + cls;
+        void hitFeedback.offsetWidth;
+        hitFeedback.classList.add('show');
+    }
+
+    function renderCombo() {
         if (combo > 1) {
             comboCount.textContent = combo + 'x';
-            comboDisplay.style.display = 'block';
+            comboDisplay.classList.add('show');
         } else {
-            comboDisplay.style.display = 'none';
-        }
-
-        // Animate impact
-        nailHead.classList.add('hit');
-        impactFlash.classList.add('show');
-        setTimeout(() => {
-            nailHead.classList.remove('hit');
-            impactFlash.classList.remove('show');
-        }, 150);
-
-        // Show feedback
-        hitFeedback.textContent = feedbackText + (comboBonus > 0 ? ` +${comboBonus}` : '');
-        hitFeedback.className = 'hit-feedback ' + hitType + ' show';
-        setTimeout(() => hitFeedback.classList.remove('show'), 600);
-
-        // Update nail visual
-        const maxDepth = 60;
-        const currentDepth = Math.min(nailDepth, maxDepth);
-        const nailHeight = Math.max(10, 70 - currentDepth);
-        nail.style.height = nailHeight + 'px';
-        nail.style.top = currentDepth + 'px';
-        nailHead.style.top = currentDepth + 'px';
-        impactFlash.style.top = currentDepth + 'px';
-
-        // Use up a nail
-        nailsLeft--;
-        updateNailsDisplay();
-
-        // Check if nail is fully in or out of nails
-        if (nailDepth >= 60 || nailsLeft <= 0) {
-            nextNail();
+            comboDisplay.classList.remove('show');
         }
     }
 
-    // Next nail
-    function nextNail() {
-        level++;
-        levelDisplay.textContent = level;
+    function addDrivenHead() {
+        // Leave a little nail head in the plank for each completed nail
+        const head = document.createElement('span');
+        head.className = 'driven-head';
+        const count = drivenHeads.children.length;
+        if (count >= 14) drivenHeads.firstChild.remove();
+        head.style.left = (12 + ((count * 37) % 200)) + 'px';
+        head.style.top = (6 + ((count * 13) % 40)) + 'px';
+        drivenHeads.appendChild(head);
+    }
 
-        // Increase speed
-        speed = Math.max(MIN_SPEED, BASE_SPEED - (level - 1) * SPEED_DECREASE);
+    // ---------- Game loop ----------
+    function frame(timestamp) {
+        rafId = 0;
+        if (state !== 'playing' || paused) return;
+        if (!lastTime) lastTime = timestamp;
+        // Clamp delta so a long frame (tab switch, slow device) can't teleport the marker
+        const delta = Math.min(timestamp - lastTime, 50);
+        lastTime = timestamp;
 
-        // Reset nail
+        position += (delta / sweepMs) * 200 * direction;
+        if (position >= 100) {
+            position = 200 - position;
+            direction = -1;
+        } else if (position <= 0) {
+            position = -position;
+            direction = 1;
+        }
+        position = Math.max(0, Math.min(100, position));
+        renderIndicator();
+        rafId = requestAnimationFrame(frame);
+    }
+
+    function startLoop() {
+        stopLoop();
+        lastTime = 0;
+        rafId = requestAnimationFrame(frame);
+    }
+
+    function stopLoop() {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = 0;
+    }
+
+    function classify(pos) {
+        for (const z of ZONES) {
+            if (pos >= z.from && pos <= z.to) return z.type;
+        }
+        return 'miss';
+    }
+
+    function strikesForLevel(lvl) {
+        if (lvl < 5) return 10;
+        if (lvl < 10) return 9;
+        return 8;
+    }
+
+    function setupNail(instant) {
+        strikesPerNail = strikesForLevel(level);
+        strikesLeft = strikesPerNail;
         nailDepth = 0;
-        nail.style.height = '70px';
-        nail.style.top = '0px';
-        nailHead.style.top = '0px';
-
-        // Reset nails left
-        nailsLeft = TOTAL_NAILS;
-        updateNailsDisplay();
-
-        // Check if game should continue (endless until miss streak or player quits)
-        // For now, game continues until 3 consecutive misses
-        // Actually let's just make it: game ends when you miss 3 nails total
-        // Simpler: let's track "bent nails" - if you miss too much on one nail, it bends and you lose
-        // Even simpler: Just level up, game gets faster, play until you mess up
-
-        // Actually, let's make it endless - you just keep going until...
-        // Let's add: if you get 3 misses in a row, game over
-        // Track in combo: if combo resets 3 times in one nail, game over
+        consecutiveMisses = 0;
+        sweepMs = Math.max(MIN_SWEEP, BASE_SWEEP * Math.pow(SWEEP_FACTOR, level - 1));
+        // Start each nail from a random edge so it's about timing, not rhythm
+        if (Math.random() < 0.5) { position = 0; direction = 1; } else { position = 100; direction = -1; }
+        renderIndicator();
+        renderNail(instant);
+        renderStrikes();
+        renderMisses();
+        renderProgress();
+        levelDisplay.textContent = level;
     }
 
-    // Update nails display
-    function updateNailsDisplay() {
-        nailsDisplay.innerHTML = '';
-        for (let i = 0; i < TOTAL_NAILS; i++) {
-            const nailIcon = document.createElement('span');
-            nailIcon.className = 'nail-icon' + (i >= nailsLeft ? ' used' : '');
-            nailIcon.textContent = '📍';
-            nailsDisplay.appendChild(nailIcon);
+    // ---------- Input ----------
+    function handleStrike() {
+        if (state !== 'playing' || paused) return;
+        const now = performance.now();
+        if (now < inputLockedUntil) return;
+
+        const kind = classify(position);
+        const hit = HITS[kind];
+
+        if (kind === 'perfect') perfects++;
+        if (kind === 'perfect' || kind === 'good') combo++;
+        else combo = 0;
+        if (combo > bestCombo) bestCombo = combo;
+
+        consecutiveMisses = kind === 'miss' ? consecutiveMisses + 1 : 0;
+
+        const comboBonus = combo > 1 ? Math.floor(hit.points * (combo - 1) * 0.1) : 0;
+        score += hit.points + comboBonus;
+        scoreDisplay.textContent = score;
+        if (hit.points) bump(scoreDisplay);
+
+        nailDepth += hit.depth;
+        strikesLeft--;
+
+        // Feel
+        sfx.hit(kind);
+        nailHead.classList.remove('hit');
+        void nailHead.offsetWidth;
+        nailHead.classList.add('hit');
+        burst(kind);
+        if (kind === 'perfect') { shake(false); vibrate(15); }
+        else if (kind === 'miss') { shake(false); vibrate([10, 30, 10]); }
+        showFeedback(hit.text + (comboBonus > 0 ? ` +${comboBonus}` : ''), kind);
+        if (tapInstruction.style.visibility !== 'hidden' && level > 1) tapInstruction.style.visibility = 'hidden';
+
+        renderNail(false);
+        renderStrikes();
+        renderMisses();
+        renderCombo();
+
+        if (nailDepth >= NAIL_DEPTH) {
+            completeNail();
+        } else if (consecutiveMisses >= MAX_CONSECUTIVE_MISSES) {
+            finish('Tre bom på rad – hammeren glapp.');
+        } else if (strikesLeft <= 0) {
+            bendNail();
         }
     }
 
-    // Start game
+    function completeNail() {
+        const bonus = strikesLeft * UNUSED_STRIKE_BONUS;
+        score += bonus;
+        scoreDisplay.textContent = score;
+        bump(scoreDisplay);
+
+        sfx.nailDone();
+        burst('done');
+        addDrivenHead();
+
+        const prevLevel = level;
+        level++;
+        bump(levelDisplay);
+        levelDisplay.textContent = level;
+        renderProgress();
+        srStatus.textContent = `Spikeren er inne. Nivå ${level}.`;
+
+        const unlockedNow = prevLevel < DISCOUNT_LEVEL && level >= DISCOUNT_LEVEL;
+        later(() => {
+            if (state !== 'playing') return;
+            showFeedback(unlockedNow ? 'RABATTKODE! 🎉' : (bonus ? `INNE! +${bonus}` : 'INNE!'), unlockedNow ? 'perfect' : 'level');
+        }, 220);
+        if (unlockedNow) {
+            sfx.unlock();
+            vibrate([20, 40, 20]);
+            showToast(`🎉 Nivå ${DISCOUNT_LEVEL}! Rabattkoden vises når spillet er over.`);
+        }
+
+        // Brief pause, then a fresh nail pops up
+        inputLockedUntil = performance.now() + 450;
+        later(() => {
+            if (state !== 'playing') return;
+            setupNail(true);
+        }, 380);
+    }
+
+    function bendNail() {
+        nailAssembly.classList.add('bent');
+        nailAssembly.style.transform = `translateY(${Math.min(nailDepth, NAIL_DEPTH)}px) rotate(${Math.random() < 0.5 ? '-' : ''}28deg)`;
+        finish('Tom for slag – spikeren bøyde seg.');
+    }
+
+    function finish(reason) {
+        if (state !== 'playing') return;
+        state = 'ending';
+        endReason = reason;
+        stopLoop();
+        sfx.gameOver();
+        shake(true);
+        vibrate(60);
+        showFeedback('GAME OVER', 'miss');
+        srStatus.textContent = reason;
+        later(showEndScreen, reducedMotion ? 600 : 1100);
+    }
+
+    // ---------- Screens ----------
+    function setPlayingUI(on) {
+        document.body.classList.toggle('playing', on);
+        headerStats.classList.toggle('visible', on);
+        pauseBtn.hidden = !on;
+    }
+
     function startGame() {
+        clearTimers();
+        stopLoop();
+        clearFx();
+        ensureAudio();
+        sfx.click();
+
         score = 0;
         level = 1;
-        nailsLeft = TOTAL_NAILS;
         combo = 0;
         bestCombo = 0;
         perfects = 0;
-        nailDepth = 0;
-        speed = BASE_SPEED;
-        indicatorPosition = 0;
-        direction = 1;
-        lastTime = 0;
-        isPlaying = true;
+        paused = false;
+        state = 'playing';
+        inputLockedUntil = performance.now() + 250; // ignore the tap that started the game
 
         scoreDisplay.textContent = '0';
-        levelDisplay.textContent = '1';
-        comboCount.classList.remove('show');
+        drivenHeads.textContent = '';
+        hitFeedback.className = 'hit-feedback';
+        comboDisplay.classList.remove('show');
+        pauseOverlay.hidden = true;
+        tapInstruction.style.visibility = '';
+        tapInstruction.textContent = window.matchMedia('(hover: hover) and (pointer: fine)').matches
+            ? '👆 Klikk hvor som helst, eller trykk mellomrom'
+            : '👆 Trykk hvor som helst';
 
-        // Reset nail visual
-        nail.style.height = '60px';
-        nail.style.top = '0px';
-        nailHead.style.top = '0px';
+        startScreen.hidden = true;
+        endScreen.hidden = true;
+        gameScreen.hidden = false;
+        setPlayingUI(true);
+        sizeCanvas();
+        setupNail(true);
 
-        updateNailsDisplay();
-
-        startScreen.classList.add('hidden');
-        endScreen.classList.add('hidden');
-        gameScreen.classList.remove('hidden');
-        headerStats.classList.add('visible');
-
-        animationId = requestAnimationFrame(updateIndicator);
+        if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+        startLoop();
     }
 
-    // End game
-    function endGame() {
-        isPlaying = false;
-        if (animationId) {
-            cancelAnimationFrame(animationId);
-        }
+    function showEndScreen() {
+        state = 'over';
+        stopLoop();
+        clearFx();
+        setPlayingUI(false);
 
-        // Check high score
         const isNewRecord = score > highScore;
         if (isNewRecord) {
             highScore = score;
-            localStorage.setItem('spikern_highscore', highScore.toString());
-            highScoreValue.textContent = highScore;
+            writeStore(STORAGE.best, highScore);
         }
+        if (level > bestLevel) {
+            bestLevel = level;
+            writeStore(STORAGE.bestLevel, bestLevel);
+        }
+        renderBest();
 
-        // Show end screen
-        gameScreen.classList.add('hidden');
-        headerStats.classList.remove('visible');
-        endScreen.classList.remove('hidden');
+        $('resultReason').textContent = endReason;
+        $('finalScore').textContent = score;
+        $('finalPerfects').textContent = perfects;
+        $('finalCombo').textContent = bestCombo;
+        $('finalLevel').textContent = level;
+        $('newRecord').hidden = !isNewRecord;
+        $('finalBest').textContent = isNewRecord ? '' : `Din rekord: ${highScore}`;
 
-        document.getElementById('finalScore').textContent = score;
-        document.getElementById('finalPerfects').textContent = perfects;
-        document.getElementById('finalCombo').textContent = bestCombo;
-        document.getElementById('finalLevel').textContent = level;
-
-        // Check for discount code unlock (level 10+)
-        const discountReveal = document.getElementById('discountReveal');
-        if (level >= 10) {
-            discountReveal.classList.remove('hidden');
+        const unlocked = level >= DISCOUNT_LEVEL;
+        $('discountReveal').hidden = !unlocked;
+        const progress = $('discountProgress');
+        if (unlocked) {
+            progress.hidden = true;
         } else {
-            discountReveal.classList.add('hidden');
+            const left = DISCOUNT_LEVEL - level;
+            progress.hidden = false;
+            progress.innerHTML = `Du kom til nivå ${level}. Bare <strong>${left} ${left === 1 ? 'spiker' : 'spikre'}</strong> til, så låser du opp rabattkoden!`;
         }
 
-        const newRecord = document.getElementById('newRecord');
-        if (isNewRecord) {
-            newRecord.classList.remove('hidden');
-        } else {
-            newRecord.classList.add('hidden');
-        }
-
-        // Result message
         let emoji, message;
-        if (score >= 5000) {
-            emoji = '🏆';
-            message = 'Mesterlig!';
-        } else if (score >= 3000) {
-            emoji = '⭐';
-            message = 'Fantastisk!';
-        } else if (score >= 2000) {
-            emoji = '🔨';
-            message = 'Solid jobbet!';
-        } else if (score >= 500) {
-            emoji = '👍';
-            message = 'Bra start!';
-        } else {
-            emoji = '💪';
-            message = 'Øvelse gjør mester!';
+        if (score >= 5000) { emoji = '🏆'; message = 'Mesterlig!'; }
+        else if (score >= 3000) { emoji = '⭐'; message = 'Fantastisk!'; }
+        else if (score >= 2000) { emoji = '🔨'; message = 'Solid jobbet!'; }
+        else if (score >= 500) { emoji = '👍'; message = 'Bra start!'; }
+        else { emoji = '💪'; message = 'Øvelse gjør mester!'; }
+        $('resultEmoji').textContent = emoji;
+        $('resultMessage').textContent = message;
+        $('resultSubtitle').textContent = unlocked ? 'Klarer du å slå rekorden?' : 'Klarer du bedre?';
+
+        gameScreen.hidden = true;
+        endScreen.hidden = false;
+        endScreen.scrollTop = 0;
+
+        if (typeof gtag === 'function') {
+            try { gtag('event', 'game_over', { game: 'spikern', score, level }); } catch (e) { /* ignore */ }
         }
 
-        document.getElementById('resultEmoji').textContent = emoji;
-        document.getElementById('resultMessage').textContent = message;
+        // Avoid an accidental restart from a frantic tap right as the screen appears
+        playAgainBtn.disabled = true;
+        later(() => {
+            playAgainBtn.disabled = false;
+            playAgainBtn.focus({ preventScroll: true });
+        }, 450);
     }
 
-    // Track misses for game over
-    let consecutiveMisses = 0;
-    const originalHandleTap = handleTap;
-
-    // Override handleTap to track misses
-    function handleTapWithGameOver() {
-        if (!isPlaying) return;
-
-        const wasCombo = combo;
-
-        // Get hit type before calling original
-        let hitType;
-        if (indicatorPosition >= ZONES.perfectStart && indicatorPosition <= ZONES.perfectEnd) {
-            hitType = 'perfect';
-        } else if (indicatorPosition >= ZONES.goodStart && indicatorPosition <= ZONES.goodEnd) {
-            hitType = 'good';
-        } else if (indicatorPosition >= 20 && indicatorPosition <= 80) {
-            hitType = 'ok';
-        } else {
-            hitType = 'miss';
-        }
-
-        // Call original logic
-        originalHandleTap.call(this);
-
-        // Track consecutive misses
-        if (hitType === 'miss') {
-            consecutiveMisses++;
-            if (consecutiveMisses >= 3) {
-                endGame();
-            }
-        } else {
-            consecutiveMisses = 0;
-        }
+    function pause() {
+        if (state !== 'playing' || paused) return;
+        paused = true;
+        stopLoop();
+        pauseOverlay.hidden = false;
+        pauseBtn.textContent = '▶';
+        pauseBtn.setAttribute('aria-label', 'Fortsett');
+        $('resumeBtn').focus({ preventScroll: true });
     }
 
-    // Event listeners
-    document.getElementById('startBtn').addEventListener('click', () => {
-        consecutiveMisses = 0;
-        startGame();
-    });
+    function resume() {
+        if (state !== 'playing' || !paused) return;
+        paused = false;
+        pauseOverlay.hidden = true;
+        pauseBtn.textContent = '⏸';
+        pauseBtn.setAttribute('aria-label', 'Pause');
+        inputLockedUntil = performance.now() + 200;
+        if (document.activeElement) document.activeElement.blur();
+        startLoop();
+    }
 
-    document.getElementById('playAgainBtn').addEventListener('click', () => {
-        consecutiveMisses = 0;
-        startGame();
-    });
+    // ---------- Events ----------
+    $('startBtn').addEventListener('click', startGame);
+    playAgainBtn.addEventListener('click', startGame);
+    $('resumeBtn').addEventListener('click', (e) => { e.stopPropagation(); resume(); });
+    pauseBtn.addEventListener('click', () => (paused ? resume() : pause()));
+    muteBtn.addEventListener('click', toggleMute);
 
-    gameArea.addEventListener('click', handleTapWithGameOver);
-    gameArea.addEventListener('touchstart', (e) => {
+    // Pointer events cover mouse, touch and pen with a single listener: no touch+click double firing
+    gameArea.addEventListener('pointerdown', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        if (e.target.closest('button, a')) return;
         e.preventDefault();
-        handleTapWithGameOver();
-    }, { passive: false });
+        handleStrike();
+    });
+    gameArea.addEventListener('contextmenu', (e) => e.preventDefault());
 
-    // Prevent double-tap zoom
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', (e) => {
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) {
+    document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey || e.altKey) return;
+        const key = e.key;
+        if (key === 'm' || key === 'M') { toggleMute(); return; }
+        if (state === 'playing') {
+            if (key === 'p' || key === 'P' || key === 'Escape') {
+                e.preventDefault();
+                paused ? resume() : pause();
+                return;
+            }
+            if (paused) return;
+            if (key === ' ' || key === 'Enter' || key === 'Spacebar') {
+                e.preventDefault();
+                if (!e.repeat) handleStrike();
+            }
+        } else if (state === 'start' && (key === ' ' || key === 'Enter') && document.activeElement === document.body) {
             e.preventDefault();
+            startGame();
         }
-        lastTouchEnd = now;
-    }, { passive: false });
+    });
 
-    // Copy discount code
-    function copyDiscountCode() {
-        const code = document.getElementById('discountCode').textContent;
-        navigator.clipboard.writeText(code).then(() => {
-            showNotification('Rabattkode kopiert: ' + code);
-        }).catch(() => {
-            showNotification('Kode: ' + code);
+    $('discountCode').addEventListener('click', async () => {
+        const code = $('discountCode').textContent.trim();
+        try {
+            await navigator.clipboard.writeText(code);
+            showToast('Rabattkode kopiert: ' + code);
+        } catch (err) {
+            // Clipboard unavailable: select the text so it can be copied manually
+            try {
+                const range = document.createRange();
+                range.selectNodeContents($('discountCode'));
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+            } catch (e2) { /* ignore */ }
+            showToast('Koden er ' + code + ' – kopier den manuelt');
+        }
+    });
+
+    // Pause automatically when the tab/app is hidden
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            pause();
+            if (audioCtx && audioCtx.state === 'running') audioCtx.suspend().catch(() => {});
+        }
+    });
+    window.addEventListener('pagehide', pause);
+    window.addEventListener('blur', () => { if (state === 'playing') pause(); });
+
+    // Keep the high-DPI particle canvas crisp across resizes/orientation changes
+    let resizeTimer = 0;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => { if (!gameScreen.hidden) sizeCanvas(); }, 100);
+    });
+
+    // Confirm before leaving in the middle of a game
+    document.querySelectorAll('.js-leave').forEach((link) => {
+        link.addEventListener('click', (e) => {
+            if (state !== 'playing') return;
+            const wasPaused = paused;
+            pause();
+            if (!window.confirm('Du er midt i et spill. Er du sikker på at du vil forlate?')) {
+                e.preventDefault();
+                if (!wasPaused) resume();
+            }
         });
-    }
+    });
 
-    // Show notification
-    function showNotification(message) {
-        const existing = document.querySelector('.notification');
+    // ---------- Toast ----------
+    let toastTimer = 0;
+    function showToast(message) {
+        const existing = document.querySelector('.toast');
         if (existing) existing.remove();
-
-        const notification = document.createElement('div');
-        notification.className = 'notification';
-        notification.textContent = message;
-        notification.style.cssText = 'position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);background:var(--success);color:white;padding:1rem 1.5rem;border-radius:10px;font-weight:500;z-index:200;';
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 300);
-        }, 2000);
+        clearTimeout(toastTimer);
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.setAttribute('role', 'status');
+        toast.textContent = message;
+        document.body.appendChild(toast);
+        toastTimer = setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 2400);
     }
 
-    // Confirm before leaving during gameplay
-    function confirmLeave(link) {
-        if (isPlaying) {
-            return confirm('Du er midt i et spill. Er du sikker på at du vil forlate?');
-        }
-        return true;
-    }
+    // Expose a tiny hook for automated testing (no effect on gameplay)
+    window.__spikern = {
+        get state() { return state; },
+        get position() { return position; },
+        get level() { return level; },
+        get score() { return score; },
+        get paused() { return paused; },
+        get strikesLeft() { return strikesLeft; }
+    };
+})();
 </script>
 
 </body>

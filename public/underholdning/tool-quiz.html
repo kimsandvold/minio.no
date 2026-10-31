@@ -4,16 +4,15 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+    <meta name="theme-color" content="#1a1a1a"/>
     <title>Minio Underholdning - Verktøy Quiz</title>
-    <meta name="description" content="Test kunnskapene dine! Vet du hvor de kjente verktøymerkene kommer fra? Ta Minio sin verktøy-quiz og vinn 10% rabattkode!"/>
-    <meta name="keywords" content="Minio, quiz, verktøy, merker, Makita, Bosch, DeWalt, Lillehammer, håndverk, rabattkode"/>
+    <meta name="description" content="Test kunnskapene dine! Vet du hvor de kjente verktøymerkene ble grunnlagt? Ta Minio sin verktøy-quiz og vinn 10% rabattkode!"/>
     <meta name="author" content="Minio"/>
     <meta name="robots" content="index, follow"/>
-    <link rel="canonical" href="https://www.minio.no/underholdning/tool-quiz.html"/>
+    <link rel="canonical" href="https://minio.no/underholdning/tool-quiz.html"/>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
-    <link rel="apple-touch-icon" href="/favicon.ico"/>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-E4J774CTXF"></script>
@@ -26,12 +25,10 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website"/>
-    <meta property="og:url" content="https://www.minio.no/underholdning/tool-quiz.html"/>
+    <meta property="og:url" content="https://minio.no/underholdning/tool-quiz.html"/>
     <meta property="og:title" content="Verktøy Quiz – Minio Underholdning"/>
-    <meta property="og:description" content="Vet du hvor de kjente verktøymerkene kommer fra? Test deg selv og vinn 10% rabattkode!"/>
-    <meta property="og:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
-    <meta property="og:image:width" content="1200"/>
-    <meta property="og:image:height" content="630"/>
+    <meta property="og:description" content="Vet du hvor de kjente verktøymerkene ble grunnlagt? Test deg selv og vinn 10% rabattkode!"/>
+    <meta property="og:image" content="https://minio.no/images/hero/carport-elbil-forside.webp"/>
     <meta property="og:image:alt" content="Verktøy Quiz - Minio spill"/>
     <meta property="og:site_name" content="Minio"/>
     <meta property="og:locale" content="nb_NO"/>
@@ -39,8 +36,8 @@
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:title" content="Verktøy Quiz – Klarer du å slå meg?"/>
-    <meta name="twitter:description" content="Vet du hvor de kjente verktøymerkene kommer fra? Test deg selv!"/>
-    <meta name="twitter:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
+    <meta name="twitter:description" content="Vet du hvor de kjente verktøymerkene ble grunnlagt? Test deg selv!"/>
+    <meta name="twitter:image" content="https://minio.no/images/hero/carport-elbil-forside.webp"/>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
@@ -52,54 +49,64 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
 
     <style>
         :root {
-            /* Minio colors */
             --dark-bg: #202020;
             --darker-bg: #1a1a1a;
-            --light-bg: #f4f4f4;
             --text-light: #f9f9f9;
-            --text-dark: #202020;
+            --muted: rgba(249, 249, 249, 0.68);
             --link-bg: #2f2f2f;
+            --line: rgba(255, 255, 255, 0.1);
             --accent: #1da1f2;
             --accent-hover: #0d8ddb;
             --success: #4caf50;
-            --error: #e53935;
+            --error: #ef5350;
+            --header-h: 56px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body { height: 100%; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: #0a0a12;
             color: var(--text-light);
             min-height: 100vh;
+            min-height: 100dvh;
             overflow: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button { font-family: inherit; }
+
+        :focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px; height: 1px;
+            padding: 0; margin: -1px;
+            overflow: hidden; clip: rect(0, 0, 0, 0);
+            white-space: nowrap; border: 0;
         }
 
         /* Animated starfield background */
         .stars-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             overflow: hidden;
             z-index: 0;
         }
 
         .stars {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background: radial-gradient(ellipse at bottom, #1a1a2e 0%, #0a0a12 100%);
         }
 
@@ -107,10 +114,7 @@
         .stars::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background-repeat: repeat;
         }
 
@@ -149,87 +153,267 @@
             50% { opacity: 1; }
         }
 
-        /* Main container */
+        /* ---------- Unified header (shared across the games) ---------- */
+        .unified-header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            z-index: 5000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            padding-left: max(0.75rem, env(safe-area-inset-left));
+            padding-right: max(0.75rem, env(safe-area-inset-right));
+            background: var(--darker-bg);
+            border-bottom: 1px solid var(--line);
+            height: var(--header-h);
+        }
+
+        .header-left { display: flex; align-items: center; gap: 0.4rem; }
+
+        .header-home,
+        .icon-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: rgba(47, 47, 47, 0.8);
+            border: none;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .header-home:hover,
+        .icon-btn:hover { background: rgba(29, 161, 242, 0.3); }
+
+        .game-nav { display: flex; align-items: center; gap: 0.3rem; }
+
+        .game-nav-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            background: rgba(47, 47, 47, 0.6);
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-light);
+            font-size: 1rem;
+            transition: background 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .game-nav-item:hover { background: rgba(29, 161, 242, 0.2); }
+
+        .game-nav-item.active {
+            border-color: var(--accent);
+            background: rgba(29, 161, 242, 0.15);
+        }
+
+        /* ---------- Screens ---------- */
+        .screen {
+            position: fixed;
+            inset: 0;
+            padding-top: var(--header-h);
+            z-index: 2;
+        }
+
+        .screen[hidden] { display: none !important; }
+
+        /* Start screen */
+        .start-screen {
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+        }
+
+        .start-inner,
+        .end-inner {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 2rem 1rem;
+            padding-bottom: max(2rem, env(safe-area-inset-bottom));
+        }
+
+        .start-logo { margin-bottom: 1.75rem; }
+
+        .start-logo img {
+            display: block;
+            height: 44px;
+            width: auto;
+        }
+
+        .start-screen h1 {
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: 800;
+        }
+
+        .start-screen .subtitle {
+            font-size: 1.1rem;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+        }
+
+        .start-description {
+            max-width: 460px;
+            line-height: 1.7;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .brand-preview {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            max-width: 460px;
+            list-style: none;
+        }
+
+        .brand-tag {
+            padding: 0.4rem 0.9rem;
+            background: var(--link-bg);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .reward-teaser {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(29, 161, 242, 0.2) 100%);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            padding: 0.75rem 1.25rem;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            max-width: 340px;
+        }
+
+        .reward-teaser strong { color: var(--success); }
+
+        .best-line {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-bottom: 1.5rem;
+            min-height: 1.2em;
+        }
+
+        .best-line strong { color: var(--text-light); }
+
+        .start-btn {
+            padding: 1.1rem 2.5rem;
+            background: var(--accent);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .start-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .home-link {
+            margin-top: 1.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            background: var(--link-bg);
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border-radius: 8px;
+            border: 1px solid var(--line);
+            transition: background 0.2s, border-color 0.2s;
+        }
+
+        .home-link:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        /* ---------- Quiz ---------- */
         .quiz-wrapper {
             display: flex;
             flex-direction: column;
-            height: 100vh;
-            position: relative;
-            z-index: 1;
         }
 
-        /* Header */
         .quiz-header {
             background: var(--darker-bg);
-            padding: 0.75rem 2rem;
+            padding: 0.6rem 1.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-            z-index: 1000;
-        }
-
-        .quiz-header-left {
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-        }
-
-        .back-link {
-            color: var(--text-light);
-            text-decoration: none;
-            font-size: 1.2rem;
-            opacity: 0.7;
-            transition: opacity 0.3s;
-        }
-
-        .back-link:hover {
-            opacity: 1;
+            gap: 1rem;
+            border-bottom: 1px solid var(--line);
         }
 
         .quiz-logo {
             display: flex;
             align-items: center;
             gap: 0.75rem;
+            min-width: 0;
         }
 
         .quiz-logo img {
-            height: 32px;
+            display: block;
+            height: 24px;
             width: auto;
         }
 
         .quiz-logo-text {
             font-weight: 700;
-            font-size: 1rem;
-            color: var(--text-light);
+            font-size: 0.95rem;
+            white-space: nowrap;
+            padding-left: 0.75rem;
+            border-left: 1px solid var(--line);
         }
 
         .quiz-stats {
             display: flex;
             align-items: center;
-            gap: 2rem;
+            gap: 1.25rem;
         }
 
         .stat {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
             font-size: 0.95rem;
+            white-space: nowrap;
         }
 
-        .stat i {
-            color: var(--accent);
-        }
+        .stat i { color: var(--accent); }
+        .stat.streak i { color: #ff9800; }
 
-        .stat-value {
-            font-weight: 700;
-            color: var(--success);
-        }
+        .stat-value { font-weight: 700; color: var(--success); }
+        .stat.streak .stat-value { color: #ffb74d; }
 
         .progress-container {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
+            gap: 0.6rem;
         }
 
         .progress-bar {
@@ -242,6 +426,7 @@
 
         .progress-fill {
             height: 100%;
+            width: 0;
             background: var(--accent);
             transition: width 0.5s ease;
         }
@@ -249,133 +434,244 @@
         .progress-text {
             font-size: 0.9rem;
             font-weight: 600;
+            font-variant-numeric: tabular-nums;
         }
 
-        /* Question panel */
         .question-panel {
             background: var(--darker-bg);
-            padding: 1.25rem 2rem;
+            padding: 1rem 1.5rem;
             text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid var(--line);
         }
 
         .question-label {
             font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 2px;
-            opacity: 0.5;
-            margin-bottom: 0.5rem;
+            color: var(--muted);
+            margin-bottom: 0.35rem;
         }
 
+        .brand-name:focus { outline: none; }
+
         .brand-name {
-            font-size: 2.5rem;
+            font-size: 2.4rem;
             font-weight: 800;
-            color: var(--text-light);
+            line-height: 1.15;
         }
 
         .brand-hint {
             font-size: 0.9rem;
-            opacity: 0.6;
-            margin-top: 0.25rem;
+            color: var(--muted);
+            margin-top: 0.2rem;
         }
 
-        /* Map container */
         .map-container {
             flex: 1;
             position: relative;
+            min-height: 0;
         }
 
         #map {
-            width: 100%;
-            height: 100%;
-            background: var(--dark-bg);
+            position: absolute;
+            inset: 0;
+            background: #12161c;
         }
 
-        /* Leaflet customization */
         .leaflet-container {
-            background: var(--dark-bg);
+            background: #12161c;
+            font-family: 'Inter', sans-serif;
         }
+
+        .leaflet-control-attribution {
+            background: rgba(0,0,0,0.55) !important;
+            color: rgba(255,255,255,0.6) !important;
+            font-size: 10px !important;
+        }
+
+        .leaflet-control-attribution a { color: rgba(255,255,255,0.8) !important; }
 
         .country-label {
             background: none !important;
             border: none !important;
             box-shadow: none !important;
-            font-family: 'Inter', sans-serif;
             font-weight: 600;
             font-size: 11px;
-            color: rgba(255,255,255,0.6);
-            text-shadow: 1px 1px 3px rgba(0,0,0,0.9);
+            color: rgba(255,255,255,0.75);
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.95);
+            text-align: center;
+            white-space: nowrap;
+            pointer-events: none;
         }
 
-        /* Feedback overlay */
-        .feedback-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
+        .map-tools {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            z-index: 1000;
+            display: flex;
+            gap: 0.4rem;
+        }
+
+        .map-tool-btn {
+            padding: 0.45rem 0.8rem;
+            background: rgba(0,0,0,0.75);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            color: var(--text-light);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .map-tool-btn:hover { border-color: var(--accent); }
+
+        .map-instruction {
+            position: absolute;
+            bottom: 1.25rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.85);
+            padding: 0.75rem 1.4rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            transition: opacity 0.4s;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .map-instruction i { margin-right: 0.5rem; color: var(--accent); }
+
+        .map-instruction.hidden { opacity: 0; }
+
+        .map-error {
+            position: absolute;
+            inset: 0;
+            display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
-        }
-
-        .feedback-overlay.visible {
-            display: flex;
-        }
-
-        .feedback-card {
-            background: var(--darker-bg);
-            border-radius: 16px;
-            padding: 2.5rem;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            transform: scale(0.9);
-            opacity: 0;
-            transition: all 0.3s ease;
-            max-width: 420px;
-            width: 90%;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .feedback-overlay.visible .feedback-card {
-            transform: scale(1);
-            opacity: 1;
-        }
-
-        .feedback-icon {
-            font-size: 3.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .feedback-icon.correct {
-            color: var(--success);
-        }
-
-        .feedback-icon.wrong {
-            color: var(--error);
-        }
-
-        .feedback-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-        }
-
-        .feedback-text {
-            font-size: 1rem;
-            opacity: 0.8;
-            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            color: var(--muted);
+            font-size: 0.95rem;
             line-height: 1.6;
         }
 
-        .feedback-text strong {
-            color: var(--accent);
+        /* Country choice buttons (keyboard + touch friendly alternative to the map) */
+        .choices {
+            background: var(--darker-bg);
+            border-top: 1px solid var(--line);
+            padding: 0.6rem 1rem;
+            padding-bottom: max(0.6rem, env(safe-area-inset-bottom));
         }
 
+        .choices-label {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-bottom: 0.4rem;
+            text-align: center;
+        }
+
+        .choice-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .choice-btn {
+            padding: 0.5rem 0.85rem;
+            min-height: 40px;
+            background: var(--link-bg);
+            border: 2px solid transparent;
+            border-radius: 20px;
+            color: var(--text-light);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+            touch-action: manipulation;
+            white-space: nowrap;
+        }
+
+        .choice-btn:hover:not(:disabled) {
+            border-color: var(--accent);
+            background: rgba(29, 161, 242, 0.2);
+        }
+
+        .choice-btn:disabled { cursor: default; opacity: 0.45; }
+
+        .choice-btn.is-correct {
+            background: var(--success);
+            border-color: var(--success);
+            opacity: 1;
+        }
+
+        .choice-btn.is-wrong {
+            background: var(--error);
+            border-color: var(--error);
+            opacity: 1;
+        }
+
+        /* Feedback sheet (docked at the bottom of the map so the highlighted country stays visible) */
+        .feedback-sheet {
+            position: absolute;
+            left: 50%;
+            bottom: 0.9rem;
+            z-index: 1100;
+            width: min(440px, calc(100% - 1.5rem));
+            background: rgba(26, 26, 26, 0.97);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 16px;
+            padding: 1.1rem 1.25rem 1.2rem;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+            transform: translateX(-50%);
+            animation: sheetIn 0.25s ease;
+        }
+
+        .feedback-sheet[hidden] { display: none; }
+
+        @keyframes sheetIn {
+            from { opacity: 0; transform: translate(-50%, 16px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        .feedback-head {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .feedback-icon { font-size: 1.6rem; line-height: 1; }
+        .feedback-icon.correct { color: var(--success); }
+        .feedback-icon.wrong { color: var(--error); }
+
+        .feedback-title { font-size: 1.25rem; font-weight: 700; }
+
+        .feedback-text {
+            font-size: 0.95rem;
+            line-height: 1.55;
+            margin-bottom: 0.5rem;
+        }
+
+        .feedback-text strong { color: var(--accent); }
+
+        .feedback-fact {
+            font-size: 0.88rem;
+            line-height: 1.5;
+            color: var(--muted);
+            margin-bottom: 0.9rem;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .feedback-fact i { color: #ffd54f; margin-top: 0.2rem; }
+
         .feedback-btn {
-            padding: 0.9rem 2rem;
+            width: 100%;
+            padding: 0.85rem 1.5rem;
             background: var(--accent);
             border: none;
             border-radius: 8px;
@@ -383,188 +679,38 @@
             font-size: 1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background 0.3s;
+            transition: background 0.2s;
+            touch-action: manipulation;
         }
 
-        .feedback-btn:hover {
-            background: var(--accent-hover);
-        }
+        .feedback-btn:hover { background: var(--accent-hover); }
 
-        /* Start screen */
-        .start-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 2;
+        .feedback-kbd {
+            display: block;
             text-align: center;
-            padding: 2rem;
+            font-size: 0.72rem;
+            color: var(--muted);
+            margin-top: 0.45rem;
         }
 
-        .start-screen.hidden {
-            display: none;
-        }
-
-        .start-logo {
-            margin-bottom: 2rem;
-        }
-
-        .start-logo img {
-            height: 60px;
-            width: auto;
-        }
-
-        .start-screen h1 {
-            font-size: 2.2rem;
-            margin-bottom: 0.5rem;
-            font-weight: 800;
-        }
-
-        .start-screen .subtitle {
-            font-size: 1.1rem;
-            opacity: 0.6;
-            margin-bottom: 2rem;
-        }
-
-        .start-description {
-            max-width: 450px;
-            line-height: 1.7;
-            opacity: 0.7;
-            margin-bottom: 2rem;
-            font-size: 0.95rem;
-        }
-
-        .brand-preview {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 2rem;
-            max-width: 450px;
-        }
-
-        .brand-tag {
-            padding: 0.4rem 0.9rem;
-            background: var(--link-bg);
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-        }
-
-        .start-btn {
-            padding: 1.1rem 2.5rem;
-            background: var(--accent);
-            border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 1.1rem;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .start-btn:hover {
-            background: var(--accent-hover);
-            transform: translateY(-2px);
-        }
-
-        .home-link {
-            margin-top: 2rem;
-            display: inline-block;
-            padding: 0.75rem 1.5rem;
-            background: var(--link-bg);
-            color: var(--text-light);
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.2s;
-        }
-
-        .home-link:hover,
-        .home-link:active {
-            background: var(--accent);
-            border-color: var(--accent);
-        }
-
-        /* End screen */
+        /* ---------- End screen ---------- */
         .end-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, #151515 0%, #1a1a1a 50%, #151515 100%);
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             z-index: 3000;
-            padding: 2rem;
+            background: linear-gradient(180deg, #151515 0%, #1a1a1a 50%, #151515 100%);
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
         }
 
-        .end-screen.visible {
-            display: flex;
-        }
-
-        /* Decorative background elements */
-        .end-screen::before {
-            content: '';
-            position: absolute;
-            top: 10%;
-            left: -10%;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(29, 161, 242, 0.08) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .end-screen::after {
-            content: '';
-            position: absolute;
-            bottom: 10%;
-            right: -10%;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(29, 161, 242, 0.06) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        /* Shareable result card */
         .result-card {
             background: linear-gradient(145deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
             border-radius: 24px;
-            padding: 2.5rem 2rem;
+            padding: 2rem 1.75rem;
             text-align: center;
             max-width: 380px;
             width: 100%;
-            border: 2px solid transparent;
-            background-clip: padding-box;
             position: relative;
-            box-shadow: 0 25px 80px rgba(0,0,0,0.5), 0 0 0 2px rgba(29, 161, 242, 0.3);
-        }
-
-        .result-card::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(135deg, var(--accent) 0%, #0d8ddb 50%, var(--accent) 100%);
-            border-radius: 26px;
-            z-index: -1;
-            opacity: 0.6;
+            box-shadow: 0 25px 80px rgba(0,0,0,0.5), 0 0 0 2px rgba(29, 161, 242, 0.45);
         }
 
         .result-card-header {
@@ -574,30 +720,29 @@
             gap: 0.75rem;
             margin-bottom: 1rem;
             padding-bottom: 1rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+            border-bottom: 1px solid var(--line);
         }
 
         .result-card-header img {
-            height: 32px;
+            display: block;
+            height: 26px;
             width: auto;
         }
 
         .result-card-header span {
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 700;
             color: var(--accent);
             letter-spacing: 1px;
+            padding-left: 0.75rem;
+            border-left: 1px solid var(--line);
         }
 
-        .result-emoji {
-            font-size: 4rem;
-            margin-bottom: 0.5rem;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
-        }
+        .result-emoji { font-size: 3.5rem; margin-bottom: 0.25rem; }
 
         .result-title {
-            font-size: 0.85rem;
-            opacity: 0.5;
+            font-size: 0.8rem;
+            color: var(--muted);
             margin-bottom: 0.25rem;
             text-transform: uppercase;
             letter-spacing: 3px;
@@ -605,67 +750,126 @@
         }
 
         .result-score {
-            font-size: 6rem;
+            font-size: 5.5rem;
             font-weight: 800;
             line-height: 1;
             margin-bottom: 0.5rem;
-            text-shadow: 0 4px 20px rgba(76, 175, 80, 0.3);
+            font-variant-numeric: tabular-nums;
         }
 
-        .result-score .correct {
-            color: var(--success);
-        }
+        .result-score .correct { color: var(--success); }
 
         .result-score .total {
-            font-size: 3rem;
+            font-size: 2.75rem;
             opacity: 0.4;
-            color: var(--text-light);
         }
 
         .result-message {
-            font-size: 1.5rem;
+            font-size: 1.45rem;
             font-weight: 700;
             margin-bottom: 0.25rem;
-            color: var(--text-light);
         }
 
         .result-subtitle {
-            font-size: 1.1rem;
-            opacity: 0.7;
-            margin-bottom: 1.5rem;
+            font-size: 1rem;
+            color: var(--muted);
+            margin-bottom: 0.75rem;
             font-weight: 500;
         }
 
-        .result-brands {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 0.4rem;
-            margin-bottom: 1.5rem;
-            padding: 0 0.5rem;
+        .result-best {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 1rem;
         }
 
-        .result-brand-tag {
-            padding: 0.3rem 0.6rem;
-            background: rgba(255,255,255,0.08);
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 500;
-            opacity: 0.6;
-        }
+        .result-best.new-record { color: #ffd54f; font-weight: 700; }
 
         .result-url {
-            font-size: 0.9rem;
-            opacity: 0.6;
+            font-size: 0.85rem;
             padding-top: 1rem;
-            border-top: 1px solid rgba(255,255,255,0.1);
+            border-top: 1px solid var(--line);
             font-weight: 600;
             color: var(--accent);
+            word-break: break-word;
         }
 
-        .screenshot-hint {
+        .discount-reveal {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.1) 100%);
+            border: 2px solid var(--success);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .discount-reveal[hidden] { display: none; }
+
+        .discount-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .discount-code {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--success);
+            background: var(--darker-bg);
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .discount-code:hover { transform: scale(1.05); }
+
+        .discount-hint {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 0.5rem;
+        }
+
+        .review {
             margin-top: 1.5rem;
-            padding: 0.75rem 1rem;
+            max-width: 380px;
+            width: 100%;
+            text-align: left;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            padding: 0.9rem 1.1rem;
+        }
+
+        .review[hidden] { display: none; }
+
+        .review h2 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .review ul { list-style: none; }
+
+        .review li {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.75rem;
+            font-size: 0.85rem;
+            padding: 0.35rem 0;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .review li:first-child { border-top: none; }
+
+        .review li span:last-child { color: var(--muted); text-align: right; }
+
+        .screenshot-hint {
+            margin-top: 1.25rem;
+            padding: 0.7rem 1rem;
             background: rgba(29, 161, 242, 0.1);
             border-radius: 8px;
             font-size: 0.85rem;
@@ -676,318 +880,166 @@
             gap: 0.5rem;
         }
 
-        .screenshot-hint i {
-            font-size: 1.1rem;
-        }
-
-        /* Share section */
-        .share-section {
-            margin-top: 2rem;
-            text-align: center;
-        }
+        .share-section { margin-top: 1.5rem; }
 
         .share-title {
             font-size: 0.9rem;
-            opacity: 0.6;
-            margin-bottom: 1rem;
+            color: var(--muted);
+            margin-bottom: 0.75rem;
         }
 
-        .share-buttons {
-            display: flex;
-            gap: 0.75rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .share-btn {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1.25rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: none;
-            text-decoration: none;
-        }
-
-        .share-btn.facebook {
-            background: #1877f2;
-            color: white;
-        }
-
-        .share-btn.facebook:hover {
-            background: #166fe5;
-        }
-
-        .share-btn.instagram {
-            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
-            color: white;
-        }
-
-        .share-btn.instagram:hover {
-            opacity: 0.9;
-        }
-
-        .share-btn.copy {
-            background: var(--link-bg);
-            color: white;
-        }
-
-        .share-btn.copy:hover {
-            background: #3a3a3a;
-        }
-
-        /* Action buttons */
+        .share-buttons,
         .action-buttons {
             display: flex;
             gap: 0.75rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
             justify-content: center;
+            flex-wrap: wrap;
         }
 
+        .action-buttons { margin-top: 1.25rem; }
+
+        .share-btn,
         .action-btn {
-            padding: 0.9rem 1.5rem;
-            border-radius: 8px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-decoration: none;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 0.5rem;
-        }
-
-        .action-btn.primary {
-            background: var(--accent);
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
             border: none;
+            text-decoration: none;
             color: white;
         }
 
-        .action-btn.primary:hover {
-            background: var(--accent-hover);
-        }
+        .share-btn.share { background: var(--accent); }
+        .share-btn.share:hover { background: var(--accent-hover); }
+        .share-btn.facebook { background: #1877f2; }
+        .share-btn.facebook:hover { background: #166fe5; }
+        .share-btn.copy { background: var(--link-bg); }
+        .share-btn.copy:hover { background: #3a3a3a; }
 
+        .action-btn { font-size: 0.95rem; padding: 0.9rem 1.5rem; }
+        .action-btn.primary { background: var(--success); }
+        .action-btn.primary:hover { background: #43a047; }
         .action-btn.secondary {
             background: transparent;
             border: 2px solid rgba(255,255,255,0.2);
-            color: white;
         }
+        .action-btn.secondary:hover { border-color: rgba(255,255,255,0.45); }
 
-        .action-btn.secondary:hover {
-            border-color: rgba(255,255,255,0.4);
-        }
-
-        /* Reward teaser */
-        .reward-teaser {
-            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(29, 161, 242, 0.2) 100%);
-            border: 1px solid rgba(76, 175, 80, 0.3);
-            padding: 0.75rem 1.25rem;
-            border-radius: 10px;
-            font-size: 0.9rem;
-            margin-bottom: 1.5rem;
-            max-width: 320px;
-        }
-
-        .reward-teaser strong {
-            color: var(--success);
-        }
-
-        /* Discount code reveal */
-        .discount-reveal {
-            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(76, 175, 80, 0.1) 100%);
-            border: 2px solid var(--success);
-            border-radius: 12px;
-            padding: 1rem;
-            margin-top: 1rem;
-            text-align: center;
-        }
-
-        .discount-reveal.hidden {
-            display: none;
-        }
-
-        .discount-label {
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.7;
-            margin-bottom: 0.5rem;
-        }
-
-        .discount-code {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--success);
-            background: var(--darker-bg);
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            font-family: monospace;
-            letter-spacing: 2px;
-            display: inline-block;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .discount-code:hover {
-            transform: scale(1.05);
-        }
-
-        .discount-hint {
-            font-size: 0.75rem;
-            opacity: 0.6;
-            margin-top: 0.5rem;
-        }
-
-        /* Copy notification */
         .copy-notification {
             position: fixed;
-            bottom: 2rem;
+            bottom: max(2rem, env(safe-area-inset-bottom));
             left: 50%;
             transform: translateX(-50%);
             background: var(--success);
             color: white;
-            padding: 1rem 2rem;
+            padding: 0.9rem 1.6rem;
             border-radius: 8px;
             font-weight: 500;
-            z-index: 4000;
+            z-index: 6000;
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
             animation: slideUp 0.3s ease;
+            transition: opacity 0.3s, transform 0.3s;
+            max-width: calc(100% - 2rem);
+            text-align: center;
         }
 
         @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateX(-50%) translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(-50%) translateY(0);
-            }
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
 
-        /* Map instruction */
-        .map-instruction {
-            position: absolute;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.85);
-            padding: 0.9rem 1.75rem;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            z-index: 1000;
-            transition: opacity 0.5s;
-        }
-
-        .map-instruction i {
-            margin-right: 0.5rem;
-            color: var(--accent);
-        }
-
-        .map-instruction.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        /* Mobile */
+        /* ---------- Responsive ---------- */
         @media (max-width: 768px) {
-            .quiz-header {
-                padding: 0.6rem 1rem;
+            .quiz-header { padding: 0.5rem 0.9rem; }
+            .quiz-logo img { height: 18px; }
+            .quiz-logo-text { display: none; }
+            .quiz-stats { gap: 0.8rem; }
+            .stat { font-size: 0.85rem; }
+            .progress-bar { width: 56px; }
+            .question-panel { padding: 0.7rem 1rem; }
+            .question-label { font-size: 0.7rem; letter-spacing: 1.5px; }
+            .brand-name { font-size: 1.75rem; }
+            .brand-hint { font-size: 0.82rem; }
+            .start-screen h1 { font-size: 1.8rem; }
+            .start-logo img { height: 36px; }
+            .result-card { padding: 1.5rem 1.25rem; }
+            .result-score { font-size: 4.5rem; }
+            .result-score .total { font-size: 2.25rem; }
+            .result-emoji { font-size: 2.75rem; }
+            .result-message { font-size: 1.25rem; }
+            .map-instruction { bottom: 0.75rem; padding: 0.6rem 1rem; font-size: 0.8rem; }
+            .choices { padding: 0.5rem 0.5rem; padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+            .choices-label { display: none; }
+            .choice-list {
+                flex-wrap: nowrap;
+                justify-content: flex-start;
+                overflow-x: auto;
+                scrollbar-width: none;
+                padding: 0 0.25rem;
+                scroll-padding: 0 0.25rem;
             }
+            .choice-list::-webkit-scrollbar { display: none; }
+            .choice-btn { flex: 0 0 auto; }
+            .feedback-sheet { padding: 0.9rem 1rem 1rem; bottom: 0.6rem; }
+            .feedback-title { font-size: 1.1rem; }
+            .feedback-text { font-size: 0.9rem; }
+            .feedback-fact { font-size: 0.82rem; margin-bottom: 0.7rem; }
+            .feedback-kbd { display: none; }
+        }
 
-            .quiz-header-left {
-                gap: 0.75rem;
+        @media (max-width: 480px) {
+            :root { --header-h: 50px; }
+            .unified-header { padding-top: 0.4rem; padding-bottom: 0.4rem; }
+            .header-home, .icon-btn { width: 32px; height: 32px; font-size: 0.9rem; }
+            .game-nav-item { width: 30px; height: 30px; font-size: 0.9rem; }
+        }
+
+        @media (max-width: 360px) {
+            .game-nav { gap: 0.2rem; }
+            .game-nav-item { width: 26px; height: 26px; font-size: 0.8rem; }
+            .stat.streak { display: none; }
+        }
+
+        @media (max-height: 560px) and (orientation: landscape) {
+            :root { --header-h: 46px; }
+            .quiz-header { padding: 0.3rem 0.9rem; }
+            .quiz-logo img { height: 16px; }
+            .question-panel { padding: 0.3rem 1rem; }
+            .question-label { display: none; }
+            .brand-name { font-size: 1.3rem; }
+            .brand-hint { display: none; }
+            .map-instruction { display: none; }
+            .map-tool-btn { padding: 0.3rem 0.6rem; }
+            .choices { padding: 0.4rem 0.5rem; }
+            .choices-label { display: none; }
+            .choice-list {
+                flex-wrap: nowrap;
+                justify-content: flex-start;
+                overflow-x: auto;
+                scrollbar-width: none;
             }
+            .choice-list::-webkit-scrollbar { display: none; }
+            .choice-btn { flex: 0 0 auto; min-height: 36px; padding: 0.35rem 0.8rem; }
+            .feedback-sheet { padding: 0.6rem 0.9rem 0.7rem; bottom: 0.4rem; }
+            .feedback-fact { font-size: 0.78rem; margin-bottom: 0.4rem; }
+            .feedback-text { font-size: 0.85rem; }
+            .feedback-text { margin-bottom: 0.4rem; }
+            .feedback-btn { padding: 0.55rem 1rem; }
+            .feedback-kbd { display: none; }
+            .unified-header { padding-top: 0.3rem; padding-bottom: 0.3rem; }
+        }
 
-            .quiz-logo img {
-                height: 24px;
-            }
-
-            .quiz-logo-text {
-                display: none;
-            }
-
-            .quiz-stats {
-                gap: 1rem;
-            }
-
-            .stat {
-                font-size: 0.85rem;
-            }
-
-            .progress-bar {
-                width: 60px;
-            }
-
-            .question-panel {
-                padding: 1rem;
-            }
-
-            .brand-name {
-                font-size: 1.8rem;
-            }
-
-            .start-screen h1 {
-                font-size: 1.6rem;
-            }
-
-            .start-logo img {
-                height: 45px;
-            }
-
-            .result-card {
-                padding: 1.5rem;
-                max-width: 340px;
-            }
-
-            .result-score {
-                font-size: 5rem;
-            }
-
-            .result-score .total {
-                font-size: 2.5rem;
-            }
-
-            .result-emoji {
-                font-size: 3rem;
-            }
-
-            .result-message {
-                font-size: 1.3rem;
-            }
-
-            .result-brands {
-                gap: 0.3rem;
-            }
-
-            .result-brand-tag {
-                font-size: 0.65rem;
-                padding: 0.25rem 0.5rem;
-            }
-
-            .screenshot-hint {
-                font-size: 0.8rem;
-                padding: 0.6rem 0.8rem;
-            }
-
-            .feedback-card {
-                padding: 1.75rem;
-            }
-
-            .map-instruction {
-                bottom: 1rem;
-                padding: 0.7rem 1.25rem;
-                font-size: 0.8rem;
-            }
-
-            .share-btn {
-                padding: 0.65rem 1rem;
-                font-size: 0.85rem;
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
             }
         }
     </style>
@@ -996,516 +1048,414 @@
 <body>
 
 <!-- Animated background -->
-<div class="stars-container">
+<div class="stars-container" aria-hidden="true">
     <div class="stars"></div>
 </div>
 
-<!-- Start Screen -->
-<div class="start-screen" id="startScreen">
-    <div class="start-logo">
-        <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+<!-- Unified Header -->
+<header class="unified-header" id="unified-header">
+    <div class="header-left">
+        <a href="/underholdning" class="header-home" data-confirm-leave title="Tilbake til spilloversikten" aria-label="Tilbake til spilloversikten">🏠</a>
+        <nav class="game-nav" aria-label="Andre spill">
+            <a href="tool-quiz.html" class="game-nav-item active" title="Verktøy Quiz" aria-label="Verktøy Quiz" aria-current="page">🌍</a>
+            <a href="tool-game.html" class="game-nav-item" data-confirm-leave title="Finn Verktøyet" aria-label="Finn Verktøyet">🔨</a>
+            <a href="tool-nails.html" class="game-nav-item" data-confirm-leave title="Spiker'n" aria-label="Spiker'n">🪵</a>
+            <a href="tool-saw.html" class="game-nav-item" data-confirm-leave title="Sag Rytme" aria-label="Sag Rytme">🪚</a>
+            <a href="tool-maze.html" class="game-nav-item" data-confirm-leave title="Verktøyjakt" aria-label="Verktøyjakt">👷</a>
+            <a href="tool-stack.html" class="game-nav-item" data-confirm-leave title="Stabelmester" aria-label="Stabelmester">📏</a>
+        </nav>
     </div>
-    <h1>Verktøy Quiz</h1>
-    <p class="subtitle">Hvor kommer de fra?</p>
-
-    <p class="start-description">
-        Kjente verktøymerker kommer fra hele verden. Klarer du å peke ut riktig land på kartet for hvert merke?
-    </p>
-
-    <div class="brand-preview">
-        <span class="brand-tag">Makita</span>
-        <span class="brand-tag">Bosch</span>
-        <span class="brand-tag">DeWalt</span>
-        <span class="brand-tag">Hilti</span>
-        <span class="brand-tag">Husqvarna</span>
-        <span class="brand-tag">Festool</span>
-        <span class="brand-tag">...og flere</span>
-    </div>
-
-    <div class="reward-teaser">
-        🎁 Få <strong>20/20</strong> riktige og lås opp en <strong>10% rabattkode</strong>!
-    </div>
-
-    <button class="start-btn" id="startBtn">
-        <i class="fas fa-play"></i> Start quiz
+    <button type="button" class="icon-btn" id="muteBtn" aria-pressed="false" aria-label="Slå av lyd" title="Slå av lyd">
+        <i class="fas fa-volume-high" aria-hidden="true"></i>
     </button>
+</header>
 
-    <a href="/" class="home-link">
-        <i class="fas fa-arrow-left"></i> Tilbake til minio.no
-    </a>
-</div>
+<main>
+<!-- Start Screen -->
+<section class="screen start-screen" id="startScreen" aria-labelledby="startTitle">
+    <div class="start-inner">
+        <div class="start-logo">
+            <img src="/images/branding/logo_navbar.svg" alt="Minio" width="545" height="148">
+        </div>
+        <h1 id="startTitle">Verktøy Quiz</h1>
+        <p class="subtitle">Hvor kommer de fra?</p>
+
+        <p class="start-description">
+            Kjente verktøymerker kommer fra hele verden. Klarer du å peke ut landet hvert merke ble grunnlagt i?
+            Trykk på kartet eller velg landet fra listen.
+        </p>
+
+        <ul class="brand-preview" aria-label="Noen av merkene">
+            <li class="brand-tag">Makita</li>
+            <li class="brand-tag">Bosch</li>
+            <li class="brand-tag">DeWalt</li>
+            <li class="brand-tag">Hilti</li>
+            <li class="brand-tag">Husqvarna</li>
+            <li class="brand-tag">Festool</li>
+            <li class="brand-tag">…og flere</li>
+        </ul>
+
+        <div class="reward-teaser">
+            🎁 Få <strong>20/20</strong> riktige og lås opp en <strong>10% rabattkode</strong>!
+        </div>
+
+        <p class="best-line" id="startBest"></p>
+
+        <button type="button" class="start-btn" id="startBtn">
+            <i class="fas fa-play" aria-hidden="true"></i> Start quiz
+        </button>
+
+        <a href="/underholdning" class="home-link">
+            <i class="fas fa-arrow-left" aria-hidden="true"></i> Tilbake til spillene
+        </a>
+    </div>
+</section>
 
 <!-- Quiz -->
-<div class="quiz-wrapper" id="quizWrapper" style="display: none;">
-    <!-- Header -->
-    <header class="quiz-header">
-        <div class="quiz-header-left">
-            <a href="/" class="back-link" title="Tilbake">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <div class="quiz-logo">
-                <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
-                <span class="quiz-logo-text">Verktøy Quiz</span>
-            </div>
+<section class="screen quiz-wrapper" id="quizWrapper" aria-label="Quiz" hidden>
+    <div class="quiz-header">
+        <div class="quiz-logo">
+            <img src="/images/branding/logo_navbar.svg" alt="Minio" width="545" height="148">
+            <span class="quiz-logo-text">Verktøy Quiz</span>
         </div>
         <div class="quiz-stats">
-            <div class="stat">
-                <i class="fas fa-star"></i>
+            <div class="stat" title="Poeng">
+                <i class="fas fa-star" aria-hidden="true"></i>
+                <span class="sr-only">Poeng:</span>
                 <span class="stat-value" id="scoreDisplay">0</span>
             </div>
+            <div class="stat streak" title="Riktige på rad">
+                <i class="fas fa-fire" aria-hidden="true"></i>
+                <span class="sr-only">Riktige på rad:</span>
+                <span class="stat-value" id="streakDisplay">0</span>
+            </div>
             <div class="progress-container">
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progressFill" style="width: 10%;"></div>
+                <div class="progress-bar" role="progressbar" aria-label="Fremdrift" aria-valuemin="0" aria-valuemax="20" aria-valuenow="1" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
                 </div>
                 <span class="progress-text" id="progressText">1/20</span>
             </div>
         </div>
-    </header>
+    </div>
 
-    <!-- Question -->
     <div class="question-panel">
-        <div class="question-label">Hvor kommer dette merket fra?</div>
-        <div class="brand-name" id="brandName">Makita</div>
+        <div class="question-label">Hvilket land ble merket grunnlagt i?</div>
+        <h2 class="brand-name" id="brandName" tabindex="-1">Makita</h2>
         <div class="brand-hint" id="brandHint">Elektroverktøy</div>
     </div>
 
-    <!-- Map -->
     <div class="map-container">
-        <div id="map"></div>
-        <div class="map-instruction" id="mapInstruction">
-            <i class="fas fa-mouse-pointer"></i> Klikk på landet du tror er riktig
+        <div id="map" aria-label="Verdenskart med land du kan velge" role="region"></div>
+        <div class="map-tools" id="mapTools">
+            <button type="button" class="map-tool-btn" id="zoomEurope">Europa</button>
+            <button type="button" class="map-tool-btn" id="zoomWorld">Verden</button>
         </div>
-    </div>
-</div>
+        <div class="map-instruction" id="mapInstruction" aria-hidden="true">
+            <i class="fas fa-hand-pointer"></i> Trykk på landet du tror er riktig
+        </div>
 
-<!-- Feedback Overlay -->
-<div class="feedback-overlay" id="feedbackOverlay">
-    <div class="feedback-card">
-        <div class="feedback-icon" id="feedbackIcon">
-            <i class="fas fa-check-circle"></i>
+        <div class="feedback-sheet" id="feedbackSheet" role="dialog" aria-labelledby="feedbackTitle" aria-describedby="feedbackText" hidden>
+            <div class="feedback-head">
+                <span class="feedback-icon" id="feedbackIcon" aria-hidden="true"><i class="fas fa-check-circle"></i></span>
+                <span class="feedback-title" id="feedbackTitle">Riktig!</span>
+            </div>
+            <p class="feedback-text" id="feedbackText"></p>
+            <p class="feedback-fact"><i class="fas fa-lightbulb" aria-hidden="true"></i><span id="feedbackFact"></span></p>
+            <button type="button" class="feedback-btn" id="feedbackBtn">Neste</button>
+            <span class="feedback-kbd">Trykk Enter for å gå videre</span>
         </div>
-        <div class="feedback-title" id="feedbackTitle">Riktig!</div>
-        <div class="feedback-text" id="feedbackText">
-            Makita ble grunnlagt i <strong>Japan</strong> i 1915.
-        </div>
-        <button class="feedback-btn" id="feedbackBtn">
-            Neste spørsmål <i class="fas fa-arrow-right"></i>
-        </button>
     </div>
-</div>
+
+    <div class="choices">
+        <div class="choices-label" id="choicesLabel">…eller velg land her</div>
+        <div class="choice-list" id="choiceList" role="group" aria-labelledby="choicesLabel"></div>
+    </div>
+</section>
 
 <!-- End Screen -->
-<div class="end-screen" id="endScreen">
-    <!-- Shareable Result Card -->
-    <div class="result-card" id="resultCard">
-        <div class="result-card-header">
-            <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
-            <span>VERKTØY QUIZ</span>
-        </div>
-        <div class="result-emoji" id="resultEmoji">🏆</div>
-        <div class="result-title">Mitt resultat</div>
-        <div class="result-score">
-            <span class="correct" id="finalScore">7</span><span class="total">/20</span>
-        </div>
-        <div class="result-message" id="resultMessage">Bra jobbet!</div>
-        <div class="result-subtitle">Klarer du å slå meg?</div>
-        <div class="result-brands">
-            <span class="result-brand-tag">Makita</span>
-            <span class="result-brand-tag">Bosch</span>
-            <span class="result-brand-tag">DeWalt</span>
-            <span class="result-brand-tag">Hilti</span>
-            <span class="result-brand-tag">Festool</span>
-            <span class="result-brand-tag">+15 til</span>
-        </div>
-        <div class="result-url">minio.no/underholdning/tool-quiz.html</div>
+<section class="screen end-screen" id="endScreen" aria-labelledby="resultHeading" hidden>
+    <div class="end-inner">
+        <div class="result-card" id="resultCard">
+            <div class="result-card-header">
+                <img src="/images/branding/logo_navbar.svg" alt="Minio" width="545" height="148">
+                <span>VERKTØY QUIZ</span>
+            </div>
+            <div class="result-emoji" id="resultEmoji" aria-hidden="true">🏆</div>
+            <h2 class="result-title" id="resultHeading">Mitt resultat</h2>
+            <div class="result-score">
+                <span class="correct" id="finalScore">0</span><span class="total">/20</span>
+            </div>
+            <div class="result-message" id="resultMessage">Bra jobbet!</div>
+            <div class="result-subtitle">Klarer du å slå meg?</div>
+            <div class="result-best" id="resultBest"></div>
+            <div class="result-url">minio.no/underholdning/tool-quiz.html</div>
 
-        <div class="discount-reveal hidden" id="discountReveal">
-            <div class="discount-label">🎉 Du låste opp en rabattkode!</div>
-            <div class="discount-code" id="discountCode" onclick="copyDiscountCode()">VPH10</div>
-            <div class="discount-hint">Trykk for å kopiere • Gjelder 10% rabatt</div>
+            <div class="discount-reveal" id="discountReveal" hidden>
+                <div class="discount-label">🎉 Du låste opp en rabattkode!</div>
+                <button type="button" class="discount-code" id="discountCode" aria-label="Kopier rabattkoden VPH10">VPH10</button>
+                <div class="discount-hint">Trykk for å kopiere • Gjelder 10% rabatt</div>
+            </div>
         </div>
-    </div>
 
-    <!-- Screenshot hint -->
-    <div class="screenshot-hint">
-        <i class="fas fa-camera"></i>
-        <span>Ta screenshot og del på Instagram!</span>
-    </div>
+        <div class="review" id="review" hidden>
+            <h2>Disse bommet du på</h2>
+            <ul id="reviewList"></ul>
+        </div>
 
-    <!-- Share Section -->
-    <div class="share-section">
-        <div class="share-title">Del resultatet ditt</div>
-        <div class="share-buttons">
-            <button class="share-btn facebook" id="shareFacebook">
-                <i class="fab fa-facebook-f"></i> Facebook
+        <div class="screenshot-hint">
+            <i class="fas fa-camera" aria-hidden="true"></i>
+            <span>Ta skjermbilde og del på Instagram!</span>
+        </div>
+
+        <div class="share-section">
+            <div class="share-title">Del resultatet ditt</div>
+            <div class="share-buttons">
+                <button type="button" class="share-btn share" id="shareNative" hidden>
+                    <i class="fas fa-share-nodes" aria-hidden="true"></i> Del
+                </button>
+                <button type="button" class="share-btn facebook" id="shareFacebook">
+                    <i class="fab fa-facebook-f" aria-hidden="true"></i> Facebook
+                </button>
+                <button type="button" class="share-btn copy" id="copyResult">
+                    <i class="fas fa-copy" aria-hidden="true"></i> Kopier tekst
+                </button>
+            </div>
+        </div>
+
+        <div class="action-buttons">
+            <button type="button" class="action-btn primary" id="playAgainBtn">
+                <i class="fas fa-rotate-right" aria-hidden="true"></i> Spill igjen
             </button>
-            <button class="share-btn instagram" id="shareInstagram">
-                <i class="fab fa-instagram"></i> Instagram
-            </button>
-            <button class="share-btn copy" id="copyResult">
-                <i class="fas fa-copy"></i> Kopier tekst
-            </button>
+            <a href="/underholdning" class="action-btn secondary">
+                <i class="fas fa-gamepad" aria-hidden="true"></i> Flere spill
+            </a>
         </div>
     </div>
+</section>
+</main>
 
-    <!-- Action Buttons -->
-    <div class="action-buttons">
-        <button class="action-btn primary" id="playAgainBtn">
-            <i class="fas fa-redo"></i> Spill igjen
-        </button>
-        <a href="/" class="action-btn secondary">
-            <i class="fas fa-home"></i> Til minio.no
-        </a>
-    </div>
-</div>
-
-<!-- Unified Header -->
-<style>
-    .unified-header {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 5000;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 0.5rem 0.75rem;
-        background: var(--darker-bg);
-        border-bottom: 1px solid rgba(255,255,255,0.1);
-        height: 56px;
-    }
-
-    .header-left {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-    }
-
-    .header-home {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 36px;
-        height: 36px;
-        background: rgba(47, 47, 47, 0.8);
-        border-radius: 8px;
-        text-decoration: none;
-        color: var(--text-light);
-        font-size: 1rem;
-        transition: all 0.2s;
-    }
-
-    .header-home:hover,
-    .header-home:active {
-        background: rgba(29, 161, 242, 0.3);
-    }
-
-    .game-nav {
-        display: flex;
-        align-items: center;
-        gap: 0.3rem;
-    }
-
-    .game-nav-item {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 34px;
-        height: 34px;
-        background: rgba(47, 47, 47, 0.6);
-        border-radius: 8px;
-        text-decoration: none;
-        color: var(--text-light);
-        font-size: 1rem;
-        transition: all 0.2s;
-        border: 2px solid transparent;
-    }
-
-    .game-nav-item:hover {
-        background: rgba(29, 161, 242, 0.2);
-    }
-
-    .game-nav-item.active {
-        border-color: var(--accent);
-        background: rgba(29, 161, 242, 0.15);
-    }
-
-
-    /* Position screens below header */
-    .start-screen,
-    .quiz-wrapper,
-    .end-screen {
-        padding-top: 56px !important;
-    }
-
-    @media (max-width: 480px) {
-        .unified-header {
-            padding: 0.4rem 0.5rem;
-            height: 50px;
-        }
-
-        .header-home {
-            width: 32px;
-            height: 32px;
-            font-size: 0.9rem;
-        }
-
-        .game-nav-item {
-            width: 30px;
-            height: 30px;
-            font-size: 0.9rem;
-        }
-
-        .start-screen,
-        .quiz-wrapper,
-        .end-screen {
-            padding-top: 50px !important;
-        }
-    }
-
-    @media (max-width: 360px) {
-        .game-nav {
-            gap: 0.2rem;
-        }
-
-        .game-nav-item {
-            width: 26px;
-            height: 26px;
-            font-size: 0.8rem;
-        }
-    }
-</style>
-
-<header class="unified-header" id="unified-header">
-    <div class="header-left">
-        <a href="index.html" class="header-home" onclick="return confirmLeave(this)" title="Tilbake">🏠</a>
-        <nav class="game-nav">
-            <a href="tool-quiz.html" class="game-nav-item active" title="Verktøy Quiz">🌍</a>
-            <a href="tool-game.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Finn Verktøyet">🔨</a>
-            <a href="tool-nails.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Spiker'n">🪵</a>
-            <a href="tool-saw.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Sag Rytme">🪚</a>
-            <a href="tool-maze.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøyjakt">👷</a>
-        </nav>
-    </div>
-</header>
+<div class="sr-only" aria-live="polite" id="liveRegion"></div>
 
 <!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
 <script>
-    // Tool brands data
+(function () {
+    'use strict';
+
+    const TOTAL = 20;
+    const BEST_KEY = 'minio-toolquiz-best';
+    const MUTE_KEY = 'minio-toolquiz-muted';
+    const DISCOUNT_CODE = 'VPH10';
+
+    // Brand data. "country" is where the brand was founded (several are owned by
+    // foreign groups today – the question explicitly asks where it was founded).
     const toolBrands = [
-        {
-            name: 'Makita',
-            country: 'Japan',
-            countryCode: 'JP',
-            hint: 'Elektroverktøy',
-            year: 1915,
-            fact: 'Startet som en motorreparasjonsvirksomhet'
-        },
-        {
-            name: 'Bosch',
-            country: 'Tyskland',
-            countryCode: 'DE',
-            hint: 'Elektroverktøy og hvitevarer',
-            year: 1886,
-            fact: 'Grunnlagt av Robert Bosch i Stuttgart'
-        },
-        {
-            name: 'DeWalt',
-            country: 'USA',
-            countryCode: 'US',
-            hint: 'Profesjonelt elektroverktøy',
-            year: 1923,
-            fact: 'Oppfant den radiale armsagen'
-        },
-        {
-            name: 'Milwaukee',
-            country: 'USA',
-            countryCode: 'US',
-            hint: 'Tungt elektroverktøy',
-            year: 1924,
-            fact: 'Kjent for sin Sawzall'
-        },
-        {
-            name: 'Hilti',
-            country: 'Liechtenstein',
-            countryCode: 'LI',
-            hint: 'Profesjonelt byggverktøy',
-            year: 1941,
-            fact: 'Et av få globale selskaper fra Liechtenstein'
-        },
-        {
-            name: 'Festool',
-            country: 'Tyskland',
-            countryCode: 'DE',
-            hint: 'Premium elektroverktøy',
-            year: 1925,
-            fact: 'Oppfant den første portable sirkelsagen'
-        },
-        {
-            name: 'Husqvarna',
-            country: 'Sverige',
-            countryCode: 'SE',
-            hint: 'Utendørs kraftutstyr',
-            year: 1689,
-            fact: 'Startet som våpenfabrikk for den svenske hæren'
-        },
-        {
-            name: 'Stihl',
-            country: 'Tyskland',
-            countryCode: 'DE',
-            hint: 'Motorsager og uteutstyr',
-            year: 1926,
-            fact: 'Verdens største produsent av motorsager'
-        },
-        {
-            name: 'Knipex',
-            country: 'Tyskland',
-            countryCode: 'DE',
-            hint: 'Tenger og kutteverktøy',
-            year: 1882,
-            fact: 'Produserer over 1000 forskjellige tangtyper'
-        },
-        {
-            name: 'Stanley',
-            country: 'USA',
-            countryCode: 'US',
-            hint: 'Håndverktøy',
-            year: 1843,
-            fact: 'Oppfant den ikoniske gule tommestokken'
-        },
-        {
-            name: 'Snap-on',
-            country: 'USA',
-            countryCode: 'US',
-            hint: 'Profesjonelt håndverktøy',
-            year: 1920,
-            fact: 'Kjent for utskiftbare skrutrekkere'
-        },
-        {
-            name: 'Wera',
-            country: 'Tyskland',
-            countryCode: 'DE',
-            hint: 'Skrutrekkere og bits',
-            year: 1936,
-            fact: 'Kjent for fargerike ergonomiske håndtak'
-        },
-        {
-            name: 'Bahco',
-            country: 'Sverige',
-            countryCode: 'SE',
-            hint: 'Håndverktøy',
-            year: 1886,
-            fact: 'Oppfant den moderne skiftenøkkelen'
-        },
-        {
-            name: 'Fein',
-            country: 'Tyskland',
-            countryCode: 'DE',
-            hint: 'Elektroverktøy',
-            year: 1867,
-            fact: 'Oppfant den elektriske hånddrillen'
-        },
-        {
-            name: 'Metabo',
-            country: 'Tyskland',
-            countryCode: 'DE',
-            hint: 'Elektroverktøy',
-            year: 1924,
-            fact: 'Navnet kommer fra "Metallbohrdreher"'
-        },
-        {
-            name: 'HiKOKI',
-            country: 'Japan',
-            countryCode: 'JP',
-            hint: 'Profesjonelt elektroverktøy',
-            year: 1948,
-            fact: 'Het tidligere Hitachi Power Tools'
-        },
-        {
-            name: 'Victorinox',
-            country: 'Sveits',
-            countryCode: 'CH',
-            hint: 'Multiverktøy og kniver',
-            year: 1884,
-            fact: 'Produsenten av den ikoniske Swiss Army Knife'
-        },
-        {
-            name: 'Facom',
-            country: 'Frankrike',
-            countryCode: 'FR',
-            hint: 'Profesjonelt håndverktøy',
-            year: 1918,
-            fact: 'Europas største produsent av håndverktøy'
-        },
-        {
-            name: 'Beta',
-            country: 'Italia',
-            countryCode: 'IT',
-            hint: 'Profesjonelt håndverktøy',
-            year: 1939,
-            fact: 'Kjent for verktøyvogner i motorsport'
-        },
-        {
-            name: 'Dremel',
-            country: 'USA',
-            countryCode: 'US',
-            hint: 'Roterende verktøy',
-            year: 1932,
-            fact: 'Oppfant det første høyhastighets roterende verktøyet'
-        }
+        { name: 'Makita', countryCode: 'JP', hint: 'Elektroverktøy', year: 1915,
+          fact: 'Startet i Nagoya som et firma som solgte og reparerte elektromotorer – det første elektroverktøyet kom først i 1958.' },
+        { name: 'Bosch', countryCode: 'DE', hint: 'Elektroverktøy og hvitevarer', year: 1886,
+          fact: 'Robert Bosch startet med et lite verksted for finmekanikk og elektroteknikk i Stuttgart.' },
+        { name: 'DeWalt', countryCode: 'US', hint: 'Profesjonelt elektroverktøy', year: 1924,
+          fact: 'Grunnleggeren Raymond DeWalt oppfant den radiale kappsagen (radialarmsagen) i 1923.' },
+        { name: 'Milwaukee', countryCode: 'US', hint: 'Tungt elektroverktøy', year: 1924,
+          fact: 'Oppkalt etter byen i Wisconsin. I 1951 lanserte de Sawzall – den første elektriske bajonettsagen.' },
+        { name: 'Hilti', countryCode: 'LI', hint: 'Profesjonelt byggverktøy', year: 1941,
+          fact: 'Grunnlagt av brødrene Martin og Eugen Hilti i Schaan – fortsatt hovedkontoret i dag.' },
+        { name: 'Festool', countryCode: 'DE', hint: 'Premium elektroverktøy', year: 1925,
+          fact: 'Startet som «Fezer & Stoll» i Esslingen – navnet Festo kommer fra grunnleggernes etternavn.' },
+        { name: 'Husqvarna', countryCode: 'SE', hint: 'Utendørs kraftutstyr', year: 1689,
+          fact: 'Startet som våpenfabrikk og har siden laget alt fra symaskiner og motorsykler til motorsager.' },
+        { name: 'Stihl', countryCode: 'DE', hint: 'Motorsager og uteutstyr', year: 1926,
+          fact: 'Andreas Stihl grunnla firmaet i Stuttgart. Stihl har vært verdens mest solgte motorsagmerke siden 1971.' },
+        { name: 'Knipex', countryCode: 'DE', hint: 'Tenger og kutteverktøy', year: 1882,
+          fact: 'C. Gustav Putsch startet tangsmie i Wuppertal – firmaet er fortsatt eid av familien.' },
+        { name: 'Stanley', countryCode: 'US', hint: 'Håndverktøy', year: 1843,
+          fact: 'Startet i New Britain, Connecticut. Ble i 2010 slått sammen med Black & Decker – som også eier DeWalt.' },
+        { name: 'Snap-on', countryCode: 'US', hint: 'Profesjonelt håndverktøy', year: 1920,
+          fact: 'Navnet kommer fra ideen om pipenøkkelhoder som «smekkes på» ulike håndtak.' },
+        { name: 'Wera', countryCode: 'DE', hint: 'Skrutrekkere og bits', year: 1936,
+          fact: 'Kjent for Kraftform-håndtaket og fargekodede verktøy som gjør det lett å finne riktig størrelse.' },
+        { name: 'Bahco', countryCode: 'SE', hint: 'Håndverktøy', year: 1886,
+          fact: 'Svensken Johan Petter Johansson regnes som oppfinneren av den moderne skiftenøkkelen, som Bahco ble kjent for.' },
+        { name: 'Fein', countryCode: 'DE', hint: 'Elektroverktøy', year: 1867,
+          fact: 'Lanserte verdens første elektriske hånddrill i 1895.' },
+        { name: 'Metabo', countryCode: 'DE', hint: 'Elektroverktøy', year: 1924,
+          fact: 'Navnet kommer fra «Metallbohrdreher» – en håndbor for metall. I dag eies Metabo av japanske KOKI.' },
+        { name: 'HiKOKI', countryCode: 'JP', hint: 'Profesjonelt elektroverktøy', year: 1948,
+          fact: 'Het Hitachi Koki (Hitachi Power Tools) frem til navnebyttet i 2018.' },
+        { name: 'Victorinox', countryCode: 'CH', hint: 'Multiverktøy og kniver', year: 1884,
+          fact: 'Karl Elsener startet knivsmie i Ibach og laget lommekniven til den sveitsiske hæren.' },
+        { name: 'Facom', countryCode: 'FR', hint: 'Profesjonelt håndverktøy', year: 1918,
+          fact: 'Navnet er en forkortelse for «Franco-Américaine de Commerce».' },
+        { name: 'Beta', countryCode: 'IT', hint: 'Profesjonelt håndverktøy', year: 1923,
+          fact: 'Beta Utensili holder til i Sovico nord for Milano og er kjent for de røde verktøyvognene.' },
+        { name: 'Dremel', countryCode: 'US', hint: 'Roterende verktøy', year: 1932,
+          fact: 'Albert J. Dremel startet i Racine, Wisconsin. Siden 1993 har Dremel vært eid av Bosch.' }
     ];
 
-    // Country coordinates for the map
+    // Countries on the map. GB, CN, KR and TW are decoys.
     const countryData = {
-        'JP': { name: 'Japan', coords: [36.2048, 138.2529], zoom: 5 },
-        'DE': { name: 'Tyskland', coords: [51.1657, 10.4515], zoom: 5 },
-        'US': { name: 'USA', coords: [37.0902, -95.7129], zoom: 4 },
-        'SE': { name: 'Sverige', coords: [60.1282, 18.6435], zoom: 5 },
-        'LI': { name: 'Liechtenstein', coords: [47.1660, 9.5554], zoom: 8 },
-        'CH': { name: 'Sveits', coords: [46.8182, 8.2275], zoom: 7 },
-        'GB': { name: 'Storbritannia', coords: [55.3781, -3.4360], zoom: 5 },
-        'FR': { name: 'Frankrike', coords: [46.2276, 2.2137], zoom: 5 },
-        'IT': { name: 'Italia', coords: [41.8719, 12.5674], zoom: 5 },
-        'CN': { name: 'Kina', coords: [35.8617, 104.1954], zoom: 4 },
-        'KR': { name: 'Sør-Korea', coords: [35.9078, 127.7669], zoom: 6 },
-        'TW': { name: 'Taiwan', coords: [23.6978, 120.9605], zoom: 7 }
+        JP: { name: 'Japan', coords: [36.2, 138.25] },
+        DE: { name: 'Tyskland', coords: [51.17, 10.45] },
+        US: { name: 'USA', coords: [39.0, -98.0] },
+        SE: { name: 'Sverige', coords: [62.0, 15.5] },
+        LI: { name: 'Liechtenstein', coords: [47.166, 9.555], small: true },
+        CH: { name: 'Sveits', coords: [46.6, 7.8] },
+        GB: { name: 'Storbritannia', coords: [53.5, -2.0] },
+        FR: { name: 'Frankrike', coords: [46.6, 2.2] },
+        IT: { name: 'Italia', coords: [42.8, 12.5] },
+        CN: { name: 'Kina', coords: [35.86, 104.2] },
+        KR: { name: 'Sør-Korea', coords: [36.3, 127.8] },
+        TW: { name: 'Taiwan', coords: [23.7, 120.96] }
+    };
+    // Draw order: big countries first so the small ones end up on top.
+    const drawOrder = ['US', 'CN', 'JP', 'KR', 'TW', 'GB', 'SE', 'FR', 'IT', 'DE', 'CH', 'LI'];
+    // Button order (alphabetical in Norwegian).
+    const buttonOrder = Object.keys(countryData).sort((a, b) =>
+        countryData[a].name.localeCompare(countryData[b].name, 'nb'));
+
+    const EUROPE_BOUNDS = [[36, -11], [66, 25]];
+
+    const COLORS = {
+        idle: '#1da1f2',
+        correct: '#4caf50',
+        wrong: '#ef5350'
     };
 
-    // Game state
-    let map;
-    let currentQuestion = 0;
-    let score = 0;
-    let shuffledBrands = [];
-    let countryLayers = {};
-    let answered = false;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
-    // DOM elements
-    const startScreen = document.getElementById('startScreen');
-    const quizWrapper = document.getElementById('quizWrapper');
-    const endScreen = document.getElementById('endScreen');
-    const startBtn = document.getElementById('startBtn');
-    const brandName = document.getElementById('brandName');
-    const brandHint = document.getElementById('brandHint');
-    const scoreDisplay = document.getElementById('scoreDisplay');
-    const progressFill = document.getElementById('progressFill');
-    const progressText = document.getElementById('progressText');
-    const feedbackOverlay = document.getElementById('feedbackOverlay');
-    const feedbackIcon = document.getElementById('feedbackIcon');
-    const feedbackTitle = document.getElementById('feedbackTitle');
-    const feedbackText = document.getElementById('feedbackText');
-    const feedbackBtn = document.getElementById('feedbackBtn');
-    const finalScore = document.getElementById('finalScore');
-    const resultMessage = document.getElementById('resultMessage');
-    const resultEmoji = document.getElementById('resultEmoji');
-    const playAgainBtn = document.getElementById('playAgainBtn');
-    const mapInstruction = document.getElementById('mapInstruction');
+    // ---------- Safe storage ----------
+    function storageGet(key) {
+        try { return window.localStorage.getItem(key); } catch (e) { return null; }
+    }
+    function storageSet(key, value) {
+        try { window.localStorage.setItem(key, value); } catch (e) { /* ignore */ }
+    }
 
-    // Shuffle array
+    // ---------- State ----------
+    const state = {
+        phase: 'start', // start | question | feedback | end
+        order: [],
+        index: 0,
+        score: 0,
+        streak: 0,
+        bestStreak: 0,
+        missed: []
+    };
+
+    let map = null;
+    let mapFailed = false;
+    let lastAnswer = null;
+    const countryLayers = {};
+    const countryShapes = {};
+    // ISO 3166-1 numeric ids used by the Natural Earth outlines -> our codes.
+    // Liechtenstein is too small for the 1:110m outlines and is a marker only.
+    const isoToCode = {
+        '392': 'JP', '276': 'DE', '840': 'US', '752': 'SE', '756': 'CH', '826': 'GB',
+        '250': 'FR', '380': 'IT', '156': 'CN', '410': 'KR', '158': 'TW'
+    };
+    const choiceButtons = {};
+    let notificationTimer = null;
+    let notificationRemoveTimer = null;
+
+    // ---------- DOM ----------
+    const $ = (id) => document.getElementById(id);
+    const startScreen = $('startScreen');
+    const quizWrapper = $('quizWrapper');
+    const endScreen = $('endScreen');
+    const brandName = $('brandName');
+    const brandHint = $('brandHint');
+    const scoreDisplay = $('scoreDisplay');
+    const streakDisplay = $('streakDisplay');
+    const progressFill = $('progressFill');
+    const progressText = $('progressText');
+    const progressBar = $('progressBar');
+    const feedbackSheet = $('feedbackSheet');
+    const feedbackIcon = $('feedbackIcon');
+    const feedbackTitle = $('feedbackTitle');
+    const feedbackText = $('feedbackText');
+    const feedbackFact = $('feedbackFact');
+    const feedbackBtn = $('feedbackBtn');
+    const mapInstruction = $('mapInstruction');
+    const choiceList = $('choiceList');
+    const liveRegion = $('liveRegion');
+    const muteBtn = $('muteBtn');
+
+    // ---------- Sound (Web Audio, no files) ----------
+    let audioCtx = null;
+    let muted = storageGet(MUTE_KEY) === '1';
+
+    function getAudio() {
+        if (muted) return null;
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return null;
+        try {
+            if (!audioCtx) audioCtx = new Ctx();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        } catch (e) {
+            return null;
+        }
+        return audioCtx;
+    }
+
+    function tone(freq, start, duration, type, volume) {
+        const ctx = getAudio();
+        if (!ctx) return;
+        const t0 = ctx.currentTime + start;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = type || 'sine';
+        osc.frequency.setValueAtTime(freq, t0);
+        gain.gain.setValueAtTime(0.0001, t0);
+        gain.gain.exponentialRampToValueAtTime(volume || 0.15, t0 + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+        osc.connect(gain).connect(ctx.destination);
+        osc.start(t0);
+        osc.stop(t0 + duration + 0.05);
+    }
+
+    const sounds = {
+        correct() { tone(660, 0, 0.12, 'triangle'); tone(990, 0.1, 0.22, 'triangle'); },
+        wrong() { tone(220, 0, 0.18, 'sawtooth', 0.08); tone(165, 0.14, 0.28, 'sawtooth', 0.08); },
+        finish(perfect) {
+            const notes = perfect ? [523, 659, 784, 1047, 1319] : [523, 659, 784];
+            notes.forEach((f, i) => tone(f, i * 0.11, 0.25, 'triangle', 0.12));
+        }
+    };
+
+    function renderMute() {
+        muteBtn.setAttribute('aria-pressed', String(muted));
+        const label = muted ? 'Slå på lyd' : 'Slå av lyd';
+        muteBtn.setAttribute('aria-label', label);
+        muteBtn.title = label;
+        muteBtn.innerHTML = muted
+            ? '<i class="fas fa-volume-xmark" aria-hidden="true"></i>'
+            : '<i class="fas fa-volume-high" aria-hidden="true"></i>';
+    }
+
+    muteBtn.addEventListener('click', () => {
+        muted = !muted;
+        storageSet(MUTE_KEY, muted ? '1' : '0');
+        renderMute();
+    });
+
+    // ---------- Personal best ----------
+    function getBest() {
+        const v = parseInt(storageGet(BEST_KEY), 10);
+        return Number.isFinite(v) && v >= 0 && v <= TOTAL ? v : null;
+    }
+
+    function renderStartBest() {
+        const best = getBest();
+        $('startBest').innerHTML = best === null
+            ? ''
+            : 'Din rekord: <strong>' + best + '/' + TOTAL + '</strong>';
+    }
+
+    // ---------- Helpers ----------
     function shuffleArray(array) {
-        const shuffled = [...array];
+        const shuffled = array.slice();
         for (let i = shuffled.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
@@ -1513,302 +1463,552 @@
         return shuffled;
     }
 
-    // Initialize map
+    function announce(text) {
+        liveRegion.textContent = '';
+        // Small delay so screen readers pick up repeated messages.
+        window.requestAnimationFrame(() => { liveRegion.textContent = text; });
+    }
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    function showScreen(name) {
+        startScreen.hidden = name !== 'start';
+        quizWrapper.hidden = name !== 'quiz';
+        endScreen.hidden = name !== 'end';
+    }
+
+    function animateMap() {
+        return !reducedMotion.matches;
+    }
+
+    // ---------- Map ----------
+    function markerRadius(code) {
+        if (!map) return 12;
+        const z = map.getZoom();
+        const base = countryData[code].small ? 6 : 10;
+        const factor = z < 1.5 ? 0.6 : z <= 2 ? 0.8 : Math.min(1.4, 1 + (z - 2) * 0.12);
+        return Math.max(4, Math.round(base * factor));
+    }
+
     function initMap() {
+        if (map || mapFailed) return;
+        if (typeof window.L === 'undefined') {
+            mapFailed = true;
+            $('map').innerHTML = '<div class="map-error">Kartet kunne ikke lastes akkurat nå.<br>Velg land fra listen under i stedet.</div>';
+            $('mapTools').hidden = true;
+            mapInstruction.hidden = true;
+            return;
+        }
+
         map = L.map('map', {
-            center: [30, 0],
+            center: [35, 30],
             zoom: 2,
-            minZoom: 2,
-            maxZoom: 8,
-            worldCopyJump: true,
-            maxBounds: [[-90, -180], [90, 180]],
-            maxBoundsViscosity: 1.0
+            minZoom: 0.5,
+            maxZoom: 7,
+            worldCopyJump: false,
+            maxBounds: [[-70, -190], [85, 190]],
+            maxBoundsViscosity: 1.0,
+            zoomControl: true,
+            zoomSnap: 0.25,
+            tap: false
         });
 
-        // Dark tile layer
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            attribution: '',
-            subdomains: 'abcd',
-            maxZoom: 20
-        }).addTo(map);
+        map.attributionControl.setPrefix(false);
 
-        // Add country markers
-        addCountryMarkers();
-    }
+        map.attributionControl.addAttribution('Kart: <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener">Natural Earth</a>');
 
-    // Add clickable country markers
-    function addCountryMarkers() {
-        Object.keys(countryData).forEach(code => {
+        // Country outlines are bundled locally (no tile service / API key needed).
+        loadCountryShapes();
+
+        drawOrder.forEach((code) => {
             const country = countryData[code];
-
-            // Create a circle marker for each country
             const marker = L.circleMarker(country.coords, {
-                radius: code === 'LI' ? 15 : 25,
-                fillColor: '#1da1f2',
-                fillOpacity: 0.25,
-                color: '#1da1f2',
+                radius: 12,
+                fillColor: COLORS.idle,
+                fillOpacity: 0.3,
+                color: COLORS.idle,
                 weight: 2,
-                opacity: 0.7
+                opacity: 0.85,
+                bubblingMouseEvents: false
             }).addTo(map);
 
-            // Add country label
-            const label = L.marker(country.coords, {
-                icon: L.divIcon({
-                    className: 'country-label',
-                    html: country.name,
-                    iconSize: [100, 20],
-                    iconAnchor: [50, -15]
-                })
-            }).addTo(map);
-
-            // Click handler
-            marker.on('click', () => handleCountryClick(code));
-
-            // Hover effects
-            marker.on('mouseover', function() {
-                this.setStyle({ fillOpacity: 0.5, weight: 3 });
+            marker.bindTooltip(country.name, {
+                permanent: true,
+                direction: code === 'LI' ? 'right' : 'bottom',
+                offset: code === 'LI' ? [6, 0] : [0, 10],
+                className: 'country-label',
+                interactive: false
             });
 
-            marker.on('mouseout', function() {
-                if (!answered) {
-                    this.setStyle({ fillOpacity: 0.25, weight: 2 });
+            marker.on('click', () => handleAnswer(code));
+            marker.on('mouseover', function () {
+                if (state.phase === 'question') this.setStyle({ fillOpacity: 0.55, weight: 3 });
+            });
+            marker.on('mouseout', function () {
+                if (state.phase === 'question') this.setStyle({ fillOpacity: 0.3, weight: 2 });
+            });
+
+            countryLayers[code] = marker;
+        });
+
+        map.on('zoomend', updateMarkerSizes);
+        updateMarkerSizes();
+        updateLabelVisibility();
+        map.on('zoomend', updateLabelVisibility);
+
+        // Keep Leaflet in sync with layout changes (resize, orientation, screen switches).
+        if ('ResizeObserver' in window) {
+            new ResizeObserver(() => { if (map) map.invalidateSize({ pan: false }); }).observe($('map'));
+        } else {
+            window.addEventListener('resize', () => map && map.invalidateSize());
+        }
+    }
+
+    function loadCountryShapes() {
+        fetch('/underholdning/tool-quiz-world.json')
+            .then((r) => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+            .then((geo) => {
+                if (!map) return;
+                map.createPane('countries');
+                map.getPane('countries').style.zIndex = 350; // below the overlay pane with the markers
+                L.geoJSON(geo, {
+                    pane: 'countries',
+                    style: (f) => shapeStyle(isoToCode[f.id], 'idle'),
+                    interactive: true,
+                    onEachFeature: (f, layer) => {
+                        const code = isoToCode[f.id];
+                        if (!code) { layer.options.interactive = false; return; }
+                        layer.options.className = 'country-shape country-' + code.toLowerCase();
+                        countryShapes[code] = layer;
+                        layer.on('click', () => handleAnswer(code));
+                        layer.on('mouseover', () => {
+                            if (state.phase === 'question') layer.setStyle({ fillColor: '#2c4a5e' });
+                        });
+                        layer.on('mouseout', () => {
+                            if (state.phase === 'question') layer.setStyle(shapeStyle(code, 'idle'));
+                        });
+                    }
+                }).addTo(map);
+                // Re-apply answer colours if the shapes arrived mid-question.
+                if (state.phase === 'feedback' && lastAnswer) {
+                    if (lastAnswer.selected !== lastAnswer.correct) styleMarker(lastAnswer.selected, 'wrong');
+                    styleMarker(lastAnswer.correct, 'correct');
                 }
-            });
+            })
+            .catch(() => { /* markers + buttons still work without outlines */ });
+    }
 
-            countryLayers[code] = { marker, label };
+    function shapeStyle(code, kind) {
+        if (!code) {
+            return { color: '#3a3a3a', weight: 0.6, fillColor: '#262626', fillOpacity: 1 };
+        }
+        if (kind === 'idle') {
+            return { color: '#4a6a80', weight: 0.8, fillColor: '#24323c', fillOpacity: 1 };
+        }
+        return { color: COLORS[kind], weight: 1.2, fillColor: COLORS[kind], fillOpacity: 0.45 };
+    }
+
+    function updateMarkerSizes() {
+        Object.keys(countryLayers).forEach((code) => countryLayers[code].setRadius(markerRadius(code)));
+    }
+
+    // Central Europe is crowded at world zoom: hide labels there until the user zooms in
+    // (the shapes stay clickable and the buttons below still name every country).
+    const LABEL_MIN_ZOOM = { LI: 3.5, CH: 3.5, DE: 2.5, FR: 2.5, IT: 2.5, GB: 2.5, KR: 2, TW: 2 };
+    function updateLabelVisibility() {
+        if (!map) return;
+        const z = map.getZoom();
+        Object.keys(countryLayers).forEach((code) => {
+            const tip = countryLayers[code].getTooltip();
+            const el = tip && tip.getElement();
+            if (el) el.style.opacity = z >= (LABEL_MIN_ZOOM[code] || 0) ? '1' : '0';
         });
     }
 
-    // Handle country click
-    function handleCountryClick(selectedCode) {
-        if (answered) return;
-        answered = true;
-
-        mapInstruction.classList.add('hidden');
-
-        const currentBrand = shuffledBrands[currentQuestion];
-        const isCorrect = selectedCode === currentBrand.countryCode;
-
-        // Highlight selected country
-        const selectedMarker = countryLayers[selectedCode].marker;
-        const correctMarker = countryLayers[currentBrand.countryCode].marker;
-
-        if (isCorrect) {
-            score++;
-            scoreDisplay.textContent = score;
-            selectedMarker.setStyle({ fillColor: '#4caf50', color: '#4caf50', fillOpacity: 0.6 });
-        } else {
-            selectedMarker.setStyle({ fillColor: '#e53935', color: '#e53935', fillOpacity: 0.6 });
-            correctMarker.setStyle({ fillColor: '#4caf50', color: '#4caf50', fillOpacity: 0.6 });
-        }
-
-        // Show feedback
-        showFeedback(isCorrect, currentBrand, selectedCode);
+    // Stop any running fly/zoom animation and run `fn` once the map is idle.
+    // (map.stop() itself may schedule an animated zoom on the next frame, and a
+    // running zoom animation would overwrite a view we set in the meantime.)
+    let settleToken = 0;
+    function whenMapIdle(fn) {
+        if (!map) return;
+        const token = ++settleToken;
+        map.stop();
+        const run = () => {
+            if (token !== settleToken) return; // superseded by a newer request
+            if (map._animatingZoom) { map.once('zoomend', run); return; }
+            fn();
+        };
+        window.requestAnimationFrame(() => window.requestAnimationFrame(run));
     }
 
-    // Show feedback overlay
-    function showFeedback(isCorrect, brand, selectedCode) {
-        feedbackIcon.innerHTML = isCorrect
-            ? '<i class="fas fa-check-circle"></i>'
-            : '<i class="fas fa-times-circle"></i>';
-        feedbackIcon.className = 'feedback-icon ' + (isCorrect ? 'correct' : 'wrong');
-
-        feedbackTitle.textContent = isCorrect ? 'Riktig!' : 'Feil!';
-
-        const countryName = countryData[brand.countryCode].name;
-        if (isCorrect) {
-            feedbackText.innerHTML = `${brand.name} ble grunnlagt i <strong>${countryName}</strong> i ${brand.year}.<br><em style="opacity:0.7">${brand.fact}</em>`;
-        } else {
-            const selectedName = countryData[selectedCode].name;
-            feedbackText.innerHTML = `${brand.name} kommer fra <strong>${countryName}</strong>, ikke ${selectedName}.<br><em style="opacity:0.7">${brand.fact}</em>`;
-        }
-
-        feedbackBtn.innerHTML = currentQuestion < 19
-            ? 'Neste <i class="fas fa-arrow-right"></i>'
-            : 'Se resultat <i class="fas fa-trophy"></i>';
-
-        feedbackOverlay.classList.add('visible');
+    function resetMapView() {
+        whenMapIdle(() => {
+            map.invalidateSize({ pan: false });
+            const bounds = L.latLngBounds(Object.values(countryData).map((c) => c.coords));
+            map.fitBounds(bounds, { padding: [30, 30], animate: false, maxZoom: 3 });
+        });
     }
 
-    // Load question
+    function styleMarker(code, kind) {
+        const shape = countryShapes[code];
+        if (shape) shape.setStyle(shapeStyle(code, kind));
+        const m = countryLayers[code];
+        if (!m) return;
+        if (kind === 'idle') {
+            m.setStyle({ fillColor: COLORS.idle, color: COLORS.idle, fillOpacity: 0.3, weight: 2 });
+        } else {
+            m.setStyle({ fillColor: COLORS[kind], color: COLORS[kind], fillOpacity: 0.75, weight: 3 });
+            m.bringToFront();
+        }
+    }
+
+    function focusAnswerOnMap(selectedCode, correctCode) {
+        if (!map) return;
+        const pts = [countryData[correctCode].coords];
+        if (selectedCode !== correctCode) pts.push(countryData[selectedCode].coords);
+        const sheetH = feedbackSheet.offsetHeight || 200;
+        const opts = {
+            paddingTopLeft: [60, 60],
+            paddingBottomRight: [60, sheetH + 30],
+            maxZoom: correctCode === 'LI' || selectedCode === 'LI' ? 5 : 4
+        };
+        const bounds = L.latLngBounds(pts);
+        // flyToBounds is frame-driven and can be cancelled with map.stop(), unlike fitBounds' CSS animation.
+        whenMapIdle(() => {
+            if (animateMap()) map.flyToBounds(bounds, Object.assign({ duration: 0.7 }, opts));
+            else map.fitBounds(bounds, Object.assign({ animate: false }, opts));
+        });
+    }
+
+    $('zoomEurope').addEventListener('click', () => {
+        whenMapIdle(() => {
+            if (animateMap()) map.flyToBounds(EUROPE_BOUNDS, { duration: 0.6 });
+            else map.fitBounds(EUROPE_BOUNDS, { animate: false });
+        });
+    });
+    $('zoomWorld').addEventListener('click', () => resetMapView());
+
+    // ---------- Choice buttons ----------
+    function buildChoices() {
+        buttonOrder.forEach((code) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'choice-btn';
+            btn.textContent = countryData[code].name;
+            btn.addEventListener('click', () => handleAnswer(code));
+            choiceList.appendChild(btn);
+            choiceButtons[code] = btn;
+        });
+    }
+
+    function resetChoices() {
+        Object.values(choiceButtons).forEach((btn) => {
+            btn.disabled = false;
+            btn.classList.remove('is-correct', 'is-wrong');
+        });
+        choiceList.scrollLeft = 0;
+    }
+
+    // ---------- Game flow ----------
+    function updateHud() {
+        scoreDisplay.textContent = state.score;
+        streakDisplay.textContent = state.streak;
+        const n = Math.min(state.index + 1, TOTAL);
+        progressFill.style.width = (n / TOTAL * 100) + '%';
+        progressText.textContent = n + '/' + TOTAL;
+        progressBar.setAttribute('aria-valuenow', String(n));
+    }
+
     function loadQuestion() {
-        answered = false;
-        const brand = shuffledBrands[currentQuestion];
+        state.phase = 'question';
+        lastAnswer = null;
+        const brand = state.order[state.index];
 
         brandName.textContent = brand.name;
         brandHint.textContent = brand.hint;
+        updateHud();
 
-        progressFill.style.width = ((currentQuestion + 1) / 20 * 100) + '%';
-        progressText.textContent = (currentQuestion + 1) + '/20';
+        feedbackSheet.hidden = true;
+        resetChoices();
+        Object.keys(countryLayers).forEach((code) => styleMarker(code, 'idle'));
+        resetMapView();
 
-        // Reset all markers
-        Object.values(countryLayers).forEach(({ marker }) => {
-            marker.setStyle({
-                fillColor: '#1da1f2',
-                color: '#1da1f2',
-                fillOpacity: 0.25,
-                weight: 2
-            });
+        mapInstruction.classList.toggle('hidden', state.index > 0);
+        announce('Spørsmål ' + (state.index + 1) + ' av ' + TOTAL + ': ' + brand.name + '. ' + brand.hint + '.');
+    }
+
+    function handleAnswer(selectedCode) {
+        if (state.phase !== 'question') return; // guards double taps / touch+click
+        state.phase = 'feedback';
+
+        const brand = state.order[state.index];
+        const correctCode = brand.countryCode;
+        const isCorrect = selectedCode === correctCode;
+        lastAnswer = { selected: selectedCode, correct: correctCode };
+
+        mapInstruction.classList.add('hidden');
+
+        if (isCorrect) {
+            state.score++;
+            state.streak++;
+            state.bestStreak = Math.max(state.bestStreak, state.streak);
+            sounds.correct();
+        } else {
+            state.streak = 0;
+            state.missed.push({ brand, guess: selectedCode });
+            sounds.wrong();
+        }
+        updateHud();
+
+        // Map + buttons feedback
+        if (!isCorrect) styleMarker(selectedCode, 'wrong');
+        styleMarker(correctCode, 'correct');
+        Object.entries(choiceButtons).forEach(([code, btn]) => {
+            btn.disabled = true;
+            if (code === correctCode) btn.classList.add('is-correct');
+            else if (code === selectedCode) btn.classList.add('is-wrong');
         });
 
-        // Reset map view
-        map.setView([30, 0], 2);
-
-        mapInstruction.classList.remove('hidden');
+        showFeedback(isCorrect, brand, selectedCode);
+        focusAnswerOnMap(selectedCode, correctCode);
     }
 
-    // Start game
-    function startGame() {
-        shuffledBrands = shuffleArray(toolBrands);
-        currentQuestion = 0;
-        score = 0;
-        scoreDisplay.textContent = 0;
+    function showFeedback(isCorrect, brand, selectedCode) {
+        const countryName = countryData[brand.countryCode].name;
+        feedbackIcon.className = 'feedback-icon ' + (isCorrect ? 'correct' : 'wrong');
+        feedbackIcon.innerHTML = isCorrect
+            ? '<i class="fas fa-check-circle"></i>'
+            : '<i class="fas fa-times-circle"></i>';
 
-        startScreen.classList.add('hidden');
-        endScreen.classList.remove('visible');
-        quizWrapper.style.display = 'flex';
-
-        // Initialize map if not already done
-        if (!map) {
-            setTimeout(() => {
-                initMap();
-                loadQuestion();
-            }, 100);
+        if (isCorrect) {
+            feedbackTitle.textContent = state.streak >= 3
+                ? 'Riktig! ' + state.streak + ' på rad 🔥'
+                : 'Riktig!';
+            feedbackText.innerHTML = escapeHtml(brand.name) + ' ble grunnlagt i <strong>' +
+                escapeHtml(countryName) + '</strong> i ' + brand.year + '.';
         } else {
-            loadQuestion();
+            feedbackTitle.textContent = 'Feil!';
+            feedbackText.innerHTML = escapeHtml(brand.name) + ' ble grunnlagt i <strong>' +
+                escapeHtml(countryName) + '</strong> i ' + brand.year + ' – ikke i ' +
+                escapeHtml(countryData[selectedCode].name) + '.';
         }
+        feedbackFact.textContent = brand.fact;
+
+        const last = state.index >= TOTAL - 1;
+        feedbackBtn.innerHTML = last
+            ? 'Se resultat <i class="fas fa-trophy" aria-hidden="true"></i>'
+            : 'Neste <i class="fas fa-arrow-right" aria-hidden="true"></i>';
+
+        feedbackSheet.hidden = false;
+        feedbackBtn.focus({ preventScroll: true });
     }
 
-    // Next question
-    feedbackBtn.addEventListener('click', () => {
-        feedbackOverlay.classList.remove('visible');
-        currentQuestion++;
-
-        if (currentQuestion >= 20) {
+    function nextQuestion() {
+        if (state.phase !== 'feedback') return;
+        state.index++;
+        if (state.index >= TOTAL) {
             showEndScreen();
         } else {
             loadQuestion();
+            brandName.focus({ preventScroll: true });
         }
-    });
+    }
 
-    // Show end screen
+    function startGame() {
+        state.order = shuffleArray(toolBrands).slice(0, TOTAL);
+        state.index = 0;
+        state.score = 0;
+        state.streak = 0;
+        state.bestStreak = 0;
+        state.missed = [];
+
+        showScreen('quiz');
+        initMap();
+        // Wait one frame so the map container has its final size before fitting the view.
+        window.requestAnimationFrame(() => {
+            loadQuestion();
+            brandName.focus({ preventScroll: true });
+        });
+        getAudio(); // unlock audio inside the user gesture
+    }
+
     function showEndScreen() {
-        quizWrapper.style.display = 'none';
-        endScreen.classList.add('visible');
+        state.phase = 'end';
+        feedbackSheet.hidden = true;
+        // Stop any running fly animation before the map is hidden (a 0×0 map makes Leaflet throw NaN LatLng errors every frame)
+        settleToken++;
+        if (map) map.stop();
+        showScreen('end');
+        endScreen.scrollTop = 0;
 
-        finalScore.textContent = score;
+        const score = state.score;
+        $('finalScore').textContent = score;
 
-        // Check for discount code unlock (20/20 - perfect score)
-        const discountReveal = document.getElementById('discountReveal');
-        if (score >= 20) {
-            discountReveal.classList.remove('hidden');
+        const perfect = score >= TOTAL;
+        $('discountReveal').hidden = !perfect;
+
+        let message, emoji;
+        if (perfect) { message = 'Perfekt score!'; emoji = '🏆'; }
+        else if (score >= 18) { message = 'Fantastisk!'; emoji = '🌟'; }
+        else if (score >= 16) { message = 'Imponerende!'; emoji = '🌟'; }
+        else if (score >= 12) { message = 'Bra jobbet!'; emoji = '👍'; }
+        else if (score >= 8) { message = 'Ikke verst!'; emoji = '🔧'; }
+        else { message = 'Prøv igjen!'; emoji = '💪'; }
+        $('resultMessage').textContent = message;
+        $('resultEmoji').textContent = emoji;
+
+        // Personal best
+        const prevBest = getBest();
+        const resultBest = $('resultBest');
+        resultBest.classList.remove('new-record');
+        if (prevBest === null || score > prevBest) {
+            storageSet(BEST_KEY, String(score));
+            if (prevBest !== null) {
+                resultBest.textContent = 'Ny personlig rekord! (forrige: ' + prevBest + '/' + TOTAL + ')';
+                resultBest.classList.add('new-record');
+            } else {
+                resultBest.textContent = 'Lengste rekke: ' + state.bestStreak + ' på rad';
+            }
         } else {
-            discountReveal.classList.add('hidden');
+            resultBest.textContent = 'Din rekord: ' + prevBest + '/' + TOTAL + ' · Lengste rekke: ' + state.bestStreak;
         }
+        renderStartBest();
 
-        if (score === 20) {
-            resultMessage.textContent = 'Perfekt score!';
-            resultEmoji.textContent = '🏆';
-        } else if (score >= 18) {
-            resultMessage.textContent = 'Fantastisk!';
-            resultEmoji.textContent = '🌟';
-        } else if (score >= 16) {
-            resultMessage.textContent = 'Imponerende!';
-            resultEmoji.textContent = '🌟';
-        } else if (score >= 12) {
-            resultMessage.textContent = 'Bra jobbet!';
-            resultEmoji.textContent = '👍';
-        } else if (score >= 8) {
-            resultMessage.textContent = 'Ikke verst!';
-            resultEmoji.textContent = '🔧';
-        } else {
-            resultMessage.textContent = 'Prøv igjen!';
-            resultEmoji.textContent = '💪';
-        }
-    }
-
-    // Copy discount code
-    function copyDiscountCode() {
-        const code = document.getElementById('discountCode').textContent;
-        navigator.clipboard.writeText(code).then(() => {
-            showNotification('Rabattkode kopiert: ' + code);
-        }).catch(() => {
-            showNotification('Kode: ' + code);
+        // Review of misses
+        const review = $('review');
+        const list = $('reviewList');
+        list.innerHTML = '';
+        state.missed.forEach(({ brand, guess }) => {
+            const li = document.createElement('li');
+            const a = document.createElement('span');
+            a.innerHTML = '<strong>' + escapeHtml(brand.name) + '</strong>';
+            const b = document.createElement('span');
+            b.textContent = countryData[brand.countryCode].name + ' (du svarte ' + countryData[guess].name + ')';
+            li.append(a, b);
+            list.appendChild(li);
         });
+        review.hidden = state.missed.length === 0;
+
+        sounds.finish(perfect);
+        announce('Ferdig! Du fikk ' + score + ' av ' + TOTAL + ' riktige.' +
+            (perfect ? ' Du låste opp rabattkoden ' + DISCOUNT_CODE + '.' : ''));
+        $('playAgainBtn').focus({ preventScroll: true });
+
+        if (typeof gtag === 'function') {
+            try { gtag('event', 'quiz_complete', { game: 'tool-quiz', score: score }); } catch (e) { /* ignore */ }
+        }
     }
 
-    // Share functions
+    // ---------- Sharing / copying ----------
     function getShareText() {
-        return `Jeg fikk ${score}/20 på Minio Verktøy Quiz! 🔧 Klarer du å slå meg? Prøv selv på minio.no/underholdning/tool-quiz.html`;
+        return 'Jeg fikk ' + state.score + '/' + TOTAL + ' på Minio Verktøy Quiz! 🔧 Klarer du å slå meg? Prøv selv på minio.no/underholdning/tool-quiz.html';
     }
 
-    // Facebook share
-    document.getElementById('shareFacebook').addEventListener('click', () => {
+    function copyText(text, okMessage) {
+        const fallback = () => {
+            let ok = false;
+            try {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.setAttribute('readonly', '');
+                ta.style.position = 'fixed';
+                ta.style.left = '-9999px';
+                document.body.appendChild(ta);
+                ta.select();
+                ok = document.execCommand('copy');
+                ta.remove();
+            } catch (e) { ok = false; }
+            showNotification(ok ? okMessage : 'Kunne ikke kopiere – merk og kopier: ' + text);
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text).then(() => showNotification(okMessage), fallback);
+        } else {
+            fallback();
+        }
+    }
+
+    $('discountCode').addEventListener('click', () =>
+        copyText(DISCOUNT_CODE, 'Rabattkode kopiert: ' + DISCOUNT_CODE));
+
+    $('shareFacebook').addEventListener('click', () => {
         const url = encodeURIComponent('https://minio.no/underholdning/tool-quiz.html');
-        const text = encodeURIComponent(getShareText());
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank', 'width=600,height=400');
+        window.open('https://www.facebook.com/sharer/sharer.php?u=' + url, '_blank', 'noopener,width=600,height=500');
     });
 
-    // Instagram share (copy to clipboard since IG doesn't support direct sharing)
-    document.getElementById('shareInstagram').addEventListener('click', () => {
-        const text = getShareText() + '\n\n#minio #verktøy #quiz #håndverk';
-        navigator.clipboard.writeText(text).then(() => {
-            showNotification('Tekst kopiert! Lim inn i Instagram.');
-        }).catch(() => {
-            fallbackCopy(text);
+    $('copyResult').addEventListener('click', () =>
+        copyText(getShareText(), 'Kopiert til utklippstavlen!'));
+
+    const shareNative = $('shareNative');
+    if (navigator.share) {
+        shareNative.hidden = false;
+        shareNative.addEventListener('click', () => {
+            navigator.share({
+                title: 'Minio Verktøy Quiz',
+                text: getShareText(),
+                url: 'https://minio.no/underholdning/tool-quiz.html'
+            }).catch(() => { /* user cancelled */ });
         });
-    });
-
-    // Copy result
-    document.getElementById('copyResult').addEventListener('click', () => {
-        const text = getShareText();
-        navigator.clipboard.writeText(text).then(() => {
-            showNotification('Kopiert til utklippstavlen!');
-        }).catch(() => {
-            fallbackCopy(text);
-        });
-    });
-
-    function fallbackCopy(text) {
-        const textarea = document.createElement('textarea');
-        textarea.value = text;
-        textarea.style.position = 'fixed';
-        textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        showNotification('Kopiert til utklippstavlen!');
     }
 
     function showNotification(message) {
+        clearTimeout(notificationTimer);
+        clearTimeout(notificationRemoveTimer);
         const existing = document.querySelector('.copy-notification');
         if (existing) existing.remove();
 
-        const notification = document.createElement('div');
-        notification.className = 'copy-notification';
-        notification.textContent = message;
-        document.body.appendChild(notification);
+        const n = document.createElement('div');
+        n.className = 'copy-notification';
+        n.setAttribute('role', 'status');
+        n.textContent = message;
+        document.body.appendChild(n);
 
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transform = 'translateX(-50%) translateY(20px)';
-            setTimeout(() => notification.remove(), 300);
+        notificationTimer = setTimeout(() => {
+            n.style.opacity = '0';
+            n.style.transform = 'translateX(-50%) translateY(20px)';
+            notificationRemoveTimer = setTimeout(() => n.remove(), 300);
         }, 2500);
     }
 
-    // Event listeners
-    startBtn.addEventListener('click', startGame);
-    playAgainBtn.addEventListener('click', startGame);
-
-    // Confirm before leaving during gameplay
-    function confirmLeave(link) {
-        const isPlaying = startScreen.classList.contains('hidden') && !endScreen.classList.contains('visible');
-        if (isPlaying && currentQuestion > 0 && currentQuestion < 20) {
-            return confirm('Du er midt i et spill. Er du sikker på at du vil forlate?');
-        }
-        return true;
+    // ---------- Leaving mid-game ----------
+    function isMidGame() {
+        return (state.phase === 'question' || state.phase === 'feedback') && state.index > 0;
     }
+
+    document.querySelectorAll('[data-confirm-leave]').forEach((link) => {
+        link.addEventListener('click', (e) => {
+            if (isMidGame() && !window.confirm('Du er midt i et spill. Er du sikker på at du vil forlate?')) {
+                e.preventDefault();
+            }
+        });
+    });
+
+    // ---------- Events ----------
+    $('startBtn').addEventListener('click', startGame);
+    $('playAgainBtn').addEventListener('click', startGame);
+    feedbackBtn.addEventListener('click', nextQuestion);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.altKey || e.ctrlKey || e.metaKey || e.repeat) return;
+        const onControl = e.target.closest && e.target.closest('button, a, input, textarea, select');
+        if (state.phase === 'feedback' && (e.key === 'Enter' || e.key === ' ') && !onControl) {
+            e.preventDefault();
+            nextQuestion();
+        } else if (state.phase === 'start' && e.key === 'Enter' && !onControl) {
+            e.preventDefault();
+            startGame();
+        }
+    });
+
+    // ---------- Init ----------
+    buildChoices();
+    renderMute();
+    renderStartBest();
+    showScreen('start');
+})();
 </script>
 
 </body>

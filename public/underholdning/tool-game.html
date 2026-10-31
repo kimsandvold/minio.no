@@ -3,17 +3,18 @@
 
 <head>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+    <meta name="theme-color" content="#0a0a12"/>
     <title>Minio Underholdning - Finn Verktøyet</title>
     <meta name="description" content="Hvor raskt kan du finne riktig verktøy? Test reaksjonsevnen din i dette morsomme spillet fra Minio. Vinn 10% rabattkode!"/>
     <meta name="keywords" content="Minio, spill, verktøy, reaksjonsspill, Lillehammer, håndverk, rabattkode"/>
     <meta name="author" content="Minio"/>
     <meta name="robots" content="index, follow"/>
-    <link rel="canonical" href="https://www.minio.no/underholdning/tool-game.html"/>
+    <link rel="canonical" href="https://minio.no/underholdning/tool-game.html"/>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico"/>
-    <link rel="apple-touch-icon" href="/favicon.ico"/>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <link rel="apple-touch-icon" href="/favicon.svg"/>
 
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-E4J774CTXF"></script>
@@ -26,12 +27,10 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website"/>
-    <meta property="og:url" content="https://www.minio.no/underholdning/tool-game.html"/>
+    <meta property="og:url" content="https://minio.no/underholdning/tool-game.html"/>
     <meta property="og:title" content="Finn Verktøyet – Minio Underholdning"/>
     <meta property="og:description" content="Hvor raskt kan du finne riktig verktøy? Test reaksjonsevnen din og vinn 10% rabattkode!"/>
-    <meta property="og:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
-    <meta property="og:image:width" content="1200"/>
-    <meta property="og:image:height" content="630"/>
+    <meta property="og:image" content="https://minio.no/images/hero/carport-elbil-forside.webp"/>
     <meta property="og:image:alt" content="Finn Verktøyet - Minio spill"/>
     <meta property="og:site_name" content="Minio"/>
     <meta property="og:locale" content="nb_NO"/>
@@ -40,21 +39,21 @@
     <meta name="twitter:card" content="summary_large_image"/>
     <meta name="twitter:title" content="Finn Verktøyet – Klarer du å slå meg?"/>
     <meta name="twitter:description" content="Hvor raskt kan du finne riktig verktøy? Test deg selv!"/>
-    <meta name="twitter:image" content="https://www.minio.no/minio_logo_black_transparent.png"/>
+    <meta name="twitter:image" content="https://minio.no/images/hero/carport-elbil-forside.webp"/>
 
     <style>
         :root {
             --dark-bg: #202020;
             --darker-bg: #1a1a1a;
-            --light-bg: #f4f4f4;
             --text-light: #f9f9f9;
-            --text-dark: #202020;
             --link-bg: #2f2f2f;
             --accent: #1da1f2;
             --accent-hover: #0d8ddb;
             --success: #4caf50;
             --error: #e53935;
             --warning: #ff9800;
+            --header-h: 56px;
+            color-scheme: dark;
         }
 
         * {
@@ -64,34 +63,57 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        html, body {
+            height: 100%;
+            overscroll-behavior: none;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             background: #0a0a12;
             color: var(--text-light);
             min-height: 100vh;
+            min-height: 100dvh;
             overflow: hidden;
             touch-action: manipulation;
             user-select: none;
             -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+
+        button {
+            font: inherit;
+            color: inherit;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--accent);
+            outline-offset: 2px;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
         /* Animated starfield background */
         .stars-container {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             overflow: hidden;
             z-index: 0;
         }
 
         .stars {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background: radial-gradient(ellipse at bottom, #1a1a2e 0%, #0a0a12 100%);
         }
 
@@ -99,10 +121,7 @@
         .stars::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             background-repeat: repeat;
         }
 
@@ -141,76 +160,125 @@
             50% { opacity: 1; }
         }
 
+        /* Particle canvas */
+        #fxCanvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 60;
+        }
+
         /* Screens */
         .screen {
             position: fixed;
-            top: 0;
+            top: var(--header-h);
             left: 0;
             width: 100%;
-            height: 100%;
+            height: calc(100% - var(--header-h));
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            padding: 1.5rem;
+            padding: 1.5rem max(1rem, env(safe-area-inset-left)) max(1.5rem, env(safe-area-inset-bottom));
             text-align: center;
             z-index: 1;
+            overflow-y: auto;
         }
 
         .screen.hidden {
             display: none;
         }
 
+        .screen.fade-in {
+            animation: fadeIn 0.35s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: none; }
+        }
+
         /* Start Screen */
         .start-screen {
+            justify-content: safe center;
         }
 
         .logo {
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
         }
 
         .logo img {
-            height: 50px;
+            display: block;
+            height: 40px;
             width: auto;
         }
 
         h1 {
             font-size: 2rem;
             font-weight: 800;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.35rem;
         }
 
         .subtitle {
             font-size: 1rem;
             opacity: 0.6;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.25rem;
         }
 
-        .description {
-            max-width: 320px;
-            line-height: 1.6;
-            opacity: 0.7;
-            margin-bottom: 1.5rem;
-            font-size: 0.95rem;
+        .how-to {
+            list-style: none;
+            display: grid;
+            gap: 0.5rem;
+            max-width: 340px;
+            width: 100%;
+            margin-bottom: 1.25rem;
+            text-align: left;
+            font-size: 0.92rem;
+            line-height: 1.4;
         }
 
-        .tool-preview {
+        .how-to li {
             display: flex;
-            justify-content: center;
-            gap: 0.75rem;
-            margin-bottom: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .preview-tool {
-            width: 50px;
-            height: 50px;
-            background: var(--link-bg);
-            border-radius: 12px;
-            display: flex;
+            gap: 0.7rem;
             align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 0.55rem 0.8rem;
+        }
+
+        .how-to .step-icon {
+            font-size: 1.35rem;
+            flex-shrink: 0;
+            width: 1.8rem;
+            text-align: center;
+        }
+
+        .reward-teaser {
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(29, 161, 242, 0.2) 100%);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            padding: 0.6rem 1rem;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            margin-bottom: 1rem;
+            max-width: 340px;
+        }
+
+        .reward-teaser strong {
+            color: var(--success);
+        }
+
+        .best-line {
+            font-size: 0.85rem;
+            opacity: 0.75;
+            margin-bottom: 1.25rem;
+            min-height: 1.2em;
+        }
+
+        .best-line strong {
+            color: var(--warning);
         }
 
         .start-btn {
@@ -222,16 +290,40 @@
             font-size: 1.1rem;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.15s, background 0.2s;
+            box-shadow: 0 8px 24px rgba(29, 161, 242, 0.3);
+        }
+
+        .start-btn:hover {
+            background: var(--accent-hover);
         }
 
         .start-btn:active {
             transform: scale(0.96);
-            background: var(--accent-hover);
+        }
+
+        .kbd-hint {
+            margin-top: 0.85rem;
+            font-size: 0.78rem;
+            opacity: 0.5;
+            display: none;
+        }
+
+        kbd {
+            font-family: inherit;
+            font-size: 0.75rem;
+            padding: 0.05rem 0.35rem;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.06);
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .kbd-hint { display: block; }
         }
 
         .home-link {
-            margin-top: 2rem;
+            margin-top: 1.5rem;
             display: inline-block;
             padding: 0.75rem 1.5rem;
             background: var(--link-bg);
@@ -241,7 +333,7 @@
             font-weight: 500;
             border-radius: 8px;
             border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.2s;
+            transition: background 0.2s, border-color 0.2s;
         }
 
         .home-link:hover,
@@ -252,63 +344,31 @@
 
         /* Game Screen */
         .game-screen {
-            padding: 0;
+            padding: 0 0 env(safe-area-inset-bottom);
             justify-content: flex-start;
+            overflow: hidden;
+            touch-action: none;
         }
 
-        /* Header */
-        .game-header {
-            width: 100%;
-            background: var(--darker-bg);
-            padding: 0.75rem 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
+        .game-screen.shake {
+            animation: shake 0.32s ease;
         }
 
-        .header-left {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-
-        .header-logo img {
-            height: 24px;
-            width: auto;
-        }
-
-        .stats {
-            display: flex;
-            gap: 1.25rem;
-        }
-
-        .stat {
-            text-align: center;
-        }
-
-        .stat-value {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--accent);
-        }
-
-        .stat-value.score {
-            color: var(--success);
-        }
-
-        .stat-label {
-            font-size: 0.65rem;
-            opacity: 0.5;
-            text-transform: uppercase;
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            20% { transform: translate(-6px, 2px); }
+            40% { transform: translate(5px, -2px); }
+            60% { transform: translate(-4px, 1px); }
+            80% { transform: translate(3px, -1px); }
         }
 
         /* Target area */
         .target-area {
             width: 100%;
-            padding: 1.25rem;
+            padding: 1rem 1.25rem 0.9rem;
             background: var(--darker-bg);
             border-bottom: 1px solid rgba(255,255,255,0.1);
+            position: relative;
         }
 
         .target-label {
@@ -338,14 +398,74 @@
             box-shadow: 0 4px 20px rgba(29, 161, 242, 0.3);
         }
 
+        .target-icon.pop {
+            animation: targetPop 0.3s ease;
+        }
+
+        @keyframes targetPop {
+            0% { transform: scale(0.6) rotate(-10deg); }
+            60% { transform: scale(1.12) rotate(4deg); }
+            100% { transform: scale(1) rotate(0); }
+        }
+
         .target-name {
             font-size: 1.5rem;
             font-weight: 700;
+            min-width: 7ch;
+            text-align: left;
+        }
+
+        .streak {
+            position: absolute;
+            right: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 152, 0, 0.15);
+            border: 1px solid rgba(255, 152, 0, 0.5);
+            color: var(--warning);
+            font-weight: 800;
+            font-size: 0.9rem;
+            padding: 0.3rem 0.55rem;
+            border-radius: 999px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .streak.visible {
+            opacity: 1;
+        }
+
+        .streak.bump {
+            animation: bump 0.25s ease;
+        }
+
+        @keyframes bump {
+            50% { transform: translateY(-50%) scale(1.25); }
+        }
+
+        /* Time bar */
+        .time-bar {
+            width: 100%;
+            height: 5px;
+            background: rgba(255,255,255,0.06);
+        }
+
+        .time-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: var(--accent);
+            transform-origin: left center;
+            transform: scaleX(1);
+        }
+
+        .time-bar-fill.low {
+            background: var(--error);
         }
 
         /* Game grid */
         .grid-container {
             flex: 1;
+            min-height: 0;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -357,8 +477,8 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
-            max-width: 340px;
-            width: 100%;
+            width: min(360px, 100%, calc(100dvh - var(--header-h) - 230px));
+            min-width: 210px;
         }
 
         .hole {
@@ -369,10 +489,11 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: transform 0.15s, background 0.15s, border-color 0.15s, opacity 0.15s;
             border: 3px solid transparent;
             position: relative;
             overflow: hidden;
+            touch-action: none;
         }
 
         .hole::before {
@@ -384,24 +505,35 @@
 
         .hole.empty {
             opacity: 0.5;
+            cursor: default;
         }
 
         .hole.has-tool {
             background: var(--link-bg);
             border-color: rgba(255,255,255,0.1);
-            transform: scale(1.02);
+        }
+
+        @media (hover: hover) {
+            .hole.has-tool:hover {
+                border-color: rgba(29, 161, 242, 0.5);
+                transform: scale(1.03);
+            }
         }
 
         .hole.correct {
-            animation: correct 0.4s ease;
+            animation: correct 0.3s ease;
             border-color: var(--success);
-            background: rgba(76, 175, 80, 0.2);
+            background: rgba(76, 175, 80, 0.25);
         }
 
         .hole.wrong {
             animation: wrong 0.4s ease;
             border-color: var(--error);
             background: rgba(229, 57, 53, 0.2);
+        }
+
+        .hole.used {
+            cursor: default;
         }
 
         @keyframes correct {
@@ -417,20 +549,35 @@
         }
 
         .tool-icon {
-            font-size: 2.5rem;
-            transition: all 0.2s;
+            font-size: clamp(1.8rem, 9vw, 2.6rem);
+            transition: transform 0.18s cubic-bezier(.3,1.6,.6,1), opacity 0.15s;
             position: relative;
             z-index: 1;
+            pointer-events: none;
         }
 
         .hole.empty .tool-icon {
             opacity: 0;
-            transform: scale(0.5);
+            transform: scale(0.4);
         }
 
         .hole.has-tool .tool-icon {
             opacity: 1;
             transform: scale(1);
+        }
+
+        .key-hint {
+            position: absolute;
+            top: 6px;
+            left: 9px;
+            font-size: 0.7rem;
+            opacity: 0.35;
+            pointer-events: none;
+            display: none;
+        }
+
+        @media (hover: hover) and (pointer: fine) {
+            .key-hint { display: block; }
         }
 
         /* Lives */
@@ -446,67 +593,134 @@
 
         .life {
             font-size: 1.5rem;
-            transition: all 0.3s;
+            transition: opacity 0.3s, transform 0.3s, filter 0.3s;
         }
 
         .life.lost {
             opacity: 0.2;
             transform: scale(0.8);
+            filter: grayscale(1);
+        }
+
+        /* Overlays (countdown, pause, round end) */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.88);
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .overlay.visible {
+            display: flex;
+        }
+
+        .countdown-number {
+            font-size: 8rem;
+            font-weight: 800;
+            color: var(--accent);
+        }
+
+        .countdown-number.pulse {
+            animation: countPulse 0.5s ease;
+        }
+
+        .countdown-tip {
+            font-size: 1rem;
+            opacity: 0.7;
+            max-width: 300px;
+        }
+
+        @keyframes countPulse {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .overlay-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+        }
+
+        .overlay-title.time { color: var(--warning); }
+        .overlay-title.lives { color: var(--error); }
+
+        .overlay-text {
+            opacity: 0.7;
+            font-size: 0.95rem;
+        }
+
+        /* Points popup */
+        .points-popup {
+            position: fixed;
+            font-size: 1.5rem;
+            font-weight: 800;
+            pointer-events: none;
+            z-index: 70;
+            transform: translate(-50%, -50%);
+            animation: pointsFade 0.8s ease forwards;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.6);
+        }
+
+        .points-popup.positive { color: var(--success); }
+        .points-popup.negative { color: var(--error); }
+
+        @keyframes pointsFade {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            100% { opacity: 0; transform: translate(-50%, calc(-50% - 40px)) scale(1.2); }
         }
 
         /* End Screen */
         .end-screen {
             background: linear-gradient(180deg, #151515 0%, #1a1a1a 50%, #151515 100%);
+            justify-content: safe center;
         }
 
         .result-card {
             background: linear-gradient(145deg, #1a1a1a 0%, #252525 50%, #1a1a1a 100%);
             border-radius: 24px;
-            padding: 2rem 1.5rem;
+            padding: 1.5rem 1.5rem 1.25rem;
             text-align: center;
-            max-width: 340px;
+            max-width: 360px;
             width: 100%;
             position: relative;
+            isolation: isolate;
             box-shadow: 0 25px 80px rgba(0,0,0,0.5), 0 0 0 2px rgba(29, 161, 242, 0.3);
-        }
-
-        .result-card::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(135deg, var(--accent) 0%, #0d8ddb 50%, var(--accent) 100%);
-            border-radius: 26px;
-            z-index: -1;
-            opacity: 0.6;
+            flex-shrink: 0;
         }
 
         .result-header {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            gap: 0.6rem;
             margin-bottom: 1rem;
             padding-bottom: 1rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
         .result-header img {
-            height: 28px;
+            display: block;
+            height: 22px;
+            width: auto;
         }
 
         .result-header span {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             font-weight: 700;
             color: var(--accent);
             letter-spacing: 1px;
         }
 
         .result-emoji {
-            font-size: 3.5rem;
-            margin-bottom: 0.5rem;
+            font-size: 3rem;
+            margin-bottom: 0.25rem;
         }
 
         .result-label {
@@ -518,24 +732,35 @@
         }
 
         .result-score {
-            font-size: 4.5rem;
+            font-size: 4.2rem;
             font-weight: 800;
             color: var(--accent);
             line-height: 1;
             margin-bottom: 0.5rem;
+            font-variant-numeric: tabular-nums;
         }
+
+        .new-best {
+            display: inline-block;
+            background: rgba(255, 152, 0, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(255, 152, 0, 0.5);
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 0.25rem 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .new-best.hidden { display: none; }
 
         .result-stats {
             display: flex;
             justify-content: center;
-            gap: 2rem;
+            gap: 1.75rem;
             margin-bottom: 1rem;
             padding-bottom: 1rem;
             border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .result-stat {
-            text-align: center;
         }
 
         .result-stat-value {
@@ -543,6 +768,8 @@
             font-weight: 700;
             color: var(--success);
         }
+
+        .result-stat-value.best { color: var(--warning); }
 
         .result-stat-label {
             font-size: 0.7rem;
@@ -559,7 +786,7 @@
         .result-subtitle {
             font-size: 1rem;
             opacity: 0.6;
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
         .result-url {
@@ -568,175 +795,26 @@
             opacity: 0.8;
         }
 
-        .screenshot-hint {
-            margin-top: 1.25rem;
-            padding: 0.6rem 1rem;
-            background: rgba(29, 161, 242, 0.1);
-            border-radius: 8px;
-            font-size: 0.8rem;
-            color: var(--accent);
-        }
-
-        .share-section {
-            margin-top: 1.5rem;
-            width: 100%;
-            max-width: 340px;
-        }
-
-        .share-title {
+        .reward-progress {
+            margin-top: 1rem;
             font-size: 0.85rem;
-            opacity: 0.5;
-            margin-bottom: 0.75rem;
+            opacity: 0.85;
         }
 
-        .share-buttons {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
+        .reward-progress.hidden { display: none; }
+
+        .progress-track {
+            margin-top: 0.4rem;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.08);
+            overflow: hidden;
         }
 
-        .share-btn {
-            padding: 0.7rem 1rem;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-        }
-
-        .share-btn.facebook {
-            background: #1877f2;
-            color: white;
-        }
-
-        .share-btn.copy {
-            background: var(--link-bg);
-            color: white;
-        }
-
-        .share-btn:active {
-            transform: scale(0.96);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 0.75rem;
-            margin-top: 1.25rem;
-        }
-
-        .action-btn {
-            padding: 0.85rem 1.25rem;
-            border-radius: 10px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-decoration: none;
-            border: none;
-        }
-
-        .action-btn.primary {
-            background: var(--accent);
-            color: white;
-        }
-
-        .action-btn.secondary {
-            background: var(--link-bg);
-            color: white;
-        }
-
-        .action-btn:active {
-            transform: scale(0.96);
-        }
-
-        /* Countdown overlay */
-        .countdown-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+        .progress-fill {
             height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-
-        .countdown-overlay.visible {
-            display: flex;
-        }
-
-        .countdown-number {
-            font-size: 8rem;
-            font-weight: 800;
-            color: var(--accent);
-            animation: countPulse 0.5s ease;
-        }
-
-        @keyframes countPulse {
-            0% { transform: scale(0.5); opacity: 0; }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-
-        /* Points popup */
-        .points-popup {
-            position: fixed;
-            font-size: 1.5rem;
-            font-weight: 700;
-            pointer-events: none;
-            z-index: 50;
-            animation: pointsFade 0.8s ease forwards;
-        }
-
-        .points-popup.positive {
-            color: var(--success);
-        }
-
-        .points-popup.negative {
-            color: var(--error);
-        }
-
-        @keyframes pointsFade {
-            0% { opacity: 1; transform: translateY(0) scale(1); }
-            100% { opacity: 0; transform: translateY(-40px) scale(1.2); }
-        }
-
-        /* Notification */
-        .notification {
-            position: fixed;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--success);
-            color: white;
-            padding: 1rem 1.5rem;
-            border-radius: 10px;
-            font-weight: 500;
-            z-index: 200;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-
-        /* Reward teaser */
-        .reward-teaser {
-            background: linear-gradient(135deg, rgba(76, 175, 80, 0.2) 0%, rgba(29, 161, 242, 0.2) 100%);
-            border: 1px solid rgba(76, 175, 80, 0.3);
-            padding: 0.6rem 1rem;
-            border-radius: 10px;
-            font-size: 0.85rem;
-            margin-bottom: 1.5rem;
-            max-width: 300px;
-        }
-
-        .reward-teaser strong {
-            color: var(--success);
+            background: linear-gradient(90deg, var(--accent), var(--success));
+            width: 0;
         }
 
         /* Discount code reveal */
@@ -757,7 +835,7 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            opacity: 0.7;
+            opacity: 0.8;
             margin-bottom: 0.5rem;
         }
 
@@ -768,11 +846,14 @@
             background: var(--darker-bg);
             padding: 0.5rem 1rem;
             border-radius: 8px;
-            font-family: monospace;
+            border: none;
+            font-family: ui-monospace, Menlo, Consolas, monospace;
             letter-spacing: 2px;
             display: inline-block;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: transform 0.2s;
+            user-select: text;
+            -webkit-user-select: text;
         }
 
         .discount-code:active {
@@ -780,53 +861,98 @@
         }
 
         .discount-hint {
-            font-size: 0.7rem;
-            opacity: 0.6;
+            font-size: 0.72rem;
+            opacity: 0.65;
             margin-top: 0.5rem;
         }
 
-        /* Mobile adjustments */
+        .screenshot-hint {
+            margin-top: 1rem;
+            padding: 0.5rem 1rem;
+            background: rgba(29, 161, 242, 0.1);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--accent);
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 0.6rem;
+            margin-top: 1rem;
+            max-width: 360px;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.15rem;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, background 0.2s;
+            text-decoration: none;
+            border: none;
+            color: white;
+            background: var(--link-bg);
+        }
+
+        .action-btn.primary {
+            background: var(--accent);
+        }
+
+        .action-btn.primary:hover { background: var(--accent-hover); }
+        .action-btn.facebook { background: #1877f2; }
+
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            bottom: max(2rem, env(safe-area-inset-bottom));
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 0.9rem 1.4rem;
+            border-radius: 10px;
+            font-weight: 500;
+            z-index: 6000;
+            animation: slideUp 0.3s ease;
+            transition: opacity 0.3s;
+            max-width: calc(100% - 2rem);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* Small heights */
         @media (max-height: 700px) {
-            .target-area {
-                padding: 0.75rem;
-            }
-
-            .target-icon {
-                width: 50px;
-                height: 50px;
-                font-size: 1.6rem;
-            }
-
-            .target-name {
-                font-size: 1.2rem;
-            }
-
-            .game-grid {
-                gap: 8px;
-            }
-
-            .hole {
-                border-radius: 16px;
-            }
-
-            .tool-icon {
-                font-size: 2rem;
-            }
+            .target-area { padding: 0.6rem 0.75rem; }
+            .target-label { margin-bottom: 0.3rem; }
+            .target-icon { width: 48px; height: 48px; font-size: 1.6rem; }
+            .target-name { font-size: 1.2rem; }
+            .game-grid { gap: 8px; width: min(360px, 100%, calc(100dvh - var(--header-h) - 180px)); }
+            .hole { border-radius: 16px; }
+            .lives-container { padding: 0.45rem; }
+            .how-to { display: none; }
         }
 
         @media (max-height: 600px) {
-            h1 {
-                font-size: 1.5rem;
-            }
+            h1 { font-size: 1.5rem; }
+            .logo { margin-bottom: 0.75rem; }
+            .logo img { height: 30px; }
+        }
 
-            .description {
-                display: none;
-            }
-
-            .preview-tool {
-                width: 40px;
-                height: 40px;
-                font-size: 1.4rem;
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
@@ -835,85 +961,89 @@
 <body>
 
 <!-- Animated background -->
-<div class="stars-container">
+<div class="stars-container" aria-hidden="true">
     <div class="stars"></div>
 </div>
 
 <!-- Start Screen -->
-<div class="screen start-screen" id="startScreen">
+<main class="screen start-screen" id="startScreen">
     <div class="logo">
-        <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+        <img src="/images/branding/logo_navbar.svg" alt="Minio" width="545" height="148">
     </div>
     <h1>Finn Verktøyet!</h1>
-    <p class="subtitle">Reaksjonsspill</p>
+    <p class="subtitle">Reaksjonsspill · 30 sekunder</p>
 
-    <p class="description">
-        Trykk på riktig verktøy så fort du kan! Feil verktøy koster deg et liv. Hvor mange poeng klarer du?
-    </p>
+    <ul class="how-to">
+        <li><span class="step-icon" aria-hidden="true">🎯</span><span>Øverst ser du hvilket verktøy du skal finne.</span></li>
+        <li><span class="step-icon" aria-hidden="true">👆</span><span>Trykk på det i rutenettet før det forsvinner. Riktig gir <strong>+100</strong>.</span></li>
+        <li><span class="step-icon" aria-hidden="true">❤️</span><span>Feil verktøy koster 50 poeng og ett liv. Du har tre.</span></li>
+    </ul>
 
     <div class="reward-teaser">
         🎁 Nå <strong>3500 poeng</strong> og lås opp en <strong>10% rabattkode</strong>!
     </div>
 
-    <div class="tool-preview">
-        <div class="preview-tool">🔨</div>
-        <div class="preview-tool">🔧</div>
-        <div class="preview-tool">🪛</div>
-        <div class="preview-tool">🪚</div>
-        <div class="preview-tool">📏</div>
-    </div>
+    <p class="best-line" id="bestLine"></p>
 
-    <button class="start-btn" id="startBtn">▶ Start spill</button>
+    <button class="start-btn" id="startBtn" type="button">▶ Start spill</button>
+    <p class="kbd-hint">Tastatur: <kbd>1</kbd>–<kbd>9</kbd> velger rute · <kbd>Esc</kbd> pause · <kbd>M</kbd> lyd</p>
 
-    <a href="/" class="home-link">← Tilbake til minio.no</a>
-</div>
+    <a href="/underholdning" class="home-link">← Tilbake til underholdning</a>
+</main>
 
 <!-- Game Screen -->
 <div class="screen game-screen hidden" id="gameScreen">
     <div class="target-area">
-        <div class="target-label">Finn denne:</div>
-        <div class="target-display">
-            <div class="target-icon" id="targetIcon">🔨</div>
+        <div class="target-label" id="targetLabel">Finn denne:</div>
+        <div class="target-display" aria-live="polite" aria-atomic="true">
+            <div class="target-icon" id="targetIcon" aria-hidden="true">🔨</div>
             <div class="target-name" id="targetName">Hammer</div>
         </div>
+        <div class="streak" id="streak" aria-hidden="true">🔥 x0</div>
     </div>
+    <div class="time-bar" aria-hidden="true"><div class="time-bar-fill" id="timeBarFill"></div></div>
 
     <div class="grid-container">
-        <div class="game-grid" id="gameGrid">
-            <div class="hole empty" data-index="0"><span class="tool-icon"></span></div>
-            <div class="hole empty" data-index="1"><span class="tool-icon"></span></div>
-            <div class="hole empty" data-index="2"><span class="tool-icon"></span></div>
-            <div class="hole empty" data-index="3"><span class="tool-icon"></span></div>
-            <div class="hole empty" data-index="4"><span class="tool-icon"></span></div>
-            <div class="hole empty" data-index="5"><span class="tool-icon"></span></div>
-            <div class="hole empty" data-index="6"><span class="tool-icon"></span></div>
-            <div class="hole empty" data-index="7"><span class="tool-icon"></span></div>
-            <div class="hole empty" data-index="8"><span class="tool-icon"></span></div>
-        </div>
+        <div class="game-grid" id="gameGrid" role="group" aria-labelledby="targetLabel"></div>
     </div>
 
-    <div class="lives-container" id="livesContainer">
-        <span class="life">❤️</span>
-        <span class="life">❤️</span>
-        <span class="life">❤️</span>
+    <div class="lives-container" id="livesContainer" role="img" aria-label="3 liv igjen">
+        <span class="life" aria-hidden="true">❤️</span>
+        <span class="life" aria-hidden="true">❤️</span>
+        <span class="life" aria-hidden="true">❤️</span>
     </div>
 </div>
 
 <!-- Countdown Overlay -->
-<div class="countdown-overlay" id="countdownOverlay">
+<div class="overlay" id="countdownOverlay" aria-live="assertive">
     <div class="countdown-number" id="countdownNumber">3</div>
+    <p class="countdown-tip" id="countdownTip"></p>
+</div>
+
+<!-- Pause Overlay -->
+<div class="overlay" id="pauseOverlay" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+    <div class="overlay-title" id="pauseTitle">⏸ Pause</div>
+    <p class="overlay-text">Spillet står på vent.</p>
+    <button class="start-btn" id="resumeBtn" type="button">▶ Fortsett</button>
+    <button class="action-btn" id="quitBtn" type="button">Avslutt runden</button>
+</div>
+
+<!-- Round end overlay -->
+<div class="overlay" id="roundEndOverlay" aria-live="assertive">
+    <div class="overlay-title" id="roundEndTitle">Tiden er ute!</div>
 </div>
 
 <!-- End Screen -->
 <div class="screen end-screen hidden" id="endScreen">
     <div class="result-card">
         <div class="result-header">
-            <img src="/images/branding/minio_white_rect_transparent.webp" alt="Minio">
+            <img src="/images/branding/logo_navbar.svg" alt="Minio" width="545" height="148">
             <span>FINN VERKTØYET</span>
         </div>
-        <div class="result-emoji" id="resultEmoji">🔨</div>
+        <div class="result-emoji" id="resultEmoji" aria-hidden="true">🔨</div>
         <div class="result-label">Poengsum</div>
         <div class="result-score" id="finalScore">0</div>
+        <div class="new-best hidden" id="newBest">⭐ Ny personlig rekord!</div>
         <div class="result-stats">
             <div class="result-stat">
                 <div class="result-stat-value" id="finalCorrect">0</div>
@@ -923,33 +1053,42 @@
                 <div class="result-stat-value" id="finalWrong">0</div>
                 <div class="result-stat-label">Feil</div>
             </div>
+            <div class="result-stat">
+                <div class="result-stat-value" id="finalStreak">0</div>
+                <div class="result-stat-label">Lengste rekke</div>
+            </div>
+            <div class="result-stat">
+                <div class="result-stat-value best" id="finalBest">0</div>
+                <div class="result-stat-label">Rekord</div>
+            </div>
         </div>
         <div class="result-message" id="resultMessage">Bra jobbet!</div>
         <div class="result-subtitle">Klarer du å slå meg?</div>
         <div class="result-url">minio.no/underholdning/tool-game.html</div>
 
+        <div class="reward-progress hidden" id="rewardProgress">
+            <span id="rewardProgressText"></span>
+            <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="rewardProgressFill"></div></div>
+        </div>
+
         <div class="discount-reveal hidden" id="discountReveal">
             <div class="discount-label">🎉 Du låste opp en rabattkode!</div>
-            <div class="discount-code" id="discountCode" onclick="copyDiscountCode()">VPH10</div>
+            <button class="discount-code" id="discountCode" type="button" aria-label="Kopier rabattkoden VPH10">VPH10</button>
             <div class="discount-hint">Trykk for å kopiere • Gjelder 10% rabatt</div>
         </div>
     </div>
 
     <div class="screenshot-hint">📷 Ta screenshot og del!</div>
 
-    <div class="share-section">
-        <div class="share-title">Del resultatet</div>
-        <div class="share-buttons">
-            <button class="share-btn facebook" id="shareFacebook">Facebook</button>
-            <button class="share-btn copy" id="copyResult">Kopier</button>
-        </div>
-    </div>
-
     <div class="action-buttons">
-        <button class="action-btn primary" id="playAgainBtn">↺ Spill igjen</button>
-        <a href="/" class="action-btn secondary">Minio.no</a>
+        <button class="action-btn primary" id="playAgainBtn" type="button">↺ Spill igjen</button>
+        <button class="action-btn facebook" id="shareFacebook" type="button">Del på Facebook</button>
+        <button class="action-btn" id="copyResult" type="button">Kopier resultat</button>
+        <a href="/underholdning" class="action-btn">Flere spill</a>
     </div>
 </div>
+
+<canvas id="fxCanvas" aria-hidden="true"></canvas>
 
 <!-- Unified Header -->
 <style>
@@ -962,19 +1101,22 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        padding: 0.5rem 0.75rem;
+        gap: 0.4rem;
+        padding: 0.5rem max(0.75rem, env(safe-area-inset-right)) 0.5rem max(0.75rem, env(safe-area-inset-left));
         background: var(--darker-bg);
         border-bottom: 1px solid rgba(255,255,255,0.1);
-        height: 56px;
+        height: var(--header-h);
     }
 
-    .header-left {
+    .header-left,
+    .header-right {
         display: flex;
         align-items: center;
         gap: 0.4rem;
     }
 
-    .header-home {
+    .header-home,
+    .icon-btn {
         display: flex;
         align-items: center;
         justify-content: center;
@@ -982,14 +1124,18 @@
         height: 36px;
         background: rgba(47, 47, 47, 0.8);
         border-radius: 8px;
+        border: none;
         text-decoration: none;
         color: var(--text-light);
         font-size: 1rem;
-        transition: all 0.2s;
+        cursor: pointer;
+        transition: background 0.2s;
+        flex-shrink: 0;
     }
 
     .header-home:hover,
-    .header-home:active {
+    .header-home:active,
+    .icon-btn:hover {
         background: rgba(29, 161, 242, 0.3);
     }
 
@@ -1010,7 +1156,7 @@
         text-decoration: none;
         color: var(--text-light);
         font-size: 1rem;
-        transition: all 0.2s;
+        transition: background 0.2s;
         border: 2px solid transparent;
     }
 
@@ -1026,7 +1172,7 @@
     .header-stats {
         display: none;
         align-items: center;
-        gap: 1rem;
+        gap: 0.8rem;
     }
 
     .header-stats.visible {
@@ -1043,10 +1189,15 @@
         font-weight: 800;
         color: var(--text-light);
         line-height: 1;
+        font-variant-numeric: tabular-nums;
     }
 
     .header-stat-value.score {
         color: var(--success);
+    }
+
+    .header-stat-value.low {
+        color: var(--error);
     }
 
     .header-stat-label {
@@ -1056,20 +1207,24 @@
         letter-spacing: 0.3px;
     }
 
+    .icon-btn.pause-btn {
+        display: none;
+    }
 
-    /* Screen positioning to account for header */
-    .screen {
-        top: 56px !important;
-        height: calc(100% - 56px) !important;
+    .icon-btn.pause-btn.visible {
+        display: flex;
     }
 
     @media (max-width: 480px) {
+        :root { --header-h: 50px; }
+
         .unified-header {
-            padding: 0.4rem 0.5rem;
-            height: 50px;
+            padding-top: 0.4rem;
+            padding-bottom: 0.4rem;
         }
 
-        .header-home {
+        .header-home,
+        .icon-btn {
             width: 32px;
             height: 32px;
             font-size: 0.9rem;
@@ -1081,8 +1236,10 @@
             font-size: 0.9rem;
         }
 
+        .header-stats { gap: 0.4rem; }
+
         .header-stat {
-            min-width: 38px;
+            min-width: 36px;
         }
 
         .header-stat-value {
@@ -1093,10 +1250,8 @@
             font-size: 0.5rem;
         }
 
-        .screen {
-            top: 50px !important;
-            height: calc(100% - 50px) !important;
-        }
+        /* While playing, hide the game switcher to make room for stats */
+        body.in-game .game-nav { display: none; }
     }
 
     @media (max-width: 360px) {
@@ -1108,10 +1263,6 @@
             width: 26px;
             height: 26px;
             font-size: 0.8rem;
-        }
-
-        .header-stats {
-            gap: 0.5rem;
         }
 
         .header-stat {
@@ -1126,29 +1277,37 @@
 
 <header class="unified-header" id="unified-header">
     <div class="header-left">
-        <a href="index.html" class="header-home" onclick="return confirmLeave(this)" title="Tilbake">🏠</a>
-        <nav class="game-nav">
-            <a href="tool-quiz.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøy Quiz">🌍</a>
-            <a href="tool-game.html" class="game-nav-item active" title="Finn Verktøyet">🔨</a>
-            <a href="tool-nails.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Spiker'n">🪵</a>
-            <a href="tool-saw.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Sag Rytme">🪚</a>
-            <a href="tool-maze.html" class="game-nav-item" onclick="return confirmLeave(this)" title="Verktøyjakt">👷</a>
+        <a href="/underholdning" class="header-home" data-leave title="Tilbake til underholdning" aria-label="Tilbake til underholdning">🏠</a>
+        <nav class="game-nav" aria-label="Spill">
+            <a href="tool-quiz.html" class="game-nav-item" data-leave title="Verktøy Quiz" aria-label="Verktøy Quiz">🌍</a>
+            <a href="tool-game.html" class="game-nav-item active" aria-current="page" title="Finn Verktøyet" aria-label="Finn Verktøyet">🔨</a>
+            <a href="tool-nails.html" class="game-nav-item" data-leave title="Spiker'n" aria-label="Spiker'n">🪵</a>
+            <a href="tool-saw.html" class="game-nav-item" data-leave title="Sag Rytme" aria-label="Sag Rytme">🪚</a>
+            <a href="tool-maze.html" class="game-nav-item" data-leave title="Verktøyjakt" aria-label="Verktøyjakt">👷</a>
+            <a href="tool-stack.html" class="game-nav-item" data-leave title="Stabelmester" aria-label="Stabelmester">📏</a>
         </nav>
     </div>
-    <div class="header-stats" id="header-stats">
-        <div class="header-stat">
-            <div class="header-stat-value score" id="headerScore">0</div>
-            <div class="header-stat-label">Poeng</div>
+    <div class="header-right">
+        <div class="header-stats" id="header-stats">
+            <div class="header-stat">
+                <div class="header-stat-value score" id="headerScore">0</div>
+                <div class="header-stat-label">Poeng</div>
+            </div>
+            <div class="header-stat">
+                <div class="header-stat-value" id="headerTime">30</div>
+                <div class="header-stat-label">Sekunder</div>
+            </div>
         </div>
-        <div class="header-stat">
-            <div class="header-stat-value" id="headerTime">30</div>
-            <div class="header-stat-label">Sekunder</div>
-        </div>
+        <button class="icon-btn pause-btn" id="pauseBtn" type="button" aria-label="Pause" title="Pause (Esc)">⏸</button>
+        <button class="icon-btn" id="muteBtn" type="button" aria-pressed="false" aria-label="Slå av lyd" title="Lyd av/på (M)">🔊</button>
     </div>
 </header>
 
 <script>
-    // Tools data
+(() => {
+    'use strict';
+
+    // ---------- Data & config ----------
     const TOOLS = [
         { icon: '🔨', name: 'Hammer' },
         { icon: '🔧', name: 'Skiftenøkkel' },
@@ -1160,42 +1319,234 @@
         { icon: '🪓', name: 'Øks' }
     ];
 
-    // Game config
-    const GAME_DURATION = 30;
+    const GAME_DURATION_MS = 30000;
     const INITIAL_TOOL_DURATION = 2000;
     const MIN_TOOL_DURATION = 800;
+    const SPEEDUP_PER_CORRECT = 30;
+    const NEXT_ROUND_DELAY = 300;
     const POINTS_CORRECT = 100;
     const POINTS_WRONG = -50;
     const STARTING_LIVES = 3;
+    const REWARD_SCORE = 3500;
+    const LOW_TIME_MS = 5000;
+    const HOLE_COUNT = 9;
 
-    // Game state
+    const BEST_KEY = 'minio-toolgame-best';
+    const MUTE_KEY = 'minio-games-muted';
+
+    const reducedMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const reducedMotion = () => reducedMotionMQ.matches;
+
+    // ---------- Safe storage ----------
+    function storageGet(key) {
+        try { return window.localStorage.getItem(key); } catch (e) { return null; }
+    }
+    function storageSet(key, value) {
+        try { window.localStorage.setItem(key, String(value)); } catch (e) { /* ignore */ }
+    }
+
+    // ---------- DOM ----------
+    const $ = (id) => document.getElementById(id);
+    const startScreen = $('startScreen');
+    const gameScreen = $('gameScreen');
+    const endScreen = $('endScreen');
+    const countdownOverlay = $('countdownOverlay');
+    const countdownNumber = $('countdownNumber');
+    const countdownTip = $('countdownTip');
+    const pauseOverlay = $('pauseOverlay');
+    const roundEndOverlay = $('roundEndOverlay');
+    const roundEndTitle = $('roundEndTitle');
+    const headerStats = $('header-stats');
+    const scoreDisplay = $('headerScore');
+    const timeDisplay = $('headerTime');
+    const timeBarFill = $('timeBarFill');
+    const targetIcon = $('targetIcon');
+    const targetName = $('targetName');
+    const streakEl = $('streak');
+    const gameGrid = $('gameGrid');
+    const livesContainer = $('livesContainer');
+    const pauseBtn = $('pauseBtn');
+    const muteBtn = $('muteBtn');
+    const startBtn = $('startBtn');
+    const playAgainBtn = $('playAgainBtn');
+
+    // Build grid buttons
+    const holes = [];
+    for (let i = 0; i < HOLE_COUNT; i++) {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'hole empty';
+        b.dataset.index = String(i);
+        b.setAttribute('aria-label', 'Tom rute');
+        b.disabled = true;
+        b.innerHTML = '<span class="key-hint" aria-hidden="true">' + (i + 1) + '</span><span class="tool-icon" aria-hidden="true"></span>';
+        gameGrid.appendChild(b);
+        holes.push(b);
+    }
+
+    // ---------- State ----------
+    // phase: 'start' | 'countdown' | 'playing' | 'paused' | 'ending' | 'end'
+    let phase = 'start';
     let score = 0;
-    let timeLeft = GAME_DURATION;
     let lives = STARTING_LIVES;
     let correctCount = 0;
     let wrongCount = 0;
+    let streak = 0;
+    let bestStreak = 0;
     let targetTool = null;
-    let gameTimer = null;
-    let toolTimer = null;
-    let isPlaying = false;
     let toolDuration = INITIAL_TOOL_DURATION;
+    let gameTime = 0;            // ms of active play elapsed
+    let lastFrame = 0;
+    let rafId = null;
+    let nextRefreshAt = 0;       // gameTime when the grid reshuffles
+    let pendingRoundAt = null;   // gameTime when next target appears after a hit
+    let lastShownSecond = -1;
+    let roundStarted = false;    // true once the countdown finished
+    let best = parseInt(storageGet(BEST_KEY), 10) || 0;
+    const timeouts = new Set();
 
-    // DOM elements
-    const startScreen = document.getElementById('startScreen');
-    const gameScreen = document.getElementById('gameScreen');
-    const endScreen = document.getElementById('endScreen');
-    const countdownOverlay = document.getElementById('countdownOverlay');
-    const countdownNumber = document.getElementById('countdownNumber');
-    const headerStats = document.getElementById('header-stats');
-    const scoreDisplay = document.getElementById('headerScore');
-    const timeDisplay = document.getElementById('headerTime');
-    const targetIcon = document.getElementById('targetIcon');
-    const targetName = document.getElementById('targetName');
-    const gameGrid = document.getElementById('gameGrid');
-    const livesContainer = document.getElementById('livesContainer');
-    const holes = document.querySelectorAll('.hole');
+    function later(fn, ms) {
+        const id = setTimeout(() => { timeouts.delete(id); fn(); }, ms);
+        timeouts.add(id);
+        return id;
+    }
+    function clearAllTimeouts() {
+        timeouts.forEach(clearTimeout);
+        timeouts.clear();
+    }
 
-    // Shuffle array
+    // ---------- Audio ----------
+    let audioCtx = null;
+    let muted = storageGet(MUTE_KEY) === '1';
+
+    function getAudio() {
+        if (muted) return null;
+        if (!audioCtx) {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return null;
+            try { audioCtx = new AC(); } catch (e) { return null; }
+        }
+        if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+        return audioCtx;
+    }
+
+    function tone(freq, duration, opts = {}) {
+        const ctx = getAudio();
+        if (!ctx) return;
+        const { type = 'sine', volume = 0.12, slideTo = null, delay = 0 } = opts;
+        try {
+            const t0 = ctx.currentTime + delay;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, t0);
+            if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, t0 + duration);
+            gain.gain.setValueAtTime(0.0001, t0);
+            gain.gain.exponentialRampToValueAtTime(volume, t0 + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + duration);
+            osc.connect(gain).connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + duration + 0.02);
+        } catch (e) { /* ignore audio errors */ }
+    }
+
+    const sfx = {
+        correct(n) {
+            const base = 520 * Math.pow(2, Math.min(n, 12) / 24);
+            tone(base, 0.09, { type: 'triangle', volume: 0.14 });
+            tone(base * 1.5, 0.12, { type: 'triangle', volume: 0.1, delay: 0.05 });
+        },
+        wrong() { tone(180, 0.25, { type: 'sawtooth', volume: 0.08, slideTo: 90 }); },
+        tick() { tone(1000, 0.04, { type: 'square', volume: 0.04 }); },
+        count() { tone(440, 0.12, { type: 'sine', volume: 0.12 }); },
+        go() { tone(880, 0.25, { type: 'sine', volume: 0.14 }); },
+        over() {
+            tone(392, 0.18, { type: 'triangle', volume: 0.12 });
+            tone(330, 0.18, { type: 'triangle', volume: 0.12, delay: 0.16 });
+            tone(262, 0.35, { type: 'triangle', volume: 0.12, delay: 0.32 });
+        },
+        win() {
+            [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.22, { type: 'triangle', volume: 0.12, delay: i * 0.1 }));
+        }
+    };
+
+    function updateMuteButton() {
+        muteBtn.textContent = muted ? '🔇' : '🔊';
+        muteBtn.setAttribute('aria-pressed', String(muted));
+        muteBtn.setAttribute('aria-label', muted ? 'Slå på lyd' : 'Slå av lyd');
+    }
+
+    function toggleMute() {
+        muted = !muted;
+        storageSet(MUTE_KEY, muted ? '1' : '0');
+        updateMuteButton();
+        if (!muted) sfx.tick();
+    }
+
+    function vibrate(pattern) {
+        if (muted || !('vibrate' in navigator)) return;
+        try { navigator.vibrate(pattern); } catch (e) { /* ignore */ }
+    }
+
+    // ---------- Particles (high-DPI canvas) ----------
+    const fxCanvas = $('fxCanvas');
+    const fx = fxCanvas.getContext('2d');
+    let particles = [];
+    let fxRaf = null;
+    let fxLast = 0;
+
+    function resizeCanvas() {
+        const dpr = Math.min(window.devicePixelRatio || 1, 3);
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        fxCanvas.width = Math.round(w * dpr);
+        fxCanvas.height = Math.round(h * dpr);
+        fx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    function burst(x, y, color, count) {
+        if (reducedMotion()) return;
+        for (let i = 0; i < count; i++) {
+            const a = Math.random() * Math.PI * 2;
+            const s = 120 + Math.random() * 260;
+            particles.push({
+                x, y,
+                vx: Math.cos(a) * s,
+                vy: Math.sin(a) * s - 120,
+                life: 0.5 + Math.random() * 0.35,
+                age: 0,
+                size: 2 + Math.random() * 3.5,
+                color
+            });
+        }
+        if (particles.length > 300) particles.splice(0, particles.length - 300);
+        if (!fxRaf) {
+            fxLast = performance.now();
+            fxRaf = requestAnimationFrame(fxFrame);
+        }
+    }
+
+    function fxFrame(now) {
+        const dt = Math.min((now - fxLast) / 1000, 0.05);
+        fxLast = now;
+        fx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+        particles = particles.filter(p => (p.age += dt) < p.life);
+        for (const p of particles) {
+            p.vy += 600 * dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            fx.globalAlpha = Math.max(0, 1 - p.age / p.life);
+            fx.fillStyle = p.color;
+            fx.beginPath();
+            fx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            fx.fill();
+        }
+        fx.globalAlpha = 1;
+        fxRaf = particles.length ? requestAnimationFrame(fxFrame) : null;
+        if (!fxRaf) fx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    }
+
+    // ---------- Helpers ----------
     function shuffle(array) {
         const arr = [...array];
         for (let i = arr.length - 1; i > 0; i--) {
@@ -1205,327 +1556,534 @@
         return arr;
     }
 
-    // Get random items from array
-    function getRandomItems(array, count) {
-        return shuffle(array).slice(0, count);
+    function restartAnimation(el, cls) {
+        if (reducedMotion()) return;
+        el.classList.remove(cls);
+        void el.offsetWidth;
+        el.classList.add(cls);
     }
 
-    // Set new target
+    function showScreen(screen) {
+        [startScreen, gameScreen, endScreen].forEach(s => {
+            s.classList.toggle('hidden', s !== screen);
+            s.classList.remove('fade-in');
+        });
+        if (screen !== gameScreen) restartAnimation(screen, 'fade-in');
+    }
+
+    function renderBestLine() {
+        $('bestLine').innerHTML = best > 0 ? 'Din rekord: <strong>' + best + '</strong> poeng' : '';
+    }
+
+    // ---------- Game logic ----------
     function setNewTarget() {
-        targetTool = TOOLS[Math.floor(Math.random() * TOOLS.length)];
+        let next;
+        do {
+            next = TOOLS[Math.floor(Math.random() * TOOLS.length)];
+        } while (targetTool && next === targetTool && TOOLS.length > 1);
+        targetTool = next;
         targetIcon.textContent = targetTool.icon;
         targetName.textContent = targetTool.name;
+        restartAnimation(targetIcon, 'pop');
     }
 
-    // Populate grid with tools
-    function populateGrid() {
-        // Clear all holes
+    // Difficulty curve: more tools on screen as you get better.
+    function toolCountForProgress() {
+        const min = Math.min(3 + Math.floor(correctCount / 6), 6);
+        const max = Math.min(min + 2, 8);
+        return min + Math.floor(Math.random() * (max - min + 1));
+    }
+
+    function clearGrid() {
         holes.forEach(hole => {
-            hole.classList.remove('has-tool', 'correct', 'wrong');
+            hole.classList.remove('has-tool', 'correct', 'wrong', 'used');
             hole.classList.add('empty');
             hole.querySelector('.tool-icon').textContent = '';
             hole.dataset.tool = '';
+            hole.disabled = true;
+            hole.setAttribute('aria-label', 'Tom rute');
         });
+    }
 
-        // Decide how many tools to show (3-6)
-        const toolCount = 3 + Math.floor(Math.random() * 4);
-
-        // Get random positions
-        const positions = shuffle([0, 1, 2, 3, 4, 5, 6, 7, 8]).slice(0, toolCount);
-
-        // Make sure target tool is included
-        const toolsToShow = getRandomItems(TOOLS.filter(t => t !== targetTool), toolCount - 1);
+    function populateGrid() {
+        clearGrid();
+        const toolCount = toolCountForProgress();
+        const positions = shuffle([...Array(HOLE_COUNT).keys()]).slice(0, toolCount);
+        // Others are distinct from the target; with more slots than tools, decoys may repeat.
+        const others = TOOLS.filter(t => t !== targetTool);
+        const toolsToShow = [];
+        let pool = shuffle(others);
+        while (toolsToShow.length < toolCount - 1) {
+            if (!pool.length) pool = shuffle(others);
+            toolsToShow.push(pool.pop());
+        }
         toolsToShow.push(targetTool);
-        shuffle(toolsToShow);
+        const placed = shuffle(toolsToShow);
 
-        // Place tools
         positions.forEach((pos, i) => {
             const hole = holes[pos];
-            const tool = toolsToShow[i];
+            const tool = placed[i];
             hole.classList.remove('empty');
             hole.classList.add('has-tool');
             hole.querySelector('.tool-icon').textContent = tool.icon;
             hole.dataset.tool = tool.name;
+            hole.disabled = false;
+            hole.setAttribute('aria-label', tool.name + ', rute ' + (pos + 1));
         });
 
-        // Set timer to refresh grid
-        if (toolTimer) clearTimeout(toolTimer);
-        toolTimer = setTimeout(() => {
-            if (isPlaying) {
-                populateGrid();
-            }
-        }, toolDuration);
+        nextRefreshAt = gameTime + toolDuration;
     }
 
-    // Handle hole click
-    function handleHoleClick(e) {
-        if (!isPlaying) return;
+    function nextRound() {
+        pendingRoundAt = null;
+        setNewTarget();
+        populateGrid();
+    }
 
-        const hole = e.currentTarget;
-        if (hole.classList.contains('empty')) return;
+    function hitHole(index) {
+        if (phase !== 'playing' || pendingRoundAt !== null) return;
+        const hole = holes[index];
+        if (!hole || hole.classList.contains('empty') || hole.classList.contains('used')) return;
 
-        const toolName = hole.dataset.tool;
         const rect = hole.getBoundingClientRect();
         const x = rect.left + rect.width / 2;
         const y = rect.top + rect.height / 2;
 
-        if (toolName === targetTool.name) {
-            // Correct!
+        if (hole.dataset.tool === targetTool.name) {
             score += POINTS_CORRECT;
             correctCount++;
-            hole.classList.add('correct');
+            streak++;
+            bestStreak = Math.max(bestStreak, streak);
+            hole.classList.add('correct', 'used');
             showPointsPopup(x, y, '+' + POINTS_CORRECT, true);
-
-            // Speed up slightly
-            toolDuration = Math.max(MIN_TOOL_DURATION, toolDuration - 30);
-
-            // New target and refresh grid
-            setTimeout(() => {
-                setNewTarget();
-                populateGrid();
-            }, 300);
+            burst(x, y, streak >= 5 ? '#ff9800' : '#4caf50', 14 + Math.min(streak, 10) * 2);
+            sfx.correct(streak);
+            toolDuration = Math.max(MIN_TOOL_DURATION, toolDuration - SPEEDUP_PER_CORRECT);
+            // Lock input briefly so a double tap can't score twice on the same target.
+            pendingRoundAt = gameTime + NEXT_ROUND_DELAY;
+            updateStreak(true);
         } else {
-            // Wrong!
             score = Math.max(0, score + POINTS_WRONG);
             wrongCount++;
             lives--;
-            hole.classList.add('wrong');
-            showPointsPopup(x, y, POINTS_WRONG, false);
+            streak = 0;
+            hole.classList.add('wrong', 'used');
+            showPointsPopup(x, y, String(POINTS_WRONG), false);
+            sfx.wrong();
+            vibrate(60);
+            restartAnimation(gameScreen, 'shake');
             updateLives();
-
+            updateStreak(false);
             if (lives <= 0) {
-                endGame();
+                updateScore();
+                endGame('lives');
+                return;
             }
         }
-
         updateScore();
     }
 
-    // Show points popup
-    function showPointsPopup(x, y, points, isPositive) {
+    function showPointsPopup(x, y, text, isPositive) {
         const popup = document.createElement('div');
         popup.className = 'points-popup ' + (isPositive ? 'positive' : 'negative');
-        popup.textContent = points;
+        popup.textContent = text;
+        popup.setAttribute('aria-hidden', 'true');
         popup.style.left = x + 'px';
         popup.style.top = y + 'px';
         document.body.appendChild(popup);
-
-        setTimeout(() => popup.remove(), 800);
+        const remove = () => popup.remove();
+        popup.addEventListener('animationend', remove, { once: true });
+        setTimeout(remove, 1000); // fallback
     }
 
-    // Update score display
     function updateScore() {
         scoreDisplay.textContent = score;
     }
 
-    // Update lives display
+    function updateStreak(bump) {
+        streakEl.textContent = '🔥 x' + streak;
+        streakEl.classList.toggle('visible', streak >= 3);
+        if (bump && streak >= 3) restartAnimation(streakEl, 'bump');
+    }
+
     function updateLives() {
-        const lifeElements = livesContainer.querySelectorAll('.life');
-        lifeElements.forEach((life, i) => {
-            if (i >= lives) {
-                life.classList.add('lost');
-            } else {
-                life.classList.remove('lost');
-            }
+        livesContainer.querySelectorAll('.life').forEach((life, i) => {
+            life.classList.toggle('lost', i >= lives);
         });
+        livesContainer.setAttribute('aria-label', lives + ' liv igjen');
     }
 
-    // Start countdown
-    function startCountdown() {
-        startScreen.classList.add('hidden');
-        gameScreen.classList.remove('hidden');
-        headerStats.classList.add('visible');
-        countdownOverlay.classList.add('visible');
-
-        let count = 3;
-        countdownNumber.textContent = count;
-
-        const countInterval = setInterval(() => {
-            count--;
-            if (count > 0) {
-                countdownNumber.textContent = count;
-                countdownNumber.style.animation = 'none';
-                void countdownNumber.offsetWidth;
-                countdownNumber.style.animation = 'countPulse 0.5s ease';
-            } else {
-                clearInterval(countInterval);
-                countdownNumber.textContent = 'GO!';
-                countdownNumber.style.animation = 'none';
-                void countdownNumber.offsetWidth;
-                countdownNumber.style.animation = 'countPulse 0.5s ease';
-
-                setTimeout(() => {
-                    countdownOverlay.classList.remove('visible');
-                    startGame();
-                }, 500);
-            }
-        }, 800);
+    function updateTime() {
+        const remaining = Math.max(0, GAME_DURATION_MS - gameTime);
+        const secs = Math.ceil(remaining / 1000);
+        if (secs !== lastShownSecond) {
+            lastShownSecond = secs;
+            timeDisplay.textContent = secs;
+            const low = remaining <= LOW_TIME_MS;
+            timeDisplay.classList.toggle('low', low);
+            timeBarFill.classList.toggle('low', low);
+            if (low && secs > 0 && phase === 'playing') sfx.tick();
+        }
+        timeBarFill.style.transform = 'scaleX(' + (remaining / GAME_DURATION_MS).toFixed(4) + ')';
     }
 
-    // Start game
-    function startGame() {
-        // Reset state
+    function frame(now) {
+        rafId = null;
+        if (phase !== 'playing') return;
+        const dt = Math.min(now - lastFrame, 100); // clamp big gaps (tab switch, jank)
+        lastFrame = now;
+        gameTime += dt;
+
+        if (gameTime >= GAME_DURATION_MS) {
+            gameTime = GAME_DURATION_MS;
+            updateTime();
+            endGame('time');
+            return;
+        }
+
+        if (pendingRoundAt !== null) {
+            if (gameTime >= pendingRoundAt) nextRound();
+        } else if (gameTime >= nextRefreshAt) {
+            populateGrid();
+        }
+
+        updateTime();
+        rafId = requestAnimationFrame(frame);
+    }
+
+    function startLoop() {
+        if (rafId) cancelAnimationFrame(rafId);
+        lastFrame = performance.now();
+        rafId = requestAnimationFrame(frame);
+    }
+
+    function stopLoop() {
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+    }
+
+    function resetGame() {
         score = 0;
-        timeLeft = GAME_DURATION;
         lives = STARTING_LIVES;
         correctCount = 0;
         wrongCount = 0;
+        streak = 0;
+        bestStreak = 0;
         toolDuration = INITIAL_TOOL_DURATION;
-        isPlaying = true;
-
-        // Reset UI
+        gameTime = 0;
+        pendingRoundAt = null;
+        lastShownSecond = -1;
+        targetTool = null;
+        roundStarted = false;
         updateScore();
         updateLives();
-        timeDisplay.textContent = timeLeft;
+        updateStreak(false);
+        updateTime();
+        clearGrid();
+        targetIcon.textContent = '❔';
+        targetName.textContent = 'Gjør deg klar';
+    }
 
-        // Set target and populate
-        setNewTarget();
-        populateGrid();
+    const TIPS = [
+        'Verktøyene bytter plass hvis du venter for lenge.',
+        'Jo flere riktige, jo raskere går det!',
+        'Feil trykk koster et liv – sikt før du trykker.',
+        'Rekker av riktige gir 🔥 – hold den gående!'
+    ];
 
-        // Start timer
-        gameTimer = setInterval(() => {
-            timeLeft--;
-            timeDisplay.textContent = timeLeft;
+    function startCountdown() {
+        if (phase !== 'start' && phase !== 'end' && phase !== 'paused') return;
+        getAudio(); // unlock audio within the user gesture
+        clearAllTimeouts();
+        stopLoop();
+        resetGame();
+        phase = 'countdown';
+        document.body.classList.add('in-game');
+        showScreen(gameScreen);
+        headerStats.classList.add('visible');
+        pauseBtn.classList.remove('visible');
+        pauseOverlay.classList.remove('visible');
+        roundEndOverlay.classList.remove('visible');
+        countdownOverlay.classList.add('visible');
+        countdownTip.textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
 
-            if (timeLeft <= 0) {
-                endGame();
+        let count = 3;
+        const show = (text) => {
+            countdownNumber.textContent = text;
+            restartAnimation(countdownNumber, 'pulse');
+        };
+        show(count);
+        sfx.count();
+
+        const step = () => {
+            if (phase !== 'countdown') return;
+            count--;
+            if (count > 0) {
+                show(count);
+                sfx.count();
+                later(step, 700);
+            } else {
+                show('KJØR!');
+                sfx.go();
+                later(() => {
+                    if (phase !== 'countdown') return;
+                    countdownOverlay.classList.remove('visible');
+                    startGame();
+                }, 450);
             }
-        }, 1000);
+        };
+        later(step, 700);
     }
 
-    // End game
-    function endGame() {
-        isPlaying = false;
-        if (gameTimer) clearInterval(gameTimer);
-        if (toolTimer) clearTimeout(toolTimer);
-
-        setTimeout(() => {
-            showEndScreen();
-        }, 500);
+    function startGame() {
+        phase = 'playing';
+        roundStarted = true;
+        pauseBtn.classList.add('visible');
+        nextRound();
+        startLoop();
     }
 
-    // Show end screen
+    function pauseGame() {
+        if (phase === 'countdown') {
+            // Abort countdown; resuming restarts it
+            clearAllTimeouts();
+            countdownOverlay.classList.remove('visible');
+        } else if (phase !== 'playing') {
+            return;
+        }
+        stopLoop();
+        phase = 'paused';
+        pauseOverlay.classList.add('visible');
+        $('resumeBtn').focus({ preventScroll: true });
+    }
+
+    function resumeGame() {
+        if (phase !== 'paused') return;
+        pauseOverlay.classList.remove('visible');
+        if (!roundStarted) {
+            startCountdown();
+            return;
+        }
+        phase = 'playing';
+        startLoop();
+    }
+
+    function endGame(reason) {
+        if (phase !== 'playing' && phase !== 'paused') return;
+        phase = 'ending';
+        stopLoop();
+        clearAllTimeouts();
+        pendingRoundAt = null;
+        holes.forEach(h => { h.disabled = true; });
+        pauseBtn.classList.remove('visible');
+        pauseOverlay.classList.remove('visible');
+        roundEndTitle.textContent = reason === 'lives' ? 'Tom for liv!' : reason === 'quit' ? 'Runden er avsluttet' : 'Tiden er ute!';
+        roundEndTitle.className = 'overlay-title ' + (reason === 'lives' ? 'lives' : 'time');
+        roundEndOverlay.classList.add('visible');
+        if (score >= REWARD_SCORE) sfx.win(); else sfx.over();
+        later(showEndScreen, reason === 'quit' ? 300 : 1100);
+    }
+
     function showEndScreen() {
-        gameScreen.classList.add('hidden');
+        phase = 'end';
+        roundEndOverlay.classList.remove('visible');
+        document.body.classList.remove('in-game');
         headerStats.classList.remove('visible');
-        endScreen.classList.remove('hidden');
+        clearGrid();
+        showScreen(endScreen);
+        endScreen.scrollTop = 0;
 
-        document.getElementById('finalScore').textContent = score;
-        document.getElementById('finalCorrect').textContent = correctCount;
-        document.getElementById('finalWrong').textContent = wrongCount;
+        const isNewBest = score > best && score > 0;
+        if (isNewBest) {
+            best = score;
+            storageSet(BEST_KEY, best);
+        }
 
-        // Check for discount code unlock (3500+ points)
-        const discountReveal = document.getElementById('discountReveal');
-        if (score >= 3500) {
-            discountReveal.classList.remove('hidden');
-        } else {
-            discountReveal.classList.add('hidden');
+        $('finalScore').textContent = score;
+        $('finalCorrect').textContent = correctCount;
+        $('finalWrong').textContent = wrongCount;
+        $('finalStreak').textContent = bestStreak;
+        $('finalBest').textContent = best;
+        $('newBest').classList.toggle('hidden', !isNewBest);
+
+        // Discount code unlock (3500+ points)
+        const unlocked = score >= REWARD_SCORE;
+        $('discountReveal').classList.toggle('hidden', !unlocked);
+        $('rewardProgress').classList.toggle('hidden', unlocked);
+        if (!unlocked) {
+            const missing = REWARD_SCORE - score;
+            $('rewardProgressText').textContent = 'Du mangler ' + missing + ' poeng til rabattkoden.';
+            $('rewardProgressFill').style.width = Math.min(100, (score / REWARD_SCORE) * 100) + '%';
         }
 
         let emoji, message;
-        if (score >= 3000) {
-            emoji = '🏆';
-            message = 'Mesterlig!';
-        } else if (score >= 2500) {
-            emoji = '🌟';
-            message = 'Imponerende!';
-        } else if (score >= 1000) {
-            emoji = '👏';
-            message = 'Veldig bra!';
-        } else if (score >= 500) {
-            emoji = '👍';
-            message = 'Bra jobbet!';
-        } else {
-            emoji = '💪';
-            message = 'Prøv igjen!';
+        if (score >= 3000) { emoji = '🏆'; message = 'Mesterlig!'; }
+        else if (score >= 2500) { emoji = '🌟'; message = 'Imponerende!'; }
+        else if (score >= 1000) { emoji = '👏'; message = 'Veldig bra!'; }
+        else if (score >= 500) { emoji = '👍'; message = 'Bra jobbet!'; }
+        else { emoji = '💪'; message = 'Prøv igjen!'; }
+        $('resultEmoji').textContent = emoji;
+        $('resultMessage').textContent = message;
+
+        if (unlocked || isNewBest) {
+            const r = $('finalScore').getBoundingClientRect();
+            burst(r.left + r.width / 2, r.top + r.height / 2, unlocked ? '#4caf50' : '#ff9800', 40);
         }
 
-        document.getElementById('resultEmoji').textContent = emoji;
-        document.getElementById('resultMessage').textContent = message;
+        playAgainBtn.focus({ preventScroll: true });
     }
 
-    // Copy discount code
+    // ---------- Clipboard & share ----------
+    function copyText(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text).then(() => true, () => legacyCopy(text));
+        }
+        return Promise.resolve(legacyCopy(text));
+    }
+
+    function legacyCopy(text) {
+        try {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            const ok = document.execCommand('copy');
+            ta.remove();
+            return ok;
+        } catch (e) {
+            return false;
+        }
+    }
+
     function copyDiscountCode() {
-        const code = document.getElementById('discountCode').textContent;
-        navigator.clipboard.writeText(code).then(() => {
-            showNotification('Rabattkode kopiert: ' + code);
-        }).catch(() => {
-            showNotification('Kode: ' + code);
-        });
+        const code = $('discountCode').textContent.trim();
+        copyText(code).then(ok => showNotification(ok ? 'Rabattkode kopiert: ' + code : 'Koden er: ' + code));
     }
 
-    // Share functions
     function getShareText() {
         return `Jeg fikk ${score} poeng i Finn Verktøyet! 🔨 ${correctCount} riktige. Klarer du å slå meg? minio.no/underholdning/tool-game.html`;
     }
 
-    document.getElementById('shareFacebook').addEventListener('click', () => {
-        const url = encodeURIComponent('https://minio.no/underholdning/tool-game.html');
-        const text = encodeURIComponent(getShareText());
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${text}`, '_blank');
-    });
-
-    document.getElementById('copyResult').addEventListener('click', () => {
-        const text = getShareText();
-        navigator.clipboard.writeText(text).then(() => {
-            showNotification('Kopiert!');
-        }).catch(() => {
-            // Fallback
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            textarea.style.position = 'fixed';
-            textarea.style.left = '-9999px';
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            showNotification('Kopiert!');
-        });
-    });
-
+    let notificationTimer = null;
     function showNotification(message) {
         const existing = document.querySelector('.notification');
         if (existing) existing.remove();
-
-        const notification = document.createElement('div');
-        notification.className = 'notification';
-        notification.textContent = message;
-        document.body.appendChild(notification);
-
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 300);
+        clearTimeout(notificationTimer);
+        const n = document.createElement('div');
+        n.className = 'notification';
+        n.setAttribute('role', 'status');
+        n.textContent = message;
+        document.body.appendChild(n);
+        notificationTimer = setTimeout(() => {
+            n.style.opacity = '0';
+            setTimeout(() => n.remove(), 300);
         }, 2000);
     }
 
-    // Event listeners
-    document.getElementById('startBtn').addEventListener('click', startCountdown);
-    document.getElementById('playAgainBtn').addEventListener('click', () => {
-        endScreen.classList.add('hidden');
-        startCountdown();
+    // ---------- Events ----------
+    startBtn.addEventListener('click', startCountdown);
+    playAgainBtn.addEventListener('click', startCountdown);
+    $('resumeBtn').addEventListener('click', resumeGame);
+    $('quitBtn').addEventListener('click', () => {
+        if (!roundStarted) {
+            // Quit before the round really began: back to start screen
+            phase = 'start';
+            pauseOverlay.classList.remove('visible');
+            document.body.classList.remove('in-game');
+            headerStats.classList.remove('visible');
+            showScreen(startScreen);
+            renderBestLine();
+            return;
+        }
+        endGame('quit');
+    });
+    pauseBtn.addEventListener('click', () => (phase === 'paused' ? resumeGame() : pauseGame()));
+    muteBtn.addEventListener('click', toggleMute);
+    $('discountCode').addEventListener('click', copyDiscountCode);
+
+    $('shareFacebook').addEventListener('click', () => {
+        const url = encodeURIComponent('https://minio.no/underholdning/tool-game.html');
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'noopener');
     });
 
-    holes.forEach(hole => {
-        hole.addEventListener('click', handleHoleClick);
+    $('copyResult').addEventListener('click', () => {
+        copyText(getShareText()).then(ok => showNotification(ok ? 'Resultatet er kopiert!' : 'Kunne ikke kopiere'));
     });
 
-    // Prevent double-tap zoom
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', (e) => {
-        const now = Date.now();
-        if (now - lastTouchEnd <= 300) {
+    // Pointer input: fires immediately (no click delay) and only once per tap.
+    holes.forEach((hole, i) => {
+        hole.addEventListener('pointerdown', (e) => {
+            if (e.pointerType === 'mouse' && e.button !== 0) return;
             e.preventDefault();
-        }
-        lastTouchEnd = now;
-    }, { passive: false });
+            hitHole(i);
+        });
+        // Keyboard activation (Enter/Space on a focused hole) produces a click with detail 0.
+        hole.addEventListener('click', (e) => {
+            if (e.detail === 0) hitHole(i);
+        });
+        hole.addEventListener('contextmenu', (e) => e.preventDefault());
+    });
 
-    // Confirm before leaving during gameplay
-    function confirmLeave(link) {
-        if (isPlaying) {
-            return confirm('Du er midt i et spill. Er du sikker på at du vil forlate?');
+    document.addEventListener('keydown', (e) => {
+        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        const key = e.key;
+
+        if (phase === 'playing' && /^[1-9]$/.test(key)) {
+            e.preventDefault();
+            hitHole(parseInt(key, 10) - 1);
+            return;
         }
-        return true;
-    }
+        if (key === 'Escape' || key === 'p' || key === 'P') {
+            if (phase === 'playing' || phase === 'countdown') { e.preventDefault(); pauseGame(); }
+            else if (phase === 'paused') { e.preventDefault(); resumeGame(); }
+            return;
+        }
+        if (key === 'm' || key === 'M') {
+            toggleMute();
+            return;
+        }
+        if ((key === 'Enter' || key === ' ') && (phase === 'start' || phase === 'end')) {
+            const tag = document.activeElement && document.activeElement.tagName;
+            if (tag === 'BUTTON' || tag === 'A') return; // let the native activation happen
+            e.preventDefault();
+            startCountdown();
+        }
+    });
+
+    // Pause automatically when the tab/app is hidden or the window loses focus.
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) pauseGame();
+    });
+    window.addEventListener('blur', () => pauseGame());
+    window.addEventListener('pagehide', () => pauseGame());
+
+    // Confirm before leaving mid-round
+    document.querySelectorAll('[data-leave]').forEach(link => {
+        link.addEventListener('click', (e) => {
+            if (phase === 'playing' || phase === 'countdown' || phase === 'paused') {
+                pauseGame();
+                if (!window.confirm('Du er midt i et spill. Er du sikker på at du vil forlate?')) {
+                    e.preventDefault();
+                }
+            }
+        });
+    });
+
+    let resizeRaf = null;
+    window.addEventListener('resize', () => {
+        if (resizeRaf) return;
+        resizeRaf = requestAnimationFrame(() => { resizeRaf = null; resizeCanvas(); });
+    });
+
+    // ---------- Init ----------
+    resizeCanvas();
+    updateMuteButton();
+    renderBestLine();
+    resetGame();
+})();
 </script>
 
 </body>

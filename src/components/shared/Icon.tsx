@@ -18,7 +18,7 @@ import {
   faSeedling, faRocket,
   faXmark, faArrowsRotate, faUpDownLeftRight, faWandMagicSparkles,
   faFan, faWarehouse, faBorderAll, faBorderNone, faPrint,
-  faBoxOpen, faFilePdf, faPlay, faPause, faKitchenSet,
+  faBoxOpen, faFilePdf, faPlay, faPause, faKitchenSet, faTrophy,
   faEye, faEyeSlash, faDumpster, faFireBurner, faToilet,
   faCubes, faSnowflake, faPenNib, faTag,
 } from '@fortawesome/free-solid-svg-icons'
@@ -43,7 +43,7 @@ const iconMap: Record<string, IconProp> = {
   faSeedling, faRocket,
   faXmark, faArrowsRotate, faUpDownLeftRight, faWandMagicSparkles,
   faFan, faWarehouse, faBorderAll, faBorderNone, faPrint,
-  faBoxOpen, faFilePdf, faPlay, faPause, faKitchenSet,
+  faBoxOpen, faFilePdf, faPlay, faPause, faKitchenSet, faTrophy,
   faEye, faEyeSlash, faDumpster, faFireBurner, faToilet,
   faCubes, faSnowflake, faPenNib, faTag,
 }
