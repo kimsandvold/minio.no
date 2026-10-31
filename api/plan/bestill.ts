@@ -14,7 +14,7 @@
  *     manuelt og sender koden til kunden.
  *  4. Kunden løser inn koden via POST /api/vipps/redeem.
  *
- * Body: { prosjektId, melding?, maal?, sammendrag?, arealM2?, estimatKr? }
+ * Body: { prosjektId, produktNavn?, melding?, maal?, sammendrag?, arealM2?, estimatKr? }
  * Auth: Authorization: Bearer <Firebase ID-token>
  */
 import type { VercelRequest } from '@vercel/node'
@@ -71,7 +71,9 @@ export default postHandler(async (req: VercelRequest, uid: string) => {
     type: 'byggeplan' as const,
     designId: prosjektId,
     produktId: p.templateId,
-    produktNavn: p.templateId,
+    // Produktnavnet («Vedskjul») kjenner bare klienten – templatene ligger
+    // ikke i API-et. Det er kosmetisk; id-en er fallback.
+    produktNavn: kort(req.body?.produktNavn, 80) || p.templateId,
     designNavn: p.navn,
     sammendrag: kort(req.body?.sammendrag, 2000),
     maal: kort(req.body?.maal, 200),
@@ -115,6 +117,8 @@ export default postHandler(async (req: VercelRequest, uid: string) => {
  */
 async function varsleAdmin(f: {
   userEmail: string
+  designId: string
+  produktId: string
   designNavn: string
   produktNavn: string
   maal: string
@@ -132,17 +136,19 @@ async function varsleAdmin(f: {
     `Produkt:  ${f.produktNavn}`,
     `Design:   ${f.designNavn}`,
     `Mål:      ${f.maal || '–'}`,
-    `Å betale: ${f.belopKr} kr`,
+    `Å betale: ${f.belopKr.toLocaleString('nb-NO')} kr`,
     ``,
     `Tilgangskode å sende kunden når Vipps er mottatt: ${f.tilgangskode}`,
     ``,
     `Melding fra kunden: ${f.melding || '(ingen)'}`,
     ``,
-    `${SITE_URL}/admin/foresporsler`,
+    `Designet: ${SITE_URL}/designverktoy/${f.produktId}?design=${f.designId}`,
+    `Admin:    ${SITE_URL}/admin/foresporsler`,
   ]
   return sendAdminVarsel({
     til,
-    emne: `Byggeplan-forespørsel: ${f.designNavn} (${f.belopKr} kr)`,
+    svarTil: f.userEmail || undefined,
+    emne: `Byggeplan-forespørsel: ${f.produktNavn} «${f.designNavn}» (${f.belopKr.toLocaleString('nb-NO')} kr)`,
     tekst: linjer.join('\n'),
     html: `<pre style="font-family:ui-monospace,monospace;font-size:14px">${linjer
       .join('\n')

@@ -750,7 +750,7 @@ export default function PlantekassePriceCalculator({
         mounting: constructionLabel(construction),
         finish: finishLabel(finish),
         espalier: espalier
-          ? `Ja, ${espalierLengthCm} cm (+${espalierFullPrice.toLocaleString('nb-NO')},-)`
+          ? `Ja, ${espalierLengthCm.toLocaleString('nb-NO')} cm (+${espalierFullPrice.toLocaleString('nb-NO')},-)`
           : 'Nei',
         delivery: deliveryChecked ? `${distance} km` : 'Nei',
         price: formatPrice(totalPrice),

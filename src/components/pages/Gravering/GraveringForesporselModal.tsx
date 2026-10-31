@@ -159,6 +159,9 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
   const [melding, settMelding] = useState('')
   const [status, settStatus] = useState<'idle' | 'sender' | 'ok' | 'feil'>('idle')
   const boks = useRef<HTMLDivElement>(null)
+  // `status` i closuren er utdatert ved et raskt dobbeltklikk – uten denne
+  // ble bestillingen lagret og sendt to ganger (med hver sin ordre-id).
+  const sender = useRef(false)
 
   useEffect(() => {
     const lukkPaEscape = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -169,7 +172,8 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (status === 'sender') return
+    if (sender.current) return
+    sender.current = true
     settStatus('sender')
 
     const spek = bestillingstekst(ordre)
@@ -245,6 +249,7 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
       varslet = false
     }
 
+    sender.current = false
     if (antallLagret > 0 || varslet) {
       settStatus('ok')
       trackEvent('gravering_foresporsel', 'gravering')
@@ -327,7 +332,7 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
               <Rad>
                 <Felt>
                   <label htmlFor="gravering-navn">Navn *</label>
-                  <input id="gravering-navn" required value={navn} onChange={(e) => settNavn(e.target.value)} />
+                  <input id="gravering-navn" required maxLength={120} value={navn} onChange={(e) => settNavn(e.target.value)} />
                 </Felt>
                 <Felt>
                   <label htmlFor="gravering-epost">E-post *</label>
@@ -335,6 +340,7 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
                     id="gravering-epost"
                     type="email"
                     required
+                    maxLength={200}
                     value={epost}
                     onChange={(e) => settEpost(e.target.value)}
                   />
@@ -342,13 +348,14 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
               </Rad>
               <Felt>
                 <label htmlFor="gravering-telefon">Telefon</label>
-                <input id="gravering-telefon" type="tel" value={telefon} onChange={(e) => settTelefon(e.target.value)} />
+                <input id="gravering-telefon" type="tel" maxLength={40} value={telefon} onChange={(e) => settTelefon(e.target.value)} />
               </Felt>
               <Felt>
                 <label htmlFor="gravering-adresse">Leveringsadresse *</label>
                 <input
                   id="gravering-adresse"
                   required
+                  maxLength={200}
                   autoComplete="street-address"
                   placeholder="Gate og husnummer"
                   value={adresse}
@@ -375,6 +382,7 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
                   <input
                     id="gravering-sted"
                     required
+                    maxLength={120}
                     autoComplete="address-level2"
                     value={sted}
                     onChange={(e) => settSted(e.target.value)}
@@ -386,6 +394,7 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
                 <textarea
                   id="gravering-melding"
                   rows={3}
+                  maxLength={4000}
                   placeholder="Skal den rekke en bestemt dato? Ønsker du flere like?"
                   value={melding}
                   onChange={(e) => settMelding(e.target.value)}

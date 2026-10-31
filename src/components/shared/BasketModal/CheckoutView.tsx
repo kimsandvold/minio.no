@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import styled from 'styled-components'
 import Icon from '../Icon'
 import { useBasketContext } from '../../../context/BasketContext'
@@ -6,6 +6,7 @@ import { useAuthContext } from '../../../context/AuthContext'
 import { formatPrice, parsePrice, formatSum } from '../../../utils/formatPrice'
 import { createOrder } from '../../../services/orderService'
 import { subscribeToNewsletter } from '../../../services/newsletterService'
+import { maalKort, slotMaalKort } from '../../../utils/basketMaal'
 
 const Body = styled.div`
   flex: 1;
@@ -148,9 +149,12 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
         message += `${item.setLabel ?? 'Pidestaller i settet'}:\n`
         item.slotDimensions.forEach((s, idx) => {
           const typePrefix = s.type ? `${s.type} – ` : ''
+          // Dybde 0 = flatt produkt (levegg) – «Dybde 0» i e-posten er bare støy.
           const dims = s.widthB
             ? `Side A ${s.width} + Side B ${s.widthB} × Høyde ${s.height} cm`
-            : `Bredde ${s.width} × Dybde ${s.depth} × Høyde ${s.height} cm`
+            : s.depth
+              ? `Bredde ${s.width} × Dybde ${s.depth} × Høyde ${s.height} cm`
+              : `Bredde ${s.width} × Høyde ${s.height} cm`
           message += `  #${idx + 1}: ${typePrefix}${dims}`
           if (s.orientation) message += ` · ${s.orientation}`
           if (s.unitPrice) message += ` – ${s.unitPrice}`
@@ -159,7 +163,9 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
       } else if (item.armThickness !== undefined) {
         message += `Mål: A ${item.dimensions.width} × B ${item.dimensions.depth} × Dybde ${item.armThickness} × Høyde ${item.dimensions.height} cm\n`
       } else if (item.dimensions.width || item.dimensions.height || item.dimensions.depth) {
-        message += `Mål: Bredde ${item.dimensions.width} × Dybde ${item.dimensions.depth} × Høyde ${item.dimensions.height} cm\n`
+        message += item.dimensions.depth
+          ? `Mål: Bredde ${item.dimensions.width} × Dybde ${item.dimensions.depth} × Høyde ${item.dimensions.height} cm\n`
+          : `Mål: Bredde ${item.dimensions.width} × Høyde ${item.dimensions.height} cm\n`
       }
       if (item.mounting) message += `Konstruksjon: ${item.mounting}\n`
       if (item.angle) message += `Vinkel: ${item.angle}°\n`
@@ -188,8 +194,14 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
     return message
   }
 
+  // `submitting` slår først inn ved neste render – et raskt dobbeltklikk sendte
+  // e-posten, ordren og nyhetsbrev-påmeldingen to ganger.
+  const senderRef = useRef(false)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (senderRef.current) return
+    senderRef.current = true
     setSubmitting(true)
 
     try {
@@ -237,6 +249,7 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
       alert('Noe gikk galt. Vennligst prøv igjen.')
     }
 
+    senderRef.current = false
     setSubmitting(false)
   }
 
@@ -279,15 +292,15 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
                       {item.slotDimensions.map((s, idx) => (
                         <li key={idx}>
                           #{idx + 1}: {s.type && <>{s.type} – </>}
-                          {s.widthB ? `${s.width}+${s.widthB}×${s.height}` : `${s.width}×${s.height}×${s.depth}`} cm
+                          {slotMaalKort(s)}
                           {s.orientation && <> · {s.orientation}</>}
                           {s.unitPrice && <> ({s.unitPrice})</>}
                         </li>
                       ))}
                     </ul>
                   </>
-                ) : (item.dimensions.width || item.dimensions.height || item.dimensions.depth) ? (
-                  <>Mål: {item.dimensions.width}×{item.dimensions.height}×{item.dimensions.depth} cm<br /></>
+                ) : maalKort(item) ? (
+                  <>Mål: {maalKort(item)}<br /></>
                 ) : null}
                 {item.shape && <>Form: {item.shape}<br /></>}
                 {item.mounting && <>Konstruksjon: {item.mounting}<br /></>}

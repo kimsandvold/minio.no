@@ -164,6 +164,9 @@ export default function ProsjekthjelpPage() {
   const [feilmelding, setFeilmelding] = useState('')
 
   const kompassRef = useRef<HTMLDivElement>(null)
+  // Knappen deaktiveres først ved neste render; ref-en stopper et dobbeltklikk
+  // fra å lagre og sende idéen to ganger.
+  const senderRef = useRef(false)
   const forsteRender = useRef(true)
 
   const type = PROSJEKTTYPER.find((t) => t.id === typeId)
@@ -244,12 +247,14 @@ export default function ProsjekthjelpPage() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (nettside) return // bot
+    if (senderRef.current) return
     if (erAnnet && melding.trim().length < 10) {
       setFeilmelding('Fortell litt om idéen din – noen setninger holder.')
       return
     }
     setFeilmelding('')
     setStatus('sender')
+    senderRef.current = true
     try {
       await opprettProsjektIde({
         navn: navn.trim(),
@@ -262,6 +267,8 @@ export default function ProsjekthjelpPage() {
       trackEvent('prosjektkompass_sendt', 'prosjekthjelp', typeId || 'ukjent')
     } catch {
       setStatus('feil')
+    } finally {
+      senderRef.current = false
     }
   }
 

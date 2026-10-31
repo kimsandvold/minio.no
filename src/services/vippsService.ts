@@ -158,7 +158,14 @@ export interface BestillResultat {
  */
 export async function bestillByggeplan(
   prosjektId: string,
-  detaljer: { melding?: string; maal?: string; sammendrag?: string; arealM2?: number | null; estimatKr?: number },
+  detaljer: {
+    produktNavn?: string
+    melding?: string
+    maal?: string
+    sammendrag?: string
+    arealM2?: number | null
+    estimatKr?: number
+  },
 ): Promise<BestillResultat> {
   try {
     const data = await kallApi<{ ok: boolean; alleredeKjopt: boolean; belopKr?: number }>(

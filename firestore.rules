@@ -67,10 +67,17 @@ service cloud.firestore {
     // SDK, går forbi disse reglene). Klienten kan derfor verken velge sin egen
     // kode eller lage en byggeplan-forespørsel selv.
     match /designForesporsler/{id} {
+      // Nøyaktig feltene src/services/foresporselService.ts skriver – ingen
+      // tilgangskode, adminVarslet eller annen status enn 'ny'.
       allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid
                     && request.resource.data.type in ['ferdig', 'materialpakke']
-                    && !request.resource.data.keys().hasAny(['tilgangskode', 'innlostAt']);
+                    && request.resource.data.keys().hasOnly(
+                         ['userId', 'userEmail', 'type', 'designId', 'produktId', 'produktNavn',
+                          'designNavn', 'sammendrag', 'konfigurasjon', 'config', 'overrides',
+                          'maal', 'arealM2', 'estimatKr', 'prisEstimatKr', 'melding', 'status',
+                          'createdAt'])
+                    && request.resource.data.status == 'ny';
       allow read, update: if request.auth != null
                           && request.auth.token.email == 'kimsandvold@gmail.com';
     }

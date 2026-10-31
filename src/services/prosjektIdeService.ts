@@ -9,6 +9,7 @@ import {
   serverTimestamp,
 } from 'firebase/firestore'
 import { db } from '../lib/firebase'
+import { LAGRINGSFRIST_MS, medTidsfrist } from '../utils/medTidsfrist'
 import type { ProsjektIde, ProsjektIdeStatus } from '../types/prosjektIde'
 
 const COLLECTION = 'prosjektIdeer'
@@ -19,20 +20,29 @@ type NyProsjektIde = Omit<ProsjektIde, 'id' | 'status' | 'createdAt'>
 
 /**
  * Lagrer prosjektidéen i Firestore (uinnlogget – se firestore.rules) og
- * varsler admin på e-post (best-effort). Varselet skal ikke blokkere
- * lagringen om Formspree feiler.
+ * varsler admin på e-post. De to går parallelt og uavhengig av hverandre:
+ * idéen regnes som sendt når minst én av dem gikk gjennom, slik at en
+ * blokkert/hengende Firestore ikke stopper e-posten (eller omvendt). Kaster
+ * bare når begge feilet – da får kunden feilmelding og beholder teksten.
  */
-export async function opprettProsjektIde(ide: NyProsjektIde): Promise<string> {
-  const ref = await addDoc(collection(db, COLLECTION), {
-    ...ide,
-    status: 'ny' as ProsjektIdeStatus,
-    createdAt: serverTimestamp(),
-  })
-  void sendAdminVarsel(ide)
-  return ref.id
+export async function opprettProsjektIde(ide: NyProsjektIde): Promise<void> {
+  const lagring = medTidsfrist(
+    addDoc(collection(db, COLLECTION), {
+      ...ide,
+      status: 'ny' as ProsjektIdeStatus,
+      createdAt: serverTimestamp(),
+    }),
+    LAGRINGSFRIST_MS,
+  ).then(
+    () => true,
+    () => false,
+  )
+  const [lagret, varslet] = await Promise.all([lagring, sendAdminVarsel(ide)])
+  if (!lagret && !varslet) throw new Error('Kunne ikke sende prosjektidéen.')
 }
 
-async function sendAdminVarsel(ide: NyProsjektIde): Promise<void> {
+/** Returnerer true når Formspree tok imot varselet. */
+async function sendAdminVarsel(ide: NyProsjektIde): Promise<boolean> {
   try {
     const fd = new FormData()
     fd.append('_subject', `Ny prosjektidé: ${ide.prosjektType || 'uteprosjekt'} – ${ide.navn}`)
@@ -42,9 +52,10 @@ async function sendAdminVarsel(ide: NyProsjektIde): Promise<void> {
     fd.append('Prosjekttype', ide.prosjektType || '(ikke valgt)')
     fd.append('Idé', ide.melding)
     fd.append('Admin', `${window.location.origin}/admin/prosjektideer`)
-    await fetch(FORMSPREE_ENDPOINT, { method: 'POST', body: fd, headers: { Accept: 'application/json' } })
+    const res = await fetch(FORMSPREE_ENDPOINT, { method: 'POST', body: fd, headers: { Accept: 'application/json' } })
+    return res.ok
   } catch {
-    // Varsel er best-effort – idéen er allerede lagret i Firestore.
+    return false
   }
 }
 

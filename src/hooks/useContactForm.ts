@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 
 interface FormState {
   name: string
@@ -19,6 +19,9 @@ export function useContactForm() {
     message: '',
   })
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle')
+  // Knappen deaktiveres først ved neste render – et raskt dobbeltklikk rakk å
+  // sende to e-poster. Ref-en stopper det andre kallet med en gang.
+  const sender = useRef(false)
 
   const setField = useCallback((field: keyof FormState, value: string) => {
     setFormState(prev => ({ ...prev, [field]: value }))
@@ -29,6 +32,8 @@ export function useContactForm() {
   }, [])
 
   const submit = useCallback(async () => {
+    if (sender.current) return
+    sender.current = true
     setStatus('submitting')
 
     const formData = new FormData()
@@ -55,6 +60,8 @@ export function useContactForm() {
       }
     } catch {
       setStatus('error')
+    } finally {
+      sender.current = false
     }
   }, [formState])
 

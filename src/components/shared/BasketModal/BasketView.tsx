@@ -2,6 +2,7 @@ import styled from 'styled-components'
 import Icon from '../Icon'
 import { useBasketContext } from '../../../context/BasketContext'
 import { formatPrice, parsePrice, formatSum } from '../../../utils/formatPrice'
+import { maalKort, slotMaalKort } from '../../../utils/basketMaal'
 
 const Body = styled.div`
   flex: 1;
@@ -224,15 +225,15 @@ export default function BasketView({ onCheckout }: BasketViewProps) {
                       {item.slotDimensions.map((s, idx) => (
                         <li key={idx}>
                           #{idx + 1}: {s.type && <>{s.type} – </>}
-                          {s.widthB ? `${s.width}+${s.widthB}×${s.height}` : `${s.width}×${s.height}×${s.depth}`} cm
+                          {slotMaalKort(s)}
                           {s.orientation && <> · {s.orientation}</>}
                           {s.unitPrice && <> ({s.unitPrice})</>}
                         </li>
                       ))}
                     </ul>
                   </>
-                ) : (item.dimensions.width || item.dimensions.height || item.dimensions.depth) ? (
-                  <><strong>Mål:</strong> {item.dimensions.width}×{item.dimensions.height}×{item.dimensions.depth} cm<br /></>
+                ) : maalKort(item) ? (
+                  <><strong>Mål:</strong> {maalKort(item)}<br /></>
                 ) : null}
                 {item.shape && <><strong>Form:</strong> {item.shape}<br /></>}
                 {item.mounting && <><strong>Konstruksjon:</strong> {item.mounting}<br /></>}

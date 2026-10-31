@@ -27,6 +27,8 @@ interface EpostInput {
   emne: string
   html: string
   tekst: string
+  /** Reply-To – f.eks. kundens adresse i varsler til admin, så «Svar» går rett til kunden. */
+  svarTil?: string
 }
 
 /**
@@ -54,6 +56,7 @@ export async function sendEpost(input: EpostInput): Promise<boolean> {
         subject: input.emne,
         html: input.html,
         text: input.tekst,
+        ...(input.svarTil ? { reply_to: input.svarTil } : {}),
       }),
     })
     if (!res.ok) {
@@ -140,15 +143,22 @@ function esc(s: string): string {
  * tilbake til Formspree-skjemaet hvis Resend mangler nøkler eller feiler.
  * Returnerer true når én av dem tok imot varselet.
  */
-export async function varsleAdmin(opts: { til?: string; emne: string; tekst: string; html: string }): Promise<boolean> {
-  if (opts.til && (await sendEpost({ til: opts.til, emne: opts.emne, html: opts.html, tekst: opts.tekst }))) {
+export async function varsleAdmin(opts: {
+  til?: string
+  emne: string
+  tekst: string
+  html: string
+  svarTil?: string
+}): Promise<boolean> {
+  if (opts.til && (await sendEpost({ til: opts.til, emne: opts.emne, html: opts.html, tekst: opts.tekst, svarTil: opts.svarTil }))) {
     return true
   }
   try {
     const res = await fetch(FORMSPREE_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ _subject: opts.emne, Melding: opts.tekst }),
+      // `email` er feltet Formspree bruker som Reply-To.
+      body: JSON.stringify({ _subject: opts.emne, Melding: opts.tekst, ...(opts.svarTil ? { email: opts.svarTil } : {}) }),
     })
     if (!res.ok) {
       console.error(`[epost] Formspree svarte ${res.status}: ${await res.text()}`)

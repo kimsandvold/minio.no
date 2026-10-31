@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import styled from 'styled-components'
 import { trackEvent } from '../../../utils/analytics'
 import Icon from '../../shared/Icon'
@@ -43,10 +43,13 @@ export default function EgetEmne() {
   const [epost, settEpost] = useState('')
   const [telefon, settTelefon] = useState('')
   const [status, settStatus] = useState<'idle' | 'sender' | 'ok' | 'feil'>('idle')
+  // Stopper et raskt dobbeltklikk før knappen rekker å bli deaktivert.
+  const sender = useRef(false)
 
   const send = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (status === 'sender') return
+    if (sender.current) return
+    sender.current = true
     settStatus('sender')
 
     const fd = new FormData()
@@ -80,6 +83,8 @@ export default function EgetEmne() {
       }
     } catch {
       settStatus('feil')
+    } finally {
+      sender.current = false
     }
   }
 

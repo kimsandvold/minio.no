@@ -117,10 +117,12 @@ export default function AdminForesporslerPage() {
                       to={`/designverktoy/${f.produktId}?design=${f.designId}`}
                       title="Åpner kundens design i designverktøyet – låst opp, klar til nedlasting"
                     >
-                      <Icon name="faFilePdf" /> Åpne designet og last ned byggeplanen
+                      <Icon name="faFilePdf" />{' '}
+                      {f.type === 'byggeplan' ? 'Åpne designet og last ned byggeplanen' : 'Åpne designet'}
                     </DesignLenke>
                   )}
                   <Spec>{f.sammendrag}</Spec>
+                  {f.konfigurasjon && <Spec style={{ whiteSpace: 'pre-line' }}>{f.konfigurasjon}</Spec>}
                   {f.melding && <Melding>«{f.melding}»</Melding>}
                   <KortBunn>
                     <a

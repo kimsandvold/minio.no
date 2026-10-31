@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import styled from 'styled-components'
 import Icon from '../../shared/Icon'
 import { opprettForesporsel } from '../../../services/foresporselService'
@@ -14,6 +14,10 @@ interface Props {
   produktNavn: string
   designNavn: string
   sammendrag: string
+  /** Alle valg som lesbar tekst (konfigTekst) – følger med forespørselen. */
+  konfigurasjon: string
+  config: Record<string, number | string | boolean>
+  overrides: Record<string, unknown>
   maal: string
   arealTekst: string
   estimatKr: number
@@ -47,9 +51,13 @@ export default function ForesporselModal(props: Props) {
   const t = TITLER[props.type]
   const [melding, setMelding] = useState('')
   const [status, setStatus] = useState<'idle' | 'sender' | 'ok' | 'feil'>('idle')
+  // `status` i closuren er utdatert ved et raskt dobbeltklikk – ref-en stopper
+  // det andre kallet før knappen rekker å bli deaktivert.
+  const sender = useRef(false)
 
   const send = async () => {
-    if (status === 'sender') return
+    if (sender.current) return
+    sender.current = true
     setStatus('sender')
     try {
       // Byggeplan-forespørsler må gå via serveren: den lager tilgangskoden og
@@ -57,6 +65,7 @@ export default function ForesporselModal(props: Props) {
       if (props.type === 'byggeplan') {
         if (!props.designId) { setStatus('feil'); return }
         const res = await bestillByggeplan(props.designId, {
+          produktNavn: props.produktNavn,
           melding: melding.trim(),
           maal: props.maal,
           sammendrag: props.sammendrag,
@@ -73,7 +82,11 @@ export default function ForesporselModal(props: Props) {
         produktId: props.produktId,
         produktNavn: props.produktNavn,
         designNavn: props.designNavn,
+        ...(props.designId ? { designId: props.designId } : {}),
         sammendrag: props.sammendrag,
+        konfigurasjon: props.konfigurasjon,
+        config: props.config,
+        overrides: props.overrides,
         maal: props.maal,
         arealM2: props.arealTekst ? parseFloat(props.arealTekst.replace(',', '.')) || null : null,
         estimatKr: props.estimatKr,
@@ -83,6 +96,8 @@ export default function ForesporselModal(props: Props) {
       setStatus('ok')
     } catch {
       setStatus('feil')
+    } finally {
+      sender.current = false
     }
   }
 
@@ -122,7 +137,10 @@ export default function ForesporselModal(props: Props) {
                 <Row><em>Mål</em><span>{props.maal}</span></Row>
                 <Row><em>Areal</em><span>{props.arealTekst}</span></Row>
                 <Row><em>Materialkostnad</em><span>{formatKr(props.estimatKr)}</span></Row>
-                <Row><em>Prisestimat</em><span>fra {formatKr(props.prisEstimatKr)}</span></Row>
+                <Row>
+                  <em>{props.type === 'byggeplan' ? 'Pris' : 'Prisestimat'}</em>
+                  <span>{props.type === 'byggeplan' ? '' : 'fra '}{formatKr(props.prisEstimatKr)}</span>
+                </Row>
               </Rows>
               <Spec>{props.sammendrag}</Spec>
             </Card>

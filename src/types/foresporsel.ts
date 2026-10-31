@@ -22,6 +22,14 @@ export interface DesignForesporsel {
   designNavn: string
   /** Kort teknisk sammendrag av designet (bom.sammendrag). */
   sammendrag: string
+  /**
+   * Alle valg kunden gjorde, én «Etikett: verdi» per linje (se
+   * src/designer/konfigTekst.ts). Mangler på eldre forespørsler.
+   */
+  konfigurasjon?: string
+  /** Rå config + maling, så designet kan gjenskapes nøyaktig. */
+  config?: Record<string, number | string | boolean>
+  overrides?: Record<string, unknown>
   /** Ytre mål, f.eks. «300 × 250 cm». */
   maal: string
   /** Grunnflate i m² (null hvis ikke relevant). */

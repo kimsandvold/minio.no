@@ -7,6 +7,7 @@ import { useScrollLock } from '../../../hooks/useScrollLock'
 import { useAuthContext } from '../../../context/AuthContext'
 import { TEMPLATES, KOMMER_SNART, getTemplate } from '../../../designer/registry'
 import { FARGER } from '../../../designer/materials'
+import { konfigTekst } from '../../../designer/konfigTekst'
 import { alleprisposter, settPris } from '../../../designer/priser'
 import { byggesoknadPdf, byggesoknadUtskrift, planPdf, planUtskrift, type PlanArgs, type SoknadArgs } from '../../../designer/pdf'
 import {
@@ -709,8 +710,9 @@ export default function DesignerPage() {
           plan: 'byggeplanen', soknad: 'søknadsheftet', cnc: 'maskinfilene',
         }
         // Koden er også sendt på e-post; vis den her i tilfelle e-posten treger.
+        // (`bundle` finnes ikke i kartet over – den gir «leveransene».)
         const kode = res.tilgangskode ? ` Tilgangskode: ${res.tilgangskode}` : ''
-        flash(`Betaling fullført – ${navn[res.vare ?? 'plan']} er låst opp!${kode}`)
+        flash(`Betaling fullført – ${navn[res.vare ?? 'plan'] ?? 'leveransene'} er låst opp!${kode}`)
       } else {
         flash('Betalingen ble ikke fullført.')
       }
@@ -787,6 +789,9 @@ export default function DesignerPage() {
 
   const startVipps = async (vare: Vare | 'bundle' = 'plan') => {
     if (!currentDesign) { flash('Lagre designet først'); return }
+    // Planen lages (og fryses ved kjøp) fra det LAGREDE designet på serveren.
+    // Ulagrede endringer ville gitt kunden en annen plan enn den hun ser.
+    if (dirty) { flash('Lagre endringene først – byggeplanen lages fra det lagrede designet'); return }
     // Lanseringsmodus: ingen kortbetaling i appen. Kunden ber om planen, og
     // får betalingsinformasjon + tilgangskode på e-post fra admin.
     if (LANSERINGSMODUS) {
@@ -1634,7 +1639,7 @@ export default function DesignerPage() {
           manuell={LANSERINGSMODUS}
           belop={template.fraPris}
           onSubmit={verifyCode}
-          onVipps={startVipps}
+          onVipps={() => startVipps()}
           onClose={() => { setShowCode(false); setCodeErr(false); setCodeErrMsg(''); pendingRef.current = null }}
         />
       )}
@@ -1732,6 +1737,9 @@ export default function DesignerPage() {
           produktNavn={template.navn}
           designNavn={currentDesign?.navn ?? template.navn}
           sammendrag={bom.sammendrag}
+          konfigurasjon={konfigTekst(template, cfg, overrides)}
+          config={cfg}
+          overrides={overrides}
           maal={maalTekst}
           arealTekst={arealTekst}
           estimatKr={bom.estimatKr}
@@ -1744,7 +1752,9 @@ export default function DesignerPage() {
           }
           userId={uid ?? ''}
           userEmail={firebaseUser?.email ?? ''}
-          designId={currentDesign?.id}
+          // Bare når det lagrede designet er det kunden ser – ellers peker
+          // lenken i e-posten til admin på en eldre versjon.
+          designId={dirty ? undefined : currentDesign?.id}
           onClose={() => setForesporsel(null)}
         />
       )}

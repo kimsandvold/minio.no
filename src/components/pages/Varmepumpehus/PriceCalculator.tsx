@@ -582,7 +582,8 @@ export default function PriceCalculator({ basePrice, config, onDimensionsChange 
     addItem({
       type: 'Varmepumpehus',
       dimensions: { width, height, depth },
-      mounting,
+      // Samme ord som knappene – ikke den interne id-en («wall»/«freestanding»).
+      mounting: mounting === 'wall' ? 'Vegghengt' : 'Frittstående',
       angle: String(angle),
       finish: finishLabel(finish),
       roof: roofLabel(roofType),
