@@ -2,8 +2,11 @@
 <html lang="no">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Fangelek!</title>
+<meta name="description" content="Fangelek – overlev 10 sekunder uten å bli tatt av monsteret! Et spill laget av Leah Noelle.">
+<link rel="canonical" href="https://minio.no/leah-noelle/fangelek.html">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
@@ -11,6 +14,7 @@
     background: #87CEEB;
     font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     touch-action: none; user-select: none; -webkit-user-select: none;
+    overscroll-behavior: none; -webkit-touch-callout: none;
   }
   #game { position: fixed; inset: 0; }
   canvas { display: block; }
@@ -84,16 +88,41 @@
   }
   #jump.pressed { transform: translateY(3px); box-shadow: 0 1px 0 rgba(180,120,0,0.5); }
 
+  .keysHint {
+    color: #fff; font-size: 15px; font-weight: 700; margin-top: 22px;
+    text-shadow: 1px 1px 0 #553010; text-align: center; opacity: 0.9;
+  }
+  @media (hover: none) and (pointer: coarse) { .keysHint { display: none; } }
+
+  #backBtn {
+    position: fixed;
+    top: calc(14px + env(safe-area-inset-top));
+    left: calc(14px + env(safe-area-inset-left));
+    z-index: 20;
+    display: flex; align-items: center; gap: 6px;
+    height: 44px; padding: 0 16px 0 12px; border-radius: 22px;
+    background: rgba(255,255,255,0.9); color: #553010;
+    font-size: 16px; font-weight: 800; text-decoration: none;
+    box-shadow: 0 3px 0 rgba(85,48,16,0.35);
+    touch-action: manipulation;
+  }
+  #backBtn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(85,48,16,0.35); }
+  body.playing #backBtn { width: 44px; padding: 0; justify-content: center; }
+  body.playing #backBtn .backText { display: none; }
+
   .hidden { display: none !important; }
 </style>
 </head>
 <body>
 <div id="game"></div>
 
+<a id="backBtn" href="/spill-av-leah-noelle" aria-label="Tilbake til Leah Noelles spill"><span aria-hidden="true">←</span><span class="backText">Spillene</span></a>
+
 <div id="start">
   <h1>FANGELEK</h1>
   <div class="subtitle">Overlev 10 sekunder<br>uten å bli tatt av monsteret!</div>
   <button class="bigBtn" id="startBtn">START 🏃‍♀️</button>
+  <div class="keysHint">Piltaster / WASD for å løpe · Mellomrom for å hoppe</div>
 </div>
 
 <div id="endScreen" class="hidden">
@@ -468,7 +497,10 @@ let monsterPhase = 0;
 
 // ===== Spill-state =====
 let gameState = 'menu';
+let endedAt = 0;
 let timeRemaining = 10;
+// Alle fartsverdier er per bilde ved 60 fps – vi skalerer med tiden (dt)
+// så spillet går like fort på 60 Hz og 120 Hz skjermer.
 const PLAYER_SPEED = 0.26;
 const MONSTER_SPEED = 0.20;
 const GRAVITY = 0.022;
@@ -507,6 +539,11 @@ function startGame() {
   gameState = 'playing';
   playerVelY = 0;
   onGround = true;
+  timerEl.textContent = '10.0';
+  joyReset(); releaseJump(); clearKeys();
+  camera.position.set(0, 9, 7);
+  lastFrame = performance.now();
+  document.body.classList.add('playing');
 
   startScreen.classList.add('hidden');
   endScreen.classList.add('hidden');
@@ -517,6 +554,9 @@ function startGame() {
 
 function endGame(won) {
   gameState = won ? 'won' : 'lost';
+  document.body.classList.remove('playing');
+  joyReset(); releaseJump(); clearKeys();
+  endedAt = performance.now();
   timerEl.classList.add('hidden');
   document.getElementById('joystick').classList.add('hidden');
   document.getElementById('jump').classList.add('hidden');
@@ -534,6 +574,31 @@ function endGame(won) {
 
 document.getElementById('startBtn').addEventListener('click', startGame);
 document.getElementById('restartBtn').addEventListener('click', startGame);
+
+// ===== Tastatur =====
+const keys = {};
+function clearKeys() { for (const k in keys) keys[k] = false; }
+window.addEventListener('keydown', (e) => {
+  const k = e.key.toLowerCase();
+  if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)) e.preventDefault();
+  if ((k === 'enter' || k === ' ') && !e.repeat && gameState !== 'playing' &&
+      performance.now() - endedAt > 700) {
+    e.preventDefault();
+    startGame();
+    return;
+  }
+  keys[k] = true;
+});
+window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+function keyAxis() {
+  let x = 0, y = 0;
+  if (keys['arrowleft'] || keys['a']) x -= 1;
+  if (keys['arrowright'] || keys['d']) x += 1;
+  if (keys['arrowup'] || keys['w']) y -= 1;
+  if (keys['arrowdown'] || keys['s']) y += 1;
+  const m = Math.hypot(x, y);
+  return m > 1 ? [x/m, y/m] : [x, y];
+}
 
 // ===== Joystick =====
 let joyActive = false, joyX = 0, joyY = 0, joyTouchId = null;
@@ -594,7 +659,8 @@ window.addEventListener('mouseup', () => {
 let jumpPressed = false;
 const jumpBtn = document.getElementById('jump');
 function jumpDown(e) { e.preventDefault(); jumpPressed = true; jumpBtn.classList.add('pressed'); }
-function jumpUp(e) { e.preventDefault(); jumpPressed = false; jumpBtn.classList.remove('pressed'); }
+function jumpUp(e) { e.preventDefault(); releaseJump(); }
+function releaseJump() { jumpPressed = false; jumpBtn.classList.remove('pressed'); }
 jumpBtn.addEventListener('touchstart', jumpDown, { passive: false });
 jumpBtn.addEventListener('touchend', jumpUp, { passive: false });
 jumpBtn.addEventListener('touchcancel', jumpUp, { passive: false });
@@ -602,11 +668,24 @@ jumpBtn.addEventListener('mousedown', jumpDown);
 jumpBtn.addEventListener('mouseup', jumpUp);
 jumpBtn.addEventListener('mouseleave', jumpUp);
 
-window.addEventListener('resize', () => {
+function onResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener('resize', onResize);
+window.addEventListener('orientationchange', () => setTimeout(onResize, 250));
+
+// Slipp alle knapper når fanen skjules eller vinduet mister fokus
+function releaseAll() { joyReset(); releaseJump(); clearKeys(); }
+window.addEventListener('blur', releaseAll);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) releaseAll();
+  lastFrame = performance.now();
 });
+// Hindre pinch-zoom på iOS mens man spiller
+document.addEventListener('gesturestart', (e) => e.preventDefault());
 
 // ===== Kollisjon =====
 function collidesWithObstacles(px, pz, r, py = 0) {
@@ -633,22 +712,28 @@ function animate() {
   const now = performance.now();
   const dt = Math.min(0.05, (now - lastFrame) / 1000);
   lastFrame = now;
+  const k = dt * 60; // 1 ved 60 fps
 
   for (const c of clouds) {
-    c.position.x += 0.02;
+    c.position.x += 0.02 * k;
     if (c.position.x > 80) c.position.x = -80;
   }
 
   if (gameState === 'playing' && player && monster) {
-    // Spiller-bevegelse
-    const dx = joyX * PLAYER_SPEED;
-    const dz = joyY * PLAYER_SPEED;
-    const moving = Math.abs(joyX) > 0.05 || Math.abs(joyY) > 0.05;
+    // Spiller-bevegelse (joystick eller tastatur)
+    let inX = joyX, inY = joyY;
+    if (!joyActive) [inX, inY] = keyAxis();
+    const dx = inX * PLAYER_SPEED * k;
+    const dz = inY * PLAYER_SPEED * k;
+    const moving = Math.abs(inX) > 0.05 || Math.abs(inY) > 0.05;
 
     let newX = player.position.x + dx;
     let newZ = player.position.z + dz;
-    if (!collidesWithObstacles(newX, player.position.z, PLAYER_R, player.position.y)) player.position.x = newX;
-    if (!collidesWithObstacles(player.position.x, newZ, PLAYER_R, player.position.y)) player.position.z = newZ;
+    // Hvis man har landet oppå/inni en kasse etter et hopp, slipp spilleren fri
+    // i stedet for at hun blir sittende fast.
+    const stuck = collidesWithObstacles(player.position.x, player.position.z, PLAYER_R, player.position.y);
+    if (stuck || !collidesWithObstacles(newX, player.position.z, PLAYER_R, player.position.y)) player.position.x = newX;
+    if (stuck || !collidesWithObstacles(player.position.x, newZ, PLAYER_R, player.position.y)) player.position.z = newZ;
     [player.position.x, player.position.z] = clampToArena(player.position.x, player.position.z, PLAYER_R);
 
     if (moving) {
@@ -656,21 +741,23 @@ function animate() {
       let diff = targetAngle - player.rotation.y;
       while (diff > Math.PI) diff -= Math.PI * 2;
       while (diff < -Math.PI) diff += Math.PI * 2;
-      player.rotation.y += diff * 0.25;
+      player.rotation.y += diff * (1 - Math.pow(0.75, k));
     }
 
-    if (jumpPressed && onGround) {
+    if ((jumpPressed || keys[' ']) && onGround) {
       playerVelY = JUMP_POWER; onGround = false;
     }
-    playerVelY -= GRAVITY;
-    player.position.y += playerVelY;
+    // Halv gravitasjon før og etter flytting = samme hoppbue uansett bildefrekvens
+    playerVelY -= GRAVITY * k * 0.5;
+    player.position.y += playerVelY * k;
+    playerVelY -= GRAVITY * k * 0.5;
     if (player.position.y <= 0) {
       player.position.y = 0; playerVelY = 0; onGround = true;
     }
 
     // Spiller-animasjon
     if (moving && onGround) {
-      walkPhase += 0.5;
+      walkPhase += 0.5 * k;
       if (player.userData.legs) {
         player.userData.legs[0].rotation.x = Math.sin(walkPhase) * 0.7;
         player.userData.legs[1].rotation.x = -Math.sin(walkPhase) * 0.7;
@@ -680,10 +767,11 @@ function animate() {
         player.userData.arms[1].rotation.x = Math.sin(walkPhase) * 0.6;
       }
     } else if (player.userData.legs) {
-      player.userData.legs[0].rotation.x *= 0.85;
-      player.userData.legs[1].rotation.x *= 0.85;
-      player.userData.arms[0].rotation.x *= 0.85;
-      player.userData.arms[1].rotation.x *= 0.85;
+      const damp = Math.pow(0.85, k);
+      player.userData.legs[0].rotation.x *= damp;
+      player.userData.legs[1].rotation.x *= damp;
+      player.userData.arms[0].rotation.x *= damp;
+      player.userData.arms[1].rotation.x *= damp;
     }
 
     // Monster-bevegelse
@@ -691,8 +779,8 @@ function animate() {
     const mdz = player.position.z - monster.position.z;
     const mdist = Math.hypot(mdx, mdz);
     if (mdist > 0.1) {
-      const nx = mdx / mdist * MONSTER_SPEED;
-      const nz = mdz / mdist * MONSTER_SPEED;
+      const nx = mdx / mdist * MONSTER_SPEED * k;
+      const nz = mdz / mdist * MONSTER_SPEED * k;
       let newMX = monster.position.x + nx;
       let newMZ = monster.position.z + nz;
       if (!collidesWithObstacles(newMX, monster.position.z, MONSTER_R)) monster.position.x = newMX;
@@ -700,7 +788,7 @@ function animate() {
       [monster.position.x, monster.position.z] = clampToArena(monster.position.x, monster.position.z, MONSTER_R);
       monster.rotation.y = Math.atan2(mdx, mdz);
     }
-    monsterPhase += 0.18;
+    monsterPhase += 0.18 * k;
     monster.position.y = Math.abs(Math.sin(monsterPhase)) * 0.18;
     if (monster.userData.arms) {
       monster.userData.arms[0].rotation.z = Math.sin(monsterPhase) * 0.5;
@@ -710,6 +798,7 @@ function animate() {
     // Sjekk om fanget
     if (mdist < 1.3 && player.position.y < 0.7) {
       endGame(false);
+      renderer.render(scene, camera);
       return;
     }
 
@@ -719,6 +808,7 @@ function animate() {
       timeRemaining = 0;
       timerEl.textContent = '0.0';
       endGame(true);
+      renderer.render(scene, camera);
       return;
     }
     timerEl.textContent = timeRemaining.toFixed(1);
@@ -727,9 +817,10 @@ function animate() {
     const targetCamX = player.position.x;
     const targetCamZ = player.position.z + 7;
     const targetCamY = 9;
-    camera.position.x += (targetCamX - camera.position.x) * 0.15;
-    camera.position.z += (targetCamZ - camera.position.z) * 0.15;
-    camera.position.y += (targetCamY - camera.position.y) * 0.15;
+    const camLerp = 1 - Math.pow(0.85, k);
+    camera.position.x += (targetCamX - camera.position.x) * camLerp;
+    camera.position.z += (targetCamZ - camera.position.z) * camLerp;
+    camera.position.y += (targetCamY - camera.position.y) * camLerp;
     camera.lookAt(player.position.x, 0.5, player.position.z - 1);
   } else {
     // Idle kamera

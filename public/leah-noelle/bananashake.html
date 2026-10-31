@@ -2,10 +2,12 @@
 <html lang="no">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, maximum-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <meta name="description" content="Bananashake - et morsomt spill der bananen samler truser. Laget av Leah Noelle.">
 <meta name="theme-color" content="#FAC775">
 <title>Bananashake</title>
+<link rel="canonical" href="https://minio.no/leah-noelle/bananashake.html">
 <style>
   * { box-sizing: border-box; }
   html, body {
@@ -32,6 +34,10 @@
     background: linear-gradient(to bottom, #87CEEB 0%, #98D8E8 65%, #C0E89F 100%);
     border-radius: 14px; overflow: hidden;
     user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    touch-action: none;
+    outline: none;
     box-shadow: 0 8px 24px rgba(0,0,0,0.12);
     transition: background 0.4s;
   }
@@ -85,16 +91,34 @@
   }
   .bt-mute { right: 10px; font-size: 18px; }
   .bt-edit-game { right: 54px; }
+  .bt-back {
+    right: 98px; display: block; text-align: center;
+    text-decoration: none; color: #633806;
+    font-size: 20px; font-weight: 700;
+  }
+  .bt-back-link {
+    position: absolute; top: 10px; left: 10px; z-index: 2;
+    display: inline-flex; align-items: center; gap: 6px;
+    height: 36px; padding: 0 14px 0 10px; border-radius: 18px;
+    background: white; color: #633806;
+    font-size: 14px; font-weight: 600; text-decoration: none;
+    box-shadow: 0 2px 0 rgba(99, 56, 6, 0.25);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bt-back-link:active { transform: translateY(1px); box-shadow: none; }
   .bt-overlay {
     position: absolute; inset: 0;
     background: rgba(255, 232, 153, 0.96);
     z-index: 25;
-    display: flex; align-items: center; justify-content: center;
+    display: flex; align-items: flex-start; justify-content: center;
     text-align: center; color: #5A4220;
     overflow-y: auto;
-    padding: 12px;
+    touch-action: pan-y;
+    -webkit-user-select: text; user-select: text;
+    padding: 56px 12px 12px;
   }
-  .bt-overlay-content { width: 100%; max-width: 400px; }
+  /* margin:auto centres vertically but never cuts the top off when the form is taller than the screen (landscape phones) */
+  .bt-overlay-content { width: 100%; max-width: 400px; margin: auto 0; }
   .bt-game-title {
     font-size: 32px; font-weight: 600; color: #633806;
     letter-spacing: 0.5px; line-height: 1.1;
@@ -365,6 +389,7 @@
     background: white; border-radius: 16px;
     padding: 14px 16px; width: 320px; max-width: 100%;
     max-height: 100%; overflow-y: auto;
+    touch-action: pan-y;
   }
   .bt-shop-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .bt-shop-title { font-size: 17px; font-weight: 500; color: #5A4220; }
@@ -451,6 +476,10 @@
       box-shadow: none;
     }
     .bt-footer { display: none; }
+    /* Lift the banana above the touch buttons so they never cover it */
+    .bt-banana { bottom: calc(92px + env(safe-area-inset-bottom)); }
+    .bt-controls { bottom: calc(14px + env(safe-area-inset-bottom)); }
+    .bt-combo { bottom: calc(184px + env(safe-area-inset-bottom)); }
     /* Title pill smaller on mobile so it doesn't crowd */
     .bt-title { font-size: 12px; padding: 5px 10px; }
   }
@@ -461,6 +490,12 @@
     .bt-face-btn { width: 40px; height: 40px; font-size: 20px; }
     .bt-game-title { font-size: 28px; }
     .bt-control { width: 60px; height: 60px; font-size: 26px; }
+    .bt-icon-btn { width: 34px; height: 34px; line-height: 34px; }
+    .bt-mute { right: 8px; }
+    .bt-edit-game { right: 46px; }
+    .bt-back { right: 84px; }
+    /* Boss health bar below the top row so it doesn't cover hearts/buttons */
+    .bt-hp-bar { top: 82px; left: auto; right: 10px; transform: none; width: 180px; max-width: 55%; }
     .bt-pill { font-size: 12px; padding: 5px 10px; }
     .bt-money { top: 42px; }
     .bt-shop-btn { top: 74px; font-size: 11px; }
@@ -478,7 +513,9 @@
     <button class="bt-shop-btn" id="btShopBtn">🛒 Butikk</button>
     <button class="bt-icon-btn bt-edit-game" id="btEditGame" title="Endre spiller">👤</button>
     <button class="bt-icon-btn bt-mute" id="btMute" title="Skru av/på lyd">🔊</button>
+    <a class="bt-icon-btn bt-back" href="/spill-av-leah-noelle" title="Tilbake til spillene" aria-label="Tilbake til Leah Noelles spill">←</a>
     <div class="bt-overlay" id="btOverlay">
+      <a class="bt-back-link" href="/spill-av-leah-noelle" aria-label="Tilbake til Leah Noelles spill"><span aria-hidden="true">←</span> Spillene</a>
       <div class="bt-overlay-content">
         <div class="bt-game-title">Bananashake</div>
         <div class="bt-game-subtitle">Laget av Leah Noelle</div>
@@ -728,7 +765,7 @@
   const BOSS_MAX_HP = 10;
   let bossX = 0;
   let bossDir = 1;
-  const bossY = 40;
+  let bossY = 40;
   const projectilesUp = [];
   const projectilesDown = [];
   let bossShootScheduled = false;
@@ -747,7 +784,8 @@
   function recomputeDimensions() {
     GAME_WIDTH = game.offsetWidth;
     GAME_HEIGHT = game.offsetHeight;
-    BANANA_TOP = GAME_HEIGHT - 8 - 70;
+    // Follows the banana's real position (it sits higher on phones)
+    BANANA_TOP = (banana.offsetTop || GAME_HEIGHT - 88) + 10;
     bananaX = Math.min(bananaX, GAME_WIDTH - BW);
     bananaX = Math.max(0, bananaX);
     banana.style.left = bananaX + 'px';
@@ -791,7 +829,7 @@
     return audioCtx;
   }
   function playCatch() {
-    if (muted) return;
+    if (muted || document.hidden) return;
     try {
       const ctx = getCtx(); const now = ctx.currentTime;
       const osc = ctx.createOscillator(); const gain = ctx.createGain();
@@ -805,7 +843,7 @@
     } catch (e) {}
   }
   function playMoneySound() {
-    if (muted) return;
+    if (muted || document.hidden) return;
     try {
       const ctx = getCtx(); const now = ctx.currentTime;
       [523, 659, 784, 1047].forEach((freq, i) => {
@@ -821,7 +859,7 @@
     } catch (e) {}
   }
   function playGoldenSound() {
-    if (muted) return;
+    if (muted || document.hidden) return;
     try {
       const ctx = getCtx(); const now = ctx.currentTime;
       [880, 1175, 1480, 1760, 2349].forEach((freq, i) => {
@@ -837,7 +875,7 @@
     } catch (e) {}
   }
   function playThunder() {
-    if (muted) return;
+    if (muted || document.hidden) return;
     try {
       const ctx = getCtx(); const now = ctx.currentTime;
       const osc = ctx.createOscillator(); const gain = ctx.createGain();
@@ -853,7 +891,7 @@
   function playMelodyNote() {
     if (!running) return;
     const note = melody[melodyIndex];
-    if (!muted && note.f > 0) {
+    if (!muted && !document.hidden && note.f > 0) {
       try {
         const ctx = getCtx(); const now = ctx.currentTime;
         const osc = ctx.createOscillator(); const gain = ctx.createGain();
@@ -916,7 +954,7 @@
   function scheduleNextStorm() {
     setTimeout(() => {
       if (!running) { scheduleNextStorm(); return; }
-      if (paused || stormActive || bossMode) { scheduleNextStorm(); return; }
+      if (paused || document.hidden || stormActive || bossMode) { scheduleNextStorm(); return; }
       startStorm();
       scheduleNextStorm();
     }, 25000 + Math.random() * 25000);
@@ -1021,6 +1059,7 @@
     const o = document.getElementById('btShopOverlay');
     if (o) o.remove();
     paused = false;
+    try { game.focus({ preventScroll: true }); } catch (e) {}
   }
   shopBtn.addEventListener('click', openShop);
 
@@ -1042,6 +1081,7 @@
       bananaX = GAME_WIDTH / 2 - BW / 2;
       banana.style.left = bananaX + 'px';
       spawnLoop();
+      lastFrameTime = 0;
       requestAnimationFrame(loop);
       startMusic();
       scheduleNextStorm();
@@ -1055,14 +1095,27 @@
   showCreation();
   renderBanana();
 
+  // A/D works as well as the arrow keys
+  const keyAlias = { a: 'ArrowLeft', A: 'ArrowLeft', d: 'ArrowRight', D: 'ArrowRight' };
   window.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    if (e.key === 'Escape' && document.getElementById('btShopOverlay')) { closeShop(); return; }
+    if (e.target && e.target.tagName === 'INPUT') return;
+    const k = keyAlias[e.key] || e.key;
+    if (k === 'ArrowLeft' || k === 'ArrowRight') {
       if (overlay.style.display !== 'none') return;
       e.preventDefault();
-      keys[e.key] = true;
+      keys[k] = true;
     }
   });
-  window.addEventListener('keyup', (e) => { keys[e.key] = false; });
+  window.addEventListener('keyup', (e) => { keys[keyAlias[e.key] || e.key] = false; });
+  function releaseAllKeys() { keys['ArrowLeft'] = false; keys['ArrowRight'] = false; }
+  window.addEventListener('blur', releaseAllKeys);
+  document.addEventListener('visibilitychange', () => {
+    releaseAllKeys();
+    lastFrameTime = 0;
+  });
+  // Stop iOS pinch-zoom inside the game while playing
+  game.addEventListener('gesturestart', (e) => e.preventDefault());
 
   function holdKey(key) { keys[key] = true; }
   function releaseKey(key) { keys[key] = false; }
@@ -1106,7 +1159,7 @@
   }
   function spawnLoop() {
     if (!running) return;
-    if (!paused && !bossMode) spawnTruse();
+    if (!paused && !document.hidden && !bossMode) spawnTruse();
     const lvlMult = 1 + (getLevel() - 1) * 0.1;
     const delay = stormActive
       ? 80 + Math.random() * 140
@@ -1200,7 +1253,7 @@
   function resetCombo() { combo = 0; lastCatchTime = 0; }
 
   function playBossHit() {
-    if (muted) return;
+    if (muted || document.hidden) return;
     try {
       const ctx = getCtx(); const now = ctx.currentTime;
       const osc = ctx.createOscillator(); const gain = ctx.createGain();
@@ -1214,7 +1267,7 @@
     } catch (e) {}
   }
   function playStunSound() {
-    if (muted) return;
+    if (muted || document.hidden) return;
     try {
       const ctx = getCtx(); const now = ctx.currentTime;
       [200, 150, 100].forEach((freq, i) => {
@@ -1229,7 +1282,7 @@
     } catch (e) {}
   }
   function playVictoryFanfare() {
-    if (muted) return;
+    if (muted || document.hidden) return;
     try {
       const ctx = getCtx(); const now = ctx.currentTime;
       [523, 659, 784, 1047, 1319, 1568].forEach((freq, i) => {
@@ -1274,10 +1327,18 @@
     setTimeout(() => { bossInvincible = false; }, 1500);
   }
 
+  function clearStack(list) {
+    (list || Array.from(banana.querySelectorAll('.bt-stacked'))).forEach(s => s.remove());
+    banana.querySelectorAll('.bt-stacked').forEach((s, i) => { s.style.bottom = (65 + i * 16) + 'px'; });
+    updateHatPosition();
+  }
+
   function startBossFight() {
+    if (bossMode) return;
     bossMode = true;
     truser.forEach(t => t.el.remove());
     truser.length = 0;
+    clearStack();
     document.querySelector('.bt-title').style.display = 'none';
     roundEl.style.display = 'none';
     scoreEl.style.display = 'none';
@@ -1295,6 +1356,8 @@
     bossEl.className = 'bt-boss';
     bossEl.innerHTML = potatoSVG();
     bossX = GAME_WIDTH / 2 - 60;
+    // On narrow phones the health bar sits in a second row, so the potato starts a bit lower
+    bossY = GAME_WIDTH <= 400 ? 116 : 40;
     bossEl.style.left = bossX + 'px';
     bossEl.style.top = bossY + 'px';
     game.appendChild(bossEl);
@@ -1328,12 +1391,12 @@
     playVictoryFanfare();
     money += 100;
     updateMoneyEl();
+    roundIndex += 2;
+    roundCount = 0;
+    updateRoundEl();
+    updateScoreEl();
     setTimeout(() => {
       if (!running) return;
-      roundIndex += 2;
-      roundCount = 0;
-      updateRoundEl();
-      updateScoreEl();
       const next = currentItem();
       showToast('Level ' + getLevel() + '! Neste: ' + next.name + ' ' + next.icon, 'gold');
     }, 2200);
@@ -1341,11 +1404,11 @@
 
   function scheduleBossShoot() {
     setTimeout(() => {
-      if (bossMode && !paused && running) {
+      if (bossMode && !paused && !document.hidden && running) {
         shootRock();
         if (Math.random() < 0.35) {
           setTimeout(() => {
-            if (bossMode && !paused && running) shootRock();
+            if (bossMode && !paused && !document.hidden && running) shootRock();
           }, 180 + Math.random() * 120);
         }
       }
@@ -1355,7 +1418,7 @@
   }
   function scheduleBananaShoot() {
     setTimeout(() => {
-      if (bossMode && !paused && running) shootBananaTruse();
+      if (bossMode && !paused && !document.hidden && running) shootBananaTruse();
       if (running) scheduleBananaShoot();
       else bananaShootScheduled = false;
     }, 480);
@@ -1386,6 +1449,9 @@
   function completeRound() {
     truser.forEach(t => t.el.remove());
     truser.length = 0;
+    // Start each round with an empty tower so it never grows off the screen
+    const finishedStack = Array.from(banana.querySelectorAll('.bt-stacked'));
+    setTimeout(() => clearStack(finishedStack), 700);
     resetCombo();
     const justCompletedLevel = getLevel();
     const justCompletedRound = getRoundInLevel();
@@ -1417,20 +1483,29 @@
     updateScoreEl();
   }
 
-  function loop() {
+  // Speeds are tuned for 60 frames per second. `f` scales every movement by the
+  // real time since the last frame, so 120Hz screens don't run double speed.
+  let lastFrameTime = 0;
+  function loop(now) {
     if (!running) return;
-    if (paused) { requestAnimationFrame(loop); return; }
-    if (keys['ArrowLeft']) bananaX = Math.max(0, bananaX - speed);
-    if (keys['ArrowRight']) bananaX = Math.min(GAME_WIDTH - BW, bananaX + speed);
+    requestAnimationFrame(loop);
+    const dt = lastFrameTime ? now - lastFrameTime : 1000 / 60;
+    lastFrameTime = now;
+    if (paused || document.hidden) return;
+    step(Math.min(Math.max(dt, 0), 50) / (1000 / 60));
+  }
+  function step(f) {
+    if (keys['ArrowLeft']) bananaX = Math.max(0, bananaX - speed * f);
+    if (keys['ArrowRight']) bananaX = Math.min(GAME_WIDTH - BW, bananaX + speed * f);
     banana.style.left = bananaX + 'px';
     if (bossMode) {
-      bossX += bossDir * 1.6;
+      bossX += bossDir * 1.6 * f;
       if (bossX < 8) { bossX = 8; bossDir = 1; }
       if (bossX > GAME_WIDTH - 128) { bossX = GAME_WIDTH - 128; bossDir = -1; }
       if (bossEl) bossEl.style.left = bossX + 'px';
       for (let i = projectilesDown.length - 1; i >= 0; i--) {
         const p = projectilesDown[i];
-        p.y += p.vy;
+        p.y += p.vy * f;
         p.el.style.top = p.y + 'px';
         if (p.y + p.w > BANANA_TOP && p.y < BANANA_TOP + 50 &&
             p.x + p.w > bananaX + 8 && p.x < bananaX + BW - 8) {
@@ -1456,7 +1531,7 @@
       }
       for (let i = projectilesUp.length - 1; i >= 0; i--) {
         const p = projectilesUp[i];
-        p.y += p.vy;
+        p.y += p.vy * f;
         p.el.style.top = p.y + 'px';
         if (p.y < bossY + 90 && p.y + p.w > bossY + 10 &&
             p.x + p.w > bossX + 10 && p.x < bossX + 110) {
@@ -1472,7 +1547,6 @@
           playBossHit();
           if (bossHP <= 0) {
             endBossFight();
-            requestAnimationFrame(loop);
             return;
           }
         } else if (p.y < -40) {
@@ -1480,12 +1554,11 @@
           projectilesUp.splice(i, 1);
         }
       }
-      requestAnimationFrame(loop);
       return;
     }
     for (let i = truser.length - 1; i >= 0; i--) {
       const t = truser[i];
-      t.y += t.vy;
+      t.y += t.vy * f;
       t.el.style.top = t.y + 'px';
       const truseRight = t.x + t.w;
       const bananaRight = bananaX + BW;
@@ -1518,7 +1591,6 @@
         resetCombo();
       }
     }
-    requestAnimationFrame(loop);
   }
 })();
 </script>

@@ -2,15 +2,18 @@
 <html lang="no">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Spøkelseshuset Gjemsel</title>
+<meta name="description" content="Spøkelseshuset Gjemsel – gjem deg fra spøkelsene i det skumle huset! Et spill laget av Leah Noelle.">
+<link rel="canonical" href="https://minio.no/leah-noelle/spokelseshuset.html">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <style>
 html,body{margin:0!important;padding:0!important;height:100%!important;width:100%!important;overflow:hidden!important;background:#0d1424!important;font-family:system-ui,-apple-system,sans-serif;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
 *{box-sizing:border-box}
-#gh-wrap{position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;display:flex!important;flex-direction:column!important;background:#0d1424;user-select:none;-webkit-user-select:none;z-index:1}
+#gh-wrap{padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right);position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;width:100vw!important;height:100vh!important;height:100dvh!important;display:flex!important;flex-direction:column!important;background:#0d1424;user-select:none;-webkit-user-select:none;z-index:1}
 @keyframes ghFloatA{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
 @keyframes ghPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
 @keyframes ghDanger{0%,100%{box-shadow:inset 0 0 60px 20px rgba(226,75,74,0)}50%{box-shadow:inset 0 0 60px 20px rgba(226,75,74,.7)}}
@@ -27,6 +30,11 @@ html,body{margin:0!important;padding:0!important;height:100%!important;width:100
 .gh-card:hover{border-color:#ff8866}
 .gh-input{background:#2c4a72;color:#f0e9ff;border:0;border-radius:8px;padding:14px 18px;font-size:18px;font-weight:500;font-family:inherit;width:280px;max-width:90vw;text-align:center}
 .gh-input:focus{outline:2px solid #ff8866}
+.gh-input{user-select:text;-webkit-user-select:text}
+.gh-back{display:flex;align-items:center;justify-content:center;width:38px;height:42px;flex-shrink:0;border-radius:8px;background:#13223a;border:1px solid #2c4a72;color:#f0e9ff;text-decoration:none;touch-action:manipulation}
+.gh-back:hover{background:#2c4a72}
+.gh-keys{color:#7d99c2;font-size:12px;margin:1rem 0 0}
+@media (hover:none) and (pointer:coarse){.gh-keys{display:none}}
 .gh-shop-scroll{overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1;min-height:0}
 .gh-fs-btn{position:absolute;top:8px;background:rgba(13,20,36,.7);border:1px solid #2c4a72;border-radius:6px;width:38px;height:38px;cursor:pointer;color:#f0e9ff;display:flex;align-items:center;justify-content:center;z-index:7;padding:0;touch-action:manipulation}
 .gh-fs-btn:hover{background:rgba(44,74,114,.9)}
@@ -45,6 +53,7 @@ html,body{margin:0!important;padding:0!important;height:100%!important;width:100
 
   <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#080d18;border-bottom:1px solid #2c4a72;gap:8px;flex-shrink:0">
     <div style="display:flex;align-items:center;gap:10px;min-width:0">
+      <a class="gh-back" href="/spill-av-leah-noelle" title="Tilbake til spillene" aria-label="Tilbake til Leah Noelles spill"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
       <div id="gh-target-pic" class="gh-pulse" style="width:42px;height:42px;background:#fcf9ff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"></div>
       <div style="min-width:0">
         <div style="color:#7d99c2;font-size:10px;font-weight:500;letter-spacing:1px">FINN</div>
@@ -114,6 +123,7 @@ html,body{margin:0!important;padding:0!important;height:100%!important;width:100
         <button class="gh-btn-p" onclick="ghStart()" style="background:#ff8866;color:white;border:0;border-radius:8px;padding:14px 26px;font-size:16px;font-weight:500;cursor:pointer;font-family:inherit">Start jakten</button>
         <button class="gh-btn-s" onclick="ghOpenShop()" style="background:#2c4a72;color:#f0e9ff;border:0;border-radius:8px;padding:14px 26px;font-size:16px;font-weight:500;cursor:pointer;font-family:inherit">Butikken</button>
       </div>
+      <p class="gh-keys">Piltaster / WASD for å fly · Q og E for å fly sidelengs</p>
     </div>
 
     <div id="gh-overlay-win" class="gh-hidden" style="position:absolute;inset:0;background:rgba(13,20,36,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:1.25rem;z-index:10">
@@ -354,12 +364,16 @@ let scene,camera,renderer,ghost,seeker,hatSlot,capeSlot;
 let staticObstacles=[],dynamicObstacles=[],hidingSpots=[],candles=[],layoutGroup;
 let targetGroup=null,targetGlow=null,targetPos={x:0,z:0},currentTarget=null;
 let gameRunning=false,startTime=0,huntStartTime=0,huntStartedAnnounced=false;
+// gameClock teller millisekunder bare mens spillet er synlig, så nedtellingen
+// ikke løper videre når fanen er skjult.
+let gameClock=0,lastFrameTime=0,hintTimers=[];
 let lastTargetIdx=-1,lastSpotIdx=-1,lastLayoutIdx=-1,currentLayout=null,lastTickShown=-1;
 const seekerState={x:0,z:0,angle:0,bob:0};
 const keys={};
 const ghostState={x:0,z:0,angle:0,bob:0};
+// Farter er per bilde ved 60 fps; animate() skalerer med tiden som har gått.
 const PLAYER_SPEED=0.20;
-const SEEKER_SPEED=0.06;
+const SEEKER_STEP=0.06;
 const PLAYER_RADIUS=0.45;
 const SEEKER_RADIUS=0.55;
 const HIDE_TIME=10000;
@@ -544,7 +558,7 @@ function onResize(){
   const cv=document.getElementById('gh-canvas');
   const w=cv.clientWidth,h=cv.clientHeight;
   if(w<10||h<10)return;
-  cv.width=w;cv.height=h;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
   camera.aspect=w/h;
   camera.updateProjectionMatrix();
   renderer.setSize(w,h,false);
@@ -599,7 +613,8 @@ function placeTarget(){
   }catch(e){console.error('placeTarget',e)}
 }
 
-function moveSeeker(){
+function moveSeeker(k){
+  const SEEKER_SPEED=SEEKER_STEP*k;
   const dx=ghostState.x-seekerState.x,dz=ghostState.z-seekerState.z;
   const dist=Math.sqrt(dx*dx+dz*dz);
   if(dist<0.05)return dist;
@@ -638,10 +653,15 @@ function animate(){
   requestAnimationFrame(animate);
   try{
     if(!renderer||!scene||!camera)return;
+    const nowPerf=performance.now();
+    const dtMs=lastFrameTime?Math.min(50,nowPerf-lastFrameTime):16.67;
+    lastFrameTime=nowPerf;
+    const k=dtMs/16.667; // 1 ved 60 fps
     const t=Date.now()*0.005;
     for(let i=0;i<candles.length;i++)candles[i].light.intensity=candles[i].baseIntensity*(0.85+Math.sin(t+i*1.7)*0.15);
     if(gameRunning){
-      const now=Date.now();
+      gameClock+=dtMs;
+      const now=gameClock;
       const hunting=now>=huntStartTime;
 
       let turn=(keys['arrowleft']||keys['a']?1:0)-(keys['arrowright']||keys['d']?1:0);
@@ -656,14 +676,15 @@ function animate(){
           fwd=-(jdy/jmag)*norm;
         }else{strafe=0;fwd=0}
       }
-      ghostState.angle+=turn*0.05;
+      ghostState.angle+=turn*0.05*k;
       if(fwd!==0||strafe!==0){
+        const SPD=PLAYER_SPEED*k;
         // Combine forward and strafe in ghost-local space
-        let dx=Math.sin(ghostState.angle)*fwd*PLAYER_SPEED+Math.cos(ghostState.angle)*strafe*PLAYER_SPEED;
-        let dz=Math.cos(ghostState.angle)*fwd*PLAYER_SPEED-Math.sin(ghostState.angle)*strafe*PLAYER_SPEED;
+        let dx=Math.sin(ghostState.angle)*fwd*SPD+Math.cos(ghostState.angle)*strafe*SPD;
+        let dz=Math.cos(ghostState.angle)*fwd*SPD-Math.sin(ghostState.angle)*strafe*SPD;
         // Cap diagonal speed so combining axes doesn't exceed PLAYER_SPEED
         const dmag=Math.hypot(dx,dz);
-        if(dmag>PLAYER_SPEED){dx=dx/dmag*PLAYER_SPEED;dz=dz/dmag*PLAYER_SPEED}
+        if(dmag>SPD){dx=dx/dmag*SPD;dz=dz/dmag*SPD}
         const nx=ghostState.x+dx;
         const nz=ghostState.z+dz;
         const stuck=isColliding(ghostState.x,ghostState.z,PLAYER_RADIUS);
@@ -674,15 +695,15 @@ function animate(){
           if(!isColliding(ghostState.x,nz,PLAYER_RADIUS))ghostState.z=nz;
         }
       }
-      ghostState.bob+=0.04;
+      ghostState.bob+=0.04*k;
       ghost.position.x=ghostState.x;ghost.position.z=ghostState.z;
       ghost.position.y=1.2+Math.sin(ghostState.bob)*0.12;
       ghost.rotation.y=ghostState.angle;
 
       let seekerDist=Math.sqrt((ghostState.x-seekerState.x)**2+(ghostState.z-seekerState.z)**2);
       if(hunting){
-        seekerDist=moveSeeker();
-        seekerState.bob+=0.05;
+        seekerDist=moveSeeker(k);
+        seekerState.bob+=0.05*k;
         seeker.position.set(seekerState.x,1.2+Math.sin(seekerState.bob)*0.15,seekerState.z);
         seeker.rotation.y=seekerState.angle;
         if(seekerEyeMat)seekerEyeMat.color.setHex(0xff3030);
@@ -693,7 +714,7 @@ function animate(){
         if(seekerDist<5){if(dangerOv){dangerOv.classList.remove('gh-hidden');dangerOv.classList.add('gh-danger')}}
         else{if(dangerOv){dangerOv.classList.add('gh-hidden');dangerOv.classList.remove('gh-danger')}}
       }else{
-        seekerState.bob+=0.02;
+        seekerState.bob+=0.02*k;
         seeker.position.y=1.2+Math.sin(seekerState.bob)*0.08;
         if(seekerEyeMat)seekerEyeMat.color.setHex(0x4a1525);
         if(seekerLightRef)seekerLightRef.intensity=0.35;
@@ -721,7 +742,7 @@ function animate(){
       camera.position.set(cX,ghost.position.y+cH,cZ);
       camera.lookAt(ghostState.x,ghost.position.y+0.3,ghostState.z);
 
-      if(targetGroup){targetGroup.rotation.y+=0.012;targetGroup.position.y=0.05+Math.sin(Date.now()*0.002)*0.04}
+      if(targetGroup){targetGroup.rotation.y+=0.012*k;targetGroup.position.y=0.05+Math.sin(Date.now()*0.002)*0.04}
 
       const dEl=document.getElementById('gh-distance');
       if(dEl){dEl.style.display='block';document.getElementById('gh-distance-val').textContent=Math.round(seekerDist)+'m'}
@@ -729,7 +750,7 @@ function animate(){
       const tdx=targetPos.x-ghostState.x,tdz=targetPos.z-ghostState.z;
       if(Math.sqrt(tdx*tdx+tdz*tdz)<1.4){winGame();return}
     }else{
-      if(ghost){ghost.rotation.y+=0.005;ghost.position.y=1.2+Math.sin(Date.now()*0.002)*0.1}
+      if(ghost){ghost.rotation.y+=0.005*k;ghost.position.y=1.2+Math.sin(Date.now()*0.002)*0.1}
       camera.position.set(0,5,16);camera.lookAt(0,1.4,12);
     }
     renderer.render(scene,camera);
@@ -739,7 +760,7 @@ function animate(){
 function winGame(){
   if(!gameRunning)return;
   gameRunning=false;clearKeys();
-  const elapsed=(Date.now()-startTime)/1000;
+  const elapsed=(gameClock-startTime)/1000;
   if(targetGroup){disposeGroup(targetGroup);scene.remove(targetGroup);targetGroup=null}
   if(targetGlow){scene.remove(targetGlow);targetGlow=null}
   player.coins+=5;savePlayer();updateCoins();
@@ -779,8 +800,9 @@ window.ghStart=function(){
     if(ghost){ghost.position.set(ps.x,1.2,ps.z);ghost.rotation.y=ps.a}
     if(seeker)seeker.position.set(ss.x,1.2,ss.z);
     placeTarget();
-    startTime=Date.now();
-    huntStartTime=startTime+HIDE_TIME;
+    gameClock=0;
+    startTime=0;
+    huntStartTime=HIDE_TIME;
     huntStartedAnnounced=false;
     lastTickShown=-1;
     gameRunning=true;
@@ -788,13 +810,16 @@ window.ghStart=function(){
     if('ontouchstart' in window){
       const hint=document.getElementById('gh-touch-hint');
       if(hint){
+        hintTimers.forEach(clearTimeout);
         hint.classList.remove('gh-hidden');
         hint.style.opacity='1';
-        setTimeout(()=>{if(hint)hint.style.opacity='0'},3500);
-        setTimeout(()=>{if(hint)hint.classList.add('gh-hidden')},4000);
+        hintTimers=[
+          setTimeout(()=>{hint.style.opacity='0'},3500),
+          setTimeout(()=>{hint.classList.add('gh-hidden')},4000)
+        ];
       }
     }
-    try{window.focus();document.body.focus()}catch(e){}
+    try{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();window.focus()}catch(e){}
   }catch(e){console.error('ghStart',e)}
 };
 
@@ -834,9 +859,26 @@ window.ghEquip=function(id){const it=shopItems.find(i=>i.id===id);if(!it||!playe
 
 function setupInputs(){
   const initOnFirst=()=>initAudio();
-  window.addEventListener('keydown',(e)=>{const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();keys[k]=true;initOnFirst()});
+  window.addEventListener('keydown',(e)=>{
+    // Ikke stjel tastetrykk mens man skriver navnet sitt (mellomrom m.m.)
+    const tg=e.target;if(tg&&(tg.tagName==='INPUT'||tg.tagName==='TEXTAREA'))return;
+    const k=e.key.toLowerCase();
+    if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();
+    if(k==='enter'&&!e.repeat&&!gameRunning){
+      // Enter starter / spiller igjen fra start-, vinn- og tapt-skjermen
+      const open=['start','win','lose'].some(n=>!document.getElementById('gh-overlay-'+n).classList.contains('gh-hidden'));
+      if(open){e.preventDefault();ghStart();return}
+    }
+    keys[k]=true;initOnFirst();
+  });
   window.addEventListener('keyup',(e)=>{keys[e.key.toLowerCase()]=false});
   window.addEventListener('blur',()=>{clearKeys();releaseJoy();lookTouchId=null});
+  document.addEventListener('visibilitychange',()=>{
+    clearKeys();releaseJoy();lookTouchId=null;
+    lastFrameTime=0;
+    if(audioCtx){try{document.hidden?audioCtx.suspend():audioCtx.resume()}catch(e){}}
+  });
+  document.addEventListener('gesturestart',(e)=>e.preventDefault());
   document.addEventListener('click',initOnFirst,{once:true});
   document.addEventListener('touchstart',initOnFirst,{once:true,passive:true});
   document.addEventListener('fullscreenchange',onFsChange);

@@ -33,7 +33,7 @@ const GAMES = [
 export default function LeahNoellePage() {
   useSEO({
     title: 'Spill av Leah Noelle – Minio',
-    description: 'Spill morsomme spill laget av Leah Noelle. Bananashake og flere spill kommer.',
+    description: 'Spill morsomme spill laget av Leah Noelle: Bananashake, Kattens hinderløype, Spøkelseshuset Gjemsel og Fangelek.',
     noindex: true,
   })
 
