@@ -43,7 +43,7 @@ export function erJulegavesesong(dato: Date = new Date()): boolean {
 
 interface SesongInnhold {
   /** Rekkefølgen på forsidens seksjoner. Alle vises – bare rekkefølgen endres. */
-  forsideRekkefolge: Array<'veier' | 'gravering' | 'produkter' | 'designer' | 'kompass' | 'guider' | 'levering'>
+  forsideRekkefolge: Array<'veier' | 'gravering' | 'produkter' | 'designer' | 'kompass' | 'guider' | 'spill' | 'levering'>
   /** Teksten på gravering-seksjonen når den står øverst vs. lenger ned. */
   gravering: {
     eyebrow: string
@@ -54,7 +54,7 @@ interface SesongInnhold {
 
 export const sesongInnhold: Record<Sesong, SesongInnhold> = {
   vinter: {
-    forsideRekkefolge: ['gravering', 'veier', 'produkter', 'designer', 'kompass', 'guider', 'levering'],
+    forsideRekkefolge: ['gravering', 'veier', 'produkter', 'designer', 'kompass', 'guider', 'spill', 'levering'],
     gravering: {
       eyebrow: 'Gravering',
       tittel: 'Tegn den ferdig før vi graverer.',
@@ -63,7 +63,7 @@ export const sesongInnhold: Record<Sesong, SesongInnhold> = {
     },
   },
   sommer: {
-    forsideRekkefolge: ['veier', 'produkter', 'designer', 'kompass', 'gravering', 'guider', 'levering'],
+    forsideRekkefolge: ['veier', 'produkter', 'designer', 'kompass', 'gravering', 'guider', 'spill', 'levering'],
     gravering: {
       eyebrow: 'Gravering',
       tittel: 'Sett navnet på det du har bygget.',

@@ -19,6 +19,7 @@ import DesignerSection from './components/home/DesignerSection'
 import KompassSection from './components/home/KompassSection'
 import GuiderSection from './components/home/GuiderSection'
 import GraveringSection from './components/home/GraveringSection'
+import SpillSection from './components/home/SpillSection'
 import { gjeldendeSesong, sesongInnhold } from './data/sesong'
 import LeveringSection from './components/home/LeveringSection'
 import Footer from './components/layout/Footer'
@@ -49,6 +50,7 @@ const FORSIDESEKSJONER = {
   designer: DesignerSection,
   kompass: KompassSection,
   guider: GuiderSection,
+  spill: SpillSection,
   levering: LeveringSection,
 } as const
 
