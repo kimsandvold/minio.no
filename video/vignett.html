@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="no">
+<head>
+<meta charset="utf-8">
+<title>Minio vignett</title>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400..500&display=block" rel="stylesheet">
+<style>
+  /* Farger fra src/styles/theme.ts */
+  :root {
+    --paper: #faf7f2;
+    --paper-2: #f4efe8;
+    --line: #e8e1d7;
+    --ink: #1c1a18;
+    --ink-muted: #6b6157;
+    --accent: #a8512c;
+  }
+  html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; }
+  body { background: var(--paper); font-family: "Geist", sans-serif; }
+
+  #stage { position: absolute; inset: 0; }
+
+  /* Blueprint-rutenett, som på planleggerne */
+  #grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 48px 48px;
+    background-position: center center;
+    -webkit-mask-image: radial-gradient(ellipse 55% 60% at 50% 50%, #000 0%, transparent 75%);
+            mask-image: radial-gradient(ellipse 55% 60% at 50% 50%, #000 0%, transparent 75%);
+  }
+  /* Myk vignett i kantene */
+  #shade {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 80% 80% at 50% 48%, transparent 55%, rgba(74, 67, 60, 0.16) 100%);
+  }
+
+  #lockup { position: absolute; left: 50%; top: 50%; width: 1090px; transform: translate(-50%, -58%); }
+  #lockup svg { width: 100%; height: auto; overflow: visible; display: block; }
+
+  #tagline {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, 0);
+    font-family: "Geist Mono", monospace; font-weight: 400;
+    font-size: 30px; text-transform: uppercase; white-space: nowrap;
+    color: var(--ink-muted);
+  }
+  #tagline b { color: var(--accent); font-weight: 500; }
+
+  #fade { position: absolute; inset: 0; background: var(--paper); opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="grid"></div>
+
+  <div id="lockup">
+    <!-- Basert på public/images/branding/logo_navbar.svg (viewBox 545×148) -->
+    <svg viewBox="0 0 545 190" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <clipPath id="grainClip"><path d="M106.772 4H40.9979C20.5645 4 4 20.5918 4 41.0588V106.941C4 127.408 20.5645 144 40.9979 144H106.772C127.205 144 143.77 127.408 143.77 106.941V41.0588C143.77 20.5918 127.205 4 106.772 4Z"/></clipPath>
+        <clipPath id="wordClip"><rect id="wordClipRect" x="185" y="30" width="0" height="90"/></clipPath>
+      </defs>
+      <g id="icon" stroke="#1c1a18" stroke-width="7" stroke-linecap="round" fill="none">
+        <path id="frame" pathLength="1" d="M106.772 4H40.9979C20.5645 4 4 20.5918 4 41.0588V106.941C4 127.408 20.5645 144 40.9979 144H106.772C127.205 144 143.77 127.408 143.77 106.941V41.0588C143.77 20.5918 127.205 4 106.772 4Z"/>
+        <g clip-path="url(#grainClip)">
+        <path class="grain" pathLength="1" d="M4.76709 57.0067C13.8191 49.9032 28.1643 30.8927 46.5753 30.8927C69.2054 30.8927 72.1724 41.3408 94.1369 40.8775C111.709 40.5069 130.713 28.237 140.164 22.0601"/>
+        <path class="grain" pathLength="1" d="M4.38366 81.5846C9.96589 75.6813 24.3289 61.2311 43.5069 58.5429C66.0201 55.3872 73.9123 68.138 101.425 66.2234C123.435 64.6918 143.617 46.2539 143.617 36.2692"/>
+        <path class="grain" pathLength="1" d="M4.0627 96.4491C14.7394 94.2575 15.5065 95.4096 28.1641 89.6492C40.8216 83.8887 44.6572 77.6121 63.6374 80.4325C79.6306 82.8091 76.5323 98.2768 66.1367 105.01C55.7411 111.744 43.8947 112.561 33.1504 116.147C21.6435 119.987 16.7386 128.748 14.7394 131.124"/>
+        <path class="grain" pathLength="1" d="M144 42.7976C134.027 53.1664 123.197 60.2377 114.626 73.5771C106.027 86.961 107.373 89.3057 90.5422 106.645C75.726 121.908 63.8497 123.82 51.294 128.068C35.4521 133.429 35.238 135.986 28.5479 141.109"/>
+        <path class="grain" pathLength="1" d="M143.617 66.6074C143.617 73.1359 140.775 87.6621 130.192 95.4096C120.396 102.581 115.308 103.543 105.149 115.031C95.6714 125.748 88.7673 135.349 71.8906 143.797"/>
+        </g>
+      </g>
+
+      <g clip-path="url(#wordClip)">
+        <path id="word" fill="#1c1a18" d="M227.52 105L213.36 77.56L209.68 69.24L208 77.56L202.56 105H193.68L205.84 46.2H206.8L222.96 77.960L227.760 88.6L232.56 77.96L248.4 46.2H249.28L261.92 105H253.12L247.2 77.56L245.44 69.24L242.24 77.56L228 105H227.52ZM299.974 105V46.2H308.934V105H299.974ZM393.685 105L359.285 66.92L359.525 73.32V105H350.565V46.12H351.685L386.245 84.68L385.925 77.96V46.2H394.885V105H393.685ZM436.518 105V46.2H445.478V105H436.518ZM514.852 105.8C510.852 105.8 507.065 105.107 503.492 103.72C499.972 102.333 496.852 100.333 494.132 97.72C491.412 95.0533 489.252 91.8533 487.652 88.12C486.105 84.3867 485.332 80.1733 485.332 75.48C485.332 70.7333 486.105 66.4933 487.652 62.76C489.252 59.0267 491.412 55.8533 494.132 53.24C496.905 50.6267 500.052 48.6533 503.572 47.32C507.145 45.9333 510.905 45.24 514.852 45.24C518.799 45.24 522.532 45.9333 526.052 47.32C529.625 48.6533 532.772 50.6267 535.492 53.24C538.265 55.8533 540.425 59.0267 541.972 62.76C543.572 66.4933 544.372 70.7333 544.372 75.48C544.372 80.1733 543.572 84.3867 541.972 88.12C540.425 91.8533 538.292 95.0533 535.572 97.72C532.852 100.333 529.705 102.333 526.132 103.72C522.612 105.107 518.852 105.8 514.852 105.8ZM514.852 97.72C518.479 97.72 521.812 96.8667 524.852 95.16C527.892 93.4533 530.319 90.9733 532.132 87.72C533.945 84.4133 534.852 80.36 534.852 75.56C534.852 70.7067 533.945 66.6533 532.132 63.4C530.319 60.0933 527.892 57.6133 524.852 55.96C521.865 54.2533 518.532 53.4 514.852 53.4C511.172 53.4 507.812 54.2533 504.772 55.96C501.785 57.6133 499.385 60.0933 497.572 63.4C495.759 66.6533 494.852 70.7067 494.852 75.56C494.852 80.36 495.785 84.4133 497.652 87.72C499.519 90.9733 501.972 93.4533 505.012 95.16C508.052 96.8667 511.332 97.72 514.852 97.72Z"/>
+      </g>
+
+      <!-- Tommestokk: "etter dine mål" -->
+      <g id="ruler" stroke="#a8512c" stroke-linecap="round">
+        <line id="rulerLine" x1="194" y1="128" x2="194" y2="128" stroke-width="2.4"/>
+        <g id="ticks" stroke-width="1.6"></g>
+      </g>
+    </svg>
+  </div>
+
+  <div id="tagline"></div>
+  <div id="shade"></div>
+  <div id="fade"></div>
+</div>
+
+<script>
+  // Tidsstyrt animasjon: renderen kaller window.setTime(t) for hvert bilde.
+  const params = new URLSearchParams(location.search);
+  const MODE = params.get('mode') || 'intro';        // intro | outro
+  const DURATION = MODE === 'outro' ? 7 : 6;
+
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const prog = (t, start, dur) => clamp((t - start) / dur);
+  const easeInOut = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const easeOut = x => 1 - Math.pow(1 - x, 4);
+  const easeOutBack = x => { const c = 1.4; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+
+  const $ = s => document.querySelector(s);
+  const frame = $('#frame');
+  const grains = [...document.querySelectorAll('.grain')];
+  const icon = $('#icon');
+  const word = $('#word');
+  const clipRect = $('#wordClipRect');
+  const rulerLine = $('#rulerLine');
+  const ticksG = $('#ticks');
+  const tagline = $('#tagline');
+  const grid = $('#grid');
+  const fade = $('#fade');
+
+  // Tommestokk-merker fra x=194 til x=545
+  const RX0 = 194, RX1 = 545, TICKS = 40;
+  const ticks = [];
+  for (let i = 0; i <= TICKS; i++) {
+    const x = RX0 + (RX1 - RX0) * i / TICKS;
+    const len = i % 10 === 0 ? 11 : i % 5 === 0 ? 7 : 4;
+    const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    l.setAttribute('x1', x); l.setAttribute('x2', x);
+    l.setAttribute('y1', 128); l.setAttribute('y2', 128 + len);
+    ticksG.appendChild(l);
+    ticks.push({ el: l, x, len });
+  }
+
+  tagline.innerHTML = MODE === 'outro'
+    ? '<b>minio.no</b>&nbsp;&nbsp;·&nbsp;&nbsp;Skreddersydd etter dine mål'
+    : 'Etter dine mål&nbsp;&nbsp;·&nbsp;&nbsp;<b>Håndlaget i Lillehammer</b>';
+
+  [frame, ...grains].forEach(p => { p.style.strokeDasharray = '1 1'; });
+
+  window.DURATION = DURATION;
+  window.setTime = function (t) {
+    // Bakgrunn
+    grid.style.opacity = 0.9 * easeOut(prog(t, 0, 1.2));
+
+    // Ikonet: ramme tegnes, så årringene
+    const fp = easeInOut(prog(t, 0.15, 1.25));
+    frame.style.strokeDashoffset = 1 - fp;
+    grains.forEach((g, i) => {
+      g.style.strokeDashoffset = 1 - easeInOut(prog(t, 0.75 + i * 0.13, 1.05));
+    });
+    const s = 0.94 + 0.06 * easeOut(prog(t, 0, 2.2));
+    icon.setAttribute('transform', `translate(74 74) scale(${s}) translate(-74 -74)`);
+
+    // Ordmerket avdekkes fra venstre
+    const wp = easeInOut(prog(t, 1.9, 0.95));
+    clipRect.setAttribute('width', 370 * wp);
+    word.setAttribute('transform', `translate(${(1 - easeOut(prog(t, 1.9, 1.3))) * -14} 0)`);
+
+    // Tommestokken måles ut
+    const rp = easeInOut(prog(t, 2.55, 0.9));
+    const rx = RX0 + (RX1 - RX0) * rp;
+    rulerLine.setAttribute('x2', rx);
+    rulerLine.style.opacity = rp > 0 ? 1 : 0;
+    ticks.forEach(k => {
+      const local = clamp((rx - k.x) / 18);
+      const e = easeOutBack(local);
+      k.el.setAttribute('y2', 128 + k.len * e);
+      k.el.style.opacity = local > 0 ? 1 : 0;
+    });
+
+    // Tagline
+    const tp = easeOut(prog(t, 3.2, 1.1));
+    tagline.style.opacity = tp;
+    tagline.style.letterSpacing = (0.42 - 0.14 * tp) + 'em';
+    tagline.style.transform = `translate(-50%, ${150 + 10 * (1 - tp)}px)`;
+
+    // Slutt: intro toner ut, outro blir stående
+    fade.style.opacity = MODE === 'intro' ? easeInOut(prog(t, 5.25, 0.75)) : 0;
+  };
+
+  window.ready = document.fonts.ready.then(() => { window.setTime(0); return true; });
+  if (!params.has('render')) {
+    // Forhåndsvisning i nettleser: spill av i loop
+    const t0 = performance.now();
+    const loop = () => { window.setTime(((performance.now() - t0) / 1000) % (DURATION + 1)); requestAnimationFrame(loop); };
+    window.ready.then(loop);
+  }
+</script>
+</body>
+</html>
