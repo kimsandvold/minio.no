@@ -66,6 +66,7 @@ const VerticalDivider = styled.div`
 const Logo = styled.div`
   display: flex;
   align-items: center;
+  flex-shrink: 0;
   margin-left: -0.5rem;
 
   a {
@@ -74,9 +75,13 @@ const Logo = styled.div`
     outline: none;
   }
 
+  /* Flex-elementer krymper i bredden mens høyden står fast – uten disse
+     ble logoen klemt sammen når menyen trengte plass. */
   img {
     height: 36px;
     width: auto;
+    aspect-ratio: 400 / 108;
+    flex-shrink: 0;
     display: block;
   }
 
@@ -91,6 +96,7 @@ const Logo = styled.div`
 
 const MenuLinks = styled.div<{ $open: boolean }>`
   justify-self: start;
+  min-width: 0;
   display: flex;
   gap: 2rem;
   align-items: center;
@@ -169,13 +175,6 @@ const TextRouterLink = styled(Link)<{ $aktiv?: boolean }>`
     background: ${({ theme }) => theme.colors.accentLight};
     opacity: ${({ $aktiv }) => ($aktiv ? 1 : 0)};
     transition: opacity ${({ theme }) => theme.transitions.default};
-  }
-
-  /* Logoen lenker allerede hjem – gi plass til resten på smale skjermer. */
-  @media (max-width: 1000px) {
-    &[href="/"] {
-      display: none;
-    }
   }
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {

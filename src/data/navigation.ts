@@ -1,13 +1,12 @@
 import type { NavLink } from '../types/product'
 
+// Toppmenyen holdes kort – logoen lenker hjem, og Gravering og Prosjekthjelp
+// ligger i footeren og under Tjenester.
 export const navLinks: NavLink[] = [
-  { href: '/', label: 'Hjem', icon: 'faHome', ariaLabel: 'Hjem' },
   { href: '/produkter', label: 'Produkter', icon: 'faBriefcase', ariaLabel: 'Produkter' },
   { href: '/designverktoy', label: 'Design selv', icon: 'faCube', ariaLabel: 'Design selv i 3D' },
-  { href: '/gravering', label: 'Gravering', icon: 'faBurn', ariaLabel: 'Gravering i tre' },
   { href: '/byggeguider', label: 'Byggeguider', icon: 'faTools', ariaLabel: 'Byggeguider' },
   { href: '/tjenester', label: 'Tjenester', icon: 'faHammer', ariaLabel: 'Tjenester' },
-  { href: '/prosjekthjelp', label: 'Prosjekthjelp', icon: 'faLightbulb', ariaLabel: 'Prosjekthjelp' },
   { href: '/kontakt', label: 'Kontakt', icon: 'faEnvelope', ariaLabel: 'Kontakt' },
 ]
 
