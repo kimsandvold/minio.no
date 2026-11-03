@@ -391,9 +391,9 @@ export default function LeveggerPage() {
   const baseJsonLd = product ? productJsonLd(product, '/produkter/levegger') : []
 
   useSEO({
-    title: 'Levegg i tre – skreddersydd, rett eller hjørne – fra 3 900,- | Minio',
+    title: 'Levegg i tre – rett eller hjørne | Minio',
     description:
-      'Skreddersydd levegg i trykkimpregnert tre fra Lillehammer. Velg rett panel eller hjørne i 90°, stående eller liggende spiler. 30–250 cm bred, 150–220 cm høy.',
+      'Skreddersydd levegg i trykkimpregnert tre fra Lillehammer. Rett panel eller hjørne i 90°, stående eller liggende spiler. 30–250 cm bred, 150–220 cm høy.',
     ogImage: product?.images[0]?.src ?? '/images/products/minio_levegg_variant.webp',
     jsonLd: [...baseJsonLd, LEVEGG_FAQ, LEVEGG_TYPE_VARIANTS],
   })

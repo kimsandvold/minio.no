@@ -182,7 +182,7 @@ export default function ProsjekthjelpPage() {
   useSEO({
     title: 'Prosjekthjelp – hva koster uteprosjektet ditt? | Minio',
     description:
-      'Velg terrasse, pergola, carport, levegg eller bod og få et øyeblikkelig anslag på materialkostnad, tidsbruk og søknadsplikt. Gratis personlig svar på e-post.',
+      'Velg terrasse, pergola, carport, levegg eller bod og få et øyeblikkelig anslag på materialkostnad, tidsbruk og søknadsplikt. Gratis svar på e-post.',
     keywords:
       'prosjekthjelp, hva koster terrasse, hva koster carport, pris pergola, søknadsplikt, hjelp til uteprosjekt, gratis byggerådgivning',
     jsonLd: JSONLD,

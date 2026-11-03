@@ -359,9 +359,9 @@ export default function PidestallKrakkPage() {
   }
 
   useSEO({
-    title: 'Pidestall krakk i tre – skreddersydd plantestativ fra 1 500,- | Minio',
+    title: 'Pidestall og krakk i tre – plantestativ | Minio',
     description:
-      'Håndlaget pidestall i trykkimpregnert tre. Skreddersydd fra 30×30×30 cm opp til 60×60×80 cm. Mengderabatt opptil 10 %. Bygget i Lillehammer – pris fra 1 500,-.',
+      'Håndlaget pidestall i trykkimpregnert tre, skreddersydd fra 30×30×30 til 60×60×80 cm. Mengderabatt opptil 10 %. Bygget i Lillehammer – fra 1 500,-.',
     ogImage: product?.images[0]?.src ?? '/images/products/pidestall_krakk_1.webp',
     jsonLd: [...baseJsonLd, PIDESTALL_FAQ],
   })

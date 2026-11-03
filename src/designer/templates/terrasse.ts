@@ -1661,6 +1661,7 @@ export const terrasse: ProductTemplate<TerrasseConfig> & {
   navn: 'Terrasse',
   ikon: 'faBorderAll',
   beskrivelse: 'Tegn terrassen i 3D – rektangel, hjørne eller U-form, inntil vegg eller frittstående. Bjelkelag, dragere, stolper og fundamenter dimensjoneres etter Eurokode, med rekkverk og trapp etter TEK17.',
+  seoBeskrivelse: 'Tegn terrassen i 3D – rektangel, hjørne eller U-form. Få materialliste, prisestimat og byggeplan med bjelkelag, rekkverk og trapp etter TEK17.',
   bilde: '/images/products/terrasse-3d.webp',
   tilgjengelig: true,
   fraPris: 349,

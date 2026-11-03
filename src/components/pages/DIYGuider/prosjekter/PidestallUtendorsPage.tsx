@@ -206,7 +206,7 @@ export default function PidestallUtendorsPage() {
   useSEO({
     title: 'Bygg en pidestall utendørs – byggeguide | Minio',
     description:
-      'Gratis byggeguide: bygg en klassisk søyle-pidestall i trykkimpregnert terrassebord. Materialliste, mål og fremgangsmåte for sokkel, søyle og topp – steg for steg.',
+      'Gratis byggeguide: bygg en klassisk søyle-pidestall i trykkimpregnert terrassebord. Materialliste, mål og fremgangsmåte steg for steg.',
     ogImage: '/images/byggeguider/pidestall.webp',
     jsonLd: [
       {

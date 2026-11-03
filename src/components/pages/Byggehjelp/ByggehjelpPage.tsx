@@ -363,7 +363,7 @@ export default function ByggehjelpPage() {
   useSEO({
     title: 'Byggehjelp og rådgivning – leie byggekyndig på timen | Minio',
     description:
-      'Står du fast på uteprosjektet? Leie en erfaren byggekyndig på timen – praktisk hjelp og rådgivning på stedet, eller gjennomgang av tegning og materialliste.',
+      'Står du fast på uteprosjektet? Lei en erfaren byggekyndig på timen – praktisk hjelp på stedet, eller gjennomgang av tegning og materialliste.',
     keywords:
       'byggehjelp, byggerådgivning, hjelp til å bygge terrasse, leie snekker, byggeveiledning, hjelp til byggeprosjekt, rådgivning bygging',
     ogImage: '/images/byggeguider/hagebenk.webp',

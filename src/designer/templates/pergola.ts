@@ -853,6 +853,7 @@ export const pergola: ProductTemplate<PergolaConfig> & {
   navn: 'Pergola',
   ikon: 'faBorderNone',
   beskrivelse: 'Tegn pergolaen i 3D – frittstående eller mot husveggen, med lekter, lameller eller tett tak. Stolper, dragere og sperrer dimensjoneres for snø og vind, med knebånd og forankring.',
+  seoBeskrivelse: 'Tegn pergolaen i 3D – frittstående eller mot husvegg, med lekter eller lameller. Få materialliste, prisestimat og byggeplan for snø og vind.',
   bilde: '/images/products/pergola-3d.webp',
   tilgjengelig: true,
   fraPris: 249,

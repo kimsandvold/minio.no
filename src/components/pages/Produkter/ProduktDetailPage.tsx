@@ -7,6 +7,7 @@ import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import { useSEO } from '../../../hooks/useSEO'
+import { productJsonLd } from '../../../utils/productJsonLd'
 import SplideCarousel from '../../shared/SplideCarousel'
 import { ProductDetailSkeleton } from '../../shared/ProductSkeleton'
 import { useProductBySlug } from '../../../hooks/useProducts'
@@ -148,6 +149,10 @@ export default function ProduktDetailPage() {
     title: product ? `${product.title} – Minio` : 'Produkt – Minio',
     description: product ? product.shortDescription : 'Utforsk skreddersydde treløsninger fra Minio – håndlaget i Lillehammer.',
     ogImage: product?.images[0]?.src,
+    // Produkter med egen side (plantekasser, vedskjul …) legger inn Product- og
+    // breadcrumb-data selv. De som bare finnes i products.json rendres her, og
+    // sto uten strukturerte data i det hele tatt – samme helper brukes nå.
+    jsonLd: product ? productJsonLd(product, `/produkter/${product.slug}`) : undefined,
   })
 
   useEffect(() => {

@@ -303,7 +303,7 @@ export default function PostkasseStativPage() {
 
   useSEO({
     title: 'Skreddersydd postkassestativ i tre – Minio',
-    description: 'Skreddersydd postkassestativ i tre for borettslag, sameie og felles innkjørsler. Plass til 1–8 postkasser med pakkehylle, belysning og husnummer. Håndlaget i Lillehammer.',
+    description: 'Skreddersydd postkassestativ i tre for borettslag, sameie og felles innkjørsler. Plass til 1–8 postkasser med pakkehylle, belysning og husnummer.',
     ogImage: '/images/products/mail_box_3.webp',
     jsonLd: product ? productJsonLd(product, '/produkter/postkassestativer') : undefined,
   })

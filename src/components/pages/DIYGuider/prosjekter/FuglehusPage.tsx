@@ -232,7 +232,7 @@ export default function FuglehusPage() {
   const imageUrl = `${SITE_URL}/images/byggeguider/fuglehus.webp`
 
   useSEO({
-    title: 'Bygge fuglehus selv – gratis byggeguide med mål og tegning | Minio',
+    title: 'Bygge fuglehus – gratis byggeguide med mål | Minio',
     description:
       'Slik bygger du et fuglehus selv: komplett materialliste med mål, riktig størrelse på innflygningshullet og fremgangsmåte steg for steg. Gratis byggeguide.',
     keywords:

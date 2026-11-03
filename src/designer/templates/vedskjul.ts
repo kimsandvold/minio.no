@@ -78,6 +78,7 @@ export const vedskjul: ProductTemplate<VedskjulConfig> & PlanUtvidelser<Vedskjul
   navn: 'Vedskjul',
   ikon: 'faFireBurner',
   beskrivelse: 'Tegn vedskjulet i 3D – luftet spaltekledning, dører og skillevegger, dimensjonert for snølast og full vedstabel.',
+  seoBeskrivelse: 'Tegn vedskjulet i 3D – luftet spaltekledning, dører og skillevegger. Få materialliste, prisestimat og byggeplan for snølast og full vedstabel.',
   bilde: '/images/products/vedskjul-3d.webp',
   tilgjengelig: true,
   fraPris: 349,

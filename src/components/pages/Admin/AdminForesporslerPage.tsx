@@ -8,24 +8,31 @@ import { foresporselStatusLabel, foresporselTypeLabel } from '../../../types/for
 import { AdminPageHead, Tabs, Tab, Loading, Empty } from './adminUi'
 
 /**
- * Ferdig svartekst for byggeplan-forespørsler: kunden får betalingsinfo og
- * tilgangskoden i én e-post. Vipps-nummeret settes med VITE_VIPPS_NUMMER.
+ * Ferdig svartekst for byggeplan-forespørsler.
+ *
+ * Salget går manuelt inntil videre (se VITE_LANSERINGSMODUS i DesignerPage):
+ * kunden får tilgangskoden MED fakturaen, ikke etter at den er betalt, slik at
+ * planen er tilgjengelig med én gang. Betalingsplikten står uavhengig av om
+ * planen er lastet ned – det er også slik salgsbetingelsene § 5 er formulert.
+ * Fakturaen sendes fra regnskapsløsningen; denne teksten er følgebrevet.
  */
-const VIPPS_NUMMER = import.meta.env.VITE_VIPPS_NUMMER ?? ''
+const FORFALL_DAGER = 14
 
 function svarTekst(f: DesignForesporsel): string {
   return [
     `Hei, og takk for at du brukte designverktøyet!`,
     ``,
     `Byggeplan for «${f.designNavn}»: ${formatKr(f.prisEstimatKr)}`,
-    VIPPS_NUMMER
-      ? `Betal med Vipps til ${VIPPS_NUMMER} og merk betalingen «${f.designNavn}».`
-      : `Betal med Vipps og merk betalingen «${f.designNavn}».`,
     ``,
     `Tilgangskode: ${f.tilgangskode ?? ''}`,
     ``,
     `Åpne designet på minio.no, trykk «Lås opp byggeplan» og skriv inn koden.`,
-    `Da får du materialliste, alle mål og byggeplanen som PDF.`,
+    `Da får du materialliste, alle mål og byggeplanen som PDF med én gang.`,
+    ``,
+    `Faktura på ${formatKr(f.prisEstimatKr)} kommer i egen e-post, med ${FORFALL_DAGER} dagers`,
+    `betalingsfrist. Du trenger ikke vente på den for å bruke planen.`,
+    ``,
+    `Si fra hvis noe er uklart, så hjelper jeg deg.`,
     ``,
     `Minio`,
   ].join('\n')

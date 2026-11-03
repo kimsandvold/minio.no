@@ -528,9 +528,9 @@ export default function PergolaPlanleggerPage() {
   }, [lightbox])
 
   useSEO({
-    title: 'Pergolaplanlegger – tegn pergola i 3D og få materialliste | Minio',
+    title: 'Pergolaplanlegger – gratis 3D-planlegger | Minio',
     description:
-      'Gratis pergolaplanlegger fra Minio. Velg frittstående eller veggmontert, sett målene og se pergolaen i 3D med tak av lekter, spjeld eller tett tak og eventuell sideskjerm. Få komplett materialliste med stolper, dragere, spær, beslag og skruer, veiledende prisestimat og PDF du kan ta med i byggevarehandelen.',
+      'Gratis pergolaplanlegger: frittstående eller veggmontert, med tak av lekter, spjeld eller tett tak. Få materialliste, prisestimat og PDF.',
     keywords:
       'pergolaplanlegger, pergola planlegger, pergoladesigner, pergolakalkulator, solskjerm pergola, planlegge pergola, tegne pergola, bygge pergola, pergola 3D, materialliste pergola, frittstående pergola, veggmontert pergola, pergola tak',
     ogImage: '/images/planleggere/pergola.webp',

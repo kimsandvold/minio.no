@@ -42,7 +42,7 @@ const TITLER: Record<ForesporselType, { tittel: string; ingress: string; ikon: s
   },
   byggeplan: {
     tittel: 'Be om byggeplan',
-    ingress: 'Vi sender deg betalingsinformasjon og en 6-sifret tilgangskode på e-post. Koden låser opp materialliste, mål og PDF for dette designet.',
+    ingress: 'Du får en 6-sifret tilgangskode på e-post med én gang, og faktura i egen e-post etterpå. Koden låser opp materialliste, mål og PDF for dette designet.',
     ikon: 'faFilePdf',
   },
 }
@@ -51,12 +51,19 @@ export default function ForesporselModal(props: Props) {
   const t = TITLER[props.type]
   const [melding, setMelding] = useState('')
   const [status, setStatus] = useState<'idle' | 'sender' | 'ok' | 'feil'>('idle')
+  // Byggeplanen gjøres tilgjengelig før fakturaen er betalt. Angreretten
+  // bortfaller da bare hvis kunden uttrykkelig har samtykket til at leveringen
+  // starter straks (angrerettloven § 22 f. ledd bokstav n) – derfor er dette
+  // et aktivt valg her, og ikke bare en setning i salgsbetingelsene.
+  const [samtykke, setSamtykke] = useState(false)
+  const krevSamtykke = props.type === 'byggeplan'
   // `status` i closuren er utdatert ved et raskt dobbeltklikk – ref-en stopper
   // det andre kallet før knappen rekker å bli deaktivert.
   const sender = useRef(false)
 
   const send = async () => {
     if (sender.current) return
+    if (krevSamtykke && !samtykke) return
     sender.current = true
     setStatus('sender')
     try {
@@ -112,9 +119,9 @@ export default function ForesporselModal(props: Props) {
             <h3>Forespørsel sendt</h3>
             {props.type === 'byggeplan' ? (
               <p>
-                Takk! Vi sender betalingsinformasjon og tilgangskoden for «{props.designNavn}» til{' '}
-                <strong>{props.userEmail}</strong>. Skriv inn koden her i designverktøyet for å låse
-                opp planen.
+                Takk! Vi sender tilgangskoden for «{props.designNavn}» til{' '}
+                <strong>{props.userEmail}</strong>, og faktura i en egen e-post etterpå. Skriv inn
+                koden her i designverktøyet for å låse opp planen.
               </p>
             ) : (
               <p>Takk! Vi har fått «{props.designNavn}» med alle mål og materialer, og tar kontakt på <strong>{props.userEmail}</strong> med et uforpliktende tilbud.</p>
@@ -154,12 +161,33 @@ export default function ForesporselModal(props: Props) {
               placeholder="F.eks. ønsket tidsrom, leveringssted, spørsmål om materialer …"
             />
 
+            {krevSamtykke && (
+              <Samtykke>
+                <input
+                  id="samtykke-levering"
+                  type="checkbox"
+                  checked={samtykke}
+                  onChange={(e) => setSamtykke(e.target.checked)}
+                />
+                <label htmlFor="samtykke-levering">
+                  Jeg bestiller byggeplanen til {formatKr(props.prisEstimatKr)} og samtykker til at
+                  leveringen starter straks. Jeg er klar over at{' '}
+                  <strong>angreretten da bortfaller</strong> når planen er gjort tilgjengelig, og at
+                  fakturaen skal betales selv om jeg ikke laster den ned.
+                </label>
+              </Samtykke>
+            )}
+
             {status === 'feil' && <Feil><Icon name="faTriangleExclamation" /> Kunne ikke sende. Prøv igjen.</Feil>}
 
-            <Primary onClick={send} disabled={status === 'sender'}>
-              {status === 'sender' ? (<><Icon name="faSpinner" spin /> Sender …</>) : (<><Icon name="faPaperPlane" /> Send forespørsel</>)}
+            <Primary onClick={send} disabled={status === 'sender' || (krevSamtykke && !samtykke)}>
+              {status === 'sender' ? (<><Icon name="faSpinner" spin /> Sender …</>) : (<><Icon name="faPaperPlane" /> {krevSamtykke ? 'Bestill byggeplan' : 'Send forespørsel'}</>)}
             </Primary>
-            <Hint>Vi lagrer designet ditt og svarer på e-post. Uforpliktende.</Hint>
+            <Hint>
+              {krevSamtykke
+                ? <>Se <a href="/salgsbetingelser" target="_blank" rel="noopener noreferrer">salgsbetingelsene</a>. Designet fryses slik det er nå.</>
+                : 'Vi lagrer designet ditt og svarer på e-post. Uforpliktende.'}
+            </Hint>
           </>
         )}
       </Box>
@@ -288,6 +316,35 @@ const Textarea = styled.textarea`
   outline: none;
   &:focus { border-color: #7880dc; background: rgba(255, 255, 255, 0.06); }
   &::placeholder { color: #626a74; }
+`
+
+const Samtykke = styled.div`
+  display: flex;
+  gap: 0.6rem;
+  align-items: flex-start;
+  margin: 0 0 0.9rem;
+  padding: 0.75rem 0.85rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+
+  input {
+    flex: none;
+    width: 17px;
+    height: 17px;
+    margin: 0.12rem 0 0;
+    accent-color: #e0895f;
+    cursor: pointer;
+  }
+
+  label {
+    font-size: 0.78rem;
+    line-height: 1.5;
+    color: #b9c0c8;
+    cursor: pointer;
+  }
+
+  strong { color: #e7eaef; }
 `
 
 const Feil = styled.p`

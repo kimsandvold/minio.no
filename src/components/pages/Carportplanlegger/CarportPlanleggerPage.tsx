@@ -531,9 +531,9 @@ const TECH = [
 
 export default function CarportPlanleggerPage() {
   useSEO({
-    title: 'Carportplanlegger – tegn carport i 3D med tak, snølast og byggeregler | Minio',
+    title: 'Carportplanlegger – snølast og byggeregler | Minio',
     description:
-      'Gratis carportplanlegger fra Minio. Velg takform (flatt, pulttak, saltak) og takvinkel, taktekke, vegger med akrylvinduer, og bygg en solid konstruksjon med tverrbjelker og knebånd. Sett snølast og se status mot norske byggeregler, med komplett materialliste, prisestimat og PDF.',
+      'Gratis carportplanlegger: velg takform, takvinkel og vegger, sett snølast og se status mot byggereglene. Få materialliste, prisestimat og PDF.',
     keywords:
       'carportplanlegger, carport planlegger, carportdesigner, carportkalkulator, garasjeplanlegger, bygge carport, carport tak, pulttak, saltak, carport snølast, carport byggeregler, søknadsfri carport, materialliste carport',
     ogImage: '/images/planleggere/carport.webp',

@@ -407,9 +407,9 @@ export default function PlantekassePage() {
   }, [])
 
   useSEO({
-    title: 'Plantekasse i tre – kvadratisk, rektangulær og hjørnemodell | Minio',
+    title: 'Plantekasse i tre etter mål | Minio',
     description:
-      'Skreddersydd plantekasse i tre i fire former: kvadratisk, rektangulær og som hjørneløsning (utvendig/innvendig L). Velg mål, trehvitt eller impregnert, espalier og levering. Pris fra 1 260,- – håndlaget i Lillehammer.',
+      'Skreddersydd plantekasse i tre – kvadratisk, rektangulær eller hjørne. Velg mål, ubehandlet eller impregnert, og espalier. Fra 1 260,- fra Lillehammer.',
     ogImage: product?.images[0]?.src ?? '/images/products/plantekasser_2.webp',
     jsonLd: product
       ? [...productJsonLd(product, '/produkter/plantekasser'), PLANTEKASSE_FAQ]

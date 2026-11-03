@@ -13,7 +13,42 @@ export default function UnderholdningPage() {
   useSEO({
     title: 'Håndverkerspill – gratis verktøyspill i nettleseren | Minio',
     description:
-      'Gratis verktøyspill for håndverkere og hobbysnekkere: slå inn spikeren, sag i takt, finn riktig verktøy og mer. Spill på mobil eller PC – nå målet og få 10 % rabattkode på varmepumpehus.',
+      'Gratis verktøyspill for håndverkere og hobbysnekkere: slå spikeren, sag i takt og finn riktig verktøy. Nå målet og få 10 % rabattkode på varmepumpehus.',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: 'Håndverkerspill',
+        url: 'https://minio.no/underholdning',
+        inLanguage: 'nb-NO',
+        mainEntity: {
+          '@type': 'ItemList',
+          itemListElement: SPILL.map((spill, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            item: {
+              '@type': 'VideoGame',
+              name: spill.tittel,
+              description: spill.beskrivelse,
+              url: `https://minio.no${spill.href}`,
+              image: `https://minio.no${spill.bilde}`,
+              gamePlatform: 'Nettleser',
+              applicationCategory: 'Game',
+              inLanguage: 'nb-NO',
+              offers: { '@type': 'Offer', price: '0', priceCurrency: 'NOK' },
+            },
+          })),
+        },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Hjem', item: 'https://minio.no/' },
+          { '@type': 'ListItem', position: 2, name: 'Håndverkerspill', item: 'https://minio.no/underholdning' },
+        ],
+      },
+    ],
   })
 
   return (

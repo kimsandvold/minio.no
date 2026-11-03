@@ -1490,6 +1490,7 @@ export const carport: ProductTemplate<CarportConfig> & {
   navn: 'Carport',
   ikon: 'faWarehouse',
   beskrivelse: 'Tegn carporten i 3D – frittstående eller inntil huset, med flatt tak, pulttak eller saltak med takstoler. Dimensjonert etter Eurokode for snølasten der du bor.',
+  seoBeskrivelse: 'Tegn carporten din i 3D – flatt tak, pulttak eller saltak. Få materialliste, prisestimat og byggeplan, dimensjonert for snølasten der du bor.',
   bilde: '/images/products/carport-3d.webp',
   tilgjengelig: true,
   fraPris: 449,

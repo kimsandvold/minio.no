@@ -340,9 +340,9 @@ const VerktoyBanner = styled.div`
 
 export default function PlanleggerePage() {
   useSEO({
-    title: 'Planleggere – tegn terrasse, pergola, carport og utekjøkken i 3D | Minio',
+    title: 'Planleggere for terrasse, pergola og carport | Minio',
     description:
-      'Minios gratis 3D-planleggere for uteprosjekter i tre. Tegn terrasse, veranda, platting, pergola eller carport i 3D, og få komplett materialliste med prisestimat og PDF.',
+      'Gratis 3D-planleggere for uteprosjekter i tre. Tegn terrasse, pergola, carport eller utekjøkken og få materialliste med prisestimat og PDF.',
     keywords:
       'planleggere, terrasseplanlegger, pergolaplanlegger, carportplanlegger, verandaplanlegger, plattingplanlegger, 3D planlegger, materialliste, planlegge uteplass',
     ogImage: '/images/planleggere/terrasse.webp',

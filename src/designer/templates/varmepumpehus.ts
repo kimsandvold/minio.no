@@ -945,6 +945,7 @@ export const varmepumpehus: ProductTemplate<VarmepumpehusConfig> & {
   navn: 'Varmepumpehus',
   ikon: 'faFan',
   beskrivelse: 'Tegn varmepumpehuset i 3D rundt din utedel – skrå 45°-spjeld som slipper luften fritt ut, men skygger for regn og snø. Velg utedel, takvinkel og taktype; klaringen og snølasten sjekkes automatisk.',
+  seoBeskrivelse: 'Tegn varmepumpehuset i 3D rundt din utedel – 45°-spjeld slipper luften ut og skygger for regn. Få materialliste, prisestimat og byggeplan.',
   bilde: '/images/products/varmepumpehus-3d.webp',
   tilgjengelig: true,
   fraPris: 199,

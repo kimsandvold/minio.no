@@ -7,7 +7,7 @@ export default function SalgsbetingelserPage() {
   useSEO({
     title: 'Salgsbetingelser – Minio',
     description:
-      'Salgsbetingelser for kjøp av digitale byggeplaner og byggesøknadsunderlag fra Minio. Basert på Forbrukertilsynets standard salgsbetingelser for forbrukerkjøp over Internett.',
+      'Salgsbetingelser for kjøp av digitale byggeplaner og byggesøknadsunderlag fra Minio, basert på Forbrukertilsynets standard for forbrukerkjøp på nett.',
   })
 
   return (
@@ -94,29 +94,37 @@ export default function SalgsbetingelserPage() {
 
       <h2>4. Avtaleinngåelse</h2>
       <p>
-        Avtalen er bindende for begge parter når kjøperen har sendt sin bestilling til selgeren og
-        betalingen er gjennomført. Avtalen er likevel ikke bindende hvis det har forekommet skrive-
-        eller tastefeil i tilbudet fra selgeren i bestillingsløsningen eller i kjøperens bestilling,
-        og den annen part innså eller burde ha innsett at det forelå en slik feil.
+        Avtalen er bindende for begge parter når kjøperen har bekreftet bestillingen i
+        bestillingsløsningen. Betaling skjer i etterkant mot faktura, jf. punkt 5. Avtalen er
+        likevel ikke bindende hvis det har forekommet skrive- eller tastefeil i tilbudet fra
+        selgeren i bestillingsløsningen eller i kjøperens bestilling, og den annen part innså eller
+        burde ha innsett at det forelå en slik feil.
       </p>
 
       <h2>5. Betaling</h2>
       <p>
-        Betaling skjer med <strong>Vipps</strong>. Du sendes til Vipps for å bekrefte og gjennomføre
-        betalingen, og beløpet belastes ved bestilling. Selger oppbevarer ikke kort- eller
-        betalingsopplysninger; dette håndteres i sin helhet av Vipps MobilePay AS.
+        Betaling skjer <strong>mot faktura</strong>. Etter bestillingen sender selger fakturaen til
+        kjøperens registrerte e-postadresse, med <strong>14 dagers betalingsfrist</strong> regnet
+        fra fakturadato. Selger tar ikke imot kortbetaling i nettsiden og oppbevarer ingen kort-
+        eller betalingsopplysninger.
       </p>
       <p>
-        Ytelsen (byggeplan / underlag) gjøres tilgjengelig for kjøperen umiddelbart etter at
-        betalingen er registrert som gjennomført.
+        Ytelsen gjøres tilgjengelig for kjøperen allerede ved bestillingen, altså før fakturaen
+        forfaller, jf. punkt 6. Betalingsplikten gjelder uavhengig av om kjøperen har lastet ned
+        eller tatt i bruk det bestilte. Ved forsinket betaling påløper forsinkelsesrente etter
+        forsinkelsesrenteloven.
       </p>
 
       <h2>6. Levering</h2>
       <p>
-        Ytelsene er digitale og leveres elektronisk. Levering anses skjedd når byggeplanen eller
-        underlaget er gjort tilgjengelig for kjøperen på nettsiden og/eller som nedlastbar fil,
-        normalt umiddelbart etter fullført betaling. Får du av tekniske årsaker ikke tilgang til det
-        du har kjøpt, ta kontakt via{' '}
+        Ytelsene er digitale og leveres elektronisk. Etter bestillingen sender selger en 6-sifret
+        tilgangskode til kjøperens e-postadresse. Koden låser opp byggeplanen med materialliste,
+        mål og PDF for det aktuelle designet. Levering anses skjedd når ytelsen er gjort
+        tilgjengelig for kjøperen på nettsiden og/eller som nedlastbar fil – normalt kort tid etter
+        bestillingen, og uavhengig av om fakturaen ennå er betalt.
+      </p>
+      <p>
+        Får du av tekniske årsaker ikke tilgang til det du har bestilt, ta kontakt via{' '}
         <Link to="/kontakt">kontaktskjemaet</Link>, så ordner vi det så raskt som mulig.
       </p>
 
@@ -127,11 +135,11 @@ export default function SalgsbetingelserPage() {
       </p>
       <p>
         <strong>Viktig unntak for digitalt innhold:</strong> Ytelsene fra Minio er digitalt innhold
-        som leveres elektronisk og gjøres tilgjengelig umiddelbart etter kjøp. Ved kjøpet
-        samtykker du uttrykkelig til at leveringen starter straks, og du erkjenner at{' '}
-        <strong>angreretten dermed bortfaller</strong> når innholdet er gjort tilgjengelig, jf.
-        angrerettloven § 22 første ledd bokstav n. Du blir opplyst om dette i bestillingsløsningen
-        før du bekrefter kjøpet, og bekreftelsen på kjøpet fungerer som bekreftelse av samtykket.
+        som leveres elektronisk og gjøres tilgjengelig umiddelbart etter bestillingen. Før du
+        bekrefter bestillingen må du uttrykkelig krysse av for at leveringen skal starte straks,
+        og for at du er klar over at <strong>angreretten dermed bortfaller</strong> når innholdet
+        er gjort tilgjengelig, jf. angrerettloven § 22 første ledd bokstav n. Avkrysningen
+        fungerer som bekreftelse av samtykket.
       </p>
       <p>
         Angreretten er dessuten ikke i behold ved levering av varer som er tilvirket etter

@@ -178,9 +178,9 @@ const TJENESTER_JSONLD = [
 
 export default function TjenesterPage() {
   useSEO({
-    title: 'Tjenester – ferdig bygget, 3D-design, byggehjelp og gravering | Minio',
+    title: 'Tjenester – bygging, 3D-design og gravering | Minio',
     description:
-      'Skal noen andre gjøre jobben? Gratis prosjekthjelp, små treprodukter bygget ferdig, 3D-tegning av prosjektet ditt, byggehjelp på timen og skilt med gravering.',
+      'Skal noen andre gjøre jobben? Gratis prosjekthjelp, treprodukter bygget ferdig, 3D-tegning, byggehjelp på timen og skilt med gravering.',
     keywords:
       'tjenester, prosjekthjelp, få bygget plantekasse, varmepumpehus på bestilling, 3D-design, byggehjelp, rådgivning, skilt og gravering, finne snekker',
     ogImage: '/images/byggeguider/hagebenk.webp',

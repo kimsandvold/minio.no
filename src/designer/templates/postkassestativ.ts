@@ -1124,6 +1124,7 @@ export const postkassestativ: ProductTemplate<PostkassestativConfig> & {
   navn: 'Postkassestativ',
   ikon: 'faEnvelope',
   beskrivelse: 'Tegn postkassestativet med tak i 3D – postkassene henges i Postens høyde (innkast 90–175 cm), med pakkehylle og bunnskap. Stolper på frostsikre fundament, tak dimensjonert for snø.',
+  seoBeskrivelse: 'Tegn postkassestativet i 3D – Postens høyde, pakkehylle og tak. Få materialliste, prisestimat og byggeplan med frostsikre fundament.',
   bilde: '/images/products/postkassestativ-3d.webp',
   tilgjengelig: true,
   fraPris: 249,

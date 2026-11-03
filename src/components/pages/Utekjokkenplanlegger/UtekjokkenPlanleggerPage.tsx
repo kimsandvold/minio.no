@@ -519,9 +519,9 @@ const TECH = [
 
 export default function UtekjokkenPlanleggerPage() {
   useSEO({
-    title: 'Utekjøkkenplanlegger – tegn utekjøkken i 3D med tak, benk og vask | Minio',
+    title: 'Utekjøkkenplanlegger – tak, benk og vask | Minio',
     description:
-      'Gratis utekjøkkenplanlegger fra Minio. Tegn utekjøkkenet i 3D: hevet platting, tak på stolper, benk med vask, underskap, sittebenk og hyller. Velg benkeplate og få komplett materialliste med prisestimat og PDF.',
+      'Gratis utekjøkkenplanlegger: tak på stolper, benk med vask, underskap, sittebenk og hyller. Få materialliste med prisestimat og PDF.',
     keywords:
       'utekjøkkenplanlegger, utekjøkken planlegger, bygge utekjøkken, utekjøkken tegning, hagekjøkken, utekjøkken med tak, utekjøkken benk, utekjøkken vask, materialliste utekjøkken',
     ogImage: '/images/planleggere/utekjokken-foto.webp',

@@ -1565,6 +1565,7 @@ export const garasje: ProductTemplate<GarasjeConfig> & {
   ikon: 'faWarehouse',
   bilde: '/images/products/garasje-3d.webp',
   beskrivelse: 'Tegn garasjen i 3D – enkel eller dobbel, på støpt plate, med takstoler, beregnet portbjelke og stående kledning. Dimensjonert etter Eurokode for snølasten der du bor.',
+  seoBeskrivelse: 'Tegn garasjen i 3D – enkel eller dobbel, med takstoler og portbjelke. Få materialliste, prisestimat og byggeplan etter snølasten der du bor.',
   tilgjengelig: true,
   fraPris: 990,
   leveranser: ['plan'],

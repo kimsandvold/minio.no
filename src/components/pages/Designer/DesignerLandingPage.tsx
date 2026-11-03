@@ -127,7 +127,7 @@ export default function DesignerLandingPage() {
 
   useSEO({
     title: 'Designverktøy – tegn uteprosjektet ditt i 3D | Minio',
-    description: 'Gratis 3D-designverktøy fra Minio. Tegn carport, terrasse, pergola, plantekasse, utekjøkken eller varmepumpekasse – tilpass mål og materialer, og få komplett byggeplan med materialliste og arbeidstegning.',
+    description: 'Gratis 3D-designverktøy. Tegn carport, terrasse, pergola, plantekasse eller utekjøkken, og få byggeplan med materialliste og arbeidstegning.',
     keywords: '3d designverktøy, tegne selv, carport, terrasse, pergola, plantekasse, utekjøkken, byggeplan, materialliste',
     ogImage: '/images/designer/plantekasse-3d.webp',
     ogImageAlt: 'Minios 3D-designverktøy for uteprosjekter i tre',

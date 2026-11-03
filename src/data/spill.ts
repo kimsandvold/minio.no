@@ -3,8 +3,8 @@
  * så de lenkes med vanlige <a>-lenker (ikke router-lenker). Brukes av
  * /underholdning og spillseksjonen på forsiden.
  *
- * Nytt spill: legg det til i SPILL med `nytt: true` – da blir det utvalgt og
- * får «Nytt»-merke begge steder.
+ * Nytt spill: legg det til i SPILL med `nytt: true` – da får det «Nytt»-merke
+ * begge steder, og blir utvalgt om ingen andre er merket `utvalgt`.
  */
 
 export interface Spill {
@@ -20,6 +20,8 @@ export interface Spill {
   /** Mobilskjermbilde fra spillet (public/images/underholdning/). */
   bilde: string
   nytt?: boolean
+  /** Vis dette spillet i toppen, uavhengig av hva som er nyest. */
+  utvalgt?: boolean
 }
 
 export const SPILL: Spill[] = [
@@ -43,6 +45,7 @@ export const SPILL: Spill[] = [
     tid: '3 min / uendelig',
     maal: '3 000 poeng',
     bilde: '/images/underholdning/terrasse.webp',
+    utvalgt: true,
   },
   {
     href: '/underholdning/tool-stack.html',
@@ -100,8 +103,8 @@ export const SPILL: Spill[] = [
   },
 ]
 
-/** Toppen fremhever det nyeste spillet – eller det første, om ingen er nye. */
-export const UTVALGT = SPILL.find((s) => s.nytt) ?? SPILL[0]
+/** Toppen fremhever det utvalgte spillet – ellers det nyeste, ellers det første. */
+export const UTVALGT = SPILL.find((s) => s.utvalgt) ?? SPILL.find((s) => s.nytt) ?? SPILL[0]
 /** Rutenettet viser resten – det utvalgte står allerede i toppen. */
 export const RESTEN = SPILL.filter((s) => s !== UTVALGT)
 

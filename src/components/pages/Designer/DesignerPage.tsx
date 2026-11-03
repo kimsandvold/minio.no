@@ -95,7 +95,9 @@ const DEMO_CODE = import.meta.env.VITE_DESIGNER_DEMO_CODE ?? ''
  * ved lansering. Så lenge flagget står:
  *  - byggeplanen låses opp med den 6-sifrede koden, ikke med Vipps i appen
  *  - «Betal med Vipps» erstattes av «Be om byggeplan», som varsler admin.
- *    Kunden Vippser manuelt, og admin sender koden fra /admin/foresporsler.
+ *    Admin sender koden fra /admin/foresporsler og fakturerer manuelt i
+ *    etterkant. Kunden får altså planen FØR betaling, så bestillingen krever
+ *    et uttrykkelig leveringssamtykke (se ForesporselModal).
  * Fjern variabelen i Vercel når produksjonsnøklene virker.
  */
 const LANSERINGSMODUS = import.meta.env.VITE_LANSERINGSMODUS === '1'
@@ -188,7 +190,7 @@ function CodeModal({ error, errorMsg, busy, belop, manuell, onSubmit, onVipps, o
         </FreezeNote>
         <CodeHint>
           {manuell
-            ? 'Vi sender betalingsinformasjon og koden på e-post. Kortbetaling i appen kommer snart.'
+            ? 'Du får koden på e-post med én gang, og faktura i egen e-post etterpå. Kortbetaling i appen kommer snart.'
             : 'Koden sendes på e-post når betalingen er registrert.'}
         </CodeHint>
       </CodeBox>
@@ -257,9 +259,11 @@ export default function DesignerPage() {
     title: template
       ? `${template.navn} – tegn i 3D & få materialliste | Minio`
       : '3D-design – tegn uteprosjektet selv | Minio',
+    // Meta-beskrivelsen må holde seg under ~155 tegn; `beskrivelse` er skrevet
+    // for produktvelgeren og er for lang, så malene har en egen `seoBeskrivelse`.
     description: template
-      ? `${template.beskrivelse} Tilpass mål og materialer i 3D, se prisestimat live og last ned komplett materialliste og byggeplan (PDF).`.slice(0, 300)
-      : 'Design uteprosjektet ditt i 3D – gratis. Tegn terrasse, pergola, carport, utekjøkken, plantekasse eller varmepumpekasse, tilpass mål og materialer, og få materialliste, prisestimat og byggeplan (PDF).',
+      ? template.seoBeskrivelse ?? `${template.beskrivelse} Få materialliste, prisestimat og byggeplan.`.slice(0, 155)
+      : 'Design uteprosjektet ditt i 3D – gratis. Tegn terrasse, pergola, carport, utekjøkken eller plantekasse, og få materialliste, prisestimat og byggeplan.',
     keywords: template
       ? `${template.navn.toLowerCase()} 3d, tegne ${template.navn.toLowerCase()}, ${template.navn.toLowerCase()} materialliste, bygge ${template.navn.toLowerCase()}, ${template.navn.toLowerCase()} byggeplan, design selv`
       : '3d design, terrasse, pergola, carport, utekjøkken, plantekasse, materialliste, byggeplan, tegne selv',

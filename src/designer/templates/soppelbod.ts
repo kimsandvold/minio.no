@@ -55,6 +55,7 @@ export const soppelbod: ProductTemplate<SoppelbodConfig> & PlanUtvidelser<Soppel
   navn: 'Søppelbod',
   ikon: 'faDumpster',
   beskrivelse: 'Tegn søppelboden i 3D – åpen front for dunkene, luftet kledning og tak dimensjonert for snølasten der du bor.',
+  seoBeskrivelse: 'Tegn søppelboden i 3D – åpen front, luftet kledning og tak for snølasten der du bor. Få materialliste, prisestimat og byggeplan som PDF.',
   bilde: '/images/products/soppelbod-3d.webp',
   tilgjengelig: true,
   fraPris: 349,

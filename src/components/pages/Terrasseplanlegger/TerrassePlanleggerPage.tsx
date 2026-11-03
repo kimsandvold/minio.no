@@ -550,9 +550,9 @@ export default function TerrassePlanleggerPage() {
   }, [lightbox])
 
   useSEO({
-    title: 'Terrasseplanlegger & verandadesigner – tegn i 3D og få materialliste | Minio',
+    title: 'Terrasseplanlegger – gratis 3D-planlegger | Minio',
     description:
-      'Gratis terrasseplanlegger, verandadesigner og plattingplanlegger fra Minio. Velg form (rektangel, L-form, U-form), sett målene og se terrassen, verandaen eller plattingen i 3D med ferdig overflate og konstruksjon. Få komplett materialliste med antall bord, bjelker, skruer, gjerde og trapp, veiledende prisestimat og PDF du kan ta med i byggevarehandelen.',
+      'Gratis terrasseplanlegger: velg rektangel, L- eller U-form, sett målene og se terrassen i 3D. Få komplett materialliste, prisestimat og PDF.',
     keywords:
       'terrasseplanlegger, verandaplanlegger, verandadesigner, plattingplanlegger, terrassedesigner, altanplanlegger, uteplassplanlegger, terrassekalkulator, plattingkalkulator, planlegge terrasse, tegne terrasse, bygge terrasse, terrasse 3D, materialliste terrasse, treplatting, uteplass i tre',
     ogImage: '/images/terrasse/terrasseplanlegger-promo.png',

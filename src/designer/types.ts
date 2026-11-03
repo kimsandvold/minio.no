@@ -249,6 +249,12 @@ export interface ProductTemplate<C extends DesignConfig = DesignConfig> {
   /** Icon-navn (FontAwesome) til produktvelgeren. */
   ikon: string
   beskrivelse: string
+  /**
+   * Meta-beskrivelse til søk (maks ~155 tegn – Google kutter der).
+   * `beskrivelse` er skrevet for produktvelgeren og blir for lang som snippet,
+   * så hold denne kort og nøkkelordnær. Utelatt = `beskrivelse` kuttes.
+   */
+  seoBeskrivelse?: string
   /** Bilde/render til produktvelger og forside-promo. */
   bilde?: string
   /** Ligger verktøyet klart, eller «kommer snart»? */

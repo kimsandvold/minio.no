@@ -912,6 +912,7 @@ export const plantekasse: ProductTemplate<PlantekasseConfig> & {
   navn: 'Plantekasse',
   ikon: 'faSeedling',
   beskrivelse: 'Tegn plantekassen i 3D – fire former, hjørner i forband, ben, topplist og espalier. Jordtrykket beregnes, så høye og lange kasser får stolper og stag der de trengs.',
+  seoBeskrivelse: 'Tegn plantekassen i 3D – fire former, hjørner i forband, ben og espalier. Få komplett materialliste, prisestimat og byggeplan som PDF.',
   bilde: '/images/designer/plantekasse-3d.webp',
   tilgjengelig: true,
   gratis: true,

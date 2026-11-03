@@ -654,9 +654,9 @@ export default function TreDDesignPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null)
 
   useSEO({
-    title: '3D-design og tegning – se terrassen din før du bygger | Minio',
+    title: '3D-design – se prosjektet før du bygger | Minio',
     description:
-      'Få terrasse, pergola eller uteprosjekt tegnet og rendret i 3D før du bygger. Designforslag, målsatt tegning og materialliste – beløpet trekkes fra ved bestilling.',
+      'Få terrasse, pergola eller uteprosjekt tegnet og rendret i 3D før du bygger. Designforslag, målsatt tegning og materialliste – trekkes fra ved bestilling.',
     keywords:
       '3d design terrasse, pergola tegning, sketchup tegning, 3d rendering hage, byggetegning terrasse, designhjelp uteprosjekt, visualisering pergola',
     ogImage: '/images/planleggere/pergola-hero.webp',

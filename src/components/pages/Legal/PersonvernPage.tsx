@@ -7,7 +7,7 @@ export default function PersonvernPage() {
   useSEO({
     title: 'Personvernerklæring – Minio',
     description:
-      'Slik behandler Minio personopplysninger: hva vi samler inn, hvorfor, hvem vi deler med (Vipps, Google, Firebase, Brevo) og hvilke rettigheter du har etter GDPR.',
+      'Slik behandler Minio personopplysninger: hva vi samler inn, hvorfor, hvem vi deler med (Vipps, Google, Firebase) og hvilke rettigheter du har etter GDPR.',
   })
 
   return (

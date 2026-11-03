@@ -846,6 +846,7 @@ export const utekjokken: ProductTemplate<UtekjokkenConfig> & {
   navn: 'Utekjøkken',
   ikon: 'faKitchenSet',
   beskrivelse: 'Tegn utekjøkkenet i 3D – fra enkel benk til stort overbygd kjøkken. Rett eller L-form, benkeplate, vask, skap, hyller og bakvegg. Taket dimensjoneres for snø, og byggeplanen har kappliste og montering steg for steg.',
+  seoBeskrivelse: 'Tegn utekjøkkenet i 3D – rett eller L-form, med benkeplate, vask og skap. Få materialliste, prisestimat og byggeplan med kappliste.',
   bilde: '/images/products/utekjokken-3d.webp',
   tilgjengelig: true,
   fraPris: 349,

@@ -13,6 +13,8 @@ import PollCard from '../../sections/Portfolio/PollCard'
 import { Eyebrow, Knapp, Reveal, Seksjon, SideHode, Tittel, Wrap } from '../../editorial'
 import ProduktKort, { ProduktKortSkjelett } from '../../editorial/ProduktKort'
 
+const SITE_URL = 'https://minio.no'
+
 const ANDRE_VEIER = [
   {
     ikon: 'faCube',
@@ -37,6 +39,32 @@ export default function ProdukterPage() {
   useSEO({
     title: 'Alle produkter – Minio',
     description: 'Utforsk Minios sortiment av skreddersydde treløsninger – varmepumpehus, søppelboder, postkassestativer, levegger og mer. Håndlaget i Lillehammer.',
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'CollectionPage',
+        name: 'Alle produkter',
+        url: `${SITE_URL}/produkter`,
+        inLanguage: 'nb-NO',
+        mainEntity: {
+          '@type': 'ItemList',
+          itemListElement: (produkter ?? []).map((pr, i) => ({
+            '@type': 'ListItem',
+            position: i + 1,
+            name: pr.title,
+            url: `${SITE_URL}/produkter/${pr.slug}`,
+          })),
+        },
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Hjem', item: `${SITE_URL}/` },
+          { '@type': 'ListItem', position: 2, name: 'Produkter', item: `${SITE_URL}/produkter` },
+        ],
+      },
+    ],
   })
 
   return (

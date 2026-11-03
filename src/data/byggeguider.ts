@@ -352,7 +352,7 @@ export const guideTopics: GuideTopic[] = [
     number: 32,
     slug: 'fundamenttyper',
     published: '2026-06-24',
-    title: 'Punktfundament, betongsåle eller skruefundament?',
+    title: 'Punktfundament eller skruefundament?',
     teaser: 'Sammenlign de vanligste fundamenttypene for terrasse, bod og carport.',
     phaseKey: 'planlegg',
     keywords: ['fundament', 'punktfundament', 'betongsåle', 'skruefundament', 'grunnarbeid', 'terrasse'],

@@ -175,6 +175,33 @@ export default function ProsessPage() {
   useSEO({
     title: 'Slik jobber vi – Minio',
     description: 'Fra første samtale til ferdig produkt – se hvordan Minio jobber med skreddersydde treløsninger. Kvalitet, presisjon og personlig oppfølging.',
+    // Stegene er en reell rekkefølge fra samtale til levering, så HowTo
+    // beskriver siden riktig – det er ikke markup lagt på for markupens skyld.
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        name: 'Slik jobber Minio',
+        description: 'Fra første samtale til ferdig, skreddersydd treprodukt.',
+        inLanguage: 'nb-NO',
+        step: processSteps.map((steg, i) => ({
+          '@type': 'HowToStep',
+          position: i + 1,
+          // Tittelen har allerede nummerprefiks («1. Samtale …») – strip det,
+          // ellers dupliseres rekkefølgen i navnet.
+          name: steg.title.replace(/^\d+\.\s*/, ''),
+          text: steg.description,
+        })),
+      },
+      {
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Hjem', item: 'https://minio.no/' },
+          { '@type': 'ListItem', position: 2, name: 'Slik jobber vi', item: 'https://minio.no/slik-jobber-vi' },
+        ],
+      },
+    ],
   })
 
   return (

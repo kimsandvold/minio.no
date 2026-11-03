@@ -60,6 +60,7 @@ export const utedo: ProductTemplate<UtedoConfig> & PlanUtvidelser<UtedoConfig> =
   ikon: 'faToilet',
   bilde: '/images/products/utedo-3d.webp',
   beskrivelse: 'Tegn utedoen i 3D – med benk, toalettsete, lufterør, tømmeluke og lufting, dimensjonert for snølasten der du bor.',
+  seoBeskrivelse: 'Tegn utedoen i 3D – benk, toalettsete, lufterør og tømmeluke. Få materialliste, prisestimat og byggeplan for snølasten der du bor.',
   tilgjengelig: true,
   fraPris: 349,
   leveranser: ['plan'],
