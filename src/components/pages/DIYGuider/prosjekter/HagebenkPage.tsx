@@ -6,6 +6,7 @@ import ProductModal from '../../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../../shared/PageTransition'
 import { useSEO } from '../../../../hooks/useSEO'
+import { company } from '../../../../data/company'
 import { Callout, DataTable, H3, Ol, P, Ul } from '../GuideArticleLayout'
 
 const ACCENT = '#a8512c'
@@ -206,6 +207,71 @@ export default function HagebenkPage() {
       'Gratis byggeguide: bygg en stilren hagebenk i trykkimpregnert terrassebord, limt og skrudd sammen. Materialliste, mål og fremgangsmåte – steg for steg.',
     ogImage: '/images/byggeguider/hagebenk.webp',
     jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'HowTo',
+        name: 'Bygg en hagebenk',
+        datePublished: '2026-06-13',
+        dateModified: '2026-06-13',
+        author: {
+          '@type': 'Person',
+          name: company.founder,
+          jobTitle: company.founderTitle,
+          url: `${SITE_URL}/handlaget-i-tre`,
+        },
+        inLanguage: 'nb-NO',
+        description:
+          'Steg-for-steg byggeguide for en stilren hagebenk i trykkimpregnert terrassebord, limt og skrudd sammen.',
+        image: `${SITE_URL}/images/byggeguider/hagebenk.webp`,
+        totalTime: 'PT4H',
+        supply: [
+          { '@type': 'HowToSupply', name: 'Setebord 120 × 28 × 1000 mm, 6 stk' },
+          { '@type': 'HowToSupply', name: 'Beinbord lange 120 × 28 × 400 mm, 10 stk' },
+          { '@type': 'HowToSupply', name: 'Beinbord korte 120 × 28 × 280 mm, 4 stk' },
+          { '@type': 'HowToSupply', name: 'Avstandsklosser 100 × 100 × 28 mm, 8 stk' },
+          { '@type': 'HowToSupply', name: 'Utelim (D4)' },
+          { '@type': 'HowToSupply', name: 'Rustfrie eller varmgalvaniserte skruer' },
+        ],
+        tool: [
+          { '@type': 'HowToTool', name: 'Sag (hånd-, stikk- eller kappsag)' },
+          { '@type': 'HowToTool', name: 'Drill/skrutrekker med bor til forboring' },
+          { '@type': 'HowToTool', name: 'Tommestokk, blyant og vinkelhake' },
+          { '@type': 'HowToTool', name: 'Tvinger' },
+          { '@type': 'HowToTool', name: 'Slipepapir' },
+        ],
+        step: [
+          {
+            '@type': 'HowToStep',
+            position: 1,
+            name: 'Kapp delene',
+            text: 'Kapp alle delene etter materiallista. Bruk et anslag så like deler blir nøyaktig like lange.',
+          },
+          {
+            '@type': 'HowToStep',
+            position: 2,
+            name: 'Slip og bryt kantene',
+            text: 'Slip delene og bryt de skarpe kantene lett.',
+          },
+          {
+            '@type': 'HowToStep',
+            position: 3,
+            name: 'Bygg beina',
+            text: 'Bygg de to beina ved å lime og skru beinbordene sammen til to like sideseksjoner. Avstandsklossene settes nederst og holder beinbordene i avstand ved bunnen av beina.',
+          },
+          {
+            '@type': 'HowToStep',
+            position: 4,
+            name: 'Monter setet',
+            text: 'Monter setet av de seks lange bordene med jevne mellomrom. La annethvert setebord overlappe beinbordene i hver ende, slik at sete og bein griper inn i hverandre og låser hjørnet. Lim og skru hvert møtepunkt, og kontroller at benken står i vinkel før limet herder.',
+          },
+          {
+            '@type': 'HowToStep',
+            position: 5,
+            name: 'Overflatebehandle',
+            text: 'Overflatebehandle når alt er tørt og rent.',
+          },
+        ],
+      },
       {
         '@context': 'https://schema.org',
         '@type': 'BreadcrumbList',

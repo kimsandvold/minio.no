@@ -8,6 +8,24 @@ import GuideArticleLayout, {
 
 const sections: ArticleSection[] = [
   {
+    id: 'kort-fortalt',
+    heading: 'Kort fortalt',
+    content: (
+      <>
+        <P>
+          Mål to ganger, kapp én gang – et kutt tar du ikke tilbake. Mål alltid fra én fast
+          referansekant på bordet, ikke videre fra forrige merke: gjør du det, legger små feil seg
+          oppå hverandre til siste del er helt gal.
+        </P>
+        <P>
+          Bruk samme målebånd gjennom hele prosjektet, for to tommestokker kan vise ørlite
+          forskjellig. Merk med et lite kryss eller en V som peker mot målet, og merk hvilken side
+          av streken sagsnittet skal gå på.
+        </P>
+      </>
+    ),
+  },
+  {
     id: 'mal-to-ganger',
     heading: 'Mål to ganger, kapp én gang',
     content: (

@@ -8,6 +8,24 @@ import GuideArticleLayout, {
 
 const sections: ArticleSection[] = [
   {
+    id: 'kort-fortalt',
+    heading: 'Kort fortalt',
+    content: (
+      <>
+        <P>
+          Bruk vernebriller ved saging, boring og sliping, hørselvern ved elektrisk verktøy, og
+          støvmaske når du sliper eller kapper – særlig i impregnert tre.
+        </P>
+        <P>
+          Den vanligste nybegynnerfeilen er å holde bordet med én hånd og sage med den andre. Fest
+          alltid emnet med tvinger til en bukk eller benk, så har du begge hender på verktøyet og
+          hendene trygt unna bladet. Ta av hanskene ved bormaskin og annet roterende verktøy: en
+          hanske som hektes fast, trekker hånden med.
+        </P>
+      </>
+    ),
+  },
+  {
     id: 'verneutstyr',
     heading: 'Verneutstyr',
     content: (

@@ -9,6 +9,24 @@ import GuideArticleLayout, {
 
 const sections: ArticleSection[] = [
   {
+    id: 'kort-fortalt',
+    heading: 'Kort fortalt',
+    content: (
+      <>
+        <P>
+          Overflatebehandlingen avgjør om prosjektet holder seg pent i to år eller i tjue. For de
+          fleste uteprosjekter er beis eller olje det trygge valget – de slites pent og er enkle å
+          friske opp. Maling holder lenge, men flasser til slutt, og lakk sprekker gjerne ute.
+        </P>
+        <P>
+          Resultatet avgjøres før du åpner boksen: overflaten må være ren, tørr og ferdig slipt,
+          og alt slipestøv børstet bort. Nyinnkjøpt trykkimpregnert tre er ofte fuktig og må tørke
+          i flere uker før det behandles.
+        </P>
+      </>
+    ),
+  },
+  {
     id: 'hvorfor-behandle',
     heading: 'Hvorfor behandle overflaten?',
     content: (

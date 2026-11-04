@@ -9,6 +9,24 @@ import GuideArticleLayout, {
 
 const sections: ArticleSection[] = [
   {
+    id: 'kort-fortalt',
+    heading: 'Kort fortalt',
+    content: (
+      <>
+        <P>
+          Skruen bør gå minst dobbelt så langt inn i det nederste bordet som tykkelsen på det
+          øverste. Skrur du gjennom et bord på 20 mm, trenger du altså rundt 60 mm skrue.
+        </P>
+        <P>
+          Ute avgjør materialet like mye som lengden: varmgalvanisert til generelt utebruk,
+          rustfri A2 på utsatte og synlige detaljer, og syrefast A4 nær sjø. Blanke
+          innendørsskruer hører ikke hjemme ute – de ruster, mister grepet og setter varige svarte
+          renner i treet. Forbor nær endene, så sprekker ikke bordet.
+        </P>
+      </>
+    ),
+  },
+  {
     id: 'skruer',
     heading: 'Skruer',
     content: (

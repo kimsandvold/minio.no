@@ -8,6 +8,25 @@ import GuideArticleLayout, {
 
 const sections: ArticleSection[] = [
   {
+    id: 'kort-fortalt',
+    heading: 'Kort fortalt',
+    content: (
+      <>
+        <P>
+          Ta en runde rundt prosjektet en gang i året, helst om våren når treet er på sitt mest
+          utsatte etter vinteren. Se etter løse skruer og beslag, sprekker der vann kan samle seg,
+          steder der behandlingen er slitt bort eller flasser, og mørke flekker eller mykt tre –
+          som er tidlige tegn på råte.
+        </P>
+        <P>
+          Vask med vann, myk børste og eventuelt litt mildt rengjøringsmiddel. Hold deg unna
+          høytrykksspyleren: den river opp trefibrene. Nytt strøk tar du før det gamle er helt
+          borte, da er jobben langt mindre.
+        </P>
+      </>
+    ),
+  },
+  {
     id: 'hvorfor',
     heading: 'Litt stell, mange år',
     content: (

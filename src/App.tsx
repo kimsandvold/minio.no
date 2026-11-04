@@ -21,6 +21,7 @@ import GuiderSection from './components/home/GuiderSection'
 import GraveringSection from './components/home/GraveringSection'
 import SpillSection from './components/home/SpillSection'
 import { gjeldendeSesong, sesongInnhold } from './data/sesong'
+import { company } from './data/company'
 import LeveringSection from './components/home/LeveringSection'
 import Footer from './components/layout/Footer'
 import ProductModal from './components/shared/ProductModal/ProductModal'
@@ -93,6 +94,16 @@ function HomePage() {
           'https://www.facebook.com/profile.php?id=61576010648640',
           'https://www.instagram.com/minio2624',
         ],
+        // Hvem som står bak, og hva verkstedet faktisk kan. `knowsAbout` er den
+        // direkte måten å erklære temaautoritet på, og en navngitt innehaver
+        // knytter guidene til en person i stedet for bare et foretaksnavn.
+        founder: {
+          '@type': 'Person',
+          name: company.founder,
+          jobTitle: company.founderTitle,
+          url: 'https://minio.no/handlaget-i-tre',
+        },
+        knowsAbout: company.knowsAbout,
       },
       {
         '@context': 'https://schema.org',

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { useAuthContext } from '../../../context/AuthContext'
 import { useMediaQuery } from '../../../hooks/useMediaQuery'
@@ -31,6 +32,17 @@ import { byggGraveringSvg, lastNedSvg } from './graveringSvg'
 import { standardPlassering } from './graveringMotiv'
 import { sokSymboler } from './symbolsok'
 import { fyllLinjer, usePersonligTekst } from './usePersonligTekst'
+
+/**
+ * Produktet forsiden (eller en delt lenke) ber om via `?produkt=`.
+ * Valideres mot `synligeProdukter` – en gammel lenke til noe vi har tatt av
+ * salg skal lande på standardproduktet, ikke på et tomt konfiguratorskall.
+ */
+function produktFraUrl(raa: string | null): ProduktId | null {
+  if (!raa) return null
+  const treff = synligeProdukter.find((p) => p.id === raa)
+  return treff ? treff.id : null
+}
 
 /** Startvalget for et produkt, slik det er definert i produktdataene. */
 function startValg(id: ProduktId): Valg {
@@ -157,6 +169,10 @@ export default function Graveringkonfigurator() {
   useEffect(() => {
     loadDesignerFont(...graveringFonter)
   }, [])
+  // Forsidens produktkort lenker hit med ?produkt=, så kunden slipper å velge
+  // produkt på nytt etter å ha trykket på nøyaktig det hun ville ha.
+  const [sokeparametre] = useSearchParams()
+  const [startProdukt] = useState<ProduktId>(() => produktFraUrl(sokeparametre.get('produkt')) ?? 'fjol-rekt')
   const [kategori, settKategori] = useState<MalKategori>(() => (erJulegavesesong() ? 'jul' : 'klassisk'))
   /**
    * Malens rå tekst, med tokens. Vi tar vare på den ved siden av den utfylte
@@ -164,9 +180,9 @@ export default function Graveringkonfigurator() {
    * asynkront), kan vi fylle ut på nytt – men bare så lenge kunden ikke har
    * skrevet noe selv. Da er teksten deres, ikke vår.
    */
-  const [malLinjer, settMalLinjer] = useState<Valg['linjer']>(() => produkt('fjol-rekt').start.linjer)
+  const [malLinjer, settMalLinjer] = useState<Valg['linjer']>(() => produkt(startProdukt).start.linjer)
   const [egenTekst, settEgenTekst] = useState(false)
-  const [valg, settValg] = useState<Valg>(() => startValg('fjol-rekt'))
+  const [valg, settValg] = useState<Valg>(() => startValg(startProdukt))
   /**
    * Masseinnlegging: ett navn per linje. En bedrift som skal gi ti fjøler med
    * hvert sitt ansattnavn skal lime inn lista, ikke konfigurere ti ganger.

@@ -9,6 +9,7 @@ import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
 import { useSEO } from '../../../hooks/useSEO'
+import { company } from '../../../data/company'
 import {
   findTopic,
   guideHref,
@@ -643,12 +644,26 @@ export default function GuideArticleLayout({
             description: lead,
             inLanguage: 'nb-NO',
             ...(topic.published
-              ? { datePublished: topic.published, dateModified: topic.published }
+              ? {
+                  datePublished: topic.published,
+                  // Faller tilbake til publiseringsdatoen når artikkelen ikke er
+                  // revidert – da er den fortsatt korrekt «sist endret».
+                  dateModified: topic.updated ?? topic.published,
+                }
               : {}),
             url: articleUrl,
             mainEntityOfPage: articleUrl,
             ...(Number.isFinite(minutes) ? { timeRequired: `PT${minutes}M` } : {}),
-            author: { '@type': 'Organization', name: 'Minio', url: SITE_URL },
+            // Navngitt fagperson, ikke bare foretaket: guidene er skrevet av en
+            // som faktisk bygger disse tingene, og det er et troverdighetssignal
+            // både søk og AI-svar vekter.
+            author: {
+              '@type': 'Person',
+              name: company.founder,
+              jobTitle: company.founderTitle,
+              worksFor: { '@type': 'Organization', name: company.brand, url: SITE_URL },
+              url: `${SITE_URL}/handlaget-i-tre`,
+            },
             publisher: {
               '@type': 'Organization',
               name: 'Minio',

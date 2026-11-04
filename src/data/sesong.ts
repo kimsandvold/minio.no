@@ -52,6 +52,23 @@ interface SesongInnhold {
   }
 }
 
+/**
+ * Gravering-teksten i julegavesesongen. November og desember er verkstedets
+ * viktigste salgsperiode, så da overstyrer dette vintervarianten; resten av
+ * vinteren står teksten i `sesongInnhold.vinter`.
+ */
+export const julegaveInnhold: SesongInnhold['gravering'] = {
+  eyebrow: 'Gravering · julegaver',
+  tittel: 'Julegaven med navnet på.',
+  ingress:
+    'Skjærefjøl i bøk, pregekjevle til pepperkakene eller drikkeflaske i stål – med navn, dato eller en hilsen. Du skriver teksten og ser gaven bli til med en gang. Vi graverer i verkstedet på Lillehammer og sender den hjem til deg.',
+}
+
+/** Teksten gravering-seksjonen skal ha nå: jul slår vinter, vinter slår sommer. */
+export function graveringInnhold(dato: Date = new Date()): SesongInnhold['gravering'] {
+  return erJulegavesesong(dato) ? julegaveInnhold : sesongInnhold[gjeldendeSesong(dato)].gravering
+}
+
 export const sesongInnhold: Record<Sesong, SesongInnhold> = {
   vinter: {
     forsideRekkefolge: ['gravering', 'veier', 'produkter', 'designer', 'kompass', 'guider', 'spill', 'levering'],

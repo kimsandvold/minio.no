@@ -6,6 +6,7 @@ import ProductModal from '../../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../../shared/PageTransition'
 import { useSEO } from '../../../../hooks/useSEO'
+import { company } from '../../../../data/company'
 import { Callout, DataTable, H3, Ol, P, Ul } from '../GuideArticleLayout'
 
 const ACCENT = '#a8512c'
@@ -213,6 +214,14 @@ export default function PidestallUtendorsPage() {
         '@context': 'https://schema.org',
         '@type': 'HowTo',
         name: 'Bygg en pidestall utendørs',
+        datePublished: '2026-06-13',
+        dateModified: '2026-06-13',
+        author: {
+          '@type': 'Person',
+          name: company.founder,
+          jobTitle: company.founderTitle,
+          url: `${SITE_URL}/handlaget-i-tre`,
+        },
         description:
           'Steg-for-steg byggeguide for en klassisk søyle-pidestall i trykkimpregnert terrassebord, med bred sokkel, gjæret søyle og speilet topp.',
         image: imageUrl,

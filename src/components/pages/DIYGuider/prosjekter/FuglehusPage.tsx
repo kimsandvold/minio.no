@@ -6,6 +6,7 @@ import ProductModal from '../../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../../shared/PageTransition'
 import { useSEO } from '../../../../hooks/useSEO'
+import { company } from '../../../../data/company'
 import { Callout, DataTable, H3, Ol, P, Ul } from '../GuideArticleLayout'
 
 const ACCENT = '#a8512c'
@@ -244,6 +245,14 @@ export default function FuglehusPage() {
         '@context': 'https://schema.org',
         '@type': 'HowTo',
         name: 'Bygge fuglehus',
+        datePublished: '2026-07-22',
+        dateModified: '2026-07-22',
+        author: {
+          '@type': 'Person',
+          name: company.founder,
+          jobTitle: company.founderTitle,
+          url: `${SITE_URL}/handlaget-i-tre`,
+        },
         inLanguage: 'nb-NO',
         description:
           'Steg-for-steg byggeguide for et fuglehus i ubehandlet tre, med bunnbrett med kant, fire vegger, saltak og sittepinne.',

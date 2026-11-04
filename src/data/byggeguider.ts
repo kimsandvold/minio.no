@@ -11,8 +11,15 @@ export interface GuideTopic {
   phaseKey: string
   /** Extra search terms / synonyms so search matches even when the word isn't in the title. */
   keywords: string[]
-  /** ISO publish date (also used as dateModified) for Article schema / SEO freshness. */
+  /** ISO publish date for Article schema / SEO freshness. */
   published?: string
+  /**
+   * ISO-dato for siste reelle innholdsendring. Settes bare når artikkelen
+   * faktisk er oppdatert – da får Article-markupen en `dateModified` som skiller
+   * seg fra `datePublished`, og ferskheten blir lesbar for søk og AI-svar.
+   * Utelatt = artikkelen står som den ble publisert.
+   */
+  updated?: string
   /** Whether the article page is published yet. Unpublished topics show as "Kommer snart". */
   available: boolean
 }
@@ -666,6 +673,10 @@ export interface GuideProject {
   teaser: string
   difficulty: string
   time: string
+  /** ISO publish date for HowTo-/Article-schema og ferskhet i søk. */
+  published?: string
+  /** ISO-dato for siste reelle innholdsendring. Se GuideTopic.updated. */
+  updated?: string
   /** Public path under /images, or null while we wait for a photo. */
   image: string | null
   available: boolean
@@ -674,6 +685,7 @@ export interface GuideProject {
 export const guideProjects: GuideProject[] = [
   {
     slug: 'hagebenk',
+    published: '2026-06-13',
     title: 'Hagebenk',
     teaser: 'En stilren, slettet benk i trykkimpregnert terrassebord – limt og skrudd sammen.',
     difficulty: 'Nybegynner',
@@ -683,6 +695,7 @@ export const guideProjects: GuideProject[] = [
   },
   {
     slug: 'pidestall-utendors',
+    published: '2026-06-13',
     title: 'Pidestall utendørs',
     teaser: 'En klassisk søyle-pidestall i terrassebord – perfekt sokkel for en potteplante eller skulptur ute.',
     difficulty: 'Nybegynner',
@@ -692,6 +705,7 @@ export const guideProjects: GuideProject[] = [
   },
   {
     slug: 'fuglehus',
+    published: '2026-07-22',
     title: 'Fuglehus',
     teaser: 'Et klassisk fuglehus med saltak, innflygningshull og sittepinne – et lite prosjekt du bygger på en ettermiddag.',
     difficulty: 'Nybegynner',

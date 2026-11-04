@@ -9,6 +9,25 @@ import GuideArticleLayout, {
 
 const sections: ArticleSection[] = [
   {
+    id: 'kort-fortalt',
+    heading: 'Kort fortalt',
+    content: (
+      <>
+        <P>
+          Start med hva konstruksjonen skal tåle: vekt ovenfra, belastning fra siden, og slitasje
+          over tid. Den vanligste grunnen til at hjemmesnekrede møbler vakler er manglende
+          avstivning – en firkant av fire bord kan vri seg til en skjev rombe uten at en eneste
+          skrue ryker.
+        </P>
+        <P>
+          Løsningen er å innføre trekanter: en diagonal skråstiver eller en bakplate som låser
+          formen. Testen er enkel – dytt forsiktig på den ferdige rammen fra siden. Vrir den seg,
+          mangler den avstivning.
+        </P>
+      </>
+    ),
+  },
+  {
     id: 'hva-skal-det-tale',
     heading: 'Hva skal det tåle?',
     content: (

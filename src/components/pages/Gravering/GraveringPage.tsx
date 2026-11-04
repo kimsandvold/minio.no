@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
@@ -295,8 +296,21 @@ function seo(jul: boolean) {
 export default function GraveringPage() {
   const [skiltdesigner, settSkiltdesigner] = useState(false)
   const jul = erJulegavesesong()
+  const [sokeparametre] = useSearchParams()
+  const direkteProdukt = sokeparametre.get('produkt')
 
   useSEO(seo(jul))
+
+  /**
+   * Kommer kunden fra et produktkort på forsiden, har hun allerede valgt hva
+   * hun vil ha – da skal hun ikke lande på toppen og måtte bla ned igjen.
+   * `useSEO` ruller til toppen ved montering, så vi venter én frame på den.
+   */
+  useEffect(() => {
+    if (!direkteProdukt) return
+    const frame = requestAnimationFrame(tilKonfigurator)
+    return () => cancelAnimationFrame(frame)
+  }, [direkteProdukt])
 
   return (
     <>

@@ -9,6 +9,24 @@ import GuideArticleLayout, {
 
 const sections: ArticleSection[] = [
   {
+    id: 'kort-fortalt',
+    heading: 'Kort fortalt',
+    content: (
+      <>
+        <P>
+          Tommestokk, blyant, vinkelhake, håndsag, drill og et par tvinger. Har du dette, kan du
+          bygge de aller fleste hageprosjekter – resten er tempo og bekvemmelighet.
+        </P>
+        <P>
+          Presisjonen starter med måleverktøyet, ikke med maskinene: en vinkelhake og en blyant med
+          fin spiss gjør mer for resultatet enn dyrt elektroverktøy. Bruk samme målebånd gjennom
+          hele prosjektet, for to tommestokker kan vise ørlite forskjellig – og da slutter delene å
+          passe.
+        </P>
+      </>
+    ),
+  },
+  {
     id: 'grunnutstyret',
     heading: 'Grunnutstyret',
     content: (

@@ -9,6 +9,25 @@ import GuideArticleLayout, {
 
 const sections: ArticleSection[] = [
   {
+    id: 'kort-fortalt',
+    heading: 'Kort fortalt',
+    content: (
+      <>
+        <P>
+          Velg treslag etter hvor det skal stå. Nær eller i kontakt med bakken: trykkimpregnert,
+          gjerne klasse for markkontakt. Fritt ute over bakken: impregnert, lerk eller godt
+          behandlet furu. Under tak eller innendørs klarer du deg med ubehandlet gran og furu – ofte
+          billigere og med et renere uttrykk.
+        </P>
+        <P>
+          Lerk og sedertre har naturlig motstand mot råte og er pene ubehandlet, men koster mer. Og
+          husk at trelast selges i nominelle mål som ikke er de faktiske – et 48×98 måler mindre enn
+          navnet sier.
+        </P>
+      </>
+    ),
+  },
+  {
     id: 'vanlige-tretyper',
     heading: 'Vanlige tretyper',
     content: (

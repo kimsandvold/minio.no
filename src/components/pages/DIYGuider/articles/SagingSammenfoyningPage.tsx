@@ -9,6 +9,25 @@ import GuideArticleLayout, {
 
 const sections: ArticleSection[] = [
   {
+    id: 'kort-fortalt',
+    heading: 'Kort fortalt',
+    content: (
+      <>
+        <P>
+          Et rett kutt handler om ro, ikke kraft. Fest bordet med tvinger slik at kappestedet er
+          fritt utenfor underlaget, start med noen korte drag for å lage et spor å følge, og hold
+          bladet loddrett mens du følger streken med blikket. Senk tempoet mot slutten og støtt
+          avkappet, ellers brekker det ned av egen vekt og river med seg en flis.
+        </P>
+        <P>
+          Håndsagen er presis nok til det meste. Sirkelsag sparer tid når det er mange rette kutt,
+          stikksag tar kurver og utsparinger, og kapp- eller gjærsag gir nøyaktige vinkelkutt på
+          rekke og rad.
+        </P>
+      </>
+    ),
+  },
+  {
     id: 'rett-kapp',
     heading: 'Slik sager du rett',
     content: (

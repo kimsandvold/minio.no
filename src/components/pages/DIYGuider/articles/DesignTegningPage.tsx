@@ -9,6 +9,24 @@ import GuideArticleLayout, {
 
 const sections: ArticleSection[] = [
   {
+    id: 'kort-fortalt',
+    heading: 'Kort fortalt',
+    content: (
+      <>
+        <P>
+          Tegn prosjektet før du kapper: alt er gratis å endre på et ark og dyrt å endre i
+          materialet. Tegn fra flere sider – forfra, fra siden og ovenfra – for det er først da du
+          ser hvordan delene faktisk møtes. Sett på alle mål, og regn kapplista ut fra tegningen,
+          så vet du hva du skal kjøpe før du står i butikken.
+        </P>
+        <P>
+          Papir og blyant holder til de fleste hageprosjekter. Ruteark hjelper når målene skal
+          stemme, og digitalt i 3D lønner seg først på større eller mer presise bygg.
+        </P>
+      </>
+    ),
+  },
+  {
     id: 'hvorfor-tegne',
     heading: 'Hvorfor tegne før du bygger?',
     content: (

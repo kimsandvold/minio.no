@@ -1,0 +1,2028 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+    <title>Kursmester – Minio Underholdning</title>
+    <meta name="description" content="Koble opp lyskurser, endevendere, dimmere og varmekabel på koblingsskjema. Slå på automaten og se om det holder."/>
+
+    <meta name="theme-color" content="#06080b"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <link rel="apple-touch-icon" href="/favicon.svg"/>
+
+    <style>
+        /*
+         * DESIGNTESE: brettet er et instrument, og STRØM ER DEN ENESTE FARGEN.
+         *
+         * Uten spenning er alt nær monokromt – hårfine grå symboler på et
+         * presist rutenett. I det automaten slås på, blomstrer den
+         * strømførende banen: lederfargene mettes, strømmen animeres, og lampa
+         * kaster faktisk lys ut på rutenettet.
+         *
+         * Derfor: ingen kort, ingen glassflater, ingen slagskygger. Dybden
+         * kommer fra lys – slik den gjør i et ekte anlegg.
+         */
+        :root {
+            --nat: #06080b;
+            --nat-2: #0a0e13;
+            --rute: rgba(132, 162, 196, 0.05);
+            --rute-5: rgba(132, 162, 196, 0.1);
+            --haar: rgba(160, 186, 214, 0.16);
+            --haar-2: rgba(160, 186, 214, 0.3);
+            --tekst: #e6edf5;
+            --dempet: #a7b6c6;
+            --svak: #525f6e;
+
+            /* Lederfarger: dempet uten spenning, mettet når strømmen går. */
+            --L-av: #6b4b36;   --L-pa: #e08a4e;
+            --N-av: #36506b;   --N-pa: #5aa8ee;
+            --PE-av: #5a6236;  --PE-pa: #cfe04a;
+
+            --strom: #ffd98a;
+            --glod: #ffc247;
+            --feil: #ff4d3d;
+            --god: #4fe08a;
+
+            --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+            --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%; height: 100dvh;
+            overflow: hidden; position: fixed; inset: 0;
+            background: var(--nat); color: var(--tekst);
+            font-family: var(--font);
+            -webkit-font-smoothing: antialiased;
+            touch-action: none; overscroll-behavior: none;
+            -webkit-user-select: none; user-select: none;
+            -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+        }
+        canvas#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+        /* ---------- Topplinje: tynn, instrumentaktig ---------- */
+        #topp {
+            position: fixed; left: 0; right: 0; top: 0; z-index: 10;
+            padding: calc(var(--sat) + 14px) 16px 12px;
+            display: flex; align-items: flex-start; gap: 12px;
+            background: linear-gradient(to bottom, var(--nat) 40%, rgba(6,8,11,0));
+        }
+        #topp .tx { flex: 1; min-width: 0; }
+        #topp .klokke {
+            float: right; font-variant-numeric: tabular-nums;
+            color: var(--dempet); letter-spacing: .06em;
+            text-transform: none;          /* arvet uppercase fra .kurs – «0.3 S» */
+            transition: color .3s ease;
+        }
+        #topp .klokke b { font-weight: 500; color: var(--tekst); }
+        #topp .klokke.over b { color: var(--glod); }
+        #topp .klokke.over { color: var(--glod); }
+        .kaprad {
+            grid-column: 1 / -1; margin: 12px 0 2px;
+            font-family: var(--mono); font-size: 9.5px; letter-spacing: .16em;
+            text-transform: uppercase; color: var(--svak);
+        }
+        .kaprad:first-child { margin-top: 0; }
+        #topp .kurs {
+            font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em;
+            text-transform: uppercase; color: var(--svak);
+        }
+        #topp h1 {
+            margin: 3px 0 0; font-size: 17px; font-weight: 600; letter-spacing: -.012em;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        #topp .maal { margin: 2px 0 0; font-size: 12px; color: var(--dempet); line-height: 1.35; }
+
+        .ikon {
+            width: 40px; height: 40px; flex: none;
+            display: grid; place-items: center;
+            background: none; border: 1px solid var(--haar); border-radius: 10px;
+            color: var(--dempet); cursor: pointer;
+        }
+        .ikon:active { background: rgba(255,255,255,.05); }
+        .ikon svg { width: 18px; height: 18px; }
+
+        /* Fremdriftsskinne – én strek per brett */
+        #skinne { position: fixed; left: 16px; right: 16px; top: calc(var(--sat) + 5px); z-index: 11; display: flex; gap: 3px; }
+        #skinne i { flex: 1; height: 2px; background: var(--haar); border-radius: 1px; transition: background .4s ease; }
+        #skinne i.klar { background: var(--glod); }
+        #skinne i.na { background: var(--tekst); }
+
+        /* ---------- Bunnlinje ---------- */
+        #bunn {
+            position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
+            padding: 14px 16px calc(var(--sab) + 16px);
+            display: flex; align-items: center; gap: 10px;
+            background: linear-gradient(to top, var(--nat) 55%, rgba(6,8,11,0));
+        }
+        .verk {
+            width: 52px; height: 52px; flex: none;
+            display: grid; place-items: center;
+            background: none; border: 1px solid var(--haar); border-radius: 13px;
+            color: var(--dempet); cursor: pointer;
+        }
+        .verk:active { background: rgba(255,255,255,.05); transform: scale(.95); }
+        .verk svg { width: 20px; height: 20px; }
+
+        /*
+         * Automaten er tegnet som en ekte vippe i et sikringsskap: spaken står
+         * nede når den er av, og slår opp når du trykker. Det er den mest
+         * tilfredsstillende knappen i spillet, så den fortjener å være fysisk.
+         */
+        #automat {
+            flex: 1; height: 52px;
+            display: flex; align-items: center; gap: 12px;
+            padding: 0 14px 0 7px;
+            background: linear-gradient(180deg, #161c24, #0e131a);
+            border: 1px solid var(--haar-2); border-radius: 13px;
+            cursor: pointer; color: var(--tekst); font-family: var(--font);
+            transition: border-color .2s ease;
+        }
+        #automat:active { transform: scale(.985); }
+        #automat .vippe {
+            width: 30px; height: 40px; flex: none; border-radius: 6px;
+            background: #080b0f; border: 1px solid var(--haar);
+            position: relative; overflow: hidden;
+        }
+        #automat .vippe::after {
+            content: ''; position: absolute; left: 4px; right: 4px; height: 14px;
+            border-radius: 3px; background: var(--svak);
+            bottom: 4px; transition: bottom .18s cubic-bezier(.3,1.7,.5,1), background .18s ease;
+        }
+        #automat.pa .vippe::after { bottom: 20px; background: var(--god); }
+        #automat .blokk { text-align: left; }
+        #automat .et2 { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--svak); }
+        #automat .tx2 { display: block; font-size: 14.5px; font-weight: 650; margin-top: 2px; }
+        #automat.seier {
+            background: linear-gradient(180deg, #ffd98a, #f0b545);
+            border-color: #ffe3a6;
+        }
+        #automat.seier .et2 { color: rgba(29,20,3,.62); }
+        #automat.seier .tx2 { color: #1d1403; }
+        #automat.seier .vippe { background: rgba(29,20,3,.22); border-color: rgba(29,20,3,.25); }
+        #automat.seier .vippe::after { background: #1d1403; bottom: 20px; }
+        #automat.pa { border-color: rgba(79,224,138,.45); }
+        #automat.pa .tx2 { color: var(--god); }
+
+        /* ---------- Paneler ---------- */
+        .lag {
+            position: fixed; inset: 0; z-index: 40;
+            background: rgba(4, 6, 9, .84);
+            backdrop-filter: blur(14px);
+            display: grid; place-items: center;
+            padding: calc(var(--sat) + 16px) 16px calc(var(--sab) + 16px);
+            overflow-y: auto;
+        }
+        .lag[hidden] { display: none; }
+        .ark {
+            width: 100%; max-width: 430px;
+            background: var(--nat-2);
+            border: 1px solid var(--haar); border-radius: 18px;
+            padding: 24px 22px 20px;
+        }
+        .ark h2 { margin: 0 0 6px; font-size: 24px; font-weight: 680; letter-spacing: -.02em; line-height: 1.12; }
+        .ark .ing { margin: 0 0 18px; font-size: 13.5px; color: var(--dempet); line-height: 1.55; }
+        .et {
+            display: block; font-family: var(--mono); font-size: 9.5px;
+            letter-spacing: .2em; text-transform: uppercase; color: var(--glod); margin-bottom: 9px;
+        }
+        .hpk { display: flex; gap: 9px; margin-top: 16px; }
+        .hk {
+            flex: 1; height: 50px; border-radius: 13px; cursor: pointer;
+            border: 1px solid var(--haar-2); background: none; color: var(--tekst);
+            font-family: var(--font); font-size: 14px; font-weight: 650;
+        }
+        .hk.pri { background: linear-gradient(180deg, #ffd98a, #f0b545); border-color: #ffe3a6; color: #1d1403; }
+        .hk:active { transform: scale(.97); }
+
+        .fag {
+            margin: 0; padding: 14px 16px; border-radius: 12px;
+            background: rgba(255, 194, 71, .06);
+            border-left: 2px solid var(--glod);
+            font-size: 13px; line-height: 1.6; color: #efe2c8;
+        }
+        .fag b { color: var(--glod); font-weight: 650; }
+        .fag .norm {
+            display: block; margin-top: 8px; font-family: var(--mono);
+            font-size: 10px; color: var(--svak); letter-spacing: .05em;
+        }
+
+        .stj { display: flex; gap: 8px; justify-content: center; margin: 10px 0 16px; }
+        .stj span { font-size: 26px; color: #1b222b; transition: color .4s ease, transform .4s cubic-bezier(.3,1.6,.5,1); }
+        .stj span.pa { color: var(--glod); transform: scale(1.18); text-shadow: 0 0 20px rgba(255,194,71,.55); }
+
+        .tall { display: flex; gap: 1px; background: var(--haar); border: 1px solid var(--haar); border-radius: 12px; overflow: hidden; }
+        .tall > div { flex: 1; text-align: center; padding: 11px 4px; background: var(--nat-2); }
+        .tall .v { font-family: var(--mono); font-size: 17px; font-weight: 600; font-variant-numeric: tabular-nums; }
+        .tall .k { font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--svak); margin-top: 3px; }
+
+        .velg { margin-top: 14px; }
+        .velg .sp { font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--svak); font-family: var(--mono); margin-bottom: 7px; }
+        .rk { display: flex; gap: 7px; margin-bottom: 13px; }
+        .rk button {
+            flex: 1; padding: 13px 4px; cursor: pointer;
+            background: none; border: 1px solid var(--haar); border-radius: 10px;
+            color: var(--dempet); font-family: var(--mono); font-size: 13px;
+        }
+        .rk button.valgt { border-color: var(--glod); color: var(--glod); background: rgba(255,194,71,.08); }
+        .rk button:active { transform: scale(.96); }
+
+        .brett { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+        .brett button {
+            aspect-ratio: 1; cursor: pointer; padding: 3px;
+            background: none; border: 1px solid var(--haar); border-radius: 11px;
+            color: var(--tekst); font-family: var(--font);
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
+        }
+        .brett button .n { font-family: var(--mono); font-size: 16px; font-weight: 600; }
+        .brett button .s { font-size: 8px; color: var(--glod); height: 10px; letter-spacing: -.5px; }
+        .brett button.laast { opacity: .3; }
+        .brett button.klar { border-color: rgba(255,194,71,.4); }
+
+        #varsel {
+            position: fixed; left: 16px; right: 16px; z-index: 30; pointer-events: none;
+            bottom: calc(var(--sab) + 88px);
+            padding: 13px 16px; border-radius: 12px;
+            background: rgba(10, 13, 18, .96); border: 1px solid var(--haar-2);
+            border-left-width: 2px;
+            font-size: 13.5px; line-height: 1.45;
+            opacity: 0; transform: translateY(8px);
+            transition: opacity .22s ease, transform .22s ease;
+        }
+        #varsel.vis { opacity: 1; transform: translateY(0); }
+        #varsel.feil { border-left-color: var(--feil); }
+        #varsel.ok { border-left-color: var(--god); }
+        #varsel.ok b { color: var(--god); }
+
+        .lenk { background: none; border: none; color: var(--dempet); font-family: var(--font); font-size: 12.5px; text-decoration: underline; cursor: pointer; padding: 10px; width: 100%; }
+        .delr { display: flex; gap: 8px; margin-top: 9px; }
+        .delr button { flex: 1; height: 44px; border-radius: 11px; border: 1px solid var(--haar); background: none; color: var(--dempet); font-family: var(--font); font-size: 12.5px; font-weight: 600; cursor: pointer; }
+
+        /* Lederkoden er pensum – den står på startskjermen */
+        .ledere { display: flex; gap: 10px; margin: 16px 0 0; }
+        .ledere > div { flex: 1; text-align: center; }
+        .ledere i { display: block; height: 3px; border-radius: 2px; margin-bottom: 8px; }
+        .ledere .t { font-family: var(--mono); font-size: 11px; font-weight: 600; }
+        .ledere .u { font-size: 9.5px; color: var(--svak); margin-top: 3px; }
+    </style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+<div id="skinne"></div>
+
+<div id="topp">
+    <div class="tx">
+        <div class="kurs"><span id="hKurs">Kurs 1 · 10 A</span> <span id="hKlokke" class="klokke">0.0 s</span></div>
+        <h1 id="hTittel">Lys i boden</h1>
+        <p class="maal" id="hMaal">Koble lampa så den tennes med bryteren.</p>
+    </div>
+    <button class="ikon" id="bHjelp" aria-label="Fagstoff">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.4 2.4 0 1 1 3.1 2.3c-.6.2-.9.7-.9 1.3v.4"/><path d="M12 16.8h.01"/></svg>
+    </button>
+    <button class="ikon" id="bMeny" aria-label="Velg brett">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
+    </button>
+</div>
+
+<div id="varsel"></div>
+
+<div id="bunn">
+    <button class="verk" id="bAngre" aria-label="Angre siste ledning">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>
+    </button>
+    <button class="verk" id="bTom" aria-label="Fjern alle ledninger">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>
+    </button>
+    <button id="automat">
+        <span class="vippe"></span>
+        <span class="blokk">
+            <span class="et2" id="aEt">Automat</span>
+            <span class="tx2" id="aTx">Slå på</span>
+        </span>
+    </button>
+</div>
+
+<div class="lag" id="start">
+    <div class="ark">
+        <span class="et">Minio Underholdning</span>
+        <h2>Kursmester</h2>
+        <p class="ing">
+            Koble opp kursen på skjemaet, slå på automaten og se om den holder.
+            Fra én bryter og ei pære til endevender, dimmer og varmekabel – med
+            kurs du må dimensjonere selv.
+        </p>
+        <div class="fag">
+            Strøm er den eneste fargen her. Uten spenning er brettet grått –
+            slår du på, lyser den strømførende banen opp. Går det galt, strober
+            feilen rødt der den faktisk er.
+        </div>
+        <div class="ledere">
+            <div><i style="background:var(--L-pa)"></i><div class="t">L</div><div class="u">brun · fase</div></div>
+            <div><i style="background:var(--N-pa)"></i><div class="t">N</div><div class="u">blå · nøytral</div></div>
+            <div><i style="background:var(--PE-pa)"></i><div class="t">PE</div><div class="u">gulgrønn · jord</div></div>
+        </div>
+        <div class="hpk"><button class="hk pri" id="bStart">Start på brett 1</button></div>
+        <button class="lenk" id="bVelgBrett">Velg brett</button>
+    </div>
+</div>
+
+<div class="lag" id="fagpanel" hidden>
+    <div class="ark">
+        <span class="et" id="fEt">Fagstoff</span>
+        <h2 id="fTittel">Serie og retur</h2>
+        <div class="fag" id="fTekst"></div>
+        <div class="hpk"><button class="hk pri" id="fLukk">Skjønner</button></div>
+    </div>
+</div>
+
+<div class="lag" id="menypanel" hidden>
+    <div class="ark">
+        <span class="et">Koblingsbrett</span>
+        <h2>Velg brett</h2>
+        <p class="ing">Hvert brett låses opp når du har klart det forrige.</p>
+        <div class="tall" style="margin-bottom:14px">
+            <div><div class="v" id="mKlart">0</div><div class="k">Brett klart</div></div>
+            <div><div class="v" id="mStj">0</div><div class="k">Stjerner</div></div>
+            <div><div class="v" id="mPoeng">0</div><div class="k">Poeng</div></div>
+        </div>
+        <div class="brett" id="brettliste"></div>
+        <div class="hpk"><button class="hk" id="mLukk">Lukk</button></div>
+    </div>
+</div>
+
+<div class="lag" id="dimpanel" hidden>
+    <div class="ark">
+        <span class="et">Før du kobler</span>
+        <h2>Dimensjoner kursen</h2>
+        <p class="ing" id="dUnder">Velg kabel og vern som passer lasten.</p>
+        <div class="velg">
+            <div class="sp">Kabeltverrsnitt</div><div class="rk" id="dKabel"></div>
+            <div class="sp">Automatsikring</div><div class="rk" id="dVern"></div>
+            <div class="sp">Jordfeilvern</div><div class="rk" id="dJfb"></div>
+        </div>
+        <div class="hpk"><button class="hk pri" id="dOk">Monter i skapet</button></div>
+    </div>
+</div>
+
+<div class="lag" id="resultat" hidden>
+    <div class="ark">
+        <span class="et" id="rEt">Brett klart</span>
+        <h2 id="rTittel">Lyset virker</h2>
+        <div class="stj" id="rStj"><span>★</span><span>★</span><span>★</span></div>
+        <div class="tall">
+            <div><div class="v" id="rTid">–</div><div class="k" id="rTidK">Tid</div></div>
+            <div><div class="v" id="rLedn">–</div><div class="k" id="rLednK">Ledninger</div></div>
+            <div><div class="v" id="rPoeng">–</div><div class="k" id="rPoengK">Poeng</div></div>
+        </div>
+        <div style="height:16px"></div>
+        <div class="fag" id="rFag"></div>
+        <div class="hpk"><button class="hk pri" id="rNeste">Neste brett</button></div>
+        <div class="delr">
+            <button id="rDel">Utfordre en kompis</button>
+            <button id="rOm">Prøv igjen</button>
+        </div>
+    </div>
+</div>
+
+<script>
+'use strict';
+/* ====================================================================
+   KURSMESTER – koblingsskjema etter IEC 60617
+
+   Symbolene er ekte skjemasymboler, ikke ikoner: å lese et koblingsskjema
+   ER ferdigheten en lærling skal ha. Ledningene rutes ortogonalt, slik et
+   skjema faktisk tegnes.
+
+     1. Lyd   2. Symbolbibliotek   3. Brett   4. Kretsløser
+     5. Ruting   6. Tegning   7. Inndata   8. Spillflyt
+   ==================================================================== */
+const $ = (id) => document.getElementById(id);
+const SITE = location.origin + location.pathname;
+let MONO = 'monospace';
+
+/* ---------- 1. Lyd ------------------------------------------------ */
+let AC = null;
+function lyd() {
+    if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+    if (AC.state === 'suspended') AC.resume();
+    return AC;
+}
+function tone(f, dur, type, gain, f2) {
+    const a = lyd(); if (!a) return;
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = type || 'sine'; o.frequency.setValueAtTime(f, a.currentTime);
+    if (f2) o.frequency.exponentialRampToValueAtTime(f2, a.currentTime + dur);
+    g.gain.setValueAtTime(0, a.currentTime);
+    g.gain.linearRampToValueAtTime(gain || .12, a.currentTime + .006);
+    g.gain.exponentialRampToValueAtTime(.0001, a.currentTime + dur);
+    o.connect(g); g.connect(a.destination);
+    o.start(); o.stop(a.currentTime + dur + .02);
+}
+function stoy(dur, gain, freq) {
+    const a = lyd(); if (!a) return;
+    const n = Math.floor(a.sampleRate * dur);
+    const b = a.createBuffer(1, n, a.sampleRate), d = b.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+    const s = a.createBufferSource(); s.buffer = b;
+    const f = a.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq || 1200; f.Q.value = 1.1;
+    const g = a.createGain(); g.gain.value = gain || .3;
+    s.connect(f); f.connect(g); g.connect(a.destination); s.start();
+}
+const SFX = {
+    tapp:    () => tone(1700, .03, 'square', .05),
+    ledning: () => tone(560, .05, 'triangle', .05, 780),
+    bryter:  () => { tone(1100, .03, 'square', .08); setTimeout(() => tone(700, .04, 'square', .05), 28); },
+    fjern:   () => tone(320, .06, 'sawtooth', .045, 180),
+    pa:      () => { tone(130, .45, 'sine', .07, 185); setTimeout(() => tone(1400, .2, 'sine', .04, 1900), 70); },
+    smell:   () => { stoy(.24, .45, 850); tone(85, .32, 'square', .17, 42); },
+    klar:    () => { [587, 784, 1175].forEach((f, i) => setTimeout(() => tone(f, .32, 'sine', .1), i * 90)); },
+    feil:    () => tone(200, .2, 'sawtooth', .09, 130)
+};
+
+/* ---------- 2. Symbolbibliotek (IEC 60617) ------------------------- */
+/*
+ * Hver type har klemmer med posisjon OG retning `d`. Retningen styrer hvilken
+ * vei ledningen forlater klemma, slik at ortogonal ruting ser riktig ut.
+ * `tegn(g, S, st)` tegner symbolet i komponentens lokale koordinater.
+ */
+function prikk(g, x, y, r) { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
+
+const TYPER = {
+    kurs: {
+        navn: 'Fordeling', b: 160, h: 150, kilde: true,
+        klemmer: [
+            { id: 'L',  x: 76, y: -44, d: [1, 0], farge: 'L',  tekst: 'L' },
+            { id: 'N',  x: 76, y: 0,   d: [1, 0], farge: 'N',  tekst: 'N' },
+            { id: 'PE', x: 76, y: 44,  d: [1, 0], farge: 'PE', tekst: 'PE' }
+        ],
+        intern: () => [],
+        tegn: (g, S, st) => {
+            g.strokeRect(S(-74), S(-60), S(112), S(120));
+            g.strokeRect(S(-56), S(-40), S(32), S(54));           // automat
+            g.beginPath();
+            g.moveTo(S(-40), S(-28));
+            g.lineTo(S(-40), st.live ? S(-8) : S(6));             // vippa
+            g.stroke();
+            [-44, 0, 44].forEach((y) => {
+                g.beginPath(); g.moveTo(S(-24), S(y)); g.lineTo(S(76), S(y)); g.stroke();
+            });
+        }
+    },
+    bryter: {
+        navn: 'Bryter', b: 150, h: 92, klikkbar: true,
+        klemmer: [
+            { id: 'A', x: -64, y: 0, d: [-1, 0], farge: 'L', tekst: '1' },
+            { id: 'B', x: 64,  y: 0, d: [1, 0],  farge: 'L', tekst: '2' }
+        ],
+        intern: (k) => k.pa ? [['A', 'B']] : [],
+        tegn: (g, S, st) => {
+            g.beginPath(); g.moveTo(S(-64), 0); g.lineTo(S(-26), 0); g.moveTo(S(26), 0); g.lineTo(S(64), 0); g.stroke();
+            prikk(g, S(-26), 0, S(4.5)); prikk(g, S(26), 0, S(4.5));
+            g.beginPath(); g.moveTo(S(-26), 0);
+            if (st.pa) g.lineTo(S(26), 0); else g.lineTo(S(20), S(-32));
+            g.stroke();
+        }
+    },
+    vekselbryter: {
+        navn: 'Toveisbryter', b: 150, h: 116, klikkbar: true,
+        klemmer: [
+            { id: 'K', x: -64, y: 0,   d: [-1, 0], farge: 'L', tekst: 'K' },
+            { id: '1', x: 64,  y: -34, d: [1, 0],  farge: 'L', tekst: '1' },
+            { id: '2', x: 64,  y: 34,  d: [1, 0],  farge: 'L', tekst: '2' }
+        ],
+        intern: (k) => [['K', k.pa ? '1' : '2']],
+        tegn: (g, S, st) => {
+            g.beginPath(); g.moveTo(S(-64), 0); g.lineTo(S(-26), 0);
+            g.moveTo(S(26), S(-34)); g.lineTo(S(64), S(-34));
+            g.moveTo(S(26), S(34)); g.lineTo(S(64), S(34)); g.stroke();
+            prikk(g, S(-26), 0, S(4.5)); prikk(g, S(26), S(-34), S(4.5)); prikk(g, S(26), S(34), S(4.5));
+            g.beginPath(); g.moveTo(S(-26), 0); g.lineTo(S(26), st.pa ? S(-34) : S(34)); g.stroke();
+        }
+    },
+    kryssbryter: {
+        navn: 'Kryssbryter', b: 150, h: 116, klikkbar: true,
+        klemmer: [
+            { id: 'A1', x: -64, y: -34, d: [-1, 0], farge: 'L', tekst: '1' },
+            { id: 'A2', x: -64, y: 34,  d: [-1, 0], farge: 'L', tekst: '2' },
+            { id: 'B1', x: 64,  y: -34, d: [1, 0],  farge: 'L', tekst: '3' },
+            { id: 'B2', x: 64,  y: 34,  d: [1, 0],  farge: 'L', tekst: '4' }
+        ],
+        intern: (k) => k.pa ? [['A1', 'B1'], ['A2', 'B2']] : [['A1', 'B2'], ['A2', 'B1']],
+        tegn: (g, S, st) => {
+            [-34, 34].forEach((y) => {
+                g.beginPath(); g.moveTo(S(-64), S(y)); g.lineTo(S(-28), S(y));
+                g.moveTo(S(28), S(y)); g.lineTo(S(64), S(y)); g.stroke();
+                prikk(g, S(-28), S(y), S(4.5)); prikk(g, S(28), S(y), S(4.5));
+            });
+            g.beginPath();
+            if (st.pa) { g.moveTo(S(-28), S(-34)); g.lineTo(S(28), S(-34)); g.moveTo(S(-28), S(34)); g.lineTo(S(28), S(34)); }
+            else { g.moveTo(S(-28), S(-34)); g.lineTo(S(28), S(34)); g.moveTo(S(-28), S(34)); g.lineTo(S(28), S(-34)); }
+            g.stroke();
+        }
+    },
+    dimmer: {
+        navn: 'Dimmer', b: 150, h: 116, klikkbar: true, lastgrense: { min: 3, maks: 100 },
+        klemmer: [
+            { id: 'A', x: -64, y: 0, d: [-1, 0], farge: 'L', tekst: 'L' },
+            { id: 'B', x: 64,  y: 0, d: [1, 0],  farge: 'L', tekst: 'ut' }
+        ],
+        intern: (k) => k.pa ? [['A', 'B']] : [],
+        tegn: (g, S, st) => {
+            g.beginPath(); g.moveTo(S(-64), 0); g.lineTo(S(-26), 0); g.moveTo(S(26), 0); g.lineTo(S(64), 0); g.stroke();
+            prikk(g, S(-26), 0, S(4.5)); prikk(g, S(26), 0, S(4.5));
+            g.beginPath(); g.moveTo(S(-26), 0);
+            if (st.pa) g.lineTo(S(26), 0); else g.lineTo(S(20), S(-28));
+            g.stroke();
+            g.beginPath(); g.moveTo(S(-36), S(30)); g.lineTo(S(36), S(-32)); g.stroke();   // regulerbar
+            g.beginPath(); g.moveTo(S(36), S(-32)); g.lineTo(S(24), S(-28)); g.lineTo(S(30), S(-19)); g.closePath(); g.fill();
+        }
+    },
+    termostat: {
+        navn: 'Termostat', b: 150, h: 126, klikkbar: true,
+        klemmer: [
+            { id: 'A', x: -64, y: 0, d: [-1, 0], farge: 'L', tekst: 'L' },
+            { id: 'B', x: 64,  y: 0, d: [1, 0],  farge: 'L', tekst: 'ut' }
+        ],
+        intern: (k) => k.pa ? [['A', 'B']] : [],
+        tegn: (g, S, st) => {
+            g.beginPath(); g.moveTo(S(-64), 0); g.lineTo(S(-26), 0); g.moveTo(S(26), 0); g.lineTo(S(64), 0); g.stroke();
+            prikk(g, S(-26), 0, S(4.5)); prikk(g, S(26), 0, S(4.5));
+            g.beginPath(); g.moveTo(S(-26), 0);
+            if (st.pa) g.lineTo(S(26), 0); else g.lineTo(S(20), S(-28));
+            g.stroke();
+            g.strokeRect(S(-21), S(22), S(42), S(32));
+            g.font = '600 ' + S(22) + 'px ' + MONO;
+            g.textAlign = 'center'; g.textBaseline = 'middle';
+            g.fillText('θ', 0, S(39));
+        }
+    },
+    lampe: {
+        navn: 'Lampe', b: 150, h: 160, last: true, watt: 9, klasseI: true,
+        klemmer: [
+            { id: 'X',  x: -64, y: 0,  d: [-1, 0], farge: 'L',  tekst: 'L' },
+            { id: 'Y',  x: 64,  y: 0,  d: [1, 0],  farge: 'N',  tekst: 'N' },
+            { id: 'PE', x: 0,   y: 70, d: [0, 1],  farge: 'PE', tekst: 'PE' }
+        ],
+        intern: () => [],
+        tegn: (g, S) => {
+            const r = S(34), k = r * 0.7071;
+            g.beginPath(); g.arc(0, 0, r, 0, 7); g.stroke();
+            g.beginPath(); g.moveTo(-k, -k); g.lineTo(k, k); g.moveTo(k, -k); g.lineTo(-k, k); g.stroke();
+            g.beginPath(); g.moveTo(S(-64), 0); g.lineTo(-r, 0); g.moveTo(r, 0); g.lineTo(S(64), 0);
+            g.moveTo(0, r); g.lineTo(0, S(70)); g.stroke();
+        }
+    },
+    downlight: {
+        navn: 'Downlight', b: 140, h: 116, last: true, watt: 7,
+        klemmer: [
+            { id: 'X', x: -60, y: 0, d: [-1, 0], farge: 'L', tekst: 'L' },
+            { id: 'Y', x: 60,  y: 0, d: [1, 0],  farge: 'N', tekst: 'N' }
+        ],
+        intern: () => [],
+        tegn: (g, S) => {
+            const r = S(26), k = r * 0.7071;
+            g.beginPath(); g.arc(0, 0, r, 0, 7); g.stroke();
+            g.beginPath(); g.moveTo(-k, -k); g.lineTo(k, k); g.moveTo(k, -k); g.lineTo(-k, k); g.stroke();
+            g.beginPath();
+            g.moveTo(S(-38), S(-32)); g.lineTo(S(-38), S(32));
+            g.moveTo(S(38), S(-32)); g.lineTo(S(38), S(32)); g.stroke();   // innfelt
+            g.beginPath(); g.moveTo(S(-60), 0); g.lineTo(-r, 0); g.moveTo(r, 0); g.lineTo(S(60), 0); g.stroke();
+        }
+    },
+    stikk: {
+        navn: 'Stikkontakt', b: 150, h: 160, klasseI: true, stikkontakt: true,
+        klemmer: [
+            { id: 'L',  x: -64, y: 0,  d: [-1, 0], farge: 'L',  tekst: 'L' },
+            { id: 'N',  x: 64,  y: 0,  d: [1, 0],  farge: 'N',  tekst: 'N' },
+            { id: 'PE', x: 0,   y: 70, d: [0, 1],  farge: 'PE', tekst: 'PE' }
+        ],
+        intern: () => [],
+        tegn: (g, S) => {
+            const r = S(34);
+            g.beginPath(); g.arc(0, 0, r, Math.PI, 0); g.stroke();
+            g.beginPath(); g.moveTo(-r, 0); g.lineTo(r, 0); g.stroke();
+            g.beginPath(); g.moveTo(0, 0); g.lineTo(0, S(-48)); g.stroke();
+            g.beginPath(); g.moveTo(S(-15), S(-48)); g.lineTo(S(15), S(-48)); g.stroke();
+            g.beginPath(); g.moveTo(S(-64), 0); g.lineTo(-r, 0); g.moveTo(r, 0); g.lineTo(S(64), 0);
+            g.moveTo(0, 0); g.lineTo(0, S(70)); g.stroke();
+        }
+    },
+    varmekabel: {
+        navn: 'Varmekabel', b: 200, h: 140, last: true, watt: 800, klasseI: true,
+        klemmer: [
+            { id: 'X',  x: -88, y: 0,  d: [-1, 0], farge: 'L',  tekst: 'L' },
+            { id: 'Y',  x: 88,  y: 0,  d: [1, 0],  farge: 'N',  tekst: 'N' },
+            { id: 'PE', x: 0,   y: 62, d: [0, 1],  farge: 'PE', tekst: 'PE' }
+        ],
+        intern: () => [],
+        tegn: (g, S) => {
+            g.strokeRect(S(-56), S(-28), S(112), S(56));
+            g.beginPath();
+            for (let i = 0; i <= 8; i++) {
+                const x = S(-46) + S(92) * i / 8;
+                const y = i % 2 ? S(-14) : S(14);
+                i ? g.lineTo(x, y) : g.moveTo(x, y);
+            }
+            g.stroke();
+            g.beginPath(); g.moveTo(S(-88), 0); g.lineTo(S(-56), 0); g.moveTo(S(56), 0); g.lineTo(S(88), 0);
+            g.moveTo(0, S(28)); g.lineTo(0, S(62)); g.stroke();
+        }
+    }
+};
+</script>
+<script id="kjerne">
+/* ---------- 3. Brettene ------------------------------------------
+ * Fire kapitler à åtte brett. Posisjoner regnes ut av leggUt() – et nytt
+ * brett koster bare komponentlista, kravene og fagteksten.
+ *   styrbar  – lasten skal kunne slås AV og PÅ fra disse bryterne
+ *   spenning – stikkontakten skal ha L og N fra kursen
+ *   pe       – klasse I-utstyr som må ha jord
+ *   maksLedn – gullgrensen for antall ledninger
+ */
+const KAPITLER = ['Grunnlag', 'Bryterkoblinger', 'Last og vern', 'Sammensatt', 'Feilsøking'];
+const BRETT = [
+    {
+        kap: 1, navn: 'Lys i boden', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Koble lampa så den tennes med bryteren.',
+        fagTittel: 'Strøm ut, strøm hjem',
+        fag: 'En krets må være *sluttet*. Strømmen går ut fra *L* (brun), gjennom bryteren, videre til lampa – og tilbake på *N* (blå). Bryteren skal alltid stå på *fasen*, aldri på nøytralen: står den på N, er lampa fortsatt spenningsførende når du skrur i pæra.',
+        norm: 'NEK 400-4-46: bryting skal skje i faseleder.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b', type: 'bryter' }, { id: 'l', type: 'lampe' }],
+        krav: { styrbar: [{ last: 'l', brytere: ['b'] }], pe: ['l'], maksLedn: 4 }
+    },
+    {
+        kap: 1, navn: 'To lamper, én bryter', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Begge lampene skal tennes med den samme bryteren.',
+        fagTittel: 'Parallellkobling',
+        fag: 'To lamper på samme bryter kobles *parallelt* – begge får full spenning. Hver lampe henter fase fra bryteren og nøytral tilbake til N. Kobler du dem i *serie*, deler de spenningen og begge lyser svakt.',
+        norm: 'Parallelt: lik spenning over hver last.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b', type: 'bryter' }, { id: 'l1', type: 'lampe' }, { id: 'l2', type: 'lampe' }],
+        krav: { styrbar: [{ last: 'l1', brytere: ['b'] }, { last: 'l2', brytere: ['b'] }], pe: ['l1', 'l2'], maksLedn: 7 }
+    },
+    {
+        kap: 1, navn: 'Stikkontakt uten bryter', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'Stikkontakten skal ha spenning hele tiden.',
+        fagTittel: 'Tre ledere, ingen snarvei',
+        fag: 'En stikkontakt tar *L*, *N* og *PE* rett fra kursen. Alle tre må med – uten jord merkes ingenting før noen får støt. Og den skal aldri henge bak en lysbryter.',
+        norm: 'NEK 400-8-823: jordet stikkontakt i bolig.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 's', type: 'stikk' }],
+        krav: { spenning: ['s'], pe: ['s'], maksLedn: 3 }
+    },
+    {
+        kap: 1, navn: 'Lys og stikk', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'Lampa styres av bryteren. Stikkontakten står alltid på.',
+        fagTittel: 'To avgreninger fra samme kurs',
+        fag: 'Begge henter fra samme kurs, men *ulikt sted*: lampa etter bryteren, stikkontakten rett på fasen. Det er her folk oftest bommer – henger du stikket bak bryteren, dør kontakten når lyset slås av.',
+        norm: 'Stikkontakt aldri bak en lysbryter.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b', type: 'bryter' }, { id: 'l', type: 'lampe' }, { id: 's', type: 'stikk' }],
+        krav: { styrbar: [{ last: 'l', brytere: ['b'] }], spenning: ['s'], pe: ['l', 's'], maksLedn: 7 }
+    },
+    {
+        kap: 1, navn: 'Tre lamper i rekke', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Alle tre lampene skal tennes samtidig.',
+        fagTittel: 'Flere laster, samme prinsipp',
+        fag: 'Tre lamper parallelt: hver får fase fra bryteren og egen retur på N. Strømmen *summeres* i tilførselen – tre pærer på 9 W blir 27 W, altså ca. 0,12 A. Langt innenfor en 10 A-kurs.',
+        norm: 'Ib = samlet laststrøm i tilførselen.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b', type: 'bryter' }, { id: 'l1', type: 'lampe' }, { id: 'l2', type: 'lampe' }, { id: 'l3', type: 'lampe' }],
+        krav: { styrbar: [{ last: 'l1', brytere: ['b'] }, { last: 'l2', brytere: ['b'] }, { last: 'l3', brytere: ['b'] }], pe: ['l1', 'l2', 'l3'], maksLedn: 10 }
+    },
+    {
+        kap: 1, navn: 'Downlight i taket', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Alle downlightene skal tennes med bryteren.',
+        fagTittel: 'Klasse II trenger ikke jord',
+        fag: 'Disse downlightene er *klasse II* – dobbeltisolert, merket med to kvadrater. De har ingen PE-klemme og skal ikke jordes. Lampa i forrige brett var klasse I: metallhus, og da *må* jord med.',
+        norm: 'NEK 400-4-41: klasse II, dobbel isolasjon.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b', type: 'bryter' }, { id: 'd1', type: 'downlight' }, { id: 'd2', type: 'downlight' }, { id: 'd3', type: 'downlight' }],
+        krav: { styrbar: [{ last: 'd1', brytere: ['b'] }, { last: 'd2', brytere: ['b'] }, { last: 'd3', brytere: ['b'] }], maksLedn: 7 }
+    },
+    {
+        kap: 1, navn: 'To rom, to brytere', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Hver bryter skal styre sin egen lampe.',
+        fagTittel: 'To uavhengige grener',
+        fag: 'Samme kurs, to *separate* grener. Hver bryter tar fase fra kursen og mater sin egen lampe. Gren dem fra samme punkt – ikke koble bryter to etter bryter én, da blir de avhengige av hverandre.',
+        norm: 'Avgreninger fra felles tilførsel.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b1', type: 'bryter' }, { id: 'b2', type: 'bryter' }, { id: 'l1', type: 'lampe' }, { id: 'l2', type: 'lampe' }],
+        krav: { styrbar: [{ last: 'l1', brytere: ['b1'] }, { last: 'l2', brytere: ['b2'] }], pe: ['l1', 'l2'], maksLedn: 8 }
+    },
+    {
+        kap: 1, navn: 'Boden ferdig', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'Lys på bryter, stikkontakt alltid på, jord på begge.',
+        fagTittel: 'Første hele kurs',
+        fag: 'Nå har du alt fra kapittel én i én kurs: bryting på fasen, avgrening til stikkontakt før bryteren, og *PE til alt i klasse I*. Dette er en helt vanlig bodkurs.',
+        norm: 'NEK 400-8-823: boligkurs.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b', type: 'bryter' }, { id: 'l', type: 'lampe' }, { id: 's', type: 'stikk' }],
+        krav: { styrbar: [{ last: 'l', brytere: ['b'] }], spenning: ['s'], pe: ['l', 's'], maksLedn: 7 }
+    },
+    {
+        kap: 2, navn: 'Lys i trappa', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Lyset skal kunne slås av og på fra begge toveisbryterne.',
+        fagTittel: 'Endevender',
+        fag: 'To *toveisbrytere* styrer samme lys fra to steder. Fase inn på K på den første, to *korresponderende ledere* mellom 1–1 og 2–2, og fra K på den andre videre til lampa. Står bryterne likt, er kretsen sluttet.',
+        norm: 'Klassisk trappekobling – to vekslere.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'l', type: 'lampe' }],
+        krav: { styrbar: [{ last: 'l', brytere: ['v1', 'v2'] }], pe: ['l'], maksLedn: 6 }
+    },
+    {
+        kap: 2, navn: 'Trapp med to lamper', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Begge lampene styres fra begge bryterne.',
+        fagTittel: 'Last etter vekselen',
+        fag: 'Endevenderen styrer *ett punkt*. Vil du ha flere lamper, parallellkobler du dem etter den siste vekselbryteren – ikke mellom de korresponderende lederne. Der hører ingen last hjemme.',
+        norm: 'Korresponderende ledere skal stå lastfrie.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'l1', type: 'lampe' }, { id: 'l2', type: 'lampe' }],
+        krav: { styrbar: [{ last: 'l1', brytere: ['v1', 'v2'] }, { last: 'l2', brytere: ['v1', 'v2'] }], pe: ['l1', 'l2'], maksLedn: 9 }
+    },
+    {
+        kap: 2, navn: 'Lys fra tre steder', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Lyset skal styres fra alle tre bryterne.',
+        fagTittel: 'Kryssbryter',
+        fag: 'Skal lyset styres fra tre steder, settes en *kryssbryter* mellom de to toveisbryterne. Den bytter om de to korresponderende lederne. Vekslerne står alltid *ytterst*.',
+        norm: 'Veksler – krysser – veksler.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'kr', type: 'kryssbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'l', type: 'lampe' }],
+        krav: { styrbar: [{ last: 'l', brytere: ['v1', 'kr', 'v2'] }], pe: ['l'], maksLedn: 8 }
+    },
+    {
+        kap: 2, navn: 'Fire steder', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Lyset skal styres fra alle fire bryterne.',
+        fagTittel: 'Flere kryss på rad',
+        fag: 'Hvert ekstra betjeningssted er én kryssbryter til, satt *i serie* på de korresponderende lederne. To vekslere ytterst, så mange kryss du vil imellom. Prinsippet endrer seg ikke.',
+        norm: 'n steder = 2 vekslere + (n−2) kryss.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'kr1', type: 'kryssbryter' }, { id: 'kr2', type: 'kryssbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'l', type: 'lampe' }],
+        krav: { styrbar: [{ last: 'l', brytere: ['v1', 'kr1', 'kr2', 'v2'] }], pe: ['l'], maksLedn: 10 }
+    },
+    {
+        kap: 2, navn: 'Trapp og stikkontakt', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'Lys fra to steder. Stikkontakten alltid på.',
+        fagTittel: 'Stikket utenom vekselen',
+        fag: 'Stikkontakten skal ha fase *før* den første vekselbryteren. Henger du den på en korresponderende leder, får den spenning i bare én av bryterstillingene – og det er en feil som er vond å finne.',
+        norm: 'Avgrening før styringen.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'l', type: 'lampe' }, { id: 's', type: 'stikk' }],
+        krav: { styrbar: [{ last: 'l', brytere: ['v1', 'v2'] }], spenning: ['s'], pe: ['l', 's'], maksLedn: 9 }
+    },
+    {
+        kap: 2, navn: 'Trapp med downlight', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Alle downlightene styres fra begge bryterne.',
+        fagTittel: 'Veksler foran en rekke',
+        fag: 'Endevenderen mater hele rekka. Downlightene parallellkobles etter den siste vekselbryteren, med felles retur på N. Tre stykker på 7 W er 21 W – ingenting for en 10 A-kurs.',
+        norm: 'Last samles etter styringen.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'd1', type: 'downlight' }, { id: 'd2', type: 'downlight' }, { id: 'd3', type: 'downlight' }],
+        krav: { styrbar: [{ last: 'd1', brytere: ['v1', 'v2'] }, { last: 'd2', brytere: ['v1', 'v2'] }, { last: 'd3', brytere: ['v1', 'v2'] }], maksLedn: 9 }
+    },
+    {
+        kap: 2, navn: 'Gangen med kryss', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'Lys fra tre steder, og en stikkontakt som alltid står på.',
+        fagTittel: 'Kryss og avgrening',
+        fag: 'Kryssbryteren midt i, stikkontakten avgrenet *før* den første vekselen. Dette er en helt vanlig gangkurs i et norsk hus – og en av de vanligste å få til å virke halvveis.',
+        norm: 'Vanlig gangkurs.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'kr', type: 'kryssbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'l', type: 'lampe' }, { id: 's', type: 'stikk' }],
+        krav: { styrbar: [{ last: 'l', brytere: ['v1', 'kr', 'v2'] }], spenning: ['s'], pe: ['l', 's'], maksLedn: 11 }
+    },
+    {
+        kap: 2, navn: 'To trapper', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Hver trapp skal ha sitt eget lys, styrt fra sine to brytere.',
+        fagTittel: 'To endevendere på én kurs',
+        fag: 'To helt uavhengige endevender-kretser fra samme kurs. Hold de korresponderende lederne *adskilt* mellom parene – blander du dem, styrer bryterne hverandres lys, og begge blir uforutsigbare.',
+        norm: 'Korresponderende ledere hører til ett par.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'v3', type: 'vekselbryter' }, { id: 'v4', type: 'vekselbryter' }, { id: 'l1', type: 'lampe' }, { id: 'l2', type: 'lampe' }],
+        krav: { styrbar: [{ last: 'l1', brytere: ['v1', 'v2'] }, { last: 'l2', brytere: ['v3', 'v4'] }], pe: ['l1', 'l2'], maksLedn: 12 }
+    },
+    {
+        kap: 3, navn: 'Dimmet lampe', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Lampa skal kunne dimmes.',
+        fagTittel: 'Dimmeren står på fasen',
+        fag: 'En dimmer kobles som en bryter – i *faselederen*, foran lasten. Den regulerer spenningen ut. Står den på nøytralen, dimmer den ingenting og lasten står spenningsførende.',
+        norm: 'Dimmer i faseleder, foran last.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'd', type: 'dimmer' }, { id: 'l', type: 'lampe' }],
+        krav: { styrbar: [{ last: 'l', brytere: ['d'] }], pe: ['l'], maksLedn: 4 }
+    },
+    {
+        kap: 3, navn: 'Dimmet downlight', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Alle tre downlightene skal dimmes fra dimmeren.',
+        fagTittel: 'Dimmeren har en lastgrense',
+        fag: 'En dimmer tåler et *område*, ikke hva som helst. Denne er merket 3–100 W. Tre LED-downlights på 7 W blir 21 W – godt innenfor. For lite last, og LED-en kan flimre; for mye, og dimmeren går varm.',
+        norm: 'Sjekk dimmerens merkeeffekt mot LED-last.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'd', type: 'dimmer' }, { id: 'd1', type: 'downlight' }, { id: 'd2', type: 'downlight' }, { id: 'd3', type: 'downlight' }],
+        krav: { styrbar: [{ last: 'd1', brytere: ['d'] }, { last: 'd2', brytere: ['d'] }, { last: 'd3', brytere: ['d'] }], maksLedn: 7 }
+    },
+    {
+        kap: 3, navn: 'Stue med dimmer', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'Downlight på dimmer, og en stikkontakt som alltid står på.',
+        fagTittel: 'Dimmeren styrer bare sitt',
+        fag: 'Stikkontakten skal *aldri* ligge etter dimmeren – den ville fått redusert spenning, og det ødelegger elektronikk. Dimmeren mater bare belysningen.',
+        norm: 'Regulert spenning kun til tiltenkt last.',
+        dim: { last: 2800, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 2.5, vern: 16, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'd', type: 'dimmer' }, { id: 'd1', type: 'downlight' }, { id: 'd2', type: 'downlight' }, { id: 's', type: 'stikk' }],
+        krav: { styrbar: [{ last: 'd1', brytere: ['d'] }, { last: 'd2', brytere: ['d'] }], spenning: ['s'], pe: ['s'], maksLedn: 8 }
+    },
+    {
+        kap: 3, navn: 'Kurs for stikkontakter', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'Begge stikkontaktene skal ha spenning og jord.',
+        fagTittel: 'Kabel og vern skal passe sammen',
+        fag: 'Regelen er *Ib ≤ In ≤ Iz*: lasten under vernet, vernet under kabelens strømføringsevne. 2,5 mm² tåler mer enn 16 A, og 16 A-automaten beskytter kabelen. 1,5 mm² med 16 A ville vært for tynt for en stikkontaktkurs.',
+        norm: 'NEK 400-4-43: koordinering leder og vern.',
+        dim: { last: 3000, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 2.5, vern: 16, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 's1', type: 'stikk' }, { id: 's2', type: 'stikk' }],
+        krav: { spenning: ['s1', 's2'], pe: ['s1', 's2'], maksLedn: 6 }
+    },
+    {
+        kap: 3, navn: 'Ren lyskurs', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'To lamper på bryter, riktig dimensjonert.',
+        fagTittel: 'Lyskurs er 10 A',
+        fag: 'En ren lyskurs legges normalt med *1,5 mm²* og *10 A*. Lasten er liten – to lamper er under 20 W – så dimensjonen bestemmes av kabelen og praksis, ikke av strømmen.',
+        norm: 'Boligpraksis: lys 10 A / 1,5 mm².',
+        dim: { last: 400, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 1.5, vern: 10, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b', type: 'bryter' }, { id: 'l1', type: 'lampe' }, { id: 'l2', type: 'lampe' }],
+        krav: { styrbar: [{ last: 'l1', brytere: ['b'] }, { last: 'l2', brytere: ['b'] }], pe: ['l1', 'l2'], maksLedn: 7 }
+    },
+    {
+        kap: 3, navn: 'Varmekabel på bad', kurs: 'Kurs 3 · 10 A · 1,5 mm²',
+        mal: 'Koble varmekabelen via termostaten. Husk skjermen.',
+        fagTittel: 'Varmekabel vil ha egen kurs',
+        fag: 'Varmekabel legges på *egen kurs* med eget 30 mA jordfeilvern – den ligger støpt inn, og en feil kan du ikke se. *Skjermen* kobles til PE; det er den som fanger opp en skade i støpen. 800 W på 230 V blir ca. 3,5 A – og da holder *10 A med 1,5 mm²*. Varmekabel betyr ikke automatisk 16 A.',
+        norm: 'NEK 400-7-753: varmekabel, skjerm til PE.',
+        dim: { last: 800, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 1.5, vern: 10, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 't', type: 'termostat' }, { id: 'v', type: 'varmekabel' }],
+        krav: { styrbar: [{ last: 'v', brytere: ['t'] }], pe: ['v'], maksLedn: 4 }
+    },
+    {
+        kap: 3, navn: 'Bad med lys', kurs: 'Kurs 3 · 10 A · 1,5 mm²',
+        mal: 'Varmekabel på termostat, og lys på egen bryter.',
+        fagTittel: 'Våtrom krever jord overalt',
+        fag: 'På bad er *alt* i klasse I jordet, og hele kursen ligger bak 30 mA jordfeilvern. Varmekabelens skjerm og lampas hus skal begge til PE. Fukt og jordfeil er en dårlig kombinasjon.',
+        norm: 'NEK 400-7-701: våtrom.',
+        dim: { last: 1000, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 1.5, vern: 10, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 't', type: 'termostat' }, { id: 'b', type: 'bryter' }, { id: 'v', type: 'varmekabel' }, { id: 'l', type: 'lampe' }],
+        krav: { styrbar: [{ last: 'v', brytere: ['t'] }, { last: 'l', brytere: ['b'] }], pe: ['v', 'l'], maksLedn: 8 }
+    },
+    {
+        kap: 3, navn: 'Hele gangen', kurs: 'Kurs 4 · 16 A · 2,5 mm²',
+        mal: 'Lys fra to steder, og en stikkontakt som alltid står på.',
+        fagTittel: 'Alt på én gang',
+        fag: 'Nå settes bitene sammen: *endevender* på lyset, *stikkontakt* rett på kursen, *PE* til begge, og riktig dimensjonert kurs. Dette er den vanligste kursen i et hus – og den du oftest ser gjort feil.',
+        norm: 'Stikkontakt aldri bak en lysbryter.',
+        dim: { last: 2800, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 2.5, vern: 16, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'l', type: 'lampe' }, { id: 's', type: 'stikk' }],
+        krav: { styrbar: [{ last: 'l', brytere: ['v1', 'v2'] }], spenning: ['s'], pe: ['l', 's'], maksLedn: 9 }
+    },
+    {
+        kap: 3, navn: 'Kjøkkenbenken', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'To stikkontakter og dimmet benkebelysning.',
+        fagTittel: 'Blandet kurs',
+        fag: 'Kjøkkenbenken har gjerne *stikkontakter og lys på samme kurs*. Stikkene rett på fasen, belysningen via dimmeren. Summen av lasten avgjør vernet – her er det stikkene som dominerer.',
+        norm: 'Ib bestemmes av samlet last.',
+        dim: { last: 3200, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 2.5, vern: 16, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'd', type: 'dimmer' }, { id: 'd1', type: 'downlight' }, { id: 'd2', type: 'downlight' }, { id: 's1', type: 'stikk' }, { id: 's2', type: 'stikk' }],
+        krav: { styrbar: [{ last: 'd1', brytere: ['d'] }, { last: 'd2', brytere: ['d'] }], spenning: ['s1', 's2'], pe: ['s1', 's2'], maksLedn: 11 }
+    },
+    {
+        kap: 4, navn: 'Kjellerstua', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'Lys fra to steder, downlight på dimmer, og to stikk.',
+        fagTittel: 'Tre grener fra én kurs',
+        fag: 'Tre uavhengige grener: endevender på taklyset, dimmer på downlightene, og stikkontaktene rett på fasen. Alle tre *greiner fra samme punkt* – ikke i serie gjennom hverandre.',
+        norm: 'Felles tilførsel, separate grener.',
+        dim: { last: 2600, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 2.5, vern: 16, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'd', type: 'dimmer' }, { id: 'l', type: 'lampe' }, { id: 'd1', type: 'downlight' }, { id: 's', type: 'stikk' }],
+        krav: { styrbar: [{ last: 'l', brytere: ['v1', 'v2'] }, { last: 'd1', brytere: ['d'] }], spenning: ['s'], pe: ['l', 's'], maksLedn: 13 }
+    },
+    {
+        kap: 4, navn: 'Soverom', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Taklys fra døra og fra senga, pluss en dimmet leselampe.',
+        fagTittel: 'Endevender og dimmer sammen',
+        fag: 'Endevender på taklyset, dimmer på leselampa – *to separate styringer* fra samme kurs. Dimmeren skal ikke ligge i endevenderens korresponderende ledere; der ville den dimmet i bare én bryterstilling.',
+        norm: 'Én styring per last.',
+        dim: { last: 600, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 1.5, vern: 10, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'd', type: 'dimmer' }, { id: 'l1', type: 'lampe' }, { id: 'l2', type: 'lampe' }],
+        krav: { styrbar: [{ last: 'l1', brytere: ['v1', 'v2'] }, { last: 'l2', brytere: ['d'] }], pe: ['l1', 'l2'], maksLedn: 11 }
+    },
+    {
+        kap: 4, navn: 'Bad komplett', kurs: 'Kurs 3 · 16 A · 2,5 mm²',
+        mal: 'Varmekabel, speillys på bryter og en jordet stikkontakt.',
+        fagTittel: 'Våtrom fra ende til ende',
+        fag: 'Varmekabel på termostat med skjermen til PE, speillys på egen bryter, og stikkontakt med jord. *Alt* bak 30 mA. Dette er et komplett baderom, og hvert ledd er et krav – ikke en anbefaling.',
+        norm: 'NEK 400-7-701 + 7-753.',
+        dim: { last: 2600, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 2.5, vern: 16, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 't', type: 'termostat' }, { id: 'b', type: 'bryter' }, { id: 'v', type: 'varmekabel' }, { id: 'l', type: 'lampe' }, { id: 's', type: 'stikk' }],
+        krav: { styrbar: [{ last: 'v', brytere: ['t'] }, { last: 'l', brytere: ['b'] }], spenning: ['s'], pe: ['v', 'l', 's'], maksLedn: 11 }
+    },
+    {
+        kap: 4, navn: 'Trapp over to etasjer', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Lys fra tre steder, og en downlight-rekke som følger med.',
+        fagTittel: 'Kryss med flere laster',
+        fag: 'Kryssbryter mellom to vekslere, og *tre downlights parallelt* etter den siste vekselen. Lastene samles alltid etter styringen – aldri mellom de korresponderende lederne.',
+        norm: 'Last etter siste veksler.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'kr', type: 'kryssbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'd1', type: 'downlight' }, { id: 'd2', type: 'downlight' }, { id: 'd3', type: 'downlight' }],
+        krav: { styrbar: [{ last: 'd1', brytere: ['v1', 'kr', 'v2'] }, { last: 'd2', brytere: ['v1', 'kr', 'v2'] }, { last: 'd3', brytere: ['v1', 'kr', 'v2'] }], maksLedn: 11 }
+    },
+    {
+        kap: 4, navn: 'Verkstedet', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'Tre stikkontakter og arbeidslys på bryter.',
+        fagTittel: 'Når lasten begynner å telle',
+        fag: 'Tre stikkontakter på ett verksted kan trekke mye samtidig. Her er det *lasten*, ikke kabelen, som avgjør: 3 200 W på 230 V er ca. 14 A, og da er 16 A-automaten på grensen av det fornuftige.',
+        norm: 'Ib = 14 A → In = 16 A.',
+        dim: { last: 3200, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 2.5, vern: 16, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b', type: 'bryter' }, { id: 'l', type: 'lampe' }, { id: 's1', type: 'stikk' }, { id: 's2', type: 'stikk' }, { id: 's3', type: 'stikk' }],
+        krav: { styrbar: [{ last: 'l', brytere: ['b'] }], spenning: ['s1', 's2', 's3'], pe: ['l', 's1', 's2', 's3'], maksLedn: 13 }
+    },
+    {
+        kap: 4, navn: 'Loftstua', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'Dimmet downlight fra to steder er ikke lov – bruk hodet.',
+        fagTittel: 'Dimmer hører ett sted',
+        fag: 'En dimmer kan ikke stå i en endevender: den har bare *to klemmer* og kan ikke veksle mellom to ledere. Vil du dimme og styre fra to steder, bruker du dimmer på det ene stedet og lar vekselen stå foran den.',
+        norm: 'Dimmer = topolet, ikke veksler.',
+        dim: { last: 2600, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 2.5, vern: 16, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'd', type: 'dimmer' }, { id: 'd1', type: 'downlight' }, { id: 'd2', type: 'downlight' }, { id: 's', type: 'stikk' }],
+        krav: { styrbar: [{ last: 'd1', brytere: ['v1', 'v2', 'd'] }, { last: 'd2', brytere: ['v1', 'v2', 'd'] }], spenning: ['s'], pe: ['s'], maksLedn: 12 }
+    },
+    {
+        kap: 4, navn: 'Entré og bod', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'Entrélys fra to steder, bodlys på egen bryter, to stikk.',
+        fagTittel: 'To styringer, to laster',
+        fag: 'Endevender på entrélyset, vanlig bryter på boden, og to stikkontakter rett på fasen. Fire grener fra ett punkt. Hold orden på hvilken leder som hører til hva – det er *her* det blir rot i virkeligheten.',
+        norm: 'Ryddig avgrening er halve jobben.',
+        dim: { last: 2600, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 2.5, vern: 16, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'b', type: 'bryter' }, { id: 'l1', type: 'lampe' }, { id: 'l2', type: 'lampe' }, { id: 's1', type: 'stikk' }, { id: 's2', type: 'stikk' }],
+        krav: { styrbar: [{ last: 'l1', brytere: ['v1', 'v2'] }, { last: 'l2', brytere: ['b'] }], spenning: ['s1', 's2'], pe: ['l1', 'l2', 's1', 's2'], maksLedn: 16 }
+    },
+    {
+        kap: 4, navn: 'Hele leiligheten', kurs: 'Kurs 4 · 16 A · 2,5 mm²',
+        mal: 'Alt du har lært, på ett brett.',
+        fagTittel: 'Kursmester',
+        fag: 'Endevender, kryssbryter, dimmer, varmekabel på termostat, stikkontakt og jord til alt i klasse I – riktig dimensjonert. Klarer du dette, kan du lese og tegne en kurs.',
+        norm: 'Du er kursmester.',
+        dim: { last: 2800, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 2.5, vern: 16, jfb: 30 } },
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'kr', type: 'kryssbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 't', type: 'termostat' }, { id: 'l', type: 'lampe' }, { id: 'v', type: 'varmekabel' }, { id: 's', type: 'stikk' }],
+        krav: { styrbar: [{ last: 'l', brytere: ['v1', 'kr', 'v2'] }, { last: 'v', brytere: ['t'] }], spenning: ['s'], pe: ['l', 'v', 's'], maksLedn: 16 }
+    },
+    /* ---- Kapittel 5: feilsøking ----
+     * Brettet er ferdig koblet av «noen andre», med én feil i. Jobben er å
+     * finne den og rette den – det er det en lærling gjør mest av.
+     * `forhand` er ledningene som ligger der når du starter.
+     */
+    {
+        kap: 5, navn: 'Det smeller', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Kursen er koblet, men automaten går. Finn feilen.',
+        fagTittel: 'Kortslutning',
+        fag: 'Når automaten går med én gang, er fase og nøytral bundet sammen *uten last imellom*. Følg den brune lederen og se hvor den møter den blå. Trykk på en ledning for å fjerne den.',
+        norm: 'Kortslutning = L og N uten motstand.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b', type: 'bryter' }, { id: 'l', type: 'lampe' }],
+        forhand: [['k:L', 'b:A'], ['b:B', 'l:X'], ['l:Y', 'k:N'], ['l:PE', 'k:PE'], ['k:L', 'k:N']],
+        krav: { styrbar: [{ last: 'l', brytere: ['b'] }], pe: ['l'], maksLedn: 4 }
+    },
+    {
+        kap: 5, navn: 'Jordfeilbryteren slår ut', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Jordfeilvernet løser ut. Finn ut hvorfor.',
+        fagTittel: 'Jordfeil',
+        fag: 'Jordfeilbryteren reagerer når strøm går ut på *PE* i stedet for tilbake på N. Her ligger fasen rett på jord. Gulgrønn skal aldri føre strøm i normal drift – den er der for at du ikke skal få den i deg.',
+        norm: 'NEK 400-4-41: 30 mA jordfeilvern.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b', type: 'bryter' }, { id: 'l', type: 'lampe' }],
+        forhand: [['k:L', 'b:A'], ['b:B', 'l:X'], ['l:Y', 'k:N'], ['l:PE', 'k:PE'], ['k:L', 'l:PE']],
+        krav: { styrbar: [{ last: 'l', brytere: ['b'] }], pe: ['l'], maksLedn: 4 }
+    },
+    {
+        kap: 5, navn: 'Lyset virker, men', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Lampa tennes og slukkes som den skal. Likevel er det feil. Finn den.',
+        fagTittel: 'Bryter på nøytralen',
+        fag: 'Dette er den farligste feilen i boka, fordi *alt ser riktig ut*. Bryteren står på nøytralen: lampa slukker, men sokkelen står fortsatt på fase. Skrur du i ei pære med bryteren «av», får du støt. Bryt alltid fasen.',
+        norm: 'NEK 400-4-46: bryting i faseleder.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b', type: 'bryter' }, { id: 'l', type: 'lampe' }],
+        forhand: [['k:L', 'l:X'], ['l:Y', 'b:A'], ['b:B', 'k:N'], ['l:PE', 'k:PE']],
+        krav: { styrbar: [{ last: 'l', brytere: ['b'] }], pe: ['l'], maksLedn: 4 }
+    },
+    {
+        kap: 5, navn: 'Ingen av lampene lyser', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Begge lampene er mørke. Finn ut hvorfor.',
+        fagTittel: 'Serie i stedet for parallell',
+        fag: 'Lampene er koblet *etter hverandre* i stedet for ved siden av. I serie deler de spenningen, og ingen av dem får nok. Hver last skal ha sin egen vei tilbake til N.',
+        norm: 'Laster i bolig kobles parallelt.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b', type: 'bryter' }, { id: 'l1', type: 'lampe' }, { id: 'l2', type: 'lampe' }],
+        forhand: [['k:L', 'b:A'], ['b:B', 'l1:X'], ['l1:Y', 'l2:X'], ['l2:Y', 'k:N'], ['l1:PE', 'k:PE'], ['l2:PE', 'k:PE']],
+        krav: { styrbar: [{ last: 'l1', brytere: ['b'] }, { last: 'l2', brytere: ['b'] }], pe: ['l1', 'l2'], maksLedn: 7 }
+    },
+    {
+        kap: 5, navn: 'Stikket dør', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'Stikkontakten mister spenning når lyset slås av. Rett det.',
+        fagTittel: 'Stikkontakt bak bryteren',
+        fag: 'Stikkontakten henter fase *etter* lysbryteren. Da følger den lyset, og støvsugeren stopper når noen slukker. Stikkontakten skal alltid ha fase rett fra kursen.',
+        norm: 'Stikkontakt aldri bak en lysbryter.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'b', type: 'bryter' }, { id: 'l', type: 'lampe' }, { id: 's', type: 'stikk' }],
+        forhand: [['k:L', 'b:A'], ['b:B', 'l:X'], ['l:Y', 'k:N'], ['l:PE', 'k:PE'], ['b:B', 's:L'], ['s:N', 'k:N'], ['s:PE', 'k:PE']],
+        krav: { styrbar: [{ last: 'l', brytere: ['b'] }], spenning: ['s'], pe: ['l', 's'], maksLedn: 7 }
+    },
+    {
+        kap: 5, navn: 'Bare én bryter virker', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Lyset styres fra den ene bryteren, men ikke fra den andre.',
+        fagTittel: 'Feilkoblet endevender',
+        fag: 'Begge de korresponderende lederne er landet på *samme klemme*. Da har den ene vekselbryteren bare én vei, og mister grepet. De to lederne skal gå 1–1 og 2–2 mellom bryterne.',
+        norm: 'To korresponderende ledere, hver sin klemme.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'l', type: 'lampe' }],
+        forhand: [['k:L', 'v1:K'], ['v1:1', 'v2:1'], ['v1:1', 'v2:2'], ['v2:K', 'l:X'], ['l:Y', 'k:N'], ['l:PE', 'k:PE']],
+        krav: { styrbar: [{ last: 'l', brytere: ['v1', 'v2'] }], pe: ['l'], maksLedn: 6 }
+    },
+    {
+        kap: 5, navn: 'Varmekabel uten skjerm', kurs: 'Kurs 1 · 10 A · 1,5 mm²',
+        mal: 'Varmekabelen varmer, men anlegget har et avvik. Finn det.',
+        fagTittel: 'Skjermen er ikke tilkoblet',
+        fag: 'Varmekabelen ligger støpt inn i gulvet. *Skjermen* er det eneste som fanger opp en skade du aldri får se – og uten den til PE merkes ingenting før noen står barbeint på et gulv med fase i.',
+        norm: 'NEK 400-7-753: skjerm tilkoblet PE.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 't', type: 'termostat' }, { id: 'v', type: 'varmekabel' }],
+        forhand: [['k:L', 't:A'], ['t:B', 'v:X'], ['v:Y', 'k:N']],
+        krav: { styrbar: [{ last: 'v', brytere: ['t'] }], pe: ['v'], maksLedn: 4 },
+        dim: { last: 800, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 1.5, vern: 10, jfb: 30 } }
+    },
+    {
+        kap: 5, navn: 'Gangen er rotete', kurs: 'Kurs 2 · 16 A · 2,5 mm²',
+        mal: 'Flere ting er galt her. Rett opp hele kursen.',
+        fagTittel: 'Siste prøve',
+        fag: 'Her er det mer enn én feil. Gå systematisk: slå på og se hva som skjer, les meldingen, rett én ting om gangen. Det er slik feilsøking faktisk gjøres – ikke ved å stirre på skjemaet til svaret kommer.',
+        norm: 'Én feil om gangen.',
+        komp: [{ id: 'k', type: 'kurs' }, { id: 'v1', type: 'vekselbryter' }, { id: 'v2', type: 'vekselbryter' }, { id: 'l', type: 'lampe' }, { id: 's', type: 'stikk' }],
+        forhand: [['k:L', 'v1:K'], ['v1:1', 'v2:1'], ['v1:2', 'v2:2'], ['v2:K', 'l:X'], ['l:Y', 'k:N'], ['v2:K', 's:L'], ['s:N', 'k:N']],
+        krav: { styrbar: [{ last: 'l', brytere: ['v1', 'v2'] }], spenning: ['s'], pe: ['l', 's'], maksLedn: 9 },
+        dim: { last: 2800, kabler: [1.5, 2.5, 4], vern: [10, 16, 20], fasit: { kabel: 2.5, vern: 16, jfb: 30 } }
+    },
+];
+
+/* ---------- 4. Kretsløser ---------------------------------------- */
+/*
+ * Union-find over alle klemmer. Ledninger og brytere i lukket stilling slår
+ * klemmer sammen; laster gjør det ALDRI. Da faller alt ut av seg selv:
+ *   L og N i samme sett uten last imellom  = kortslutning
+ *   L og PE i samme sett                   = jordfeil
+ *   last med én klemme i L-settet og én i N-settet = den lyser
+ */
+function los(komp, ledninger) {
+    const far = new Map();
+    const finn = (a) => { while (far.get(a) !== a) { far.set(a, far.get(far.get(a))); a = far.get(a); } return a; };
+    const slaa = (a, b) => { const ra = finn(a), rb = finn(b); if (ra !== rb) far.set(ra, rb); };
+
+    for (const k of komp) for (const kl of TYPER[k.type].klemmer) far.set(k.id + ':' + kl.id, k.id + ':' + kl.id);
+    for (const w of ledninger) { if (far.has(w.a) && far.has(w.b)) slaa(w.a, w.b); }
+    for (const k of komp) for (const par of TYPER[k.type].intern(k)) slaa(k.id + ':' + par[0], k.id + ':' + par[1]);
+
+    const kilde = komp.find((k) => TYPER[k.type].kilde);
+    const rL = kilde ? finn(kilde.id + ':L') : null;
+    const rN = kilde ? finn(kilde.id + ':N') : null;
+    const rPE = kilde ? finn(kilde.id + ':PE') : null;
+
+    const kortslutning = rL !== null && rL === rN;
+    const jordfeil = rL !== null && rL === rPE;
+
+    const tente = new Set();
+    let wattSum = 0;
+    for (const k of komp) {
+        const t = TYPER[k.type];
+        if (!t.last) continue;
+        const a = finn(k.id + ':X'), b = finn(k.id + ':Y');
+        if ((a === rL && b === rN) || (a === rN && b === rL)) { tente.add(k.id); wattSum += t.watt; }
+    }
+
+    // Stikkontakt regnes som spenningssatt når L og N står på plass.
+    const spenning = new Set();
+    for (const k of komp) {
+        if (!TYPER[k.type].stikkontakt) continue;
+        if (finn(k.id + ':L') === rL && finn(k.id + ':N') === rN) spenning.add(k.id);
+    }
+
+    // PE-kontroll: klasse I-utstyr må henge på kursens PE.
+    const peOk = new Set();
+    for (const k of komp) {
+        if (!TYPER[k.type].klasseI) continue;
+        if (finn(k.id + ':PE') === rPE) peOk.add(k.id);
+    }
+
+    return { finn, rL, rN, rPE, kortslutning, jordfeil, tente, spenning, peOk, wattSum };
+}
+
+/* Går gjennom ALLE bryterstillinger og sjekker at lasten faktisk kan styres. */
+function sjekkStyrbar(komp, ledninger, krav) {
+    const brytere = komp.filter((k) => TYPER[k.type].klikkbar);
+    const lagret = brytere.map((b) => b.pa);
+    const n = brytere.length;
+    const resultat = {};
+    for (const s of (krav.styrbar || [])) resultat[s.last] = { av: false, pa: false };
+    let feil = null;
+
+    /*
+     * Tre regler til, som alle er ekte fagfeil en lærling gjør:
+     *   nPaaFase  – returen til N må stå uansett bryterstilling. Står bryteren
+     *               på nøytralen, lyser lampa riktig, men står spenningsførende.
+     *   stikkDoed – en stikkontakt bak en bryter mister spenning i én stilling.
+     *   utenVirkning – en bryter som er oppgitt som styring, men ikke gjør noe
+     *               (typisk feilkoblet endevender der den ene ikke virker).
+     */
+    const nPaaFase = {}, stikkDoed = {};
+    const tentVed = {};
+    for (const sp of (krav.styrbar || [])) tentVed[sp.last] = [];
+
+    for (let maske = 0; maske < (1 << n); maske++) {
+        brytere.forEach((b, i) => { b.pa = !!(maske & (1 << i)); });
+        const r = los(komp, ledninger);
+        if (r.kortslutning) { feil = feil || 'kort'; }
+        if (r.jordfeil) { feil = feil || 'jord'; }
+        for (const sp of (krav.styrbar || [])) {
+            const tent = r.tente.has(sp.last);
+            if (tent) resultat[sp.last].pa = true; else resultat[sp.last].av = true;
+            tentVed[sp.last][maske] = tent;
+            if (r.finn(sp.last + ':Y') !== r.rN) nPaaFase[sp.last] = true;
+        }
+        for (const id of (krav.spenning || [])) if (!r.spenning.has(id)) stikkDoed[id] = true;
+    }
+
+    // Hver oppgitte bryter må faktisk endre noe for sin last.
+    const utenVirkning = [];
+    for (const sp of (krav.styrbar || [])) {
+        (sp.brytere || []).forEach((id) => {
+            const i = brytere.findIndex((b) => b.id === id);
+            if (i < 0) return;
+            const bit = 1 << i;
+            let virker = false;
+            for (let m = 0; m < (1 << n); m++) {
+                if (m & bit) continue;
+                if (tentVed[sp.last][m] !== tentVed[sp.last][m | bit]) { virker = true; break; }
+            }
+            if (!virker) utenVirkning.push(id);
+        });
+    }
+
+    brytere.forEach((b, i) => { b.pa = lagret[i]; });
+    return { resultat, feil, nPaaFase, stikkDoed, utenVirkning };
+}
+
+</script>
+<script>
+/* ---------- 5. Ortogonal ruting ------------------------------------ */
+/*
+ * Et koblingsskjema tegnes med rette vinkler. Hver klemme har en retning den
+ * går ut i; ledningen får en kort stump ut av klemma, møtes i en kanal, og går
+ * inn i målklemma fra dens retning. Kanalen forskyves per ledning (stabil
+ * hash) så parallelle strekk ikke legger seg oppå hverandre.
+ */
+function hash(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; }
+
+function rute(p1, d1, p2, d2, nokkel) {
+    const stump = 28;
+    const a = { x: p1.x + d1[0] * stump, y: p1.y + d1[1] * stump };
+    const b = { x: p2.x + d2[0] * stump, y: p2.y + d2[1] * stump };
+    const v = nokkel ? ((((hash(nokkel) % 7) + 7) % 7) - 3) * 17 : 0;
+    const pts = [p1, a];
+    const vann1 = d1[0] !== 0, vann2 = d2[0] !== 0;
+
+    if (vann1 && vann2) {
+        const mx = (a.x + b.x) / 2 + v;
+        pts.push({ x: mx, y: a.y }, { x: mx, y: b.y });
+    } else if (!vann1 && !vann2) {
+        const my = (a.y + b.y) / 2 + v;
+        pts.push({ x: a.x, y: my }, { x: b.x, y: my });
+    } else if (vann1) {
+        pts.push({ x: b.x, y: a.y });
+    } else {
+        pts.push({ x: a.x, y: b.y });
+    }
+    pts.push(b, p2);
+    return pts.filter((p, i) => i === 0 || Math.abs(p.x - pts[i - 1].x) > .5 || Math.abs(p.y - pts[i - 1].y) > .5);
+}
+
+
+/* ---------- Automatisk utlegg ---------------------------------------
+ * Hvert brett oppgir bare HVILKE komponenter det har. Plasseringen regnes ut:
+ * kilden øverst, lastene i midten, styringen nederst – innenfor tommelens
+ * rekkevidde. Kolonnene veksler, så ledningene får noe å rute mellom.
+ * Brettets høyde vokser med innholdet, og skalaen krymper tilsvarende.
+ */
+function leggUt(liste) {
+    const er = (k, f) => !!TYPER[k.type][f];
+    const kilde   = liste.filter((k) => er(k, 'kilde'));
+    const last    = liste.filter((k) => !er(k, 'kilde') && (er(k, 'last') || er(k, 'stikkontakt')));
+    const styring = liste.filter((k) => !er(k, 'kilde') && er(k, 'klikkbar'));
+    const rest    = liste.filter((k) => kilde.indexOf(k) < 0 && last.indexOf(k) < 0 && styring.indexOf(k) < 0);
+    const rekke = kilde.concat(last, rest, styring);
+
+    rekke.forEach((k) => { if (TYPER[k.type].klikkbar && k.pa === undefined) k.pa = false; });
+
+    /*
+     * Pakk to og to i rad der de får plass. Én per rad strakk et brett med to
+     * komponenter over hele høyden, og da ble symbolene bittesmå på telefon.
+     * Pakkingen skjer bare innenfor samme gruppe, så lesningen kilde → last →
+     * styring holder.
+     */
+    const parvis = (gruppe) => {
+        const ut = [];
+        for (let i = 0; i < gruppe.length;) {
+            const a = gruppe[i], c = gruppe[i + 1];
+            if (c && TYPER[a.type].b <= 170 && TYPER[c.type].b <= 170) { ut.push([a, c]); i += 2; }
+            else { ut.push([a]); i += 1; }
+        }
+        return ut;
+    };
+    const rader = [].concat(parvis(kilde), parvis(last), parvis(rest), parvis(styring));
+
+    const topp = 72;
+    const radH = rader.map((r) => Math.max.apply(null, r.map((k) => TYPER[k.type].h)));
+    const sumH = radH.reduce((a, h) => a + h, 0);
+    // Luftig når det er få rader, tettere når brettet er travelt.
+    const luft = Math.max(46, Math.min(108, 540 / rader.length));
+    VH = Math.round(topp * 2 + sumH + luft * (rader.length - 1));
+
+    let y = topp;
+    rader.forEach((rad, i) => {
+        rad.forEach((k, j) => {
+            k.y = Math.round(y + radH[i] / 2);
+            k.x = rad.length === 1 ? 320 : (j === 0 ? 176 : 464);
+        });
+        y += radH[i] + luft;
+    });
+    return liste;
+}
+
+/* ---------- 6. Tegning --------------------------------------------- */
+const VB = 640;
+let VH = 980;          // settes per brett av leggUt()
+const C = $('c'), G = C.getContext('2d');
+let sk = 1, offX = 0, offY = 0, DPR = 1, na = 0;
+let P = {};
+const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+function lesPalett() {
+    P = {
+        Lav: css('--L-av'), Lpa: css('--L-pa'),
+        Nav: css('--N-av'), Npa: css('--N-pa'),
+        PEav: css('--PE-av'), PEpa: css('--PE-pa'),
+        strom: css('--strom'), glod: css('--glod'), feil: css('--feil'),
+        tekst: css('--tekst'), dempet: css('--dempet'), svak: css('--svak'),
+        rute: css('--rute'), rute5: css('--rute-5'), natt: css('--nat')
+    };
+    MONO = css('--mono');
+}
+function skaler() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2.5);
+    const w = window.innerWidth, h = window.innerHeight;
+    C.width = Math.round(w * DPR); C.height = Math.round(h * DPR);
+    C.style.width = w + 'px'; C.style.height = h + 'px';
+    const topp = 112, bunn = 96;
+    // Maks 560 px brettbredde: på en bred skjerm skal dette lese som en
+    // bevisst stolpe, ikke som et lite brett som har gått seg bort.
+    const maksBredde = Math.min(w - 24, 560);
+    sk = Math.min(maksBredde / VB, (h - topp - bunn) / VH, 1.3);
+    offX = (w - VB * sk) / 2;
+    offY = topp + (h - topp - bunn - VH * sk) / 2;
+}
+window.addEventListener('resize', skaler);
+const tilSkjerm = (p) => ({ x: offX + p.x * sk, y: offY + p.y * sk });
+/* Etikettstørrelse i SKJERMPIKSLER med lesbar bunn. Skalerte de med brettet,
+   havnet de på 5 px på telefon – og da er de like gjerne ikke der. */
+const etiSt = (grunn) => Math.max(grunn, grunn * sk * 1.15);
+
+function lederFarge(f, live) {
+    if (f === 'N') return live ? P.Npa : P.Nav;
+    if (f === 'PE') return live ? P.PEpa : P.PEav;
+    return live ? P.Lpa : P.Lav;
+}
+
+/* Ortogonal bane med avrundede hjørner. */
+function bane(g, pts, rad) {
+    g.beginPath();
+    g.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length - 1; i++) {
+        const p = pts[i], n = pts[i + 1];
+        const r = Math.min(rad,
+            Math.hypot(p.x - pts[i - 1].x, p.y - pts[i - 1].y) / 2,
+            Math.hypot(n.x - p.x, n.y - p.y) / 2);
+        g.arcTo(p.x, p.y, n.x, n.y, r);
+    }
+    g.lineTo(pts[pts.length - 1].x, pts[pts.length - 1].y);
+}
+
+function tegnRutenett() {
+    G.setTransform(DPR, 0, 0, DPR, 0, 0);
+    const w = window.innerWidth, h = window.innerHeight;
+    G.fillStyle = P.natt; G.fillRect(0, 0, w, h);
+    const o = tilSkjerm({ x: 0, y: 0 });
+    // Svak glød bak stolpen så den løftes fra bakgrunnen på brede skjermer.
+    if (offX > 30) {
+        const gl = G.createLinearGradient(o.x - 60, 0, o.x + VB * sk + 60, 0);
+        gl.addColorStop(0, 'rgba(90,168,238,0)');
+        gl.addColorStop(.5, 'rgba(90,168,238,.035)');
+        gl.addColorStop(1, 'rgba(90,168,238,0)');
+        G.fillStyle = gl;
+        G.fillRect(o.x - 60, o.y - 20, VB * sk + 120, VH * sk + 40);
+    }
+    G.save();
+    G.beginPath(); G.rect(o.x - 8 * sk, o.y - 8 * sk, (VB + 16) * sk, (VH + 16) * sk); G.clip();
+    G.lineWidth = 1;
+    for (let x = 0; x <= VB; x += 20) {
+        const p = tilSkjerm({ x, y: 0 });
+        G.strokeStyle = (x % 100 === 0) ? P.rute5 : P.rute;
+        G.beginPath(); G.moveTo(p.x, o.y); G.lineTo(p.x, o.y + VH * sk); G.stroke();
+    }
+    for (let y = 0; y <= VH; y += 20) {
+        const p = tilSkjerm({ x: 0, y });
+        G.strokeStyle = (y % 100 === 0) ? P.rute5 : P.rute;
+        G.beginPath(); G.moveTo(o.x, p.y); G.lineTo(o.x + VB * sk, p.y); G.stroke();
+    }
+    G.restore();
+}
+
+/* Lys fra tente laster, lagt ut på rutenettet. */
+function tegnLysglod(r) {
+    if (!r) return;
+    for (const k of komp) {
+        if (!r.tente.has(k.id)) continue;
+        const p = tilSkjerm({ x: k.x, y: k.y });
+        const f = seierFase();
+        const rad = 200 * sk * (1 + 0.55 * Math.sin(Math.PI * Math.min(1, f * 1.6)));
+        const gr = G.createRadialGradient(p.x, p.y, 0, p.x, p.y, rad);
+        gr.addColorStop(0, 'rgba(255,201,90,.20)');
+        gr.addColorStop(.45, 'rgba(255,201,90,.07)');
+        gr.addColorStop(1, 'rgba(255,201,90,0)');
+        G.fillStyle = gr;
+        G.beginPath(); G.arc(p.x, p.y, rad, 0, 7); G.fill();
+    }
+}
+
+/* 0 → 1 gjennom seiersslaget, brukes til å skru opp lyset og farten. */
+function seierFase() {
+    if (!seier) return 0;
+    return Math.max(0, Math.min(1, (na - seier.fra) / 2000));
+}
+
+function tegnLedning(w, live, markert) {
+    const pts = w.pts.map(tilSkjerm);
+    const strobe = markert && (Math.floor(na / 110) % 2 === 0);
+    const farge = strobe ? P.feil : lederFarge(w.farge, live);
+    G.save();
+    G.lineCap = 'round'; G.lineJoin = 'round';
+    if (live || strobe) {
+        G.strokeStyle = farge; G.shadowColor = farge; G.shadowBlur = 16 * sk;
+        G.lineWidth = 3.4 * sk; bane(G, pts, 14 * sk); G.stroke();
+        G.shadowBlur = 0;
+    }
+    G.strokeStyle = farge;
+    G.lineWidth = (live || strobe ? 3.4 : 2.6) * sk;
+    bane(G, pts, 14 * sk); G.stroke();
+    if (live && !strobe) {
+        // Under seiersslaget renner strømmen fortere og lyser kraftigere.
+        const f = seierFase();
+        const fart = f > 0 ? 0.1 + 0.55 * (1 - f) : 0.1;
+        const kraft = f > 0 ? 1 + 2.2 * Math.sin(Math.PI * Math.min(1, f * 1.6)) : 1;
+        G.strokeStyle = P.strom; G.shadowColor = P.strom;
+        G.shadowBlur = 10 * sk * kraft;
+        G.lineWidth = 1.8 * sk * (1 + (kraft - 1) * .5);
+        G.setLineDash([4 * sk, 22 * sk]);
+        G.lineDashOffset = -(na * fart) % (26 * sk);
+        bane(G, pts, 14 * sk); G.stroke();
+    }
+    G.restore();
+}
+
+function tegnSymbol(k, r) {
+    const d = TYPER[k.type];
+    const p = tilSkjerm({ x: k.x, y: k.y });
+    /*
+     * Laster lyser når de er tent. Brytere og fordelingen lyser når de faktisk
+     * FØRER fase – ellers ser det ut som strømmen hopper over dem.
+     */
+    let aktiv = !!(r && (r.tente.has(k.id) || r.spenning.has(k.id)));
+    if (!aktiv && r && d.klikkbar) {
+        // En bryter lyser når den faktisk fører fase videre – begge sider live.
+        const live = d.klemmer.filter((kl) => r.finn(k.id + ':' + kl.id) === r.rL);
+        aktiv = live.length >= 2;
+    }
+    if (!aktiv && r && d.kilde) {
+        // Fordelingen lyser bare når det går strøm et sted. Kildens egen
+        // L-klemme ER L-nettet, så uten dette lyste den alltid – alene.
+        aktiv = r.tente.size > 0 || r.spenning.size > 0;
+    }
+    const S = (v) => v * sk;
+
+    G.save();
+    G.translate(p.x, p.y);
+    G.lineWidth = (aktiv ? 2.6 : 2.4) * sk; G.lineCap = 'round'; G.lineJoin = 'round';
+    const f = aktiv ? P.glod : P.dempet;
+    G.strokeStyle = f; G.fillStyle = f;
+    if (aktiv) { G.shadowColor = P.glod; G.shadowBlur = 14 * sk; }
+    d.tegn(G, S, { pa: !!k.pa, live: spilletLive });
+    G.restore();
+
+    G.save();
+    G.fillStyle = aktiv ? 'rgba(255,194,71,.9)' : P.svak;
+    G.font = '500 ' + etiSt(10.5) + 'px ' + MONO;
+    G.textAlign = 'center'; G.textBaseline = 'alphabetic';
+    const navn = d.navn.toUpperCase();
+    const halv = G.measureText(navn).width / 2;
+    const vb = tilSkjerm({ x: 0, y: 0 }).x + halv + 4 * sk;
+    const hb = tilSkjerm({ x: VB, y: 0 }).x - halv - 4 * sk;
+    const lx = Math.max(vb, Math.min(hb, p.x));
+    const eh = etiSt(10.5);
+    const ly = p.y - d.h / 2 * sk - Math.max(10, 12 * sk);
+    const f2 = G.fillStyle;
+    G.fillStyle = P.natt;
+    G.fillRect(lx - halv - 5, ly - eh, halv * 2 + 10, eh * 1.45);
+    G.fillStyle = f2;
+    G.fillText(navn, lx, ly);
+    G.restore();
+}
+
+function tegnKlemme(t, r) {
+    const s = tilSkjerm(t.p);
+    const live = !!(r && r.finn(t.id) === r.rL);
+    const valgt = !!(pending && pending.id === t.id);
+    const gyldig = !!(pending && pending.id !== t.id);
+    const markert = !!(feilmark && feilmark.klemmer.indexOf(t.id) >= 0);
+    const strobe = markert && (Math.floor(na / 110) % 2 === 0);
+    const farge = strobe ? P.feil : lederFarge(t.kl.farge, live);
+    const rr = 7.5 * sk;
+
+    G.save();
+    if (gyldig) {
+        const puls = .3 + .25 * Math.sin(na / 260);
+        G.strokeStyle = 'rgba(255,217,138,' + puls.toFixed(3) + ')';
+        G.lineWidth = 1.6 * sk;
+        G.beginPath(); G.arc(s.x, s.y, rr + 10 * sk, 0, 7); G.stroke();
+    }
+    if (valgt) {
+        G.strokeStyle = P.strom; G.lineWidth = 2.2 * sk;
+        G.shadowColor = P.strom; G.shadowBlur = 14 * sk;
+        G.beginPath(); G.arc(s.x, s.y, rr + 8 * sk, 0, 7); G.stroke();
+        G.shadowBlur = 0;
+    }
+    if (live || strobe) { G.shadowColor = farge; G.shadowBlur = 12 * sk; }
+    G.fillStyle = farge;
+    G.beginPath(); G.arc(s.x, s.y, rr, 0, 7); G.fill();
+    G.shadowBlur = 0;
+    G.fillStyle = P.natt;
+    G.beginPath(); G.arc(s.x, s.y, rr * .4, 0, 7); G.fill();
+    G.restore();
+
+    G.save();
+    G.fillStyle = live ? P.strom : P.svak;
+    G.font = '600 ' + etiSt(10) + 'px ' + MONO;
+    G.textAlign = 'center'; G.textBaseline = 'middle';
+    const dx = t.kl.d[0], dy = t.kl.d[1];
+    // Loddrette klemmer får teksten til siden: rett under ligger dens egen leder.
+    const avst = Math.max(15, 19 * sk);
+    const tx = dy !== 0 ? s.x + avst : s.x + dx * avst;
+    const ty = dy !== 0 ? s.y + dy * 4 * sk : s.y - Math.max(13, 15 * sk);
+    const f3 = G.fillStyle;
+    G.fillStyle = P.natt;
+    const br = G.measureText(t.kl.tekst).width / 2 + 3;
+    const th = etiSt(10);
+    G.fillRect(tx - br, ty - th * .7, br * 2, th * 1.4);
+    G.fillStyle = f3;
+    G.fillText(t.kl.tekst, tx, ty);
+    G.restore();
+}
+
+/* ---------- 7. Tilstand og inndata ---------------------------------- */
+let brettNr = 0, komp = [], ledninger = [], pending = null, pekerPos = null;
+let spilletLive = false, sisteRes = null, startTid = 0, sisteSum = null, feilmark = null;
+let kapittelFerdig = 0;
+let seier = null;   // { fra, til } – øyeblikket du får se at kretsen holder
+let fremdrift = { klart: {}, poeng: {} };
+try { fremdrift = JSON.parse(localStorage.getItem('kursmester2') || '{"klart":{},"poeng":{}}'); } catch (e) { /* tom */ }
+if (!fremdrift.poeng) fremdrift.poeng = {};
+const totalPoeng = () => Object.keys(fremdrift.poeng).reduce((a, k) => a + fremdrift.poeng[k], 0);
+let dimValg = { kabel: null, vern: null, jfb: null };
+const brett = () => BRETT[brettNr];
+/* Måltid: sju sekunder per ledning du faktisk trenger. Treffer du det, er
+   du rutinert; dobbelt så lenge er fortsatt greit. */
+/*
+ * Maks vern for tverrsnittet, norsk boligpraksis: lyskurs 1,5 mm² / 10 A,
+ * stikkontaktkurs 2,5 mm² / 16 A. Dette er koordineringen Ib ≤ In ≤ Iz gjort
+ * om til det en lærling faktisk møter i et sikringsskap.
+ */
+const MAKS_VERN = { 1.5: 10, 2.5: 16, 4: 25 };
+
+/* Riktig dimensjonert = minste vern som dekker lasten, og minste kabel som
+   tåler det vernet. Ikke underdimensjonert, og ikke unødig grovt. */
+function riktigDim(dim) {
+    const Ib = dim.last / 230;
+    const vern = dim.vern.slice().sort((a, b) => a - b).find((v) => v >= Ib);
+    const kabel = dim.kabler.slice().sort((a, b) => a - b).find((k) => MAKS_VERN[k] >= vern);
+    return { vern, kabel, jfb: 30, Ib };
+}
+
+/* Returnerer null når valget holder, ellers en forklaring på HVA som er galt. */
+function sjekkDim(dim, valg) {
+    const r = riktigDim(dim);
+    if (valg.jfb !== 30) return 'Alle kurser i bolig skal ha 30 mA jordfeilvern.';
+    if (valg.vern < r.Ib) return 'Vernet er for lite: lasten er ' + r.Ib.toFixed(1) + ' A. Ib ≤ In.';
+    if (valg.vern > MAKS_VERN[valg.kabel]) return valg.kabel + ' mm² tåler ikke ' + valg.vern + ' A. In ≤ Iz.';
+    if (valg.vern > r.vern) return 'Vernet er grovere enn nødvendig – ' + r.vern + ' A dekker ' + r.Ib.toFixed(1) + ' A.';
+    if (valg.kabel > r.kabel) return 'Kabelen er grovere enn nødvendig – ' + r.kabel + ' mm² tåler ' + r.vern + ' A.';
+    return null;
+}
+
+const maaltid = () => (brett().krav.maksLedn || 6) * 7;
+const klemmePos = (k, kl) => ({ x: k.x + kl.x, y: k.y + kl.y });
+
+function alleKlemmer() {
+    const ut = [];
+    for (const k of komp) for (const kl of TYPER[k.type].klemmer) {
+        ut.push({ komp: k, kl, id: k.id + ':' + kl.id, p: klemmePos(k, kl) });
+    }
+    return ut;
+}
+function byggBane(w) {
+    const kl = alleKlemmer();
+    const a = kl.find((x) => x.id === w.a), b = kl.find((x) => x.id === w.b);
+    if (a && b) w.pts = rute(a.p, a.kl.d, b.p, b.kl.d, w.a + w.b);
+}
+function lastBrett(n) {
+    brettNr = Math.max(0, Math.min(BRETT.length - 1, n));
+    const b = brett();
+    komp = leggUt(b.komp.map((k) => Object.assign({}, k)));
+    skaler();
+    ledninger = []; pending = null; pekerPos = null; feilmark = null; seier = null;
+    // Feilsøkingsbrett starter ferdig koblet – med feilen i.
+    if (b.forhand) {
+        const kl = alleKlemmer();
+        b.forhand.forEach((par) => {
+            const A = kl.find((x) => x.id === par[0]), B = kl.find((x) => x.id === par[1]);
+            if (!A || !B) return;
+            const w = { a: par[0], b: par[1], farge: fargeFor(A, B) };
+            byggBane(w); ledninger.push(w);
+        });
+    }
+    sisteRes = null; startTid = performance.now();
+    dimValg = { kabel: null, vern: null, jfb: null };
+    $('hKurs').textContent = b.kurs;
+    $('hTittel').textContent = b.navn;
+    $('hMaal').textContent = b.mal;
+    settAutomat(false);
+    $('automat').classList.remove('seier');
+    byggSkinne();
+    if (b.dim) visDim(b); else lukkAlle();
+}
+function klemmeVed(vx, vy) {
+    /*
+     * Treffsonen måles i brettenheter, men fingeren måles i piksler. På et
+     * travelt brett blir skalaen liten, og en fast sone krympet til under
+     * 40 px. Vi holder minst ~24 px radius uansett – nærmeste klemme vinner
+     * når soner overlapper.
+     */
+    let best = null, bd = Math.max(44, 24 / sk);
+    for (const t of alleKlemmer()) {
+        const d = Math.hypot(t.p.x - vx, t.p.y - vy);
+        if (d < bd) { bd = d; best = t; }
+    }
+    return best;
+}
+function komponentVed(vx, vy) {
+    for (const k of komp) {
+        const d = TYPER[k.type];
+        if (Math.abs(vx - k.x) < d.b / 2 && Math.abs(vy - k.y) < d.h / 2) return k;
+    }
+    return null;
+}
+function ledningVed(vx, vy) {
+    for (let i = ledninger.length - 1; i >= 0; i--) {
+        const pts = ledninger[i].pts || [];
+        for (let j = 0; j < pts.length - 1; j++) {
+            const a = pts[j], b = pts[j + 1];
+            const dx = b.x - a.x, dy = b.y - a.y;
+            const l2 = dx * dx + dy * dy || 1;
+            let t = ((vx - a.x) * dx + (vy - a.y) * dy) / l2;
+            t = Math.max(0, Math.min(1, t));
+            if (Math.hypot(a.x + t * dx - vx, a.y + t * dy - vy) < 18) return i;
+        }
+    }
+    return -1;
+}
+function fargeFor(a, b) {
+    const f = [a.kl.farge, b.kl.farge];
+    if (f.indexOf('PE') >= 0) return 'PE';
+    if (f.indexOf('N') >= 0) return 'N';
+    return 'L';
+}
+function koble(a, b) {
+    if (a.id === b.id) return;
+    if (ledninger.some((w) => (w.a === a.id && w.b === b.id) || (w.a === b.id && w.b === a.id))) return;
+    const w = { a: a.id, b: b.id, farge: fargeFor(a, b) };
+    byggBane(w); ledninger.push(w); SFX.ledning();
+    if (spilletLive) test(true);
+}
+function tilVerden(e) {
+    const r = C.getBoundingClientRect();
+    return { x: (e.clientX - r.left - offX) / sk, y: (e.clientY - r.top - offY) / sk };
+}
+C.addEventListener('pointerdown', (e) => {
+    lyd();
+    const v = tilVerden(e);
+    const t = klemmeVed(v.x, v.y);
+    if (t) {
+        if (pending && pending.id !== t.id) { koble(pending, t); pending = null; pekerPos = null; }
+        else { pending = t; pekerPos = v; SFX.tapp(); }
+        return;
+    }
+    /*
+     * Bryteren sjekkes FØR ledningene. Ledninger rutes ofte rett over et
+     * symbol, og da slettet et trykk på bryteren en ledning i stedet for å
+     * vippe den. Et symbol er et bevisst mål; en ledning som tilfeldigvis
+     * krysser det, skal ikke stjele trykket.
+     */
+    const k = komponentVed(v.x, v.y);
+    if (k && TYPER[k.type].klikkbar) {
+        k.pa = !k.pa; SFX.bryter(); pending = null; pekerPos = null;
+        // Under seieren skal bryterne virke, men brettet skal ikke dømmes på
+        // nytt – du er ferdig, du bare viser deg selv at det holder.
+        if (spilletLive) { sisteRes = los(komp, ledninger); if (!seier) test(true); }
+        return;
+    }
+    const wi = ledningVed(v.x, v.y);
+    if (wi >= 0) {
+        ledninger.splice(wi, 1); SFX.fjern(); pending = null; pekerPos = null;
+        if (spilletLive) test(true);
+        return;
+    }
+    pending = null; pekerPos = null;
+});
+C.addEventListener('pointermove', (e) => { if (pending) pekerPos = tilVerden(e); });
+C.addEventListener('pointerup', (e) => {
+    if (!pending) return;
+    const v = tilVerden(e);
+    const t = klemmeVed(v.x, v.y);
+    if (t && t.id !== pending.id) { koble(pending, t); pending = null; pekerPos = null; }
+});
+
+/* ---------- 8. Spillflyt -------------------------------------------- */
+function varsle(tekst, type, ms) {
+    const el = $('varsel');
+    el.textContent = tekst;
+    el.className = 'vis ' + (type || '');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.className = ''; }, ms || 2600);
+}
+function settAutomat(pa) {
+    spilletLive = pa;
+    $('automat').classList.toggle('pa', pa);
+    $('aTx').textContent = pa ? 'Automaten står på' : 'Slå på';
+    $('aEt').textContent = pa ? 'Spenning' : 'Automat';
+    if (!pa) sisteRes = null;
+}
+
+/* Marker feilen DER den er – ikke bare i en tekstboks. */
+function markerFeil(r, type) {
+    const ider = [], klemmer = [];
+    const maal = type === 'kort' ? r.rN : r.rPE;
+    for (const w of ledninger) if (r.finn(w.a) === r.rL || r.finn(w.a) === maal) ider.push(w.a + w.b);
+    for (const t of alleKlemmer()) if (r.finn(t.id) === r.rL || r.finn(t.id) === maal) klemmer.push(t.id);
+    feilmark = { ider, klemmer, til: performance.now() + 2800 };
+}
+function markerPE(id) { feilmark = { ider: [], klemmer: [id + ':PE'], til: performance.now() + 3200 }; }
+
+function test(stille) {
+    const b = brett();
+    const r = los(komp, ledninger);
+    sisteRes = r;
+
+    if (r.kortslutning) {
+        markerFeil(r, 'kort'); settAutomat(false); SFX.smell();
+        varsle('Kortslutning – automaten gikk. Fase møter nøytral uten last imellom.', 'feil', 3400);
+        return false;
+    }
+    if (r.jordfeil) {
+        markerFeil(r, 'jord'); settAutomat(false); SFX.smell();
+        varsle('Jordfeil – jordfeilbryteren slo ut. Fase ligger på PE.', 'feil', 3400);
+        return false;
+    }
+    if (stille) return true;
+
+    for (const k of komp) {
+        const d = TYPER[k.type];
+        if (!d.lastgrense) continue;
+        let wsum = 0;
+        for (const l of komp) if (TYPER[l.type].last && r.tente.has(l.id)) wsum += TYPER[l.type].watt;
+        if (wsum > d.lastgrense.maks) {
+            SFX.feil(); varsle('For mye last på dimmeren: ' + wsum + ' W mot maks ' + d.lastgrense.maks + ' W.', 'feil', 3400);
+            return false;
+        }
+    }
+
+    const sj = sjekkStyrbar(komp, ledninger, b.krav);
+    if (sj.feil === 'kort') { SFX.smell(); varsle('En av bryterstillingene gir kortslutning. Prøv alle stillinger.', 'feil', 3600); return false; }
+    if (sj.feil === 'jord') { SFX.smell(); varsle('En av bryterstillingene gir jordfeil.', 'feil', 3600); return false; }
+
+    for (const s of (b.krav.styrbar || [])) {
+        const res = sj.resultat[s.last];
+        if (!res.pa) { SFX.feil(); varsle('Lasten tennes ikke i noen bryterstilling – kretsen er ikke sluttet.', 'feil', 3400); return false; }
+        if (!res.av) { SFX.feil(); varsle('Lasten står på uansett bryterstilling. Bryteren må stå på fasen.', 'feil', 3600); return false; }
+    }
+    if (Object.keys(sj.nPaaFase).length) {
+        SFX.feil();
+        varsle('Bryteren står på nøytralen. Lampa lyser riktig, men står spenningsførende når den er «av» – bryt alltid fasen.', 'feil', 4600);
+        return false;
+    }
+    if (sj.utenVirkning.length) {
+        SFX.feil();
+        varsle('En av bryterne gjør ingenting. Sjekk de korresponderende lederne.', 'feil', 4000);
+        return false;
+    }
+    for (const id of (b.krav.spenning || [])) {
+        if (sj.stikkDoed[id] || !r.spenning.has(id)) {
+            SFX.feil();
+            varsle('Stikkontakten mister spenning i en bryterstilling. Den skal ha L og N rett fra kursen.', 'feil', 4200);
+            return false;
+        }
+    }
+    for (const id of (b.krav.pe || [])) {
+        if (!r.peOk.has(id)) {
+            markerPE(id); SFX.feil();
+            varsle('Avvik: utstyr i klasse I mangler jord. PE må kobles.', 'feil', 3600);
+            return false;
+        }
+    }
+    if (b.dim) {
+        const d = sjekkDim(b.dim, dimValg);
+        if (d) { SFX.feil(); varsle('Kretsen virker, men kursen er feil dimensjonert. ' + d, 'feil', 4200); return false; }
+    }
+    ferdig();
+    return true;
+}
+
+function ferdig() {
+    const tid = performance.now() - startTid;
+    const antall = ledninger.length;
+    const maks = brett().krav.maksLedn || 99;
+    /*
+     * Belønningen henger på to ting: at kretsen er RIKTIG (antall ledninger
+     * innenfor budsjettet) og at den sitter i fingrene (tid under måltiden).
+     * Tre stjerner krever begge – det er den som får deg til å prøve igjen.
+     */
+    const sek = tid / 1000, maal = maaltid();
+    let stjerner = 1;
+    if (antall <= maks) stjerner = 2;
+    if (antall <= maks && sek <= maal) stjerner = 3;
+    const tidsbonus = Math.max(0, Math.round((maal * 2 - sek) * 14));
+    const effbonus = Math.max(0, (maks - antall + 2) * 70);
+    const poeng = 400 + tidsbonus + effbonus;
+
+    const forrige = fremdrift.poeng[brettNr] || 0;
+    const nyRekord = poeng > forrige;
+    fremdrift.klart[brettNr] = Math.max(fremdrift.klart[brettNr] || 0, stjerner);
+    fremdrift.poeng[brettNr] = Math.max(forrige, poeng);
+    try { localStorage.setItem('kursmester2', JSON.stringify(fremdrift)); } catch (e) { /* privat */ }
+    byggSkinne();
+
+    SFX.klar();
+    $('rEt').textContent = 'Brett ' + (brettNr + 1) + ' klart';
+    $('rTittel').textContent = brett().navn + ' virker';
+    $('rTid').textContent = sek.toFixed(1) + ' s';
+    $('rTidK').textContent = sek <= maal ? 'Tid · gull' : 'Tid · mål ' + maal + ' s';
+    $('rLedn').textContent = antall + '/' + maks;
+    $('rLednK').textContent = 'Ledninger';
+    $('rPoeng').textContent = String(poeng);
+    $('rPoengK').textContent = nyRekord && forrige ? 'Poeng · ny rekord' : (forrige ? 'Poeng · best ' + forrige : 'Poeng');
+    settFag($('rFag'), brett().fag, brett().norm);
+    const st = $('rStj').children;
+    for (let i = 0; i < 3; i++) {
+        st[i].classList.remove('pa');
+        if (i < stjerner) setTimeout(() => st[i].classList.add('pa'), 260 + i * 180);
+    }
+    // Fullførte du det siste brettet i kapittelet, fortjener det et eget øyeblikk.
+    const kap = brett().kap;
+    const iKap = BRETT.map((b, j) => [b, j]).filter((x) => x[0].kap === kap);
+    const alleKlare = iKap.every((x) => fremdrift.klart[x[1]]);
+    const sisteIKap = brettNr === iKap[iKap.length - 1][1];
+    kapittelFerdig = alleKlare && sisteIKap ? kap : 0;
+    $('rNeste').textContent = kapittelFerdig ? 'Kapittel ' + kap + ' fullført' :
+        (brettNr < BRETT.length - 1 ? 'Neste brett' : 'Du er kursmester!');
+    $('rDel').textContent = 'Utfordre en kompis';
+    sisteSum = { brett: brettNr, poeng, stjerner, tid: sek, ledn: antall };
+
+    /*
+     * IKKE panel med en gang. Det beste øyeblikket i spillet er å se at
+     * kretsen faktisk virker – strømmen går, lampa lyser. Panelet dekket det
+     * etter 450 ms. Nå får du et seiersslag først, og kan trykke for å hoppe
+     * over hvis du har dårlig tid.
+     */
+    /*
+     * Seieren har ingen klokke. Brettet blir stående levende så du kan vippe
+     * bryterne og se at det faktisk virker – det er beviset på at du skjønte
+     * det. Du går videre når du selv vil, med knappen nederst.
+     */
+    seier = { fra: performance.now() };
+    varsle('Kretsen holder. ' + sek.toFixed(1) + ' s' + (sek <= maal ? ' – gulltid.' : '.') +
+           ' Prøv bryterne – så ser du det selv.', 'ok', 6000);
+    $('automat').classList.add('seier');
+    $('aEt').textContent = 'Klart';
+    $('aTx').textContent = 'Se resultat';
+}
+
+const PANELER = ['start', 'fagpanel', 'menypanel', 'dimpanel', 'resultat'];
+const lukkAlle = () => PANELER.forEach((p) => { $(p).hidden = true; });
+function aapne(id) { lukkAlle(); $(id).hidden = false; }
+function tom(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+/* Fagtekst med *stjerner* rundt utheving – bygges som DOM, aldri innerHTML. */
+function settFag(el, tekst, norm) {
+    tom(el);
+    tekst.split('*').forEach((bit, i) => {
+        if (!bit) return;
+        if (i % 2) { const b = document.createElement('b'); b.textContent = bit; el.appendChild(b); }
+        else el.appendChild(document.createTextNode(bit));
+    });
+    if (norm) {
+        const s = document.createElement('span');
+        s.className = 'norm'; s.textContent = norm;
+        el.appendChild(s);
+    }
+}
+/* Skinna viser bare kapittelet du er i – 33 streker hadde vært uleselig. */
+function byggSkinne() {
+    const el = $('skinne'); tom(el);
+    const kap = brett().kap;
+    BRETT.forEach((b, i) => {
+        if (b.kap !== kap) return;
+        const s = document.createElement('i');
+        s.className = (i === brettNr) ? 'na' : (fremdrift.klart[i] ? 'klar' : '');
+        el.appendChild(s);
+    });
+}
+function visDim(b) {
+    $('dUnder').textContent = 'Lasten er ' + b.dim.last + ' W på 230 V – det blir ' +
+        (b.dim.last / 230).toFixed(1) + ' A. Velg kabel og vern.';
+    const rad = (el, verdier, suff, felt) => {
+        tom(el);
+        verdier.forEach((v) => {
+            const kn = document.createElement('button');
+            kn.textContent = v + suff;
+            kn.onclick = () => {
+                dimValg[felt] = v; SFX.tapp();
+                Array.prototype.forEach.call(el.children, (c) => c.classList.remove('valgt'));
+                kn.classList.add('valgt');
+            };
+            el.appendChild(kn);
+        });
+    };
+    rad($('dKabel'), b.dim.kabler, ' mm²', 'kabel');
+    rad($('dVern'), b.dim.vern, ' A', 'vern');
+    rad($('dJfb'), [30, 300], ' mA', 'jfb');
+    aapne('dimpanel');
+}
+function byggMeny() {
+    const stjSum = Object.keys(fremdrift.klart).reduce((a, k) => a + fremdrift.klart[k], 0);
+    $('mKlart').textContent = Object.keys(fremdrift.klart).length + '/' + BRETT.length;
+    $('mStj').textContent = stjSum + '/' + (BRETT.length * 3);
+    $('mPoeng').textContent = totalPoeng().toLocaleString('nb-NO');
+    const el = $('brettliste'); tom(el);
+    let sisteKap = 0;
+    BRETT.forEach((b, i) => {
+        if (b.kap !== sisteKap) {
+            sisteKap = b.kap;
+            const h = document.createElement('div');
+            h.className = 'kaprad';
+            const kl = BRETT.filter((x) => x.kap === b.kap);
+            const ok = kl.filter((x) => fremdrift.klart[BRETT.indexOf(x)]).length;
+            h.textContent = b.kap + '. ' + KAPITLER[b.kap - 1] + '  ·  ' + ok + '/' + kl.length;
+            el.appendChild(h);
+        }
+        const kn = document.createElement('button');
+        const st = fremdrift.klart[i] || 0;
+        const laast = i > 0 && !fremdrift.klart[i - 1];
+        kn.className = (laast ? 'laast ' : '') + (st ? 'klar' : '');
+        const n = document.createElement('span'); n.className = 'n'; n.textContent = String(i + 1);
+        const s = document.createElement('span'); s.className = 's'; s.textContent = '★'.repeat(st);
+        kn.appendChild(n); kn.appendChild(s);
+        kn.title = b.navn;
+        kn.onclick = () => {
+            if (laast) { varsle('Klar brettet før først.', 'feil', 1600); return; }
+            SFX.tapp(); lastBrett(i);
+        };
+        el.appendChild(kn);
+    });
+}
+
+$('bStart').onclick = () => { lyd(); SFX.tapp(); lastBrett(0); };
+$('bVelgBrett').onclick = () => { lyd(); byggMeny(); aapne('menypanel'); };
+$('bMeny').onclick = () => { byggMeny(); aapne('menypanel'); };
+$('mLukk').onclick = lukkAlle;
+$('fLukk').onclick = lukkAlle;
+$('dOk').onclick = () => {
+    if (!dimValg.kabel || !dimValg.vern || !dimValg.jfb) { varsle('Velg kabel, vern og jordfeilvern.', 'feil', 2000); return; }
+    SFX.tapp(); lukkAlle(); startTid = performance.now();
+};
+$('bHjelp').onclick = () => {
+    const b = brett();
+    $('fEt').textContent = 'Brett ' + (brettNr + 1);
+    $('fTittel').textContent = b.fagTittel;
+    settFag($('fTekst'), b.fag, b.norm);
+    aapne('fagpanel');
+};
+$('bAngre').onclick = () => { if (ledninger.length) { ledninger.pop(); SFX.fjern(); if (spilletLive) test(true); } };
+$('bTom').onclick = () => { if (ledninger.length) { ledninger = []; SFX.fjern(); settAutomat(false); feilmark = null; } };
+$('automat').onclick = () => {
+    lyd();
+    if (seier) { SFX.tapp(); visResultat(); return; }
+    if (spilletLive) { settAutomat(false); SFX.bryter(); return; }
+    if (!ledninger.length) { varsle('Koble opp kretsen først.', 'feil', 1800); return; }
+    feilmark = null; settAutomat(true); SFX.pa();
+    setTimeout(() => { if (spilletLive) test(false); }, 650);
+};
+$('rNeste').onclick = () => {
+    SFX.tapp();
+    if (kapittelFerdig) {
+        const kap = kapittelFerdig; kapittelFerdig = 0;
+        const iKap = BRETT.map((b, j) => [b, j]).filter((x) => x[0].kap === kap);
+        const stj = iKap.reduce((a, x) => a + (fremdrift.klart[x[1]] || 0), 0);
+        const pts = iKap.reduce((a, x) => a + (fremdrift.poeng[x[1]] || 0), 0);
+        $('rEt').textContent = 'Kapittel ' + kap;
+        $('rTittel').textContent = KAPITLER[kap - 1] + ' fullført';
+        $('rTid').textContent = iKap.length; $('rTidK').textContent = 'Brett';
+        $('rLedn').textContent = stj + '/' + (iKap.length * 3); $('rLednK').textContent = 'Stjerner';
+        $('rPoeng').textContent = pts.toLocaleString('nb-NO'); $('rPoengK').textContent = 'Poeng';
+        settFag($('rFag'), kap < KAPITLER.length
+            ? 'Du har *' + KAPITLER[kap - 1].toLowerCase() + '* i fingrene. Neste kapittel er *' + KAPITLER[kap] + '*.'
+            : 'Du har vært gjennom alt: grunnlag, bryterkoblinger, last og vern, sammensatte kurser og feilsøking. *Du er kursmester.*', '');
+        const st = $('rStj').children;
+        for (let i = 0; i < 3; i++) { st[i].classList.remove('pa'); setTimeout(() => st[i].classList.add('pa'), 200 + i * 170); }
+        $('rNeste').textContent = kap < KAPITLER.length ? 'Start kapittel ' + (kap + 1) : 'Velg brett';
+        SFX.klar();
+        return;
+    }
+    if (brettNr < BRETT.length - 1) lastBrett(brettNr + 1);
+    else { byggMeny(); aapne('menypanel'); }
+};
+$('rOm').onclick = () => { SFX.tapp(); lastBrett(brettNr); };
+$('rDel').onclick = async () => {
+    const s = sisteSum; if (!s) return;
+    const lenke = SITE + '?brett=' + (s.brett + 1) + '&mot=' + s.poeng;
+    const tekst = 'Jeg koblet «' + BRETT[s.brett].navn + '» i Kursmester på ' +
+        s.tid.toFixed(1) + ' s ' + '★'.repeat(s.stjerner) + ' ⚡ Klarer du det raskere?';
+    try { if (navigator.share) { await navigator.share({ title: 'Kursmester', text: tekst, url: lenke }); return; } }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+    try { await navigator.clipboard.writeText(tekst + ' ' + lenke); $('rDel').textContent = 'Lenke kopiert!'; }
+    catch (e) { $('rDel').textContent = 'Kunne ikke kopiere'; }
+};
+
+/* ---------- Løkke ---------------------------------------------------- */
+let klokkeEl = null;
+function oppdaterKlokke() {
+    if (!klokkeEl) klokkeEl = $('hKlokke');
+    if ($('dimpanel').hidden === false || $('resultat').hidden === false) return;
+    const sek = (performance.now() - startTid) / 1000;
+    const maal = maaltid();
+    // «12.4 / 42 s» – brukt tid mot gullgrensa, uten å spise en linje av oppdraget.
+    tom(klokkeEl);
+    const b = document.createElement('b');
+    b.textContent = sek.toFixed(1);
+    klokkeEl.appendChild(b);
+    klokkeEl.appendChild(document.createTextNode(' / ' + maal + ' s'));
+    klokkeEl.classList.toggle('over', sek > maal);
+}
+
+function visResultat() {
+    seier = null;
+    $('varsel').className = '';
+    $('automat').classList.remove('seier');
+    aapne('resultat');
+}
+
+function tegn(t) {
+    na = t;
+    oppdaterKlokke();
+    if (feilmark && t > feilmark.til) feilmark = null;
+    const r = spilletLive ? sisteRes : null;
+
+    tegnRutenett();
+    tegnLysglod(r);
+
+    for (const w of ledninger) {
+        if (!w.pts) byggBane(w);
+        const live = !!(r && r.finn(w.a) === r.rL && w.farge === 'L');
+        tegnLedning(w, live, !!(feilmark && feilmark.ider.indexOf(w.a + w.b) >= 0));
+    }
+
+    if (pending && pekerPos) {
+        const p1 = tilSkjerm(pending.p), p2 = tilSkjerm(pekerPos);
+        G.save();
+        G.strokeStyle = 'rgba(255,217,138,.55)';
+        G.lineWidth = 2 * sk; G.setLineDash([6 * sk, 8 * sk]); G.lineCap = 'round';
+        G.beginPath(); G.moveTo(p1.x, p1.y); G.lineTo(p2.x, p1.y); G.lineTo(p2.x, p2.y); G.stroke();
+        G.restore();
+    }
+
+    for (const k of komp) tegnSymbol(k, r);
+    for (const kl of alleKlemmer()) tegnKlemme(kl, r);
+}
+function loop(t) { tegn(t); requestAnimationFrame(loop); }
+
+lesPalett();
+skaler();
+komp = leggUt(BRETT[0].komp.map((k) => Object.assign({}, k)));
+skaler();
+byggSkinne();
+const pr = new URLSearchParams(location.search);
+const onsket = parseInt(pr.get('brett') || '0', 10);
+if (onsket >= 1 && onsket <= BRETT.length) lastBrett(onsket - 1);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

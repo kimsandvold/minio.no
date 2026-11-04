@@ -101,6 +101,16 @@ export const SPILL: Spill[] = [
     maal: '20 av 20 riktige',
     bilde: '/images/underholdning/quiz.webp',
   },
+  {
+    href: '/underholdning/tool-kursmester.html',
+    tittel: 'Kursmester',
+    beskrivelse:
+      'Koble opp lyskurser på koblingsskjema: endevender i trappa, kryssbryter fra tre steder, dimmer med lastgrense og varmekabel på egen kurs. Slå på automaten – holder den, eller smeller det? 33 brett i fire kapitler.',
+    ferdighet: 'Fagkunnskap',
+    tid: '1–3 min per brett',
+    maal: 'Tre stjerner på et brett',
+    bilde: '/images/underholdning/kursmester.webp',
+  },
 ]
 
 /** Toppen fremhever det utvalgte spillet – ellers det nyeste, ellers det første. */

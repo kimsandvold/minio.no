@@ -9,6 +9,25 @@ import GuideArticleLayout, {
 
 const sections: ArticleSection[] = [
   {
+    id: 'kort-fortalt',
+    heading: 'Kort fortalt',
+    content: (
+      <>
+        <P>
+          Jobb fra grovt til fint uten å hoppe over trinn: korn 60–80 fjerner ujevnheter og runder
+          skarpe kanter, 120 er hovedslipingen for de fleste prosjekter, og 180–240 er finishen før
+          behandling. Går du rett fra 80 til 240, blir du aldri kvitt de grove riftene – du bare
+          polerer dem.
+        </P>
+        <P>
+          Slip alltid med fiberretningen, aldri på tvers, og børst bort alt støv før du behandler.
+          Sliping gir også beis, olje og maling noe å feste seg i, så hopper du over den, vises det
+          med en gang behandlingen er på.
+        </P>
+      </>
+    ),
+  },
+  {
     id: 'hvorfor-slipe',
     heading: 'Hvorfor slipe?',
     content: (

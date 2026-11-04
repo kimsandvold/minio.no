@@ -10,6 +10,24 @@ import GuideArticleLayout, {
 
 const sections: ArticleSection[] = [
   {
+    id: 'kort-fortalt',
+    heading: 'Kort fortalt',
+    content: (
+      <>
+        <P>
+          En halvtime med planlegging på kjøkkenbordet sparer deg for timer med frustrasjon i
+          garasjen. Prosjekter stopper sjelden opp fordi noen mangler ferdigheter – de stopper
+          fordi materialet ikke strakk til, eller delene ikke passet sammen.
+        </P>
+        <P>
+          Svar på tre spørsmål før du tegner en strek: hva skal det brukes til, hvor skal det stå,
+          og hvor stort kan det være. Lag deretter en enkel skisse, en materialliste og en
+          kappeliste – da vet du nøyaktig hva du skal handle.
+        </P>
+      </>
+    ),
+  },
+  {
     id: 'hvorfor-planlegge',
     heading: 'Hvorfor planlegge?',
     content: (

@@ -118,3 +118,101 @@ Hvem er medlemmene utover sluttbrukerne?
   skalerer ikke utover kjøreavstand, og er strengt tatt støtte, ikke nettverk.
 
 Status: til vurdering.
+
+## Sidegesjeft: nettsider/verktøy for bedrifter (2026-11-03)
+
+Diskusjon om å starte et sideprosjekt ved siden av Minio. Utgangspunktet var
+«headless hjemmesider til bedrifter med Supabase/Firebase». Ikke besluttet —
+notert her fordi to av konklusjonene berører minio.no direkte.
+
+### Omformuleringen
+
+«Headless med Supabase/Firebase» er rørlegging, ikke et produkt. Ingen kunde
+etterspør en arkitektur. Og «hjemmesider til bedrifter» er en vare som ikke lar
+seg skille fra Squarespace, Framer, nevøen eller «nettside fra 4 900,-» —
+konkurransen blir på pris, og priskonkurranse er spesielt ille som bigeskjeft:
+kundene som betaler minst krever mest, og supportbyrden varer i årevis.
+
+Men valget av Supabase/Firebase røper hva som egentlig er ønsket: å bygge
+**applikasjoner**, ikke brosjyresider. En brosjyreside trenger ikke database,
+auth eller backend.
+
+### Det faktiske fortrinnet
+
+`src/designer/` er en parametrisk konstruksjonsmotor: lastberegning etter
+Eurokode, snølast per kommune, kappeoptimalisering mot lagerlengder, SVG-/PDF-
+generering av arbeidstegninger, femten produktmaler. Svært få norske
+solo-utviklere kan bygge det, og nesten ingen byråer vil bygge det for
+budsjettet til en liten produsent.
+
+**Nisjen:** konfiguratorer og regneverktøy for bedrifter som selger «etter mål»
+— trapper, kjøkken, garasjeporter, markiser, persienner, peiser. Bedrifter som
+i dag tar imot forespørsler på e-post og regner pris manuelt. Én slik kunde
+betaler som femten brosjyresider og genererer langt mindre support.
+
+### Merkevare: separat, men med Minio som referanse
+
+**Beslutning (foreløpig): eget domene og merkenavn, ikke under Minio.**
+
+- En bedriftseier som leter etter utvikler og lander på minio.no, ser
+  plantekasser og skjærefjøler. Minios posisjonering (konfigurasjon først,
+  håndverk, Lillehammer) blir uklar hvis den også skal selge integrasjoner.
+- Koblingen skal likevel ikke skjules — den er salgsargumentet. **Pilen går én
+  vei:** utviklersiden lenker til minio.no som flaggskip-referanse
+  («dette bygde jeg selv, inkludert beregningsmotoren»). Minio lenker ikke
+  tilbake og forblir ren.
+- Dette er en referanse andre frilansere ikke kan matche, fordi det ikke er et
+  kundeoppdrag, men egen drift.
+
+Navnevalg: ikke lås det til «web»/«nettsider» (dytter mot priskonkurransen), og
+ikke avled det av Minio-navnet (`minio-web.no` e.l. arver forvirringen). Eget
+navn eller noe nøytralt som tåler at tilbudet dreier mot verktøy og produkt.
+
+### Feilmodusen å passe på
+
+Utviklere erstatter salg med bygging. Konkret risiko: domenet kjøpes, så skal
+det jo være en side der, og siden blir et designsystem med prerendering og 100 i
+Lighthouse. Tre helger går, det føles som framdrift, og det gir null kunder.
+
+**Derfor: kjøp domenet (billig, reversibelt, navn blir tatt), men ikke bygg
+siden ennå.** Første kunde kommer fra nettverk — Innlandet, ECIT, leverandører
+Minio allerede snakker med — ikke fra en nettside. Beviset i den samtalen er
+minio.no, som allerede finnes. Bygg siden når første kunde er i havn; da vet du
+hva den skal si, i stedet for å gjette.
+
+Første oppdrag bør være lite nok til å bli ferdig: én konfigurator for ett
+produkt, fast pris, fast omfang.
+
+### Tripwire mot Minio
+
+**Betingelse før første oppdrag tas: Minio må kunne ta imot en betaling.**
+
+Kundefrister vinner alltid over egne produktfrister. Blir ikke inntektsrøret
+koblet først, blir det aldri koblet. Konkret står det på DKIM og SPF for
+minio.no (se notatet om e-postinfrastruktur) — en kveldsjobb, ikke et prosjekt.
+
+### ÅPENT — avgjør før noe startes
+
+Hva er målet med sidegesjeften? Svaret endrer strategien vesentlig:
+
+- **A. Ekstra inntekt** — rent tjenestesalg. Ta oppdrag, fakturer timer, ikke
+  tenk produkt. Enklest, skalerer ikke.
+- **B. Mer interessant arbeid enn jobben gir** — vær kresen fra dag én, ta bare
+  konfiguratorjobber selv om det betyr færre kunder.
+- **C. Ut av ansettelse på sikt** — da er tjenestesalg feil vei; det skalerer
+  ikke uten flere timer. Konfiguratormotoren som allerede finnes er en bedre
+  kandidat: samme motor, mange kunder.
+
+Status: ubesvart.
+
+### Parkert
+
+Mva og selskapsform ble diskutert, men er ikke problemstillingen nå. Kort for
+senere: grensen er 50 000 kr avgiftspliktig omsetning over rullerende tolv
+måneder, og den gjelder **juridisk enhet** — ikke merkevare. Webutvikling er
+fullt avgiftspliktig, så ett–to oppdrag passerer grensen, og da må minio.no
+legge 25 % på byggeplaner og gravering (salgsbetingelsene § 3 og
+`PRIS_ER_ENDELIG` lover i dag at prisen er endelig). Eget merkenavn skiller
+ikke mva; bare egen juridisk enhet gjør det. Mot B2B er mva nøytralt, mot
+forbruker er det ren prisøkning — så på sikt hører de to hjemme i hver sin
+enhet. Ikke aktuelt før det finnes omsetning.
