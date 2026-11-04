@@ -1,12 +1,21 @@
-export function getShareUrl(context?: string): string {
+/**
+ * Lenka som deles. `kanal` merker den med utm, slik at besøk fra en kopiert
+ * lenke (Messenger, SMS, Snap) ikke havner som «direkte» i GA4 – uten merket
+ * er det bare Facebook-delinger som kan spores tilbake, via referrer.
+ */
+export function getShareUrl(context?: string, kanal?: string): string {
   const base = window.location.origin
+  let sti = window.location.pathname
   if (context === 'product' || context === 'portfolio') {
-    return base + '/produkter'
+    sti = '/produkter'
+  } else if (context === 'contact') {
+    sti = '/kontakt'
   }
-  if (context === 'contact') {
-    return base + '/kontakt'
-  }
-  return base + window.location.pathname
+  if (!kanal) return base + sti
+  const url = new URL(sti, base)
+  url.searchParams.set('utm_source', 'deling')
+  url.searchParams.set('utm_medium', kanal)
+  return url.toString()
 }
 
 export function shareFacebook(url: string): void {

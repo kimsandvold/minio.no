@@ -7,6 +7,7 @@ import Footer from '../../layout/Footer'
 import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
+import ShareButtons from '../../shared/ShareButtons'
 import Icon from '../../shared/Icon'
 import { useSEO } from '../../../hooks/useSEO'
 import { company } from '../../../data/company'
@@ -737,6 +738,8 @@ export default function GuideArticleLayout({
                     {s.content}
                   </Section>
                 ))}
+
+                <ShareButtons variant="artikkel" />
 
                 <AllGuides aria-label="Alle byggeguider">
                   <div className="label">Alle byggeguider</div>

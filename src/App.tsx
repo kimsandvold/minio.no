@@ -36,6 +36,7 @@ const AdminLayout = lazy(() => import('./components/pages/Admin/AdminLayout'))
 const AdminDashboardPage = lazy(() => import('./components/pages/Admin/AdminDashboardPage'))
 const AdminBestillingerPage = lazy(() => import('./components/pages/Admin/AdminBestillingerPage'))
 const AdminForesporslerPage = lazy(() => import('./components/pages/Admin/AdminForesporslerPage'))
+const AdminHenvendelserPage = lazy(() => import('./components/pages/Admin/AdminHenvendelserPage'))
 const AdminProsjektIdeerPage = lazy(() => import('./components/pages/Admin/AdminProsjektIdeerPage'))
 const AdminGraveringerPage = lazy(() => import('./components/pages/Admin/AdminGraveringerPage'))
 const AdminPollsPage = lazy(() => import('./components/pages/Admin/AdminPollsPage'))
@@ -174,6 +175,7 @@ export default function App() {
                   <Route path="bestillinger" element={<Suspense fallback={null}><AdminBestillingerPage /></Suspense>} />
                   <Route path="foresporsler" element={<Suspense fallback={null}><AdminForesporslerPage /></Suspense>} />
                   <Route path="graveringer" element={<Suspense fallback={null}><AdminGraveringerPage /></Suspense>} />
+                  <Route path="henvendelser" element={<Suspense fallback={null}><AdminHenvendelserPage /></Suspense>} />
                   <Route path="prosjektideer" element={<Suspense fallback={null}><AdminProsjektIdeerPage /></Suspense>} />
                   <Route path="avstemninger" element={<Suspense fallback={null}><AdminPollsPage /></Suspense>} />
                 </Route>

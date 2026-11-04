@@ -108,6 +108,34 @@ service cloud.firestore {
                           && request.auth.token.email == 'kimsandvold@gmail.com';
     }
 
+    // Henvendelser fra kontaktskjemaet og «eget emne». Disse gikk tidligere
+    // BARE på e-post via Formspree, og forsvant hvis e-posten druknet. De
+    // lagres nå i tillegg her, slik at alt kunden sender finnes igjen under
+    // /admin/henvendelser. Som prosjektidéene: ingen innlogging kreves, men
+    // feltene er låst og bare admin kan lese.
+    match /henvendelser/{id} {
+      allow create: if request.resource.data.keys().hasOnly(
+                         ['kilde', 'emne', 'navn', 'epost', 'mobil', 'melding', 'detaljer', 'status', 'createdAt'])
+                    && request.resource.data.kilde in ['kontakt', 'eget-emne']
+                    && request.resource.data.emne is string
+                    && request.resource.data.emne.size() <= 160
+                    && request.resource.data.navn is string
+                    && request.resource.data.navn.size() > 0
+                    && request.resource.data.navn.size() <= 120
+                    && request.resource.data.epost is string
+                    && request.resource.data.epost.size() >= 5
+                    && request.resource.data.epost.size() <= 200
+                    && request.resource.data.mobil is string
+                    && request.resource.data.mobil.size() <= 40
+                    && request.resource.data.melding is string
+                    && request.resource.data.melding.size() <= 4000
+                    && (!request.resource.data.keys().hasAny(['detaljer'])
+                        || request.resource.data.detaljer.size() <= 12)
+                    && request.resource.data.status == 'ny';
+      allow read, update: if request.auth != null
+                          && request.auth.token.email == 'kimsandvold@gmail.com';
+    }
+
     // Graveringsbestillinger fra /gravering. Som prosjektidéene krever de
     // ingen innlogging – en gravert gave skal ikke kreve Google-pålogging –
     // så create er åpen, men bundet til nøyaktig disse feltene med grenser.

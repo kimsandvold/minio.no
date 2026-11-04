@@ -965,6 +965,8 @@
     const LAUNCH = [2026, 11, 1];
     const FS_PROJECT = 'minio-7738e';
     const SITE = 'https://minio.no/underholdning/tool-dreiemester.html';
+    /* Delte lenker merkes, ellers teller GA4 alle som åpner dem som direktetrafikk. */
+    const UTM = 'utm_source=deling&utm_medium=spill';
     const TAU = Math.PI * 2;
 
     const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
@@ -2998,10 +3000,10 @@
     logoImg.src = '/images/branding/logo_navbar.svg';
     function duelLink(sum) {
         const s = sum || lastSummary;
-        if (s.mode === 'daglig') return SITE;
+        if (s.mode === 'daglig') return SITE + '?' + UTM;
         let u = SITE + '?duell=' + (s.seed >>> 0).toString(36) + '&mot=' + s.score;
         if (stats.name) u += '&n=' + encodeURIComponent(stats.name);
-        return u;
+        return u + '&' + UTM;
     }
     function shareText(sum) {
         const s = sum || lastSummary;
@@ -3078,21 +3080,31 @@
         a.href = shareUrl; a.download = `dreiemester-${lastSummary.score}.png`;
         document.body.appendChild(a); a.click(); a.remove();
     }
+    /* GA4 «share» – samme form som resten av minio.no (method/content_type/
+       item_id), så spill og nettsider teller i én rapport. Kalles først når
+       delingen faktisk gikk gjennom, ikke når knappen trykkes. */
+    function sporDeling(metode) {
+        try {
+            if (typeof gtag === 'function') gtag('event', 'share', {
+                method: metode, content_type: 'spill', item_id: 'dreiemester',
+                mode: lastSummary ? lastSummary.mode : ''
+            });
+        } catch (e) { /* ignorer */ }
+    }
     async function shareNative() {
         if (!lastSummary) return;
         const link = duelLink(), text = shareText();
-        try { if (typeof gtag === 'function') gtag('event', 'share', { game: 'dreiemester', mode: lastSummary.mode }); } catch (e) { /* ignorer */ }
         try {
             if (shareBlob && navigator.canShare) {
                 const file = new File([shareBlob], `dreiemester-${lastSummary.score}.png`, { type: 'image/png' });
-                if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Dreiemester', text: text + '\n' + link }); return; }
+                if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: 'Dreiemester', text: text + '\n' + link }); sporDeling('web-share-bilde'); return; }
             }
-            if (navigator.share && coarse) { await navigator.share({ title: 'Dreiemester', text, url: link }); return; }
+            if (navigator.share && coarse) { await navigator.share({ title: 'Dreiemester', text, url: link }); sporDeling('web-share'); return; }
         } catch (e) { if (e && e.name === 'AbortError') return; }
-        copyText(text + ' ' + link, () => { $('shareSub').textContent = 'Lenke kopiert – lim inn hos kompisen!'; $('sCopyTx').textContent = 'Kopiert!'; });
+        copyText(text + ' ' + link, () => { sporDeling('kopier-lenke'); $('shareSub').textContent = 'Lenke kopiert – lim inn hos kompisen!'; $('sCopyTx').textContent = 'Kopiert!'; });
     }
     $('shareBtn').addEventListener('click', (e) => { e.preventDefault(); shareNative(); });
-    $('sCopy').addEventListener('click', (e) => { e.preventDefault(); copyText(shareText() + ' ' + duelLink(), () => { $('sCopyTx').textContent = 'Kopiert!'; SFX.click(); }); });
+    $('sCopy').addEventListener('click', (e) => { e.preventDefault(); copyText(shareText() + ' ' + duelLink(), () => { sporDeling('kopier-lenke'); $('sCopyTx').textContent = 'Kopiert!'; SFX.click(); }); });
     $('sDl').addEventListener('click', (e) => { e.preventDefault(); downloadImage(); });
     $('sharePrev').addEventListener('click', (e) => { e.preventDefault(); downloadImage(); });
 
@@ -3301,6 +3313,8 @@
             const c = cleanName((q.get('n') || '').slice(0, 16));
             const target = clamp(parseInt(q.get('mot'), 10) || 0, 0, 1000000);
             duelParam = { seed: seed >>> 0, target, name: c.name || 'kompisen' };
+            // Andre halvdel av delingssløyfa: en delt lenke ble faktisk åpnet.
+            try { if (typeof gtag === 'function') gtag('event', 'delt_lenke_apnet', { content_type: 'spill', item_id: 'dreiemester' }); } catch (e2) { /* ignorer */ }
         } catch (e) { /* ignorer */ }
     })();
 

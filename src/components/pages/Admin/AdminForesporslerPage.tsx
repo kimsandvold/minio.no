@@ -29,6 +29,9 @@ function svarTekst(f: DesignForesporsel): string {
     `Åpne designet på minio.no, trykk «Lås opp byggeplan» og skriv inn koden.`,
     `Da får du materialliste, alle mål og byggeplanen som PDF med én gang.`,
     ``,
+    f.kunde?.fulltNavn
+      ? `Faktura sendes til ${f.kunde.fulltNavn}, ${[f.kunde.adresse, [f.kunde.postnr, f.kunde.poststed].filter(Boolean).join(' ')].filter(Boolean).join(', ')}.`
+      : '',
     `Faktura på ${formatKr(f.prisEstimatKr)} kommer i egen e-post, med ${FORFALL_DAGER} dagers`,
     `betalingsfrist. Du trenger ikke vente på den for å bruke planen.`,
     ``,
@@ -98,6 +101,14 @@ export default function AdminForesporslerPage() {
                     <span><b>Materialer</b> {formatKr(f.estimatKr)}</span>
                     <span><b>Prisestimat</b> fra {formatKr(f.prisEstimatKr)}</span>
                   </Fakta>
+                  {f.kunde && (
+                    <Kunde>
+                      <div><em>Faktureres til</em><b>{f.kunde.fulltNavn || '(uten navn)'}</b></div>
+                      <div><em>Mobil</em><b>{f.kunde.mobil || '–'}</b></div>
+                      <div><em>Adresse</em><b>{[f.kunde.adresse, [f.kunde.postnr, f.kunde.poststed].filter(Boolean).join(' ')].filter(Boolean).join(', ') || '–'}</b></div>
+                      <div><em>E-post</em><b>{f.kunde.epost || f.userEmail || '–'}</b></div>
+                    </Kunde>
+                  )}
                   {f.type === 'byggeplan' && f.tilgangskode && (
                     <KodeBoks>
                       <div>
@@ -184,6 +195,28 @@ const Melding = styled.p`margin: 0.7rem 0 0; padding: 0.7rem 0.85rem; background
 const KortBunn = styled.div`
   margin-top: 0.9rem; padding-top: 0.7rem; border-top: 1px solid #efe9e0;
   a { display: inline-flex; align-items: center; gap: 0.45rem; font-size: 0.85rem; font-weight: 600; color: #3a5f3a; text-decoration: none; &:hover { text-decoration: underline; } }
+`
+
+/* Fakturaopplysningene samlet – det du trenger for å sende regningen. */
+const Kunde = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.9rem;
+  padding: 0.85rem 1rem;
+  background: #faf7f2;
+  border: 1px solid #ece6dd;
+  border-radius: 10px;
+
+  div { display: flex; flex-direction: column; min-width: 0; }
+  em {
+    font-style: normal;
+    font-size: 0.64rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8a7f72;
+  }
+  b { font-size: 0.86rem; font-weight: 600; overflow-wrap: anywhere; }
 `
 
 const KodeBoks = styled.div`

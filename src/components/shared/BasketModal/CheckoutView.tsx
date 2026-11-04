@@ -14,6 +14,13 @@ const Body = styled.div`
   padding: 1.5rem;
 `
 
+/* Postnr. og poststed hører sammen på én linje – de er ett felt mentalt. */
+const ToKol = styled.div`
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 0.75rem;
+`
+
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
@@ -133,6 +140,9 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
   const { items, notes, clearBasket } = useBasketContext()
   const { user, firebaseUser } = useAuthContext()
   const [name, setName] = useState(user?.name ?? '')
+  const [adresse, setAdresse] = useState('')
+  const [postnr, setPostnr] = useState('')
+  const [poststed, setPoststed] = useState('')
   const [email, setEmail] = useState(user?.email ?? '')
   const [phone, setPhone] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -205,38 +215,47 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
     setSubmitting(true)
 
     try {
-      // 1. Save order to Firestore (don't block checkout if it fails)
-      if (firebaseUser) {
-        createOrder({
-          userId: firebaseUser.uid,
-          userEmail: firebaseUser.email ?? '',
-          userName: firebaseUser.displayName ?? '',
-          customerName: name,
-          customerEmail: email,
-          customerPhone: phone,
-          items,
-          notes,
-          totalSum,
-        }).catch(() => {
-          // Firestore save failed (e.g. rules not configured) — checkout still proceeds
-        })
-      }
+      /*
+       * 1. Lagre forespørselen under /admin.
+       *
+       * Dette lå tidligere bak `if (firebaseUser)`, så en uinnlogget kunde ga
+       * en bestilling som BARE fantes i en Formspree-e-post. Gikk den tapt,
+       * fantes henvendelsen ingen steder. Nå lagres den alltid; innlogging
+       * beriker den bare med konto-id.
+       */
+      const lagring = createOrder({
+        userId: firebaseUser?.uid ?? '',
+        userEmail: firebaseUser?.email ?? email,
+        userName: firebaseUser?.displayName ?? name,
+        customerName: name,
+        customerEmail: email,
+        customerPhone: phone,
+        customerAddress: adresse,
+        customerPostnr: postnr,
+        customerPoststed: poststed,
+        items,
+        notes,
+        totalSum,
+      }).then(() => true, () => false)
 
       // 2. Send email via Formspree (keep existing flow)
       const formData = new FormData()
       formData.append('name', name)
       formData.append('email', email)
       formData.append('phone', phone)
+      formData.append('address', `${adresse}, ${postnr} ${poststed}`)
       formData.append('_subject', `Ny forespørsel fra handlekurv – ${name}`)
       formData.append('message', formatBasketForEmail())
 
-      const response = await fetch(FORMSPREE_ENDPOINT, {
+      const sending = fetch(FORMSPREE_ENDPOINT, {
         method: 'POST',
         body: formData,
         headers: { Accept: 'application/json' },
-      })
+      }).then((r) => r.ok, () => false)
 
-      if (response.ok) {
+      // Vellykket når minst én av de to gikk gjennom.
+      const [lagret, sendt] = await Promise.all([lagring, sending])
+      if (lagret || sendt) {
         // 3. Nyhetsbrev kun når kunden har huket av (best-effort).
         if (nyhetsbrev) subscribeToNewsletter(email)
 
@@ -269,6 +288,20 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
             <label htmlFor="checkout-phone">Telefon *</label>
             <input type="tel" id="checkout-phone" required placeholder="123 45 678" value={phone} onChange={e => setPhone(e.target.value)} />
           </FormGroup>
+          <FormGroup>
+            <label htmlFor="checkout-adresse">Leveringsadresse *</label>
+            <input type="text" id="checkout-adresse" required placeholder="Gate og husnummer" autoComplete="street-address" value={adresse} onChange={e => setAdresse(e.target.value)} />
+          </FormGroup>
+          <ToKol>
+            <FormGroup>
+              <label htmlFor="checkout-postnr">Postnr. *</label>
+              <input type="text" id="checkout-postnr" required inputMode="numeric" pattern="[0-9]{4}" maxLength={4} placeholder="2624" autoComplete="postal-code" value={postnr} onChange={e => setPostnr(e.target.value.replace(/\D/g, ''))} />
+            </FormGroup>
+            <FormGroup>
+              <label htmlFor="checkout-poststed">Poststed *</label>
+              <input type="text" id="checkout-poststed" required placeholder="Lillehammer" autoComplete="address-level2" value={poststed} onChange={e => setPoststed(e.target.value)} />
+            </FormGroup>
+          </ToKol>
           <Samtykke>
             <input
               type="checkbox"

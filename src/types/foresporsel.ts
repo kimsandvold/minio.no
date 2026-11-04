@@ -46,6 +46,8 @@ export interface DesignForesporsel {
    * 6-sifret tilgangskode kunden får når betalingen er mottatt. Settes kun av
    * serveren, og feltet er ikke lesbart for kunden (se firestore.rules).
    */
+  /** Fakturaopplysninger for byggeplan-bestillinger. Settes av api/plan/bestill.ts. */
+  kunde?: { fulltNavn: string; epost: string; mobil: string; adresse: string; postnr: string; poststed: string }
   tilgangskode?: string
   /**
    * Gikk varsel-e-posten til admin ut? Settes av api/plan/bestill.ts. false =

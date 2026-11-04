@@ -3,6 +3,7 @@ import styled from 'styled-components'
 import Icon from './Icon'
 import CopyNotification from './CopyNotification'
 import { getShareUrl, shareFacebook, copyToClipboard } from '../../utils/share'
+import { trackShare } from '../../utils/analytics'
 
 const HeroGroup = styled.div`
   display: flex;
@@ -122,8 +123,60 @@ const SmallBtn = styled.button<{ $platform: 'facebook' | 'instagram' }>`
   }
 `
 
+/*
+ * Artikkelfot. Egne stiler i stedet for `section`-varianten: plattformfargene
+ * der (Facebook-blå, Instagram-rosa) ville brutt én-aksent-regelen midt i en
+ * lang guide. Her er raden nøytral, og terrakotta kommer først på hover.
+ */
+const ArticleRow = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid ${({ theme }) => theme.colors.border};
+`
+
+const ArticleLabel = styled.span`
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  color: ${({ theme }) => theme.colors.inkMuted};
+  margin-right: 0.25rem;
+`
+
+const ArticleBtn = styled.button`
+  padding: 0.45rem 1rem;
+  background: transparent;
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: ${({ theme }) => theme.borderRadius.pill};
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 600;
+  font-size: ${({ theme }) => theme.fontSizes.sm};
+  letter-spacing: -0.005em;
+  color: ${({ theme }) => theme.colors.inkMuted};
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition:
+    background-color ${({ theme }) => theme.transitions.default},
+    border-color ${({ theme }) => theme.transitions.default},
+    color ${({ theme }) => theme.transitions.default};
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.surface};
+    border-color: ${({ theme }) => theme.colors.accent};
+    color: ${({ theme }) => theme.colors.accent};
+  }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.accent};
+    outline-offset: 2px;
+  }
+`
+
 interface ShareButtonsProps {
-  variant: 'hero' | 'section' | 'small'
+  variant: 'hero' | 'section' | 'small' | 'artikkel'
   context?: string
 }
 
@@ -131,14 +184,21 @@ export default function ShareButtons({ variant, context = '' }: ShareButtonsProp
   const [notification, setNotification] = useState<string | null>(null)
 
   const handleShare = useCallback(async (platform: 'facebook' | 'instagram') => {
-    const url = getShareUrl(context)
+    const kanal = platform === 'facebook' ? 'facebook' : 'kopier-lenke'
+    const url = getShareUrl(context, kanal)
+    const sti = new URL(url).pathname
     if (platform === 'facebook') {
       shareFacebook(url)
+      trackShare(kanal, sti)
     } else {
       const success = await copyToClipboard(url)
-      setNotification(success ? 'Lenke kopiert! Lim inn i Instagram.' : 'Kunne ikke kopiere lenke automatisk.')
+      // Teller bare delinger som faktisk ble til en lenke på utklippstavla.
+      if (success) trackShare(kanal, sti)
+      // Artikkelraden har en nøytral «kopier lenke»-knapp, ikke en Instagram-knapp.
+      const kopiert = variant === 'artikkel' ? 'Lenke kopiert!' : 'Lenke kopiert! Lim inn i Instagram.'
+      setNotification(success ? kopiert : 'Kunne ikke kopiere lenke automatisk.')
     }
-  }, [context])
+  }, [context, variant])
 
   if (variant === 'hero') {
     return (
@@ -151,6 +211,23 @@ export default function ShareButtons({ variant, context = '' }: ShareButtonsProp
             <Icon name="faInstagram" /> Kopier lenke
           </HeroBtn>
         </HeroGroup>
+        {notification && <CopyNotification message={notification} onDone={() => setNotification(null)} />}
+      </>
+    )
+  }
+
+  if (variant === 'artikkel') {
+    return (
+      <>
+        <ArticleRow>
+          <ArticleLabel>Fant du guiden nyttig? Del den videre:</ArticleLabel>
+          <ArticleBtn onClick={() => handleShare('facebook')} aria-label="Del på Facebook">
+            <Icon name="faFacebookF" /> Facebook
+          </ArticleBtn>
+          <ArticleBtn onClick={() => handleShare('instagram')} aria-label="Kopier lenke til guiden">
+            <Icon name="faLink" /> Kopier lenke
+          </ArticleBtn>
+        </ArticleRow>
         {notification && <CopyNotification message={notification} onDone={() => setNotification(null)} />}
       </>
     )

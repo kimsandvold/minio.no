@@ -304,6 +304,30 @@
         .btn:active { transform: translateY(1px) scale(.99); }
         .btn svg { width: 18px; height: 18px; }
 
+        .btn-share {
+            appearance: none;
+            cursor: pointer;
+            font-family: var(--font);
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: -.01em;
+            padding: 12px 18px;
+            border-radius: 14px;
+            width: 100%;
+            margin-top: 10px;
+            color: var(--text);
+            background: rgba(255, 255, 255, .06);
+            border: 1px solid var(--line-strong);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 9px;
+            transition: background .2s, border-color .2s, transform .12s ease;
+        }
+        .btn-share:hover { background: rgba(255, 255, 255, .12); border-color: var(--accent); }
+        .btn-share:active { transform: translateY(1px) scale(.99); }
+        .btn-share svg { width: 17px; height: 17px; }
+
         .btn-ghost {
             display: inline-block;
             margin-top: 12px;
@@ -533,6 +557,10 @@
         <button class="btn" id="retryBtn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
             Prøv igjen
+        </button>
+        <button class="btn-share" id="shareBtn" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+            <span id="shareBtnTx">Del resultatet</span>
         </button>
         <a class="btn-ghost" href="/underholdning">Flere spill</a>
         <div class="hint hint-key">eller trykk <kbd>Mellomrom</kbd></div>
@@ -1838,6 +1866,11 @@
     }, { passive: false });
 
     window.addEventListener('keydown', (e) => {
+        // Mellomrom/Enter på en fokusert knapp tilhører knappen – ellers ville
+        // tabbing til «Del resultatet» eller rabattkoden bare startet nytt spill.
+        const aktiv = document.activeElement;
+        const paaKnapp = aktiv && aktiv.closest && aktiv.closest('a, button, .discount-code');
+        if (paaKnapp && (e.code === 'Space' || e.key === ' ' || e.key === 'Enter')) return;
         if (e.code === 'Space' || e.key === ' ' || e.key === 'Enter') {
             e.preventDefault();
             if (e.repeat) return;
@@ -1877,6 +1910,43 @@
             } catch (e) { $('discountHint').textContent = 'Koden er VPH10'; }
         }
     }
+    // ── Deling ────────────────────────────────────────────────────────
+    // Lenka merkes, ellers teller GA4 alle som åpner den som direktetrafikk.
+    const SITE = 'https://minio.no/underholdning/tool-stack.html';
+    const DEL_LENKE = SITE + '?utm_source=deling&utm_medium=spill';
+
+    /* GA4 «share» – samme form som resten av minio.no. Kalles først når
+       delingen faktisk gikk gjennom, ikke når knappen trykkes. */
+    function sporDeling(metode) {
+        try { if (typeof gtag === 'function') gtag('event', 'share', { method: metode, content_type: 'spill', item_id: 'stabelmester' }); } catch (e) { /* ignorer */ }
+    }
+
+    function delTekst() {
+        const n = $('finalScore').textContent;
+        const rang = $('rank').textContent;
+        return `Jeg stablet ${n} planker i Stabelmester og endte som ${rang} 🪵 Slå meg!`;
+    }
+
+    async function delResultat() {
+        const tekst = delTekst();
+        const tx = $('shareBtnTx');
+        try {
+            if (navigator.share) {
+                await navigator.share({ title: 'Stabelmester', text: tekst, url: DEL_LENKE });
+                sporDeling('web-share');
+                return;
+            }
+        } catch (e) { if (e && e.name === 'AbortError') return; }
+        try {
+            await navigator.clipboard.writeText(tekst + ' ' + DEL_LENKE);
+            sporDeling('kopier-lenke');
+            tx.textContent = 'Lenke kopiert!';
+            SFX.click();
+        } catch (e) { tx.textContent = 'Kunne ikke kopiere'; }
+        setTimeout(() => { tx.textContent = 'Del resultatet'; }, 2400);
+    }
+    $('shareBtn').addEventListener('click', delResultat);
+
     $('discountCode').addEventListener('click', copyCode);
     $('discountCode').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); copyCode(); } });
 

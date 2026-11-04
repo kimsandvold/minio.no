@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-r
 import styled from 'styled-components'
 import Icon from '../../shared/Icon'
 import { useSEO } from '../../../hooks/useSEO'
+import { trackEvent, trackShare } from '../../../utils/analytics'
 import { useScrollLock } from '../../../hooks/useScrollLock'
 import { useAuthContext } from '../../../context/AuthContext'
 import { TEMPLATES, KOMMER_SNART, getTemplate } from '../../../designer/registry'
@@ -951,11 +952,19 @@ export default function DesignerPage() {
     if (!template) return
     const data = JSON.stringify({ c: config, o: overrides })
     const kode = btoa(unescape(encodeURIComponent(data))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
-    const url = `${window.location.origin}/designverktoy/${template.id}?d=${kode}`
+    const sti = `/designverktoy/${template.id}`
+    const url = `${window.location.origin}${sti}?d=${kode}&utm_source=deling&utm_medium=designlenke`
     try {
-      if (navigator.share && smal) await navigator.share({ title: `${currentDesign?.navn ?? template.navn} – Minio`, url })
-      else { await navigator.clipboard.writeText(url); flash('Lenke til designet er kopiert') }
+      if (navigator.share && smal) {
+        await navigator.share({ title: `${currentDesign?.navn ?? template.navn} – Minio`, url })
+        trackShare('web-share', sti, 'design')
+      } else {
+        await navigator.clipboard.writeText(url)
+        trackShare('kopier-lenke', sti, 'design')
+        flash('Lenke til designet er kopiert')
+      }
     } catch {
+      // Avbrutt delingsark eller blokkert utklippstavle – ingen deling å telle.
       window.prompt('Kopier lenken til designet:', url)
     }
   }
@@ -973,6 +982,8 @@ export default function DesignerPage() {
         window.setTimeout(() => {
           setConfig({ ...template.defaultConfig, ...v.c } as DesignConfig)
           setOverrides(v.o ?? {})
+          // Den ene delingen vi kan måle hele veien: lenke delt → lenke åpnet.
+          trackEvent('delt_design_apnet', 'deling', template.id)
           flash('Delt design åpnet')
         }, 0)
       }

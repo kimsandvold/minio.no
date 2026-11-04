@@ -2005,13 +2005,24 @@
     muteBtn.addEventListener('click', toggleMute);
     $('discountCode').addEventListener('click', copyDiscountCode);
 
+    // Delte lenker merkes, ellers teller GA4 alle som åpner dem som direktetrafikk.
+    const SHARE_URL = 'https://minio.no/underholdning/tool-game.html?utm_source=deling&utm_medium=spill';
+
+    /* GA4 «share» – samme form som resten av minio.no. */
+    function trackShare(method) {
+        try { if (typeof gtag === 'function') gtag('event', 'share', { method, content_type: 'spill', item_id: 'slaa-spikeren' }); } catch (e) { /* ignore */ }
+    }
+
     $('shareFacebook').addEventListener('click', () => {
-        const url = encodeURIComponent('https://minio.no/underholdning/tool-game.html');
-        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, '_blank', 'noopener');
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(SHARE_URL)}`, '_blank', 'noopener');
+        trackShare('facebook');
     });
 
     $('copyResult').addEventListener('click', () => {
-        copyText(getShareText()).then(ok => showNotification(ok ? 'Resultatet er kopiert!' : 'Kunne ikke kopiere'));
+        copyText(getShareText()).then(ok => {
+            if (ok) trackShare('kopier-resultat');
+            showNotification(ok ? 'Resultatet er kopiert!' : 'Kunne ikke kopiere');
+        });
     });
 
     // Pointer input: fires immediately (no click delay) and only once per tap.

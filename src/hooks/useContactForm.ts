@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from 'react'
+import { lagreHenvendelse } from '../services/henvendelseService'
 
 interface FormState {
   name: string
@@ -45,14 +46,31 @@ export function useContactForm() {
     formData.append('subject', formState.subject)
     formData.append('message', formState.message)
 
-    try {
-      const response = await fetch(FORMSPREE_ENDPOINT, {
-        method: 'POST',
-        body: formData,
-        headers: { Accept: 'application/json' },
-      })
+    /*
+     * Lagring og e-post går PARALLELT og uavhengig av hverandre. Før gikk
+     * kontaktskjemaet bare til Formspree, og da fantes henvendelsen ingen
+     * steder hvis e-posten druknet. Nå ligger den også under /admin.
+     * Innsendingen regnes som vellykket når minst én av dem gikk gjennom –
+     * en blokkert Firestore skal ikke hindre kunden i å få kontakt.
+     */
+    const lagring = lagreHenvendelse({
+      kilde: 'kontakt',
+      emne: formState.subject || 'Henvendelse',
+      navn: formState.name,
+      epost: formState.email,
+      mobil: formState.phone,
+      melding: formState.message,
+    })
 
-      if (response.ok) {
+    const epost = fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      body: formData,
+      headers: { Accept: 'application/json' },
+    }).then((r) => r.ok, () => false)
+
+    try {
+      const [lagret, sendt] = await Promise.all([lagring, epost])
+      if (lagret || sendt) {
         setStatus('success')
         setFormState({ name: '', email: '', phone: '', subject: '', message: '' })
       } else {

@@ -5,6 +5,7 @@ import { opprettForesporsel } from '../../../services/foresporselService'
 import type { ForesporselType } from '../../../types/foresporsel'
 import { foresporselTypeLabel } from '../../../types/foresporsel'
 import { bestillByggeplan } from '../../../services/vippsService'
+import { ryddKunde, validerKunde } from '../../../types/kunde'
 
 const formatKr = (n: number) => `${n.toLocaleString('nb-NO')} kr`
 
@@ -50,6 +51,17 @@ const TITLER: Record<ForesporselType, { tittel: string; ingress: string; ikon: s
 export default function ForesporselModal(props: Props) {
   const t = TITLER[props.type]
   const [melding, setMelding] = useState('')
+  /*
+   * Byggeplanen faktureres, og da holder det ikke med e-posten Google gir oss:
+   * fakturaen trenger fullt navn og adresse, og vi trenger mobil for å nå
+   * kunden om noe skurrer. Bare påkrevd for 'byggeplan' – de uforpliktende
+   * forespørslene skal ha lav terskel.
+   */
+  const [fulltNavn, setFulltNavn] = useState('')
+  const [mobil, setMobil] = useState('')
+  const [adresse, setAdresse] = useState('')
+  const [postnr, setPostnr] = useState('')
+  const [poststed, setPoststed] = useState('')
   const [status, setStatus] = useState<'idle' | 'sender' | 'ok' | 'feil'>('idle')
   // Byggeplanen gjøres tilgjengelig før fakturaen er betalt. Angreretten
   // bortfaller da bare hvis kunden uttrykkelig har samtykket til at leveringen
@@ -57,6 +69,7 @@ export default function ForesporselModal(props: Props) {
   // et aktivt valg her, og ikke bare en setning i salgsbetingelsene.
   const [samtykke, setSamtykke] = useState(false)
   const krevSamtykke = props.type === 'byggeplan'
+  const kundeOk = !krevSamtykke || !validerKunde({ fulltNavn, epost: props.userEmail, mobil, adresse, postnr, poststed })
   // `status` i closuren er utdatert ved et raskt dobbeltklikk – ref-en stopper
   // det andre kallet før knappen rekker å bli deaktivert.
   const sender = useRef(false)
@@ -64,6 +77,7 @@ export default function ForesporselModal(props: Props) {
   const send = async () => {
     if (sender.current) return
     if (krevSamtykke && !samtykke) return
+    if (krevSamtykke && !kundeOk) return
     sender.current = true
     setStatus('sender')
     try {
@@ -71,8 +85,10 @@ export default function ForesporselModal(props: Props) {
       // lagrer den utenfor kundens rekkevidde (se api/plan/bestill.ts).
       if (props.type === 'byggeplan') {
         if (!props.designId) { setStatus('feil'); return }
+        const kunde = ryddKunde({ fulltNavn, epost: props.userEmail, mobil, adresse, postnr, poststed })
         const res = await bestillByggeplan(props.designId, {
           produktNavn: props.produktNavn,
+          kunde,
           melding: melding.trim(),
           maal: props.maal,
           sammendrag: props.sammendrag,
@@ -152,6 +168,33 @@ export default function ForesporselModal(props: Props) {
               <Spec>{props.sammendrag}</Spec>
             </Card>
 
+            {krevSamtykke && (
+              <>
+                <Label htmlFor="kunde-navn">Fullt navn <span>(til fakturaen)</span></Label>
+                <Felt id="kunde-navn" required autoComplete="name" placeholder="Fornavn Etternavn"
+                      value={fulltNavn} onChange={(e) => setFulltNavn(e.target.value)} />
+                <Label htmlFor="kunde-mobil">Mobil</Label>
+                <Felt id="kunde-mobil" required type="tel" autoComplete="tel" placeholder="123 45 678"
+                      value={mobil} onChange={(e) => setMobil(e.target.value)} />
+                <Label htmlFor="kunde-adresse">Adresse</Label>
+                <Felt id="kunde-adresse" required autoComplete="street-address" placeholder="Gate og husnummer"
+                      value={adresse} onChange={(e) => setAdresse(e.target.value)} />
+                <Rad2>
+                  <div>
+                    <Label htmlFor="kunde-postnr">Postnr.</Label>
+                    <Felt id="kunde-postnr" required inputMode="numeric" maxLength={4} autoComplete="postal-code"
+                          placeholder="2624" value={postnr}
+                          onChange={(e) => setPostnr(e.target.value.replace(/\D/g, ''))} />
+                  </div>
+                  <div>
+                    <Label htmlFor="kunde-poststed">Poststed</Label>
+                    <Felt id="kunde-poststed" required autoComplete="address-level2" placeholder="Lillehammer"
+                          value={poststed} onChange={(e) => setPoststed(e.target.value)} />
+                  </div>
+                </Rad2>
+              </>
+            )}
+
             <Label htmlFor="melding">Din melding <span>(valgfritt)</span></Label>
             <Textarea
               id="melding"
@@ -180,7 +223,7 @@ export default function ForesporselModal(props: Props) {
 
             {status === 'feil' && <Feil><Icon name="faTriangleExclamation" /> Kunne ikke sende. Prøv igjen.</Feil>}
 
-            <Primary onClick={send} disabled={status === 'sender' || (krevSamtykke && !samtykke)}>
+            <Primary onClick={send} disabled={status === 'sender' || (krevSamtykke && (!samtykke || !kundeOk))}>
               {status === 'sender' ? (<><Icon name="faSpinner" spin /> Sender …</>) : (<><Icon name="faPaperPlane" /> {krevSamtykke ? 'Bestill byggeplan' : 'Send forespørsel'}</>)}
             </Primary>
             <Hint>
@@ -300,6 +343,27 @@ const Label = styled.label`
   font-weight: 700;
   color: #e7eaef;
   span { font-weight: 400; color: #838b95; }
+`
+
+const Felt = styled.input`
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  margin-bottom: 0.7rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9px;
+  color: #e7eaef;
+  font-family: inherit;
+  font-size: 0.9rem;
+
+  &::placeholder { color: #6c757e; }
+  &:focus { outline: 2px solid #e0895f; outline-offset: 1px; }
+`
+
+const Rad2 = styled.div`
+  display: grid;
+  grid-template-columns: 6.5rem 1fr;
+  gap: 0.6rem;
 `
 
 const Textarea = styled.textarea`

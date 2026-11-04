@@ -19,6 +19,10 @@ interface CreateOrderParams {
   userId: string
   userEmail: string
   userName: string
+  /** Leveringsadresse. Tom streng når forespørselen kom før adressefeltene. */
+  customerAddress?: string
+  customerPostnr?: string
+  customerPoststed?: string
   customerName: string
   customerEmail: string
   customerPhone: string

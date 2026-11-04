@@ -1270,6 +1270,7 @@
 
     <div class="action-buttons">
         <button type="button" class="action-btn primary" id="playAgainBtn">↺ Spill igjen</button>
+        <button type="button" class="action-btn secondary" id="shareBtn">↗ Del resultatet</button>
         <a href="/underholdning" class="action-btn secondary">Flere spill</a>
     </div>
 </section>
@@ -2070,6 +2071,41 @@
 
     // ---------- Toast ----------
     let toastTimer = 0;
+    // ── Deling ────────────────────────────────────────────────────────
+    // Lenka merkes, ellers teller GA4 alle som åpner den som direktetrafikk.
+    const SHARE_URL = 'https://minio.no/underholdning/tool-nails.html?utm_source=deling&utm_medium=spill';
+
+    /* GA4 «share» – samme form som resten av minio.no. Kalles først når
+       delingen faktisk gikk gjennom, ikke når knappen trykkes. */
+    function trackShare(method) {
+        try { if (typeof gtag === 'function') gtag('event', 'share', { method, content_type: 'spill', item_id: 'spikern' }); } catch (e) { /* ignore */ }
+    }
+
+    function shareText() {
+        const poeng = $('finalScore').textContent;
+        const niva = $('finalLevel').textContent;
+        return `Jeg slo ${poeng} poeng på nivå ${niva} i Slå spikeren 🔨 Slå meg!`;
+    }
+
+    async function shareResult() {
+        const text = shareText();
+        try {
+            if (navigator.share) {
+                await navigator.share({ title: 'Slå spikeren', text, url: SHARE_URL });
+                trackShare('web-share');
+                return;
+            }
+        } catch (e) { if (e && e.name === 'AbortError') return; }
+        try {
+            await navigator.clipboard.writeText(text + ' ' + SHARE_URL);
+            trackShare('kopier-lenke');
+            showToast('Lenke kopiert – lim inn hos kompisen!');
+        } catch (e) {
+            showToast('Kunne ikke kopiere lenken automatisk');
+        }
+    }
+    $('shareBtn').addEventListener('click', shareResult);
+
     function showToast(message) {
         const existing = document.querySelector('.toast');
         if (existing) existing.remove();

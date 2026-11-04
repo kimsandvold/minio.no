@@ -14,6 +14,15 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
     <link rel="apple-touch-icon" href="/favicon.svg"/>
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E4J774CTXF"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-E4J774CTXF');
+    </script>
+
     <style>
         /*
          * DESIGNTESE: brettet er et instrument, og STRØM ER DEN ENESTE FARGEN.
@@ -407,6 +416,13 @@
    ==================================================================== */
 const $ = (id) => document.getElementById(id);
 const SITE = location.origin + location.pathname;
+/* Delte lenker merkes, ellers teller GA4 alle som åpner dem som direktetrafikk. */
+const UTM = 'utm_source=deling&utm_medium=spill';
+/* GA4 «share» – samme form som resten av minio.no. Kalles først når delingen
+   faktisk gikk gjennom, ikke når knappen trykkes. */
+function sporDeling(metode) {
+    try { if (typeof gtag === 'function') gtag('event', 'share', { method: metode, content_type: 'spill', item_id: 'kursmester' }); } catch (e) { /* ignorer */ }
+}
 let MONO = 'monospace';
 
 /* ---------- 1. Lyd ------------------------------------------------ */
@@ -1953,12 +1969,12 @@ $('rNeste').onclick = () => {
 $('rOm').onclick = () => { SFX.tapp(); lastBrett(brettNr); };
 $('rDel').onclick = async () => {
     const s = sisteSum; if (!s) return;
-    const lenke = SITE + '?brett=' + (s.brett + 1) + '&mot=' + s.poeng;
+    const lenke = SITE + '?brett=' + (s.brett + 1) + '&mot=' + s.poeng + '&' + UTM;
     const tekst = 'Jeg koblet «' + BRETT[s.brett].navn + '» i Kursmester på ' +
         s.tid.toFixed(1) + ' s ' + '★'.repeat(s.stjerner) + ' ⚡ Klarer du det raskere?';
-    try { if (navigator.share) { await navigator.share({ title: 'Kursmester', text: tekst, url: lenke }); return; } }
+    try { if (navigator.share) { await navigator.share({ title: 'Kursmester', text: tekst, url: lenke }); sporDeling('web-share'); return; } }
     catch (e) { if (e && e.name === 'AbortError') return; }
-    try { await navigator.clipboard.writeText(tekst + ' ' + lenke); $('rDel').textContent = 'Lenke kopiert!'; }
+    try { await navigator.clipboard.writeText(tekst + ' ' + lenke); sporDeling('kopier-lenke'); $('rDel').textContent = 'Lenke kopiert!'; }
     catch (e) { $('rDel').textContent = 'Kunne ikke kopiere'; }
 };
 
@@ -2021,7 +2037,11 @@ skaler();
 byggSkinne();
 const pr = new URLSearchParams(location.search);
 const onsket = parseInt(pr.get('brett') || '0', 10);
-if (onsket >= 1 && onsket <= BRETT.length) lastBrett(onsket - 1);
+if (onsket >= 1 && onsket <= BRETT.length) {
+    lastBrett(onsket - 1);
+    // Andre halvdel av delingssløyfa: en delt lenke ble faktisk åpnet.
+    try { if (typeof gtag === 'function') gtag('event', 'delt_lenke_apnet', { content_type: 'spill', item_id: 'kursmester' }); } catch (e) { /* ignorer */ }
+}
 requestAnimationFrame(loop);
 </script>
 </body>

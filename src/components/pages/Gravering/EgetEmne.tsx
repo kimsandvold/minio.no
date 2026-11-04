@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import styled from 'styled-components'
 import { trackEvent } from '../../../utils/analytics'
+import { lagreHenvendelse } from '../../../services/henvendelseService'
 import Icon from '../../shared/Icon'
 
 // Samme Formspree-skjema som kontakt og graveringsforespørslene bruker.
@@ -69,13 +70,27 @@ export default function EgetEmne() {
     )
     fd.append('message', design.trim() || '(ingen beskrivelse)')
 
+    /*
+     * Lagring og e-post går parallelt. Før gikk eget emne bare til Formspree,
+     * og da fantes forespørselen ingen steder hvis e-posten ikke kom fram.
+     * Nå ligger den under /admin/henvendelser også.
+     */
+    const lagring = lagreHenvendelse({
+      kilde: 'eget-emne',
+      emne: 'Gravering på eget emne',
+      navn, epost, mobil: telefon,
+      melding: design.trim() || '(ingen beskrivelse)',
+      detaljer: { form, materiale: materiale || '(ikke oppgitt)', maal: maal || '(ikke oppgitt)', antall },
+    })
+    const sending = fetch(FORMSPREE_ENDPOINT, {
+      method: 'POST',
+      body: fd,
+      headers: { Accept: 'application/json' },
+    }).then((r) => r.ok, () => false)
+
     try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
-        method: 'POST',
-        body: fd,
-        headers: { Accept: 'application/json' },
-      })
-      if (res.ok) {
+      const [lagret, sendt] = await Promise.all([lagring, sending])
+      if (lagret || sendt) {
         settStatus('ok')
         trackEvent('gravering_eget_emne', 'gravering')
       } else {

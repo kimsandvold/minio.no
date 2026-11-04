@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+    <title>Rivingsmester – Minio Underholdning</title>
+    <meta name="description" content="Slegge i hånda, 60 sekunder og et grusomt 70-tallskjøkken. Riv alt – men ikke rør bæreveggen."/>
+
+    <!-- UTPRØVING: ikke lansert. Ikke i spill.ts, ikke i sitemap.xml. -->
+    <meta name="robots" content="noindex, nofollow"/>
+    <meta name="theme-color" content="#0d0a08"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <link rel="apple-touch-icon" href="/favicon.svg"/>
+
+    <style>
+        :root {
+            --bg: #0d0a08;
+            --panel-2: rgba(20, 15, 12, 0.93);
+            --line: rgba(255, 214, 170, 0.14);
+            --line-strong: rgba(255, 214, 170, 0.26);
+            --text: #f4ebe1;
+            --muted: #b3a291;
+            --faint: #7d6d5f;
+            --accent: #f2a541;
+            --accent-2: #ffcf7a;
+            --accent-ink: #2a1806;
+            --good: #a6d65a;
+            --bad: #ff7a59;
+            --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            -webkit-font-smoothing: antialiased;
+            touch-action: none;
+            overscroll-behavior: none;
+            -webkit-user-select: none; user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        canvas#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+        /* Mørk skygge i toppen, ellers forsvinner tall og knapper i lyst tak. */
+        .skygge {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: calc(var(--sat) + 135px);
+            z-index: 10; pointer-events: none;
+            background: linear-gradient(to bottom, rgba(10, 8, 6, .72), rgba(10, 8, 6, .42) 55%, rgba(10, 8, 6, 0));
+        }
+
+        /* ---------- Topplinje ---------- */
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: calc(var(--sat) + 10px) 12px 0;
+            z-index: 20; pointer-events: none;
+        }
+        .topbar > * { pointer-events: auto; }
+        .back {
+            display: inline-flex; align-items: center; gap: 9px;
+            color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 500;
+            padding: 7px 11px 7px 9px; border-radius: 11px;
+            background: rgba(20, 15, 12, 0.5); border: 1px solid var(--line);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        .back svg { width: 15px; height: 15px; flex: none; }
+        .back img { height: 16px; width: auto; display: block; opacity: .95; }
+        .iconbtn {
+            width: 38px; height: 38px; display: grid; place-items: center;
+            border-radius: 11px; background: rgba(20, 15, 12, 0.5);
+            border: 1px solid var(--line); color: var(--muted); cursor: pointer;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        .iconbtn svg { width: 18px; height: 18px; }
+        .iconbtn svg[hidden] { display: none; }
+
+        /* ---------- HUD ---------- */
+        .hud {
+            position: fixed; top: calc(var(--sat) + 56px); left: 0; right: 0;
+            z-index: 15; padding: 0 14px; pointer-events: none;
+            display: flex; align-items: flex-start; justify-content: space-between;
+            opacity: 0; transition: opacity .3s;
+        }
+        .hud.on { opacity: 1; }
+        .kr { font-size: 30px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; text-shadow: 0 2px 10px rgba(0,0,0,.7); }
+        .kr small { font-size: 14px; font-weight: 650; color: var(--accent-2); margin-left: 3px; }
+        .krl { font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); font-weight: 700; }
+        .tid { font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums; text-shadow: 0 2px 10px rgba(0,0,0,.7); text-align: right; }
+        .tid.lite { color: var(--bad); }
+        .tidl { font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--faint); font-weight: 700; text-align: right; }
+
+        .combo {
+            position: fixed; left: 0; right: 0; top: 38%;
+            text-align: center; z-index: 14; pointer-events: none;
+            font-size: 46px; font-weight: 800; color: var(--accent-2);
+            text-shadow: 0 3px 18px rgba(0,0,0,.8);
+            opacity: 0; transform: scale(.6);
+            transition: opacity .12s, transform .12s;
+        }
+        .combo.on { opacity: 1; transform: scale(1); }
+
+        /* ---------- Sikte ---------- */
+        .sikte {
+            position: fixed; left: 50%; top: 50%; z-index: 12;
+            width: 26px; height: 26px; margin: -13px 0 0 -13px;
+            pointer-events: none; opacity: 0; transition: opacity .2s;
+        }
+        .sikte.on { opacity: .75; }
+        .sikte::before, .sikte::after {
+            content: ''; position: absolute; background: rgba(255, 255, 255, .85);
+            box-shadow: 0 0 4px rgba(0,0,0,.6);
+        }
+        .sikte::before { left: 50%; top: 0; width: 2px; height: 100%; margin-left: -1px; }
+        .sikte::after { top: 50%; left: 0; height: 2px; width: 100%; margin-top: -1px; }
+        .sikte.traff::before, .sikte.traff::after { background: var(--accent-2); }
+
+        /* ---------- Overlegg ---------- */
+        .overlay {
+            position: fixed; inset: 0; z-index: 30;
+            display: none; align-items: center; justify-content: center;
+            padding: calc(var(--sat) + 16px) 16px calc(var(--sab) + 16px);
+            background: radial-gradient(120% 80% at 50% 0%, rgba(44, 30, 18, .8), rgba(8, 6, 5, .96));
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            overflow-y: auto;
+        }
+        .overlay.show { display: flex; }
+        .card {
+            width: 100%; max-width: 380px;
+            background: var(--panel-2); border: 1px solid var(--line);
+            border-radius: 20px; padding: 22px 20px 20px; text-align: center;
+            box-shadow: 0 28px 70px rgba(0, 0, 0, .65);
+        }
+        .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--accent); font-weight: 700; }
+        .title { margin: 8px 0 2px; font-size: 36px; line-height: 1.02; letter-spacing: -.025em; }
+        .tagline { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+        .howto {
+            margin: 0 0 16px; font-size: 13.5px; line-height: 1.55; color: var(--muted); text-align: left;
+            background: rgba(255, 214, 170, .05); border: 1px solid var(--line);
+            border-radius: 13px; padding: 12px 13px;
+        }
+        .howto b { color: var(--text); }
+        .howto p { margin: 0 0 7px; }
+        .howto p:last-child { margin: 0; }
+        .btn {
+            width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+            padding: 15px 18px; border: 0; border-radius: 13px;
+            background: linear-gradient(180deg, var(--accent-2), var(--accent));
+            color: var(--accent-ink); font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer;
+        }
+        .btn:active { transform: scale(.985); }
+        .btn svg { width: 18px; height: 18px; }
+        .btn-ghost { display: block; margin-top: 10px; color: var(--muted); text-decoration: none; font-size: 13.5px; padding: 9px; }
+
+        .big-score { font-size: 50px; font-weight: 800; line-height: 1; letter-spacing: -.035em; margin: 10px 0 2px; font-variant-numeric: tabular-nums; }
+        .big-unit { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+        .rank {
+            display: inline-block; padding: 5px 13px; border-radius: 99px;
+            background: rgba(242, 165, 65, .14); border: 1px solid rgba(242, 165, 65, .3);
+            color: var(--accent-2); font-size: 13px; font-weight: 700; margin-bottom: 14px;
+        }
+        .quote {
+            text-align: left; font-size: 14px; line-height: 1.5; color: var(--text);
+            border-left: 2px solid var(--line-strong); padding: 2px 0 2px 12px; margin: 0 0 14px; font-style: italic;
+        }
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 14px; }
+        .stat { background: rgba(255, 214, 170, .05); border: 1px solid var(--line); border-radius: 11px; padding: 9px 5px; }
+        .stat .v { font-size: 18px; font-weight: 750; font-variant-numeric: tabular-nums; }
+        .stat .l { font-size: 10.5px; color: var(--faint); margin-top: 2px; }
+        .hint { margin-top: 10px; font-size: 12px; color: var(--faint); }
+        .feil { color: var(--bad); }
+    </style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+<div class="skygge"></div>
+
+<div class="sikte" id="sikte"></div>
+<div class="combo" id="combo"></div>
+
+<div class="topbar">
+    <a href="/underholdning" class="back" aria-label="Tilbake til underholdning">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <img src="/images/branding/logo_navbar.svg" alt="Minio" width="58" height="16"/>
+    </a>
+    <button class="iconbtn" id="muteBtn" aria-label="Lyd av/på" aria-pressed="false">
+        <svg id="lydPa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+        <svg id="lydAv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>
+    </button>
+</div>
+
+<div class="hud" id="hud">
+    <div>
+        <div class="krl">Revet for</div>
+        <div class="kr"><span id="kr">0</span><small>kr</small></div>
+    </div>
+    <div>
+        <div class="tidl">Igjen</div>
+        <div class="tid" id="tid">60</div>
+    </div>
+</div>
+
+<div class="overlay show" id="startOverlay">
+    <div class="card">
+        <div class="eyebrow">Minio byggeplass</div>
+        <h1 class="title">Rivingsmester</h1>
+        <p class="tagline">Slegga er din. Kjøkkenet er fra 1974.</p>
+        <div class="howto">
+            <p><b>Dra</b> for å se deg rundt. <b>Trykk</b> for å slå.</p>
+            <p>Alt du knuser er penger. Fliser, skap, benk, komfyr – riv alt du rekker på <b>60 sekunder</b>.</p>
+            <p>Treff på rappen gir <b>combo</b>, og combo gir mangedobbelt betalt.</p>
+            <p class="feil">Den ene veggen er bærende. Den er merket. Rører du den, kommer taket ned.</p>
+        </div>
+        <button class="btn" id="startBtn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5z"/></svg>
+            Riv
+        </button>
+        <div class="hint">Beste: <b id="rekord">0</b> kr</div>
+    </div>
+</div>
+
+<div class="overlay" id="overOverlay">
+    <div class="card">
+        <div class="eyebrow" id="sluttHode">Takstrapport</div>
+        <div class="big-score"><span id="sluttKr">0</span></div>
+        <div class="big-unit">kroner revet</div>
+        <div class="rank" id="rank">Lærling</div>
+        <blockquote class="quote" id="quote">–</blockquote>
+        <div class="stats-row">
+            <div class="stat"><div class="v" id="sSlag">0</div><div class="l">Slag</div></div>
+            <div class="stat"><div class="v" id="sTreff">0</div><div class="l">Treff-%</div></div>
+            <div class="stat"><div class="v" id="sCombo">0</div><div class="l">Beste combo</div></div>
+        </div>
+        <button class="btn" id="retryBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+            En gang til
+        </button>
+        <a class="btn-ghost" href="/underholdning">Flere spill</a>
+    </div>
+</div>
+
+<script type="module">
+import * as THREE from '/underholdning/lib/three.module.min.js';
+
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = (a) => a[(Math.random() * a.length) | 0];
+const kroner = (n) => Math.round(n).toLocaleString('nb-NO');
+
+const RUNDE = 60;
+const REKKE = 2.9;            // hvor langt slegga når
+const ROM = { b: 4.4, h: 2.6, d: 3.2 };
+
+// ==================================================================
+//  Lyd
+// ==================================================================
+const MUTE_KEY = 'riving.mute';
+let muted = false;
+try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch (e) { /* ignorer */ }
+let AC = null, master = null, noiseBuf = null;
+
+function ensureAudio() {
+    if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    AC = new Ctx();
+    master = AC.createGain();
+    master.gain.value = muted ? 0 : 0.8;
+    master.connect(AC.destination);
+    noiseBuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+}
+const canPlay = () => AC && master && !muted;
+
+function tone(t, f, type, dur, gain, f2) {
+    if (!AC) return;
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(Math.max(20, f2), t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0001, gain), t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + dur + 0.02);
+}
+function noise(t, dur, type, freq, q, gain) {
+    if (!AC || !noiseBuf) return;
+    const s = AC.createBufferSource(); s.buffer = noiseBuf;
+    const bq = AC.createBiquadFilter(); bq.type = type; bq.frequency.value = freq; bq.Q.value = q || 1;
+    const g = AC.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0001, gain), t + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(bq); bq.connect(g); g.connect(master);
+    s.start(t); s.stop(t + dur + 0.02);
+}
+
+const SFX = {
+    svning() { if (!canPlay()) return; noise(AC.currentTime, 0.1, 'bandpass', 900, 1.4, 0.1); },
+    bom() { if (!canPlay()) return; const t = AC.currentTime; noise(t, 0.12, 'lowpass', 300, 1, 0.22); tone(t, 90, 'sine', 0.12, 0.1, 60); },
+    flis() {
+        if (!canPlay()) return; const t = AC.currentTime;
+        noise(t, 0.26, 'highpass', 2600, 0.7, 0.45);
+        for (let i = 0; i < 4; i++) tone(t + i * 0.02, rnd(1800, 3800), 'triangle', 0.1, 0.07);
+    },
+    tre() {
+        if (!canPlay()) return; const t = AC.currentTime;
+        noise(t, 0.3, 'bandpass', 420, 0.8, 0.5);
+        tone(t, 150, 'square', 0.22, 0.16, 70);
+    },
+    glass() {
+        if (!canPlay()) return; const t = AC.currentTime;
+        noise(t, 0.4, 'highpass', 4200, 0.6, 0.4);
+        for (let i = 0; i < 9; i++) tone(t + i * 0.035, rnd(2400, 6200), 'sine', 0.14, 0.055);
+    },
+    metall() {
+        if (!canPlay()) return; const t = AC.currentTime;
+        [523, 784, 1245, 1760].forEach((f, i) => tone(t + i * 0.012, f * rnd(.96, 1.04), 'triangle', 0.5, 0.1));
+        noise(t, 0.2, 'bandpass', 2000, 1.4, 0.2);
+    },
+    kollaps() {
+        if (!canPlay()) return; const t = AC.currentTime;
+        noise(t, 1.8, 'lowpass', 500, 0.6, 0.85);
+        tone(t, 70, 'sine', 1.4, 0.4, 28);
+        for (let i = 0; i < 16; i++) noise(t + rnd(0, 1.2), 0.2, 'bandpass', rnd(300, 1800), 1, 0.2);
+    },
+    combo(n) {
+        if (!canPlay()) return;
+        tone(AC.currentTime, 440 * Math.pow(2, Math.min(n, 14) / 12), 'triangle', 0.16, 0.14);
+    },
+    ferdig() {
+        if (!canPlay()) return; const t = AC.currentTime;
+        [392, 523, 659, 784].forEach((f, i) => tone(t + i * 0.1, f, 'triangle', 0.3, 0.14));
+    },
+};
+
+function tegnMute() {
+    $('lydPa').hidden = muted; $('lydAv').hidden = !muted;
+    $('muteBtn').setAttribute('aria-pressed', String(muted));
+}
+$('muteBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    muted = !muted;
+    try { localStorage.setItem(MUTE_KEY, muted ? '1' : '0'); } catch (err) { /* ignorer */ }
+    ensureAudio();
+    if (master && AC) master.gain.setTargetAtTime(muted ? 0 : 0.8, AC.currentTime, 0.02);
+    tegnMute();
+});
+tegnMute();
+
+// ==================================================================
+//  Scene
+// ==================================================================
+const renderer = new THREE.WebGLRenderer({ canvas: $('c'), antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x14100d);
+scene.fog = new THREE.Fog(0x14100d, 6, 15);
+
+const camera = new THREE.PerspectiveCamera(82, 1, 0.05, 60);
+camera.position.set(0, 1.6, 0.55);
+
+scene.add(new THREE.HemisphereLight(0xffe8c8, 0x3a2f26, 0.85));
+const sol = new THREE.DirectionalLight(0xfff3dd, 1.1);
+sol.position.set(2.5, 4, 1.5);
+scene.add(sol);
+const lampe = new THREE.PointLight(0xffd9a0, 18, 9, 2);
+lampe.position.set(0, 2.35, 0);
+scene.add(lampe);
+
+function resize() {
+    const w = innerWidth, h = innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    camera.fov = h > w ? 79 : 66;   // portrett trenger høy vFOV for brukbar bredde
+    camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize, { passive: true });
+addEventListener('orientationchange', () => setTimeout(resize, 250), { passive: true });
+resize();
+
+// ==================================================================
+//  Materialer – stygt på 70-tallsvis
+// ==================================================================
+const M = {
+    flis: new THREE.MeshLambertMaterial({ color: 0x7f9144 }),       // avokadogrønn
+    fuge: new THREE.MeshLambertMaterial({ color: 0xcfc6ad }),
+    skap: new THREE.MeshLambertMaterial({ color: 0x6d4524 }),       // mørk brun teak
+    skapdor: new THREE.MeshLambertMaterial({ color: 0x8a5a30 }),
+    benk: new THREE.MeshLambertMaterial({ color: 0xd8c79e }),
+    hvitevare: new THREE.MeshLambertMaterial({ color: 0xe9e3d5 }),
+    stal: new THREE.MeshLambertMaterial({ color: 0xa8b0b8 }),
+    glass: new THREE.MeshLambertMaterial({ color: 0xbfd8e4, transparent: true, opacity: 0.45 }),
+    tapet: new THREE.MeshLambertMaterial({ color: 0xbf6a2c }),      // oransje tapet
+    tak: new THREE.MeshLambertMaterial({ color: 0xded5c2 }),
+    gulv: new THREE.MeshLambertMaterial({ color: 0x8d6b42 }),
+    bære: new THREE.MeshLambertMaterial({ color: 0x9c3a2c }),
+    rust: new THREE.MeshLambertMaterial({ color: 0x8c5a3a }),
+};
+
+const BOKS = new THREE.BoxGeometry(1, 1, 1);
+
+/** Alt som kan knuses. */
+const rivbare = [];
+
+function lagBit(x, y, z, b, h, d, mat, kr, hp, lyd, navn) {
+    const m = new THREE.Mesh(BOKS, mat);
+    m.position.set(x, y, z);
+    m.scale.set(b, h, d);
+    m.userData = { kr, hp, maksHp: hp, lyd, navn, rivbar: true };
+    scene.add(m);
+    rivbare.push(m);
+    return m;
+}
+
+function byggRom() {
+    const hb = ROM.b / 2, hd = ROM.d / 2;
+
+    const gulv = new THREE.Mesh(BOKS, M.gulv);
+    gulv.position.set(0, -0.06, 0); gulv.scale.set(ROM.b, 0.12, ROM.d);
+    scene.add(gulv);
+
+    const takplater = [];
+    for (let i = -2; i <= 2; i++) {
+        for (let j = -1; j <= 1; j++) {
+            takplater.push(lagBit(i * 0.86, ROM.h + 0.04, j * 1.0, 0.82, 0.08, 0.96, M.tak, 900, 1, 'tre', 'takplate'));
+        }
+    }
+
+    // Vegger. Venstre side er bærende.
+    const vegg = (x, y, z, b, h, d, mat) => {
+        const m = new THREE.Mesh(BOKS, mat);
+        m.position.set(x, y, z); m.scale.set(b, h, d);
+        scene.add(m); return m;
+    };
+    vegg(0, ROM.h / 2, -hd, ROM.b, ROM.h, 0.14, M.tapet);
+    vegg(hb, ROM.h / 2, 0, 0.14, ROM.h, ROM.d, M.tapet);
+    vegg(0, ROM.h / 2, hd, ROM.b, ROM.h, 0.14, M.tapet);
+
+    const bære = new THREE.Mesh(BOKS, M.bære);
+    bære.position.set(-hb, ROM.h / 2, 0); bære.scale.set(0.2, ROM.h, ROM.d);
+    bære.userData = { bære: true, rivbar: true, kr: 0, hp: 1, maksHp: 1, lyd: 'kollaps', navn: 'bærevegg' };
+    scene.add(bære);
+    rivbare.push(bære);
+    for (let j = -1; j <= 1; j++) scene.add(skilt(-hb + 0.11, 1.72, j * 1.0));
+
+    // Flisvegg: 9 x 5
+    for (let i = 0; i < 9; i++) {
+        for (let j = 0; j < 5; j++) {
+            lagBit(-1.76 + i * 0.44, 0.98 + j * 0.3, -hd + 0.09, 0.4, 0.26, 0.04,
+                (i + j) % 3 === 0 ? M.fuge : M.flis, 420, 1, 'flis', 'flis');
+        }
+    }
+
+    // Under- og overskap langs bakveggen
+    for (let i = 0; i < 4; i++) {
+        const x = -1.5 + i * 1.0;
+        lagBit(x, 0.42, -hd + 0.42, 0.94, 0.84, 0.6, M.skap, 3200, 2, 'tre', 'underskap');
+        lagBit(x, 0.45, -hd + 0.72, 0.84, 0.6, 0.03, M.skapdor, 1100, 1, 'tre', 'skapdør');
+        if (i !== 2) lagBit(x, 1.92, -hd + 0.3, 0.94, 0.7, 0.36, M.skap, 2900, 2, 'tre', 'overskap');
+    }
+    lagBit(0, 0.88, -hd + 0.44, 4.1, 0.08, 0.66, M.benk, 7800, 3, 'tre', 'benkeplate');
+
+    lagBit(-1.0, 0.95, -hd + 0.44, 0.7, 0.12, 0.5, M.stal, 4600, 2, 'metall', 'vask');
+    lagBit(0.5, 0.5, -hd + 0.42, 0.62, 1.0, 0.58, M.hvitevare, 6500, 3, 'metall', 'komfyr');
+    lagBit(0.5, 1.92, -hd + 0.3, 0.7, 0.4, 0.4, M.stal, 3400, 2, 'metall', 'kjøkkenvifte');
+    lagBit(1.72, 0.9, -hd + 0.45, 0.68, 1.8, 0.64, M.hvitevare, 9200, 4, 'metall', 'kjøleskap');
+
+    // Høyre vegg: vindu og radiator
+    lagBit(hb - 0.1, 1.55, -0.35, 0.05, 1.0, 1.2, M.glass, 5200, 1, 'glass', 'vindu');
+    lagBit(hb - 0.13, 1.55, -0.35, 0.06, 1.14, 1.34, M.skap, 1800, 2, 'tre', 'vinduskarm');
+    lagBit(hb - 0.2, 0.42, 0.9, 0.14, 0.56, 1.0, M.rust, 3800, 3, 'metall', 'radiator');
+
+    // Dør i fronten, bak deg
+    lagBit(-1.2, 1.05, hd - 0.12, 0.9, 2.1, 0.06, M.skapdor, 4200, 2, 'tre', 'dør');
+
+    return takplater;
+}
+
+function skilt(x, y, z) {
+    const c = document.createElement('canvas');
+    c.width = 256; c.height = 128;
+    const g = c.getContext('2d');
+    g.fillStyle = '#f2c14e'; g.fillRect(0, 0, 256, 128);
+    g.fillStyle = '#1a1208';
+    g.font = '800 30px sans-serif'; g.textAlign = 'center';
+    g.fillText('BÆREVEGG', 128, 52);
+    g.font = '700 22px sans-serif';
+    g.fillText('IKKE RØR', 128, 92);
+    g.lineWidth = 10; g.strokeStyle = '#1a1208'; g.strokeRect(5, 5, 246, 118);
+    const m = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.62, 0.31),
+        new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c) })
+    );
+    m.position.set(x, y, z);
+    m.rotation.y = Math.PI / 2;
+    return m;
+}
+
+const takplater = byggRom();
+
+// ==================================================================
+//  Slegga
+// ==================================================================
+const slegge = new THREE.Group();
+const skaft = new THREE.Mesh(BOKS, new THREE.MeshLambertMaterial({ color: 0xb98437 }));
+skaft.scale.set(0.038, 0.8, 0.038);
+skaft.position.set(0, -0.26, 0);
+slegge.add(skaft);
+const hode = new THREE.Mesh(BOKS, new THREE.MeshLambertMaterial({ color: 0x7b838c }));
+hode.scale.set(0.3, 0.11, 0.11);     // hodet på tvers, som en slegge skal ligge
+hode.position.set(0, 0.16, 0);
+slegge.add(hode);
+const kile = new THREE.Mesh(BOKS, new THREE.MeshLambertMaterial({ color: 0x5c646c }));
+kile.scale.set(0.07, 0.12, 0.12);
+kile.position.set(-0.17, 0.16, 0);
+slegge.add(kile);
+slegge.scale.setScalar(0.78);
+slegge.position.set(0.3, -0.5, -0.95);
+slegge.rotation.set(-0.35, 0.26, 0.52);
+camera.add(slegge);
+const handlys = new THREE.PointLight(0xfff0d6, 2.2, 3, 2);
+handlys.position.set(0.35, 0.25, -0.2);
+camera.add(handlys);
+scene.add(camera);
+
+// ==================================================================
+//  Biter og støv
+// ==================================================================
+const POOL = 220;
+const biter = [];
+for (let i = 0; i < POOL; i++) {
+    const m = new THREE.Mesh(BOKS, M.flis);
+    m.visible = false;
+    scene.add(m);
+    biter.push({ mesh: m, liv: 0, v: new THREE.Vector3(), spinn: new THREE.Vector3() });
+}
+let bitPek = 0;
+
+function spreng(pos, mat, antall, kraft) {
+    for (let i = 0; i < antall; i++) {
+        const b = biter[bitPek = (bitPek + 1) % POOL];
+        const s = rnd(0.04, 0.13);
+        b.mesh.material = mat;
+        b.mesh.scale.set(s, s * rnd(0.5, 1.4), s * rnd(0.5, 1.4));
+        b.mesh.position.copy(pos).add(new THREE.Vector3(rnd(-.2, .2), rnd(-.2, .2), rnd(-.2, .2)));
+        b.mesh.rotation.set(rnd(0, 6), rnd(0, 6), rnd(0, 6));
+        b.mesh.visible = true;
+        b.v.set(rnd(-1, 1), rnd(0.4, 1.6), rnd(-1, 1)).normalize().multiplyScalar(kraft * rnd(0.5, 1.3));
+        b.spinn.set(rnd(-9, 9), rnd(-9, 9), rnd(-9, 9));
+        b.liv = rnd(1.5, 2.6);
+    }
+}
+
+const stovTex = (() => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 64;
+    const g = c.getContext('2d');
+    const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    gr.addColorStop(0, 'rgba(226,215,196,.85)');
+    gr.addColorStop(1, 'rgba(226,215,196,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 64, 64);
+    return new THREE.CanvasTexture(c);
+})();
+
+const stov = [];
+for (let i = 0; i < 60; i++) {
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: stovTex, transparent: true, depthWrite: false }));
+    s.visible = false;
+    scene.add(s);
+    stov.push({ sp: s, liv: 0, v: new THREE.Vector3(), start: 0.4 });
+}
+let stovPek = 0;
+
+function stovsky(pos, n, skala) {
+    for (let i = 0; i < n; i++) {
+        const d = stov[stovPek = (stovPek + 1) % stov.length];
+        d.sp.position.copy(pos).add(new THREE.Vector3(rnd(-.3, .3), rnd(-.3, .3), rnd(-.3, .3)));
+        d.v.set(rnd(-.5, .5), rnd(.2, .9), rnd(-.5, .5));
+        d.start = skala;
+        d.liv = rnd(0.9, 1.7);
+        d.sp.visible = true;
+    }
+}
+
+// Tall som spretter opp der du traff
+const popper = [];
+function popp(pos, tekst, farge) {
+    const c = document.createElement('canvas');
+    c.width = 256; c.height = 80;
+    const g = c.getContext('2d');
+    g.font = '800 54px ' + getComputedStyle(document.body).fontFamily;
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.lineWidth = 9; g.strokeStyle = 'rgba(12,9,6,.9)';
+    g.strokeText(tekst, 128, 42); g.fillStyle = farge; g.fillText(tekst, 128, 42);
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthTest: false }));
+    sp.position.copy(pos);
+    sp.scale.set(0.9, 0.28, 1);
+    scene.add(sp);
+    popper.push({ sp, liv: 1.1 });
+}
+
+// ==================================================================
+//  Styring: dra = se, trykk = slå
+// ==================================================================
+let yaw = 0, pitch = -0.06;
+let drar = false, startX = 0, startY = 0, sistX = 0, sistY = 0, flyttet = 0, nedTid = 0;
+
+$('c').addEventListener('pointerdown', (e) => {
+    drar = true; flyttet = 0; nedTid = performance.now();
+    startX = sistX = e.clientX; startY = sistY = e.clientY;
+    try { $('c').setPointerCapture(e.pointerId); } catch (err) { /* ignorer */ }
+});
+$('c').addEventListener('pointermove', (e) => {
+    if (!drar) return;
+    const dx = e.clientX - sistX, dy = e.clientY - sistY;
+    sistX = e.clientX; sistY = e.clientY;
+    flyttet += Math.abs(dx) + Math.abs(dy);
+    yaw -= dx * 0.0046;
+    pitch = clamp(pitch - dy * 0.0046, -1.15, 1.0);
+});
+function slipp(e) {
+    if (!drar) return;
+    drar = false;
+    const kort = performance.now() - nedTid < 320;
+    if (flyttet < 14 && kort) slag();
+}
+$('c').addEventListener('pointerup', slipp);
+$('c').addEventListener('pointercancel', () => { drar = false; });
+addEventListener('keydown', (e) => {
+    if (e.code === 'Space') { e.preventDefault(); if (spill === 'kjorer') slag(); else start(); }
+    if (e.key === 'm' || e.key === 'M') $('muteBtn').click();
+});
+
+// ==================================================================
+//  Slag
+// ==================================================================
+const stråle = new THREE.Raycaster();
+const midt = new THREE.Vector2(0, 0);
+let svinger = 0, slagGjort = false;
+let kr = 0, slag_ = 0, treff = 0, combo = 0, besteCombo = 0, comboT = 0;
+let rist = 0, spill = 'start', tid = RUNDE;
+
+function slag() {
+    if (spill !== 'kjorer' || svinger > 0) return;
+    ensureAudio();
+    svinger = 0.36;
+    slagGjort = false;
+    slag_++;
+    SFX.svning();
+}
+
+function treffNoe() {
+    stråle.setFromCamera(midt, camera);
+    const synlige = rivbare.filter((m) => m.visible);
+    const h = stråle.intersectObjects(synlige, false);
+    if (!h.length || h[0].distance > REKKE) {
+        combo = 0; oppdaterCombo();
+        SFX.bom();
+        rist = Math.max(rist, 0.25);
+        return;
+    }
+    const o = h[0].object, p = h[0].point, u = o.userData;
+
+    rist = Math.max(rist, 0.5);
+    treff++;
+    u.hp--;
+
+    if (u.bære) { kollaps(p); return; }
+
+    if (u.hp > 0) {
+        // Ikke knust ennå – den rister og mister litt materiale
+        o.scale.multiplyScalar(0.94);
+        spreng(p, o.material, 5, 2.4);
+        stovsky(p, 2, 0.3);
+        SFX[u.lyd] ? SFX[u.lyd]() : SFX.tre();
+        return;
+    }
+
+    // Knust
+    combo++;
+    comboT = 1.25;
+    besteCombo = Math.max(besteCombo, combo);
+    const mult = 1 + Math.floor(combo / 3) * 0.5;
+    const verdi = u.kr * mult;
+    kr += verdi;
+
+    o.visible = false;
+    spreng(p, o.material, 14, 4.2);
+    stovsky(p, 4, 0.55);
+    popp(p, '+' + kroner(verdi), mult > 1 ? '#ffcf7a' : '#f4ebe1');
+    SFX[u.lyd] ? SFX[u.lyd]() : SFX.tre();
+    if (combo > 1) SFX.combo(combo);
+    oppdaterCombo();
+    $('kr').textContent = kroner(kr);
+}
+
+function oppdaterCombo() {
+    const el = $('combo');
+    if (combo > 1) {
+        el.textContent = '×' + (1 + Math.floor(combo / 3) * 0.5).toFixed(1).replace('.0', '') + '  ' + combo + ' på rad';
+        el.classList.add('on');
+    } else {
+        el.classList.remove('on');
+    }
+}
+
+let kollapser = 0;
+function kollaps(p) {
+    spill = 'kollaps';
+    kollapser = 2.2;
+    rist = 2.5;
+    SFX.kollaps();
+    stovsky(p, 14, 1.4);
+    for (const t of takplater) {
+        if (!t.visible) continue;
+        t.userData.faller = rnd(0, 0.5);
+        t.userData.vy = 0;
+    }
+}
+
+// ==================================================================
+//  Løkke
+// ==================================================================
+const G = -11;
+let sist = performance.now();
+const tmp = new THREE.Vector3();
+
+function ramme(na) {
+    requestAnimationFrame(ramme);
+    const dt = Math.min(0.05, (na - sist) / 1000);
+    sist = na;
+
+    // Slegga
+    if (svinger > 0) {
+        svinger -= dt;
+        const f = 1 - svinger / 0.36;
+        const sv = Math.sin(clamp(f, 0, 1) * Math.PI);
+        slegge.rotation.x = -0.35 - sv * 1.55;
+        slegge.position.z = -0.95 + sv * 0.26;
+        slegge.position.y = -0.5 + sv * 0.14;
+        if (!slagGjort && f >= 0.45) { slagGjort = true; treffNoe(); }
+        if (svinger <= 0) { slegge.rotation.x = -0.35; slegge.position.set(0.3, -0.5, -0.95); }
+    }
+
+    if (spill === 'kjorer') {
+        tid -= dt;
+        if (comboT > 0) { comboT -= dt; if (comboT <= 0) { combo = 0; oppdaterCombo(); } }
+        $('tid').textContent = Math.max(0, Math.ceil(tid));
+        $('tid').classList.toggle('lite', tid < 11);
+        if (tid <= 0) slutt(false);
+    }
+
+    if (kollapser > 0) {
+        kollapser -= dt;
+        for (const t of takplater) {
+            const u = t.userData;
+            if (u.faller === undefined || !t.visible) continue;
+            if (u.faller > 0) { u.faller -= dt; continue; }
+            u.vy += G * dt;
+            t.position.y += u.vy * dt;
+            t.rotation.z += dt * 1.4;
+            if (t.position.y < 0.1) { t.position.y = 0.1; u.vy = 0; }
+        }
+        if (kollapser <= 0 && spill === 'kollaps') slutt(true);
+    }
+
+    // Biter
+    for (const b of biter) {
+        if (b.liv <= 0) continue;
+        b.liv -= dt;
+        b.v.y += G * dt;
+        b.mesh.position.addScaledVector(b.v, dt);
+        b.mesh.rotation.x += b.spinn.x * dt;
+        b.mesh.rotation.y += b.spinn.y * dt;
+        if (b.mesh.position.y < 0.04) {
+            b.mesh.position.y = 0.04;
+            b.v.y *= -0.32; b.v.x *= 0.7; b.v.z *= 0.7;
+            b.spinn.multiplyScalar(0.5);
+        }
+        if (b.liv <= 0) b.mesh.visible = false;
+    }
+
+    // Støv
+    for (const d of stov) {
+        if (d.liv <= 0) continue;
+        d.liv -= dt;
+        d.sp.position.addScaledVector(d.v, dt);
+        d.v.multiplyScalar(0.96);
+        const f = clamp(d.liv / 1.4, 0, 1);
+        const s = d.start * (2.2 - f * 1.2);
+        d.sp.scale.set(s, s, 1);
+        d.sp.material.opacity = f * 0.55;
+        if (d.liv <= 0) d.sp.visible = false;
+    }
+
+    // Poppende tall
+    for (let i = popper.length - 1; i >= 0; i--) {
+        const p = popper[i];
+        p.liv -= dt;
+        p.sp.position.y += dt * 0.7;
+        p.sp.material.opacity = clamp(p.liv * 1.6, 0, 1);
+        if (p.liv <= 0) { scene.remove(p.sp); p.sp.material.map.dispose(); p.sp.material.dispose(); popper.splice(i, 1); }
+    }
+
+    // Kamera
+    camera.rotation.set(0, 0, 0);
+    camera.rotation.order = 'YXZ';
+    camera.rotation.y = yaw;
+    camera.rotation.x = pitch;
+    if (rist > 0) {
+        rist = Math.max(0, rist - dt * 2.6);
+        camera.rotation.y += rnd(-1, 1) * rist * 0.035;
+        camera.rotation.x += rnd(-1, 1) * rist * 0.035;
+        camera.rotation.z = rnd(-1, 1) * rist * 0.03;
+    }
+
+    // Sikte: lyser opp når noe er innen rekkevidde
+    if (spill === 'kjorer') {
+        stråle.setFromCamera(midt, camera);
+        const h = stråle.intersectObjects(rivbare.filter((m) => m.visible), false);
+        $('sikte').classList.toggle('traff', !!h.length && h[0].distance <= REKKE);
+    }
+
+    renderer.render(scene, camera);
+}
+requestAnimationFrame(ramme);
+
+// ==================================================================
+//  Runden
+// ==================================================================
+const RANGER = [
+    { fra: 120000, t: 'Rivingsmester' }, { fra: 85000, t: 'Rutinert' },
+    { fra: 55000, t: 'Godkjent' }, { fra: 30000, t: 'Lærling' }, { fra: -1, t: 'Du sto mest og så på' },
+];
+const SITATER = [
+    'Takstmannen fant ingenting igjen å takse.',
+    'Nabo i tredje melder om «bank».',
+    'Kjøkkenet fra 1974 overlevde ikke 1974-stilen.',
+    'Byggherren har sett videoen. Han ler ikke.',
+];
+
+function nullstill() {
+    for (const m of rivbare) {
+        m.visible = true;
+        m.userData.hp = m.userData.maksHp || 1;
+        if (m.userData.startSkala) m.scale.copy(m.userData.startSkala);
+    }
+    for (const t of takplater) {
+        t.userData.faller = undefined;
+        if (t.userData.startY !== undefined) t.position.y = t.userData.startY;
+        t.rotation.set(0, 0, 0);
+    }
+    for (const b of biter) { b.liv = 0; b.mesh.visible = false; }
+    for (const d of stov) { d.liv = 0; d.sp.visible = false; }
+    kr = 0; slag_ = 0; treff = 0; combo = 0; besteCombo = 0; comboT = 0;
+    tid = RUNDE; rist = 0; kollapser = 0; svinger = 0;
+    yaw = 0; pitch = -0.06;
+    $('kr').textContent = '0';
+    $('tid').textContent = RUNDE;
+    oppdaterCombo();
+}
+// Husk utgangspunktet så runde to blir lik runde én
+for (const m of rivbare) m.userData.startSkala = m.scale.clone();
+for (const t of takplater) t.userData.startY = t.position.y;
+
+function start() {
+    ensureAudio();
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => { /* iOS tillater det ikke */ });
+    nullstill();
+    spill = 'kjorer';
+    $('startOverlay').classList.remove('show');
+    $('overOverlay').classList.remove('show');
+    $('hud').classList.add('on');
+    $('sikte').classList.add('on');
+}
+
+function slutt(tokBære) {
+    spill = 'slutt';
+    $('hud').classList.remove('on');
+    $('sikte').classList.remove('on');
+    $('combo').classList.remove('on');
+    SFX.ferdig();
+
+    $('sluttHode').textContent = tokBære ? 'Byggesaken' : 'Takstrapport';
+    $('sluttKr').textContent = kroner(kr);
+    $('rank').textContent = tokBære ? 'Tatt bæreveggen' : (RANGER.find((r) => kr >= r.fra) || RANGER[RANGER.length - 1]).t;
+    $('quote').textContent = tokBære
+        ? '«Han tok bæreveggen. Hele oppgangen står og vipper.»'
+        : '«' + pick(SITATER) + '»';
+    $('sSlag').textContent = slag_;
+    $('sTreff').textContent = slag_ ? Math.round(treff / slag_ * 100) + '%' : '0%';
+    $('sCombo').textContent = besteCombo;
+    $('overOverlay').classList.add('show');
+
+    try {
+        const best = Math.max(kr, parseInt(localStorage.getItem('riving.best') || '0', 10) || 0);
+        localStorage.setItem('riving.best', String(Math.round(best)));
+        $('rekord').textContent = kroner(best);
+    } catch (e) { /* ignorer */ }
+}
+
+try { $('rekord').textContent = kroner(parseInt(localStorage.getItem('riving.best') || '0', 10) || 0); } catch (e) { /* ignorer */ }
+$('startBtn').addEventListener('click', start);
+$('retryBtn').addEventListener('click', start);
+</script>
+</body>
+</html>

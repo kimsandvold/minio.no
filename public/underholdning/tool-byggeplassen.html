@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+    <title>Byggeplassen – Minio Underholdning</title>
+    <meta name="description" content="Førsteperson på byggeplassen. Finn ut av hvorfor sagen ikke går, løs oppdraget, og hold deg unna det som faller ned."/>
+
+    <!-- UTPRØVING: ikke lansert. Ikke i spill.ts, ikke i sitemap.xml. -->
+    <meta name="robots" content="noindex, nofollow"/>
+    <meta name="theme-color" content="#0d0a08"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <link rel="apple-touch-icon" href="/favicon.svg"/>
+
+    <style>
+        :root {
+            --bg: #0d0a08;
+            --panel-2: rgba(20, 15, 12, 0.93);
+            --line: rgba(255, 214, 170, 0.14);
+            --line-strong: rgba(255, 214, 170, 0.26);
+            --text: #f4ebe1;
+            --muted: #b3a291;
+            --faint: #7d6d5f;
+            --accent: #f2a541;
+            --accent-2: #ffcf7a;
+            --accent-ink: #2a1806;
+            --good: #a6d65a;
+            --bad: #ff7a59;
+            --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0; padding: 0; width: 100%; height: 100%; height: 100dvh;
+            overflow: hidden; position: fixed; inset: 0;
+            background: var(--bg); color: var(--text); font-family: var(--font);
+            -webkit-font-smoothing: antialiased;
+            touch-action: none; overscroll-behavior: none;
+            -webkit-user-select: none; user-select: none;
+            -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+        }
+        canvas#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+        .skygge {
+            position: fixed; top: 0; left: 0; right: 0;
+            height: calc(var(--sat) + 150px); z-index: 10; pointer-events: none;
+            background: linear-gradient(to bottom, rgba(10,8,6,.7), rgba(10,8,6,.35) 60%, rgba(10,8,6,0));
+        }
+
+        .topbar {
+            position: fixed; top: 0; left: 0; right: 0;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: calc(var(--sat) + 10px) 12px 0; z-index: 20; pointer-events: none;
+        }
+        .topbar > * { pointer-events: auto; }
+        .back {
+            display: inline-flex; align-items: center; gap: 9px;
+            color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 500;
+            padding: 7px 11px 7px 9px; border-radius: 11px;
+            background: rgba(20,15,12,.5); border: 1px solid var(--line);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        .back svg { width: 15px; height: 15px; flex: none; }
+        .back img { height: 16px; width: auto; display: block; opacity: .95; }
+        .iconbtn {
+            width: 38px; height: 38px; display: grid; place-items: center;
+            border-radius: 11px; background: rgba(20,15,12,.5);
+            border: 1px solid var(--line); color: var(--muted); cursor: pointer;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        .iconbtn svg { width: 18px; height: 18px; }
+        .iconbtn svg[hidden] { display: none; }
+
+        /* ---------- Oppdrag ---------- */
+        .hud {
+            position: fixed; top: calc(var(--sat) + 56px); left: 0; right: 0;
+            z-index: 15; padding: 0 14px; pointer-events: none;
+            opacity: 0; transition: opacity .3s;
+        }
+        .hud.on { opacity: 1; }
+        .oppdragsrad { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+        .lbl { font-size: 10px; text-transform: uppercase; letter-spacing: .13em; color: var(--accent); font-weight: 700; }
+        .lbl.dim { color: var(--faint); }
+        .oppdrag { font-size: 17px; font-weight: 750; line-height: 1.3; text-shadow: 0 2px 10px rgba(0,0,0,.85); max-width: 70%; }
+        .tid { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; text-shadow: 0 2px 10px rgba(0,0,0,.85); text-align: right; }
+        .steg { font-size: 11px; color: var(--faint); font-weight: 700; text-align: right; margin-top: 2px; }
+
+        .melding {
+            position: fixed; left: 14px; right: 14px; top: 36%;
+            z-index: 17; pointer-events: none; text-align: center;
+            font-size: 19px; font-weight: 750; line-height: 1.35;
+            color: var(--text); text-shadow: 0 2px 14px rgba(0,0,0,.95);
+            opacity: 0; transform: translateY(8px);
+            transition: opacity .25s, transform .25s;
+        }
+        .melding.on { opacity: 1; transform: translateY(0); }
+
+        .sikte {
+            position: fixed; left: 50%; top: 50%; z-index: 12;
+            width: 22px; height: 22px; margin: -11px 0 0 -11px;
+            pointer-events: none; opacity: 0; transition: opacity .2s;
+        }
+        .sikte.on { opacity: .65; }
+        .sikte::before, .sikte::after {
+            content: ''; position: absolute; background: rgba(255,255,255,.9);
+            box-shadow: 0 0 4px rgba(0,0,0,.7);
+        }
+        .sikte::before { left: 50%; top: 0; width: 2px; height: 100%; margin-left: -1px; }
+        .sikte::after { top: 50%; left: 0; height: 2px; width: 100%; margin-top: -1px; }
+        .sikte.naer::before, .sikte.naer::after { background: var(--accent-2); }
+
+        .brukhint {
+            position: fixed; left: 0; right: 0; top: calc(50% + 24px);
+            text-align: center; z-index: 13; pointer-events: none;
+            font-size: 13px; font-weight: 700; color: var(--accent-2);
+            text-shadow: 0 2px 10px rgba(0,0,0,.95);
+            opacity: 0; transition: opacity .15s;
+        }
+        .brukhint.on { opacity: 1; }
+
+        /* Veiviseren. Uten denne aner du ikke hvor oppdraget er. */
+        .vei {
+            position: fixed; left: 0; top: 0; z-index: 14;
+            pointer-events: none; opacity: 0; transition: opacity .25s;
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            transform: translate(-50%, -50%);
+        }
+        .vei.on { opacity: 1; }
+        .vei .ring {
+            width: 34px; height: 34px; border-radius: 50%;
+            border: 3px solid var(--accent-2);
+            box-shadow: 0 0 0 2px rgba(10,8,6,.6), 0 2px 10px rgba(0,0,0,.6);
+            display: grid; place-items: center;
+        }
+        .vei .ring::after {
+            content: ''; width: 9px; height: 9px; border-radius: 50%;
+            background: var(--accent-2);
+        }
+        .vei.utenfor .ring { border-radius: 4px; transform: rotate(45deg); }
+        .vei .meter {
+            font-size: 12.5px; font-weight: 800; color: var(--accent-2);
+            text-shadow: 0 2px 8px rgba(0,0,0,.95); font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        /* Oppdragsteksten må leses først, ikke lete-etter-es */
+        .oppdragskort {
+            position: fixed; left: 50%; top: calc(var(--sat) + 54px);
+            transform: translateX(-50%);
+            z-index: 16; pointer-events: none; text-align: center;
+            background: rgba(16, 12, 9, .72);
+            border: 1px solid rgba(242,165,65,.4);
+            border-radius: 14px; padding: 9px 18px;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            max-width: calc(100% - 28px);
+            opacity: 0; transition: opacity .3s;
+        }
+        .oppdragskort.on { opacity: 1; }
+        .oppdragskort .hva {
+            font-size: 10px; letter-spacing: .16em; text-transform: uppercase;
+            color: var(--accent); font-weight: 800;
+        }
+        .oppdragskort .tekst { font-size: 16.5px; font-weight: 750; line-height: 1.25; margin-top: 2px; }
+
+        /* Uten denne lurer PC-spilleren på hvorfor musa ikke gjør noe. */
+        .musprompt {
+            position: fixed; inset: 0; z-index: 19;
+            display: none; align-items: center; justify-content: center;
+            flex-direction: column; gap: 10px;
+            background: rgba(10, 8, 6, .55);
+            backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px);
+            cursor: pointer; text-align: center; padding: 20px;
+        }
+        .musprompt.on { display: flex; }
+        .musprompt .stor {
+            font-size: 22px; font-weight: 800; letter-spacing: -.01em;
+            text-shadow: 0 2px 14px rgba(0,0,0,.9);
+        }
+        .musprompt .liten { font-size: 13.5px; color: var(--muted); }
+        .musprompt kbd {
+            font-family: inherit; font-size: 12px; padding: 2px 7px; border-radius: 6px;
+            border: 1px solid var(--line-strong); background: rgba(255,214,170,.09); color: var(--text);
+        }
+
+        /* ---------- Styring ---------- */
+        .spak {
+            position: fixed; left: 16px; bottom: calc(var(--sab) + 20px);
+            width: 126px; height: 126px; z-index: 16; border-radius: 50%;
+            background: rgba(20,15,12,.3); border: 1.5px solid rgba(255,214,170,.18);
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            opacity: 0; pointer-events: none; transition: opacity .3s; touch-action: none;
+        }
+        .spak.on { opacity: 1; pointer-events: auto; }
+        .knott {
+            position: absolute; left: 50%; top: 50%;
+            width: 56px; height: 56px; margin: -28px 0 0 -28px; border-radius: 50%;
+            background: rgba(242,165,65,.5); border: 2px solid rgba(255,207,122,.7);
+            box-shadow: 0 4px 14px rgba(0,0,0,.45);
+            pointer-events: none;
+        }
+
+        .knapper {
+            position: fixed; right: 16px; bottom: calc(var(--sab) + 20px);
+            z-index: 16; display: flex; flex-direction: column; gap: 11px; align-items: flex-end;
+            opacity: 0; pointer-events: none; transition: opacity .3s;
+        }
+        .knapper.on { opacity: 1; pointer-events: auto; }
+        .rundknapp {
+            width: 74px; height: 74px; border-radius: 50%;
+            border: 2px solid rgba(255,214,170,.28);
+            background: rgba(20,15,12,.5); color: var(--text);
+            font-family: inherit; font-size: 11.5px; font-weight: 800;
+            letter-spacing: .08em; text-transform: uppercase; cursor: pointer;
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            display: grid; place-items: center; touch-action: none;
+        }
+        .rundknapp:active { transform: scale(.93); background: rgba(242,165,65,.3); }
+        .rundknapp.bruk { border-color: rgba(242,165,65,.55); color: var(--accent-2); }
+        .rundknapp.bruk.klar { background: rgba(242,165,65,.32); }
+
+        /* ---------- Overlegg ---------- */
+        .overlay {
+            position: fixed; inset: 0; z-index: 30;
+            display: none; align-items: center; justify-content: center;
+            padding: calc(var(--sat) + 16px) 16px calc(var(--sab) + 16px);
+            background: radial-gradient(120% 80% at 50% 0%, rgba(44,30,18,.82), rgba(8,6,5,.96));
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+            overflow-y: auto;
+        }
+        .overlay.show { display: flex; }
+        .card {
+            width: 100%; max-width: 400px;
+            background: var(--panel-2); border: 1px solid var(--line);
+            border-radius: 20px; padding: 22px 20px 20px; text-align: center;
+            box-shadow: 0 28px 70px rgba(0,0,0,.65);
+        }
+        .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--accent); font-weight: 700; }
+        .title { margin: 8px 0 2px; font-size: 35px; line-height: 1.02; letter-spacing: -.025em; }
+        .tagline { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+        .howto {
+            margin: 0 0 16px; font-size: 13.5px; line-height: 1.6; color: var(--muted); text-align: left;
+            background: rgba(255,214,170,.05); border: 1px solid var(--line);
+            border-radius: 13px; padding: 12px 13px;
+        }
+        .howto b { color: var(--text); }
+        .howto p { margin: 0 0 7px; }
+        .howto p:last-child { margin: 0; }
+        .btn {
+            width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+            padding: 15px 18px; border: 0; border-radius: 13px;
+            background: linear-gradient(180deg, var(--accent-2), var(--accent));
+            color: var(--accent-ink); font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer;
+        }
+        .btn:active { transform: scale(.985); }
+        .btn svg { width: 18px; height: 18px; }
+        .btn-ghost { display: block; margin-top: 10px; color: var(--muted); text-decoration: none; font-size: 13.5px; padding: 9px; }
+        .big-score { font-size: 50px; font-weight: 800; line-height: 1; letter-spacing: -.03em; margin: 10px 0 2px; font-variant-numeric: tabular-nums; }
+        .big-unit { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+        .rank {
+            display: inline-block; padding: 5px 13px; border-radius: 99px;
+            background: rgba(242,165,65,.14); border: 1px solid rgba(242,165,65,.3);
+            color: var(--accent-2); font-size: 13px; font-weight: 700; margin-bottom: 14px;
+        }
+        .quote {
+            text-align: left; font-size: 14px; line-height: 1.5; color: var(--text);
+            border-left: 2px solid var(--line-strong); padding: 2px 0 2px 12px; margin: 0 0 14px; font-style: italic;
+        }
+        .hint { margin-top: 10px; font-size: 12px; color: var(--faint); }
+    </style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+<div class="skygge"></div>
+<div class="sikte" id="sikte"></div>
+<div class="brukhint" id="brukhint">Trykk BRUK</div>
+<div class="melding" id="melding"></div>
+<div class="vei" id="vei"><div class="ring"></div><div class="meter" id="veimeter">0 m</div></div>
+<div class="oppdragskort" id="oppdragskort">
+    <div class="hva">Oppdrag <span id="kortsteg">1/5</span></div>
+    <div class="tekst" id="korttekst">–</div>
+</div>
+<div class="musprompt" id="musprompt">
+    <div class="stor">Klikk for å styre med musa</div>
+    <div class="liten"><kbd>WASD</kbd> går · <kbd>Shift</kbd> spurter · <kbd>Mellomrom</kbd> hopper · <kbd>E</kbd> bruker</div>
+    <div class="liten"><kbd>Esc</kbd> slipper musa igjen</div>
+</div>
+
+<div class="spak" id="spak"><div class="knott" id="knott"></div></div>
+<div class="knapper" id="knapper">
+    <button class="rundknapp bruk" id="brukBtn">Bruk</button>
+    <button class="rundknapp" id="hoppBtn">Hopp</button>
+</div>
+
+<div class="topbar">
+    <a href="/underholdning" class="back" aria-label="Tilbake til underholdning">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <img src="/images/branding/logo_navbar.svg" alt="Minio" width="58" height="16"/>
+    </a>
+    <div style="display:flex; gap:8px">
+    <button class="iconbtn" id="hintBtn" aria-label="Hint" title="Hint (H)" style="font-weight:800; font-size:17px">?</button>
+    <button class="iconbtn" id="muteBtn" aria-label="Lyd av/på" aria-pressed="false">
+        <svg id="lydPa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+        <svg id="lydAv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>
+    </button>
+    </div>
+</div>
+
+<div class="hud" id="hud">
+    <div class="oppdragsrad">
+        <div><div class="oppdrag" id="oppdrag" hidden>–</div></div>
+        <div>
+            <div class="lbl dim">Tid</div>
+            <div class="tid" id="tid">0:00</div>
+            <div class="steg" id="stegtall">1/5</div>
+        </div>
+    </div>
+</div>
+
+<div class="overlay show" id="startOverlay">
+    <div class="card">
+        <div class="eyebrow">Minio byggeplass</div>
+        <h1 class="title">Byggeplassen</h1>
+        <p class="tagline">Basen ga deg én jobb. Den går ikke etter planen.</p>
+        <div class="howto">
+            <p><b>Mobil:</b> spaken nede til venstre går, dra på høyre side for å se deg rundt. <b>BRUK</b> og <b>HOPP</b> nede til høyre.</p>
+            <p><b>PC:</b> <b>WASD</b> går, musa ser, <b>mellomrom</b> hopper, <b>E</b> bruker. Klikk for å låse musa.</p>
+            <p>Du får ett oppdrag om gangen. Finn ut av hva som står i veien, og fiks det.</p>
+            <p>Den gule søylen viser hvor du skal. Tida teller fra første steg.</p>
+        </div>
+        <button class="btn" id="startBtn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5z"/></svg>
+            Møt på jobb
+        </button>
+        <div class="hint">Rekord: <b id="rekord">–</b></div>
+    </div>
+</div>
+
+<div class="overlay" id="overOverlay">
+    <div class="card">
+        <div class="eyebrow">Dagsrapport</div>
+        <div class="big-score" id="sluttTid">0:00</div>
+        <div class="big-unit">på hele oppdraget</div>
+        <div class="rank" id="rank">Lærling</div>
+        <blockquote class="quote" id="quote">–</blockquote>
+        <button class="btn" id="retryBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+            Ny vakt
+        </button>
+        <a class="btn-ghost" href="/underholdning">Flere spill</a>
+    </div>
+</div>
+
+<script type="module">
+import * as THREE from '/underholdning/lib/three.module.min.js';
+
+const $ = (id) => document.getElementById(id);
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = (a) => a[(Math.random() * a.length) | 0];
+const mmss = (s) => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+
+const OYE = 1.68;
+const FART = 5.2;           // m/s gange
+const SPURT = 8.4;          // full spak / shift
+const AKSEL = 52;           // hvor kvikt du kommer opp i fart
+const FRIKSJON = 14;        // og hvor kvikt du stopper
+const SPRANG = 6.2;
+const G = -18;
+const RADIUS = 0.36;
+const REKKE = 3.4;
+
+// ==================================================================
+//  Lyd
+// ==================================================================
+const MUTE_KEY = 'byggeplassen.mute';
+let muted = false;
+try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch (e) { /* ignorer */ }
+let AC = null, master = null, noiseBuf = null;
+
+function ensureAudio() {
+    if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    AC = new Ctx();
+    master = AC.createGain();
+    master.gain.value = muted ? 0 : 0.8;
+    master.connect(AC.destination);
+    noiseBuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
+    const d = noiseBuf.getChannelData(0);
+    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+}
+const canPlay = () => AC && master && !muted;
+
+function tone(t, f, type, dur, gain, f2) {
+    if (!AC) return;
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.setValueAtTime(f, t);
+    if (f2) o.frequency.exponentialRampToValueAtTime(Math.max(20, f2), t + dur);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0001, gain), t + 0.006);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + dur + 0.02);
+}
+function noise(t, dur, type, freq, q, gain) {
+    if (!AC || !noiseBuf) return;
+    const s = AC.createBufferSource(); s.buffer = noiseBuf;
+    const bq = AC.createBiquadFilter(); bq.type = type; bq.frequency.value = freq; bq.Q.value = q || 1;
+    const g = AC.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(Math.max(0.0001, gain), t + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    s.connect(bq); bq.connect(g); g.connect(master);
+    s.start(t); s.stop(t + dur + 0.02);
+}
+
+const SFX = {
+    steg() { if (!canPlay()) return; noise(AC.currentTime, 0.08, 'bandpass', 780, 1.1, 0.07); },
+    hopp() { if (!canPlay()) return; tone(AC.currentTime, 420, 'sine', 0.12, 0.07, 620); },
+    land() { if (!canPlay()) return; noise(AC.currentTime, 0.13, 'lowpass', 400, 1, 0.16); },
+    klikk() { if (!canPlay()) return; tone(AC.currentTime, 1100, 'square', 0.05, 0.08); },
+    nei() { if (!canPlay()) return; const t = AC.currentTime; tone(t, 220, 'sawtooth', 0.22, 0.14, 120); },
+    ja() { if (!canPlay()) return; const t = AC.currentTime; [523, 659, 880].forEach((f, i) => tone(t + i * 0.07, f, 'triangle', 0.24, 0.12)); },
+    bryter() { if (!canPlay()) return; const t = AC.currentTime; noise(t, 0.06, 'highpass', 2600, 1, 0.3); tone(t + 0.04, 180, 'square', 0.1, 0.1); },
+    smell() { if (!canPlay()) return; const t = AC.currentTime; noise(t, 0.5, 'lowpass', 1400, 0.6, 0.8); tone(t, 120, 'square', 0.3, 0.3, 50); },
+    sag() { if (!canPlay()) return; const t = AC.currentTime; for (let i = 0; i < 24; i++) noise(t + i * 0.035, 0.05, 'bandpass', 1800 + Math.sin(i) * 900, 2, 0.2); },
+    motor() { if (!canPlay()) return; const t = AC.currentTime; for (let i = 0; i < 8; i++) tone(t + i * 0.08, rnd(90, 150), 'sawtooth', 0.09, 0.055); },
+    ferdig() { if (!canPlay()) return; const t = AC.currentTime; [392, 523, 659, 784, 1047].forEach((f, i) => tone(t + i * 0.11, f, 'triangle', 0.34, 0.13)); },
+    elg() { if (!canPlay()) return; const t = AC.currentTime; tone(t, 160, 'sawtooth', 0.7, 0.16, 110); noise(t, 0.6, 'lowpass', 600, 0.8, 0.12); },
+};
+
+function tegnMute() {
+    $('lydPa').hidden = muted; $('lydAv').hidden = !muted;
+    $('muteBtn').setAttribute('aria-pressed', String(muted));
+}
+$('muteBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    muted = !muted;
+    try { localStorage.setItem(MUTE_KEY, muted ? '1' : '0'); } catch (err) { /* ignorer */ }
+    ensureAudio();
+    if (master && AC) master.gain.setTargetAtTime(muted ? 0 : 0.8, AC.currentTime, 0.02);
+    tegnMute();
+});
+tegnMute();
+
+// ==================================================================
+//  Scene
+// ==================================================================
+const renderer = new THREE.WebGLRenderer({ canvas: $('c'), antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0xbcc3c4, 0.0042);
+
+const camera = new THREE.PerspectiveCamera(78, 1, 0.05, 2600);
+
+// Himmelkuppel – en flat bakgrunnsfarge er halve grunnen til at noe ser uferdig ut.
+(() => {
+    const c = document.createElement('canvas');
+    c.width = 8; c.height = 256;
+    const g = c.getContext('2d');
+    const gr = g.createLinearGradient(0, 0, 0, 256);
+    gr.addColorStop(0.00, '#5a7f9e');
+    gr.addColorStop(0.40, '#93aebd');
+    gr.addColorStop(0.74, '#bcc3c4');
+    gr.addColorStop(1.00, '#c6c7c2');
+    g.fillStyle = gr; g.fillRect(0, 0, 8, 256);
+    const t = new THREE.CanvasTexture(c);
+    const kuppel = new THREE.Mesh(
+        new THREE.SphereGeometry(1700, 32, 20),
+        new THREE.MeshBasicMaterial({ map: t, side: THREE.BackSide, fog: false, depthWrite: false })
+    );
+    scene.add(kuppel);
+})();
+
+scene.add(new THREE.HemisphereLight(0xcfe2f2, 0x6b5a45, 0.85));
+const sol = new THREE.DirectionalLight(0xffeeda, 1.9);
+sol.position.set(20, 26, 12);
+sol.castShadow = true;
+sol.shadow.mapSize.set(1024, 1024);
+sol.shadow.mapSize.set(2048, 2048);
+sol.shadow.camera.left = -19; sol.shadow.camera.right = 19;
+sol.shadow.camera.top = 19; sol.shadow.camera.bottom = -19;
+sol.shadow.camera.near = 2; sol.shadow.camera.far = 64;
+sol.shadow.bias = -0.0004;
+sol.shadow.normalBias = 0.09;
+scene.add(sol);
+scene.add(sol.target);
+scene.add(camera);
+
+let fovMal = 78, fovNaa = 78;
+
+function resize() {
+    const w = innerWidth, h = innerHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    fovMal = fovNaa = camera.fov = h > w ? 78 : 66;
+    camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize, { passive: true });
+addEventListener('orientationchange', () => setTimeout(resize, 250), { passive: true });
+resize();
+
+// ==================================================================
+//  Byggeklosser
+// ==================================================================
+const M = {
+    grus: new THREE.MeshLambertMaterial({ color: 0x8a8070 }),
+    gress: new THREE.MeshLambertMaterial({ color: 0x5f7342 }),
+    plate: new THREE.MeshLambertMaterial({ color: 0xc8a86f }),
+    stendar: new THREE.MeshLambertMaterial({ color: 0xd9b47d }),
+    betong: new THREE.MeshLambertMaterial({ color: 0xa6a299 }),
+    brakke: new THREE.MeshLambertMaterial({ color: 0xd8dde0 }),
+    brakkeMork: new THREE.MeshLambertMaterial({ color: 0x5a6670 }),
+    container: new THREE.MeshLambertMaterial({ color: 0xc0632e }),
+    stal: new THREE.MeshLambertMaterial({ color: 0x9aa3ab }),
+    gul: new THREE.MeshLambertMaterial({ color: 0xedb21f }),
+    svart: new THREE.MeshLambertMaterial({ color: 0x2b2b2e }),
+    gronn: new THREE.MeshLambertMaterial({ color: 0x4f9150 }),
+    tre: new THREE.MeshLambertMaterial({ color: 0xb98437 }),
+    presenning: new THREE.MeshLambertMaterial({ color: 0x3f6f8f }),
+    elg: new THREE.MeshLambertMaterial({ color: 0x4a3528 }),
+    treA: new THREE.MeshLambertMaterial({ color: 0xc69a53 }),
+    treB: new THREE.MeshLambertMaterial({ color: 0xa87a3c }),
+    fat: new THREE.MeshLambertMaterial({ color: 0x3f6f3f }),
+    fatRust: new THREE.MeshLambertMaterial({ color: 0x8a4a2c }),
+    bolt: new THREE.MeshLambertMaterial({ color: 0x6f757b }),
+    sekk: new THREE.MeshLambertMaterial({ color: 0xcfc3a8 }),
+    utedo: new THREE.MeshLambertMaterial({ color: 0x2f7a4f }),
+    gjerde: new THREE.MeshLambertMaterial({ color: 0xb8bcc0 }),
+};
+const BOKS = new THREE.BoxGeometry(1, 1, 1);
+
+const hindre = [];
+const dekker = [];
+
+/**
+ * Landskapet. Tomta er planert flat ut til 38 m – slik en byggeplass faktisk
+ * er – og så får marka lov til å bølge, stige i lier og ende i fjell.
+ */
+const myk = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
+
+function terrengHoyde(x, z) {
+    const d = Math.hypot(x, z);
+    const planert = myk((d - 38) / 26);          // 0 på tomta, 1 utenfor
+    if (planert <= 0) return 0;
+
+    let h = Math.sin(x * 0.0205 + 1.3) * Math.cos(z * 0.0187 - 0.7) * 7.5;
+    h += Math.sin(x * 0.058) * Math.cos(z * 0.049) * 2.6;
+    h += Math.sin((x - z) * 0.013 + 2.1) * 5.0;
+    h += Math.sin((x + z) * 0.104) * 0.6;
+
+    // Fjellene reiser seg lenger ute
+    // Åsrygger først, så fjell langt der framme. Kommer de for nær,
+    // blir de en vegg i stedet for en horisont.
+    const aas = myk((d - 95) / 115);
+    h += aas * aas * (26 + Math.sin(x * 0.0152 - 0.8) * 11 + Math.cos(z * 0.0131 + 0.5) * 9);
+
+    const fjell = myk((d - 235) / 240);
+    h += fjell * fjell * (205 + Math.sin(x * 0.0067 + 0.4) * 78 + Math.cos(z * 0.0059 - 1.1) * 66
+                          + Math.sin((x + z) * 0.0038 + 2.6) * 54);
+
+    return h * planert;
+}
+
+function kloss(x, y, z, b, h, d, mat, solid) {
+    const m = new THREE.Mesh(BOKS, mat);
+    m.position.set(x, y + h / 2, z);
+    m.scale.set(b, h, d);
+    // Tynne stendere skygger på seg selv og blir stripete. De tar imot
+    // skygge, men kaster den ikke.
+    m.castShadow = b > 0.22 || d > 0.22;
+    m.receiveShadow = true;
+    scene.add(m);
+    if (solid !== false) hindre.push({ x0: x - b / 2, x1: x + b / 2, z0: z - d / 2, z1: z + d / 2, topp: y + h, bunn: y });
+    return m;
+}
+function dekke(x0, x1, z0, z1, h) { dekker.push({ x0, x1, z0, z1, h }); }
+
+function gulvHoyde(x, z) {
+    let h = terrengHoyde(x, z);
+    for (const d of dekker) {
+        if (x >= d.x0 && x <= d.x1 && z >= d.z0 && z <= d.z1 && d.h > h) h = d.h;
+    }
+    // Rampa opp til stillaset
+    if (x > 7.6 && x < 10.8 && z > 2.4 && z < 9.5) {
+        const t = clamp((9.5 - z) / 7.1, 0, 1);
+        h = Math.max(h, t * 2.54);
+    }
+    return h;
+}
+
+const INTER = [];
+function interaktiv(mesh, navn, handling) {
+    mesh.userData.inter = { navn, handling };
+    INTER.push(mesh);
+    return mesh;
+}
+
+// ==================================================================
+//  Byggeplassen
+// ==================================================================
+function byggPlassen() {
+    // ---- Terrenget ----
+    const terr = new THREE.PlaneGeometry(1500, 1500, 230, 230);
+    terr.rotateX(-Math.PI / 2);
+    const pos = terr.attributes.position;
+    const farger = new Float32Array(pos.count * 3);
+    for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i), z = pos.getZ(i);
+        const h = terrengHoyde(x, z);
+        pos.setY(i, h);
+
+        // Farge etter høyde: eng – skogsbunn – ur – snø
+        let r, g2, b2;
+        if (h < 3)        { r = 0.33; g2 = 0.42; b2 = 0.21; }
+        else if (h < 16)  { const t = (h - 3) / 13;  r = 0.33 + t * 0.03; g2 = 0.42 - t * 0.12; b2 = 0.21 - t * 0.03; }
+        else if (h < 70)  { const t = (h - 16) / 54; r = 0.36 + t * 0.13; g2 = 0.30 + t * 0.13; b2 = 0.18 + t * 0.17; }
+        else if (h < 150) { const t = (h - 70) / 80; r = 0.49 + t * 0.10; g2 = 0.43 + t * 0.11; b2 = 0.35 + t * 0.14; }
+        else              { const t = clamp((h - 150) / 70, 0, 1); r = 0.59 + t * 0.36; g2 = 0.54 + t * 0.41; b2 = 0.49 + t * 0.46; }
+        const flekk = 0.92 + ((Math.sin(x * 1.7) * Math.cos(z * 2.3) + 1) * 0.5) * 0.16;
+        farger[i * 3] = r * flekk; farger[i * 3 + 1] = g2 * flekk; farger[i * 3 + 2] = b2 * flekk;
+    }
+    terr.setAttribute('color', new THREE.BufferAttribute(farger, 3));
+    terr.computeVertexNormals();
+    const terreng = new THREE.Mesh(terr, new THREE.MeshLambertMaterial({ vertexColors: true }));
+    terreng.receiveShadow = true;
+    scene.add(terreng);
+
+    // ---- Grusdekket på selve tomta ----
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    const g2d = c.getContext('2d');
+    g2d.fillStyle = '#6f6657'; g2d.fillRect(0, 0, 256, 256);
+    for (let i = 0; i < 2600; i++) {
+        const v = 90 + Math.random() * 90;
+        g2d.fillStyle = 'rgba(' + (v + 20) + ',' + (v + 8) + ',' + (v - 10) + ',' + (0.2 + Math.random() * 0.5) + ')';
+        const r2 = 1 + Math.random() * 3.5;
+        g2d.fillRect(Math.random() * 256, Math.random() * 256, r2, r2);
+    }
+    const grusTex = new THREE.CanvasTexture(c);
+    grusTex.wrapS = grusTex.wrapT = THREE.RepeatWrapping;
+    grusTex.repeat.set(20, 20);
+    const bakke = new THREE.Mesh(new THREE.CircleGeometry(44, 48), new THREE.MeshLambertMaterial({ map: grusTex }));
+    bakke.rotation.x = -Math.PI / 2;
+    bakke.position.y = 0.02;
+    bakke.receiveShadow = true;
+    scene.add(bakke);
+
+    // ---- Granskog i liene ----
+    const stamme = new THREE.CylinderGeometry(0.16, 0.24, 1.6, 5);
+    const krone = new THREE.ConeGeometry(1.5, 6.2, 7);
+    const matStamme = new THREE.MeshLambertMaterial({ color: 0x4b3726 });
+    const matKrone = new THREE.MeshLambertMaterial({ color: 0x2e4a2c });
+    const MAX_TRAER = 620;
+    const iStamme = new THREE.InstancedMesh(stamme, matStamme, MAX_TRAER);
+    const iKrone = new THREE.InstancedMesh(krone, matKrone, MAX_TRAER);
+    const dummy = new THREE.Object3D();
+    let antall = 0;
+    for (let forsok = 0; forsok < 5000 && antall < MAX_TRAER; forsok++) {
+        const a = Math.random() * Math.PI * 2;
+        const d = 46 + Math.random() * 210;
+        const x = Math.cos(a) * d, z = Math.sin(a) * d;
+        const h = terrengHoyde(x, z);
+        if (h < 1.0 || h > 54) continue;                 // ikke på tomta, ikke over tregrensa
+        const sk = 0.6 + Math.random() * 0.9;
+        dummy.position.set(x, h, z);
+        dummy.rotation.set(0, Math.random() * 6.28, 0);
+        dummy.scale.set(sk, sk * (0.8 + Math.random() * 0.5), sk);
+        dummy.updateMatrix();
+        iStamme.setMatrixAt(antall, dummy.matrix);
+        dummy.position.y = h + 3.4 * sk;
+        dummy.updateMatrix();
+        iKrone.setMatrixAt(antall, dummy.matrix);
+        antall++;
+    }
+    iStamme.count = antall; iKrone.count = antall;
+    iStamme.instanceMatrix.needsUpdate = true; iKrone.instanceMatrix.needsUpdate = true;
+    iKrone.castShadow = true;
+    scene.add(iStamme); scene.add(iKrone);
+
+    // ---- Huset under bygging ----
+    kloss(-4, 0, -8, 14, 0.3, 11, M.betong, false);
+    dekke(-11, 3, -13.5, -2.5, 0.3);
+    for (let i = 0; i <= 14; i++) {
+        const x = -11 + i;
+        if (Math.abs(x + 4) > 1.7) kloss(x, 0.3, -2.6, 0.14, 2.6, 0.14, M.stendar);
+        kloss(x, 0.3, -13.4, 0.14, 2.6, 0.14, M.stendar);
+    }
+    for (let j = 0; j <= 10; j++) {
+        const z = -13.4 + j * 1.08;
+        kloss(-11, 0.3, z, 0.14, 2.6, 0.14, M.stendar);
+        if (j > 3) kloss(3, 0.3, z, 0.14, 2.6, 0.14, M.stendar);
+    }
+    for (let i = 0; i <= 14; i++) kloss(-11 + i, 2.9, -8, 0.1, 0.22, 11, M.stendar, false);
+    kloss(-4, 2.9, -2.6, 14.2, 0.2, 0.2, M.stendar, false);
+    kloss(-4, 2.9, -13.4, 14.2, 0.2, 0.2, M.stendar, false);
+    for (let j = 0; j <= 10; j++) {
+        const z = -13.4 + j * 1.08;
+        if (j < 4 || j > 6) kloss(-5.5, 0.3, z, 0.16, 2.6, 1.0, M.plate);
+    }
+
+    // ---- Stillas med rampe opp ----
+    kloss(9.2, 2.4, -1, 3.0, 0.14, 7.2, M.plate, false);
+    dekke(7.6, 10.8, -4.5, 2.6, 2.54);
+    for (const z of [-4, -1, 2]) {
+        kloss(8.3, 0, z, 0.1, 2.4, 0.1, M.stal, false);
+        kloss(10.1, 0, z, 0.1, 2.4, 0.1, M.stal, false);
+        kloss(9.2, 3.1, z, 2.0, 0.08, 0.08, M.stal, false);
+    }
+    kloss(9.2, 0, 6.0, 3.0, 0.08, 7.0, M.plate, false);   // selve rampa, synlig
+
+    // ---- Brakka ----
+    kloss(14, 0, 9, 7, 0.4, 4.4, M.brakkeMork);
+    dekke(10.5, 17.5, 6.8, 11.2, 0.4);
+    kloss(12.0, 0.4, 7.0, 3.0, 2.6, 0.2, M.brakke);
+    kloss(16.2, 0.4, 7.0, 1.6, 2.6, 0.2, M.brakke);
+    kloss(11.2, 0.4, 9, 0.2, 2.6, 4.4, M.brakke);
+    kloss(16.8, 0.4, 9, 0.2, 2.6, 4.4, M.brakke);
+    kloss(14, 0.4, 11.1, 7, 2.6, 0.2, M.brakke);
+    kloss(14, 3.0, 9, 7.3, 0.2, 4.7, M.brakkeMork, false);
+    kloss(12.1, 1.4, 6.9, 1.2, 0.9, 0.06, M.presenning, false);
+
+    // ---- Container og materialer ----
+    kloss(-16, 0, 6, 6, 2.6, 2.6, M.container);
+    for (let i = 0; i < 5; i++) kloss(-2, i * 0.16, 2.5, 5, 0.15, 1.2, M.tre);
+    for (let i = 0; i < 4; i++) kloss(4.5, i * 0.2, 5, 1.2, 0.19, 2.4, M.plate);
+    kloss(-9, 0, 4, 3.4, 1.1, 2.6, M.presenning);
+    for (const [cx, cz] of [[0, 8], [2, 9], [-4, 8.5], [6.5, -2], [5, 1]]) {
+        const k = new THREE.Mesh(BOKS, M.container);
+        k.position.set(cx, 0.3, cz); k.scale.set(0.45, 0.6, 0.45);
+        scene.add(k);
+    }
+
+    // ---- Tingene oppdraget handler om ----
+    const sag = kloss(9.2, 2.54, -3.2, 1.0, 0.75, 0.7, M.gul);
+    const skive = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.4, 0.03, 20), M.stal);
+    skive.rotation.z = Math.PI / 2;
+    skive.position.set(0.3, 0.45, 0);
+    sag.add(skive);
+    interaktiv(sag, 'Kappsagen', brukSag);
+
+    const skap = kloss(16.45, 1.0, 9.6, 0.26, 1.3, 1.0, M.gronn);
+    interaktiv(skap, 'Sikringsskapet', brukSkap);
+
+    const blander = kloss(-13, 0, 0, 1.6, 1.4, 1.6, M.gul);
+    const tromme = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.38, 0.85, 16), M.gul);
+    tromme.position.set(0, 0.85, 0);
+    tromme.rotation.z = 0.5;
+    blander.add(tromme);
+    interaktiv(blander, 'Blandemaskinen', brukBlander);
+
+    const bjelke = kloss(9.2, 2.74, -0.6, 0.3, 0.4, 4.2, M.tre);
+    interaktiv(bjelke, 'Bjelken', brukBjelke);
+
+    return { sag, skap, blander, bjelke };
+}
+
+
+/** Rot og rekvisitter. En byggeplass uten rot ser ut som en tegning. */
+function byggRot() {
+    const palle = (x, z, lag) => {
+        for (let i = 0; i < lag; i++) {
+            kloss(x, i * 0.16, z, 1.2, 0.07, 0.9, i % 2 ? M.treA : M.treB);
+            kloss(x, i * 0.16 + 0.07, z, 1.2, 0.08, 0.14, M.treB, false);
+        }
+    };
+    const fat = (x, z, mat) => {
+        const m = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.88, 14), mat);
+        m.position.set(x, 0.44, z);
+        m.castShadow = true; m.receiveShadow = true;
+        scene.add(m);
+        hindre.push({ x0: x - 0.3, x1: x + 0.3, z0: z - 0.3, z1: z + 0.3, topp: 0.88, bunn: 0 });
+    };
+    const bokk = (x, z, r) => {
+        const g = new THREE.Group();
+        g.position.set(x, 0, z); g.rotation.y = r;
+        for (const sx of [-0.45, 0.45]) for (const sz of [-0.28, 0.28]) {
+            const b = new THREE.Mesh(BOKS, M.treB);
+            b.scale.set(0.07, 0.72, 0.07);
+            b.position.set(sx, 0.36, sz);
+            b.castShadow = true; g.add(b);
+        }
+        const t = new THREE.Mesh(BOKS, M.treA);
+        t.scale.set(1.3, 0.1, 0.16); t.position.y = 0.76;
+        t.castShadow = true; g.add(t);
+        scene.add(g);
+    };
+
+    palle(-6.5, 7.5, 4); palle(-5.0, 8.2, 2); palle(6.5, 6.5, 3);
+    palle(1.5, -0.5, 2); palle(-16, 10, 5);
+    fat(-7.5, 1.2, M.fat); fat(-6.8, 1.6, M.fatRust); fat(-7.2, 2.3, M.fat);
+    fat(12, 4.5, M.fatRust); fat(12.7, 4.2, M.fat);
+    bokk(-1.5, 0.5, 0.3); bokk(0.2, 1.4, -0.2); bokk(11, 2.5, 1.1);
+
+    // Armeringsjern i bunter
+    for (let i = 0; i < 9; i++) {
+        kloss(-3.4 + (i % 3) * 0.1, 0.06 + Math.floor(i / 3) * 0.1, 6.4 + (i % 3) * 0.12, 0.06, 0.08, 4.4, M.bolt, i === 0);
+    }
+    // Sementsekker
+    for (let i = 0; i < 7; i++) {
+        kloss(7.5 + (i % 2) * 0.1, i * 0.17, 8.5, 0.9, 0.16, 0.6, M.sekk, i === 0);
+    }
+    // Kabeltrommel
+    const trommel = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 0.75, 0.7, 16), M.treB);
+    trommel.rotation.z = Math.PI / 2;
+    trommel.position.set(3.5, 0.75, 9.5);
+    trommel.castShadow = true; trommel.receiveShadow = true;
+    scene.add(trommel);
+    hindre.push({ x0: 3.1, x1: 3.9, z0: 8.75, z1: 10.25, topp: 1.5, bunn: 0 });
+
+    // Utedoen
+    kloss(-19, 0, 0, 1.2, 2.3, 1.2, M.utedo);
+    kloss(-18.38, 0.3, 0, 0.06, 1.7, 0.75, M.brakke, false);
+
+    // Byggegjerde rundt halve plassen
+    for (let i = 0; i < 16; i++) {
+        const x = -30 + i * 4;
+        kloss(x, 0, -20, 0.1, 2.0, 0.1, M.bolt, false);
+        kloss(x + 2, 0.15, -20, 3.4, 1.7, 0.05, M.gjerde, false);
+    }
+    for (let i = 0; i < 10; i++) {
+        const z = -20 + i * 4;
+        kloss(30, 0, z, 0.1, 2.0, 0.1, M.bolt, false);
+        kloss(30, 0.15, z + 2, 0.05, 1.7, 3.4, M.gjerde, false);
+    }
+
+    // Tårnkran i bakgrunnen – gir plassen en silhuett
+    const kran = new THREE.Group();
+    for (let i = 0; i < 13; i++) {
+        const y = i * 1.8;
+        for (const [sx, sz] of [[-0.6, -0.6], [0.6, -0.6], [-0.6, 0.6], [0.6, 0.6]]) {
+            const b = new THREE.Mesh(BOKS, M.gul);
+            b.scale.set(0.16, 1.8, 0.16); b.position.set(sx, y + 0.9, sz);
+            kran.add(b);
+        }
+        const tv = new THREE.Mesh(BOKS, M.gul);
+        tv.scale.set(1.36, 0.12, 1.36); tv.position.y = y + 1.8;
+        kran.add(tv);
+    }
+    for (let i = 0; i < 22; i++) {
+        const b = new THREE.Mesh(BOKS, M.gul);
+        b.scale.set(1.5, 0.14, 0.14);
+        b.position.set(-8 + i * 1.5, 24.2, 0);
+        kran.add(b);
+    }
+    const motvekt = new THREE.Mesh(BOKS, M.betong);
+    motvekt.scale.set(2.2, 1.4, 1.6); motvekt.position.set(-8.5, 23.8, 0);
+    kran.add(motvekt);
+    const wire = new THREE.Mesh(BOKS, M.bolt);
+    wire.scale.set(0.05, 9, 0.05); wire.position.set(14, 19.5, 0);
+    kran.add(wire);
+    const krok = new THREE.Mesh(BOKS, M.gul);
+    krok.scale.set(0.5, 0.5, 0.5); krok.position.set(14, 14.8, 0);
+    kran.add(krok);
+    kran.position.set(-44, 0, -42);
+    kran.rotation.y = 0.5;
+    scene.add(kran);
+}
+
+
+// ==================================================================
+//  Folka på plassen
+//  Gubbene er flate utklipp som alltid vender mot deg. Det er en
+//  bevisst stil – og det er eneste måten å få kunsten inn i 3D-en.
+// ==================================================================
+const NPC_FILER = [
+    '/images/underholdning/basen/basen-snekker.webp',
+    '/images/underholdning/basen/basen-elektriker.webp',
+];
+const npcTex = NPC_FILER.map((f) => {
+    const t = new THREE.TextureLoader().load(f);
+    t.colorSpace = THREE.SRGBColorSpace;
+    return t;
+});
+
+const bobleCache = new Map();
+function bobleTex(tekst) {
+    if (bobleCache.has(tekst)) return bobleCache.get(tekst);
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 160;
+    const g = c.getContext('2d');
+    g.font = '800 46px ' + getComputedStyle(document.body).fontFamily;
+    const w = Math.min(500, g.measureText(tekst).width + 54);
+    const x0 = (512 - w) / 2;
+    g.fillStyle = 'rgba(250,246,239,.97)';
+    g.strokeStyle = 'rgba(30,22,14,.85)';
+    g.lineWidth = 5;
+    g.beginPath(); g.roundRect(x0, 10, w, 86, 22); g.fill(); g.stroke();
+    g.beginPath();
+    g.moveTo(246, 94); g.lineTo(256, 130); g.lineTo(276, 94);
+    g.closePath(); g.fill();
+    g.fillStyle = '#24190f';
+    g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(tekst, 256, 54);
+    const t = new THREE.CanvasTexture(c);
+    bobleCache.set(tekst, t);
+    return t;
+}
+
+/** Felles byggeplass-prat. Alle kan bruke disse. */
+const FELLES = [
+    'Åssen gå re a?', 'Har du en røyk til meg eller?', 'Fyllesjuk i dag ell?', 'Står til?', 'Går det unna?',
+    'Er re fredag snart?', 'Æ orker itte mer i dag.', 'Kaffe, nå.', 'Hvem har tatt kaffen min a?',
+    'Det var itte sånn på tegninga.', 'Tegninga e feil, igjen.', 'Arkitekten har aldri vært på en byggeplass.',
+    'Det der holder i massevis.', 'Ingen ser det når det e malt.', 'Vi tar det med silikon.',
+    'Litt fug, så e re fint.', 'Hvem har lånt hammeren min?', 'Æ fant den itte.', 'Den lå der i går.',
+    'Noen har rota her.', 'Det e itte mitt rot.', 'Æ rydder etter meg, æ.', 'Har du sett tommestokken min?',
+    'Den e bare to centimeter feil.', 'To centimeter, det går fint.', 'Måler du en gang, kapper du to.',
+    'Æ kappa den litt for kort.', 'Den vokser itte tilbake, nei.', 'Vi skjøter den bare.',
+    'Basen kommer klokka ti.', 'Da ser vi travle ut.', 'Se opptatt ut, han kommer.',
+    'Æ har holdt på siden sju, æ.', 'Du kom seint i dag.', 'Bussen gikk fra meg.', 'Det regna hele natta.',
+    'Det blir snø i morra.', 'Kaldt i dag, re her.', 'Det e november, hva venta du?',
+    'Æ har itte kjent tærne siden ni.', 'Varmt nok med tre lag.', 'Hvem satte kjeglene der a?',
+    'Noen kjørte ned gjerdet igjen.', 'Det var itte meg.', 'Æ så ingenting.', 'Spør elektrikeren.',
+    'Spør rørleggeren.', 'Rørleggern kommer aldri.', 'Han har sagt tirsdag i tre uker.',
+    'Elektrikern e på et annet bygg.', 'Alle e på et annet bygg.', 'Vi e for få, det e det.',
+    'De lovte to mann til.', 'Lærlingen e grei nok, han.', 'Han lærer fort.', 'Han spør i hvert fall.',
+    'Æ var sånn sjøl en gang.', 'Det var bedre før.', 'Nå e alt papirarbeid.', 'HMS, HMS, HMS.',
+    'Hvor e hjelmen min?', 'Æ har den på, se.', 'Vernebriller, ja ja.', 'Verneombudet kommer torsdag.',
+    'Da rydder vi onsdag.', 'Har du sett regninga på det der?', 'Det koster jo flesk.',
+    'Byggherren vil ha det billig.', 'Billig blir dyrt.', 'Det får bli hans problem.', 'Æ skriver avvik.',
+    'Nei, æ gidder itte.', 'Det ordner seg.', 'Det har alltid ordna seg.', 'En gang til, så sitter det.',
+    'Nesten.', 'Nesten e itte godt nok.', 'Jo, i dag e re godt nok.', 'Klokka e snart tolv.', 'Matpause?',
+    'Æ har med brødskive.', 'Brunost igjen.', 'Kona smurte feil.', 'Kaffen e kald.', 'Den var kald i går og.',
+    'Termosen lekker.', 'Skal du på hytta i helga?', 'Æ skal pusse opp hjemme.', 'Skomakerens barn, ikke sant.',
+    'Æ har hatt det badet i to år.', 'Kona spør hver dag.', 'Til sommeren, sier æ.', 'Har du sett kampen?',
+    'Vi tapte igjen.', 'Det blir aldri noe med dem.', 'Neste sesong.', 'Det sa du i fjor og.', 'Hæ?', 'Hva sa du?',
+    'Æ hører deg itte over sagen.', 'Snakk høyere a!', 'Nei, nå gidder æ itte mer.', 'Fem minutter til.',
+    'Æ tar en røyk.', 'Du tok nettopp en.', 'Og?', 'Hvem har satt på radioen?', 'Skru av den dritten.',
+    'Æ liker den låta.', 'Du har dårlig smak.', 'Gi meg den der.', 'Nei, den andre.', 'Den store.', 'Takk.',
+    'Lang dag i dag.', 'Det går mot slutten.', 'Enda tre timer.', 'Æ teller.', 'Ikke se på klokka.',
+    'Det e snart helg, gutta.'
+];
+
+/** Det hver type sier i tillegg – til sammen godt over hundre linjer hver. */
+const REPLIKKER = {
+    sover: [
+    'Zzz…', 'Æ sover itte, æ tenker.', 'Fem minutter til a.', 'Vekk meg når basen kommer.', 'Shhh.',
+    'Æ hviler øya bare.', 'Æ var oppe i natt.', 'Ungen skreik.', 'Æ har sovet tre timer.', 'Dette e pause.',
+    'Æ har krav på pause.', 'Står jo oppreist, æ jobber.', 'Mhm, ja, sant.', 'Nei vel.', 'Æ hørte alt.',
+    'Sa du noe?', 'Har det ringt?', 'Er re mat?', 'Vekk meg til mat.', 'Bare til tolv.', 'Æ drømte om fredag.',
+    'Ikke si det til basen.', 'Du så ingenting.', 'Æ lener meg bare.', 'Ryggen, vettu.', 'Æ har vondt i ryggen.',
+    'Legen sa hvile.', 'Æ følger legens råd.', 'En time til lunsj.', 'Det går fort når man sover.',
+    'Æ jobber bedre etterpå.', 'Prøv sjøl.', 'God idé, re her.', 'Sett deg ned, du og.'
+    ],
+    hull: [
+    'Åssen gå re a?', 'Nei, det der e itte rett.', 'Hvem har grævi her a?', 'Det der blir dyrt.',
+    'Ikke mitt bord, altså.', 'Æ sier ingenting.', 'Noen får ta en titt.', 'Det e dypt, re der.',
+    'Hvor dypt tror du?', 'Dypt nok.', 'Skulle det vært der?', 'Står re på tegninga?', 'Ingen vet.',
+    'Vi lar det ligge.', 'Noen ringer noen.', 'Det e vann der nede.', 'Det e alltid vann.', 'Da e re rør.',
+    'Eller kabel.', 'Håper itte kabel.', 'Da smeller det.', 'Æ går itte nedi.', 'Du går nedi.', 'Nei.',
+    'Vi venter på basen.', 'Han vet.', 'Han vet ingenting, han.', 'Hm.', 'Jaja.', 'Tja.', 'Nettopp.', 'Akkurat.',
+    'Sånn e re.', 'Vi har sett verre.', 'Har vi det?'
+    ],
+    baerer: [
+    'Har du en røyk til meg eller?', 'Hvor faen skal denna a?', 'Pass dere, gutta!', 'Æ bare går, æ.',
+    'Tung i dag, re her.', 'Unna vei!', 'Æ ser ingenting.', 'Hvem sa æ skulle ta den?',
+    'Den var itte så tung i sta.', 'Snu deg itte nå.', 'Æ har bært den to ganger alt.',
+    'Den skal tilbake etterpå.', 'Alltid meg.', 'Hvorfor meg?', 'Fordi æ e sterkest.', 'Det sa itte æ.',
+    'Hvor la dere trillebåra?', 'Den e punktert.', 'Alt e punktert her.', 'Ryggen min, altså.',
+    'Løft med beina, ja ja.', 'Æ løfter med ryggen, æ.', 'Det går fint.', 'Au.', 'Nei, det går fint.',
+    'To til, så e æ ferdig.', 'Fem til.', 'Æ telte feil.', 'Flytt deg.', 'Kommer gjennom!', 'Pass hodet.',
+    'For seint.', 'Sa æ det itte?', 'Noen må åpne døra.'
+    ],
+    faller: [
+    'AU, for svarte!', 'Går fint!', 'Hvem satte den der a?', 'Det var itte meg!', 'Så ingen det der?',
+    'Æ gjorde det med vilje.', 'Æ landa på beina.', 'Nei, det gjorde æ itte.', 'Hvor e hjelmen?', 'Der ja.',
+    'Det stillaset e itte godkjent.', 'Æ sa det i går.', 'Noen må feste den planken.', 'Æ skulle til å feste den.',
+    'Æ e helt fin.', 'Bare litt støv.', 'Æ har falt verre.', 'I fjor falt æ to etasjer.', 'Nei, halvannen.',
+    'Æ skriver avvik på meg sjøl.', 'Ikke si det til verneombudet.', 'Du så ingenting.', 'Æ går opp igjen.',
+    'Tredje gang i dag.', 'Fjerde.', 'Hvem teller?', 'Au, ryggen.', 'Au, alt.', 'Gi meg en hånd a.',
+    'Nei, ikke le.', 'Du ler.', 'Æ så det.', 'Det var glatt.', 'Alt e glatt her.'
+    ],
+    maler: [
+    'Fyllesjuk i dag ell?', 'En strøk til, så e re fint.', 'Dette blir rått.', 'Æ maler bare over det.',
+    'Ingen ser baksida uansett.', 'To strøk e nok.', 'Tre, sier kona.', 'Hun maler itte.', 'Fargen e feil.',
+    'Den så lysere ut i butikken.', 'Det tørker mørkere.', 'Eller lysere.', 'Æ husker itte.',
+    'Noen har tatt penselen min.', 'Den lå her.', 'Æ bruker rullen.', 'Rullen e tørr.', 'Alt e tørt her.',
+    'Hvem har latt lokket stå av?', 'Det var itte æ.', 'Æ har malt siden sju.', 'Samme vegg?', 'Samme flekk.',
+    'Den blir aldri fin.', 'Jo, nå.', 'Nei.', 'Æ gir meg itte.', 'Maling løser alt.', 'Det gjorde det i fjor.',
+    'Det sprakk opp igjen.', 'Da maler vi igjen.', 'Du har maling i håret.', 'Det har du og.',
+    'Vi ser like dumme ut.'
+    ],
+    naer: [
+    'Åssen gå re a?', 'Har du en røyk?', 'Fyllesjuk i dag ell?', 'Står til?', 'Du ser trøtt ut, du.',
+    'Er\'n her alt?', 'Går det unna?', 'Ny her?', 'Æ har itte sett deg før.', 'Hvem er du a?',
+    'Du e vel fra kontoret.', 'Du ser sånn ut.', 'Ta en kaffe, du.', 'Kaffen e kald.', 'Advarte deg.',
+    'Har du sett basen?', 'Si itte at du så meg.', 'Æ var på do.', 'Lang tur.', 'Kan du holde denna litt?',
+    'Nei, glem det.', 'Du ser ut som du kan noe.', 'Kan du noe?', 'Trodde itte det.', 'Du går feil vei.',
+    'Eller gjør du?', 'Æ vet itte hvor noe er, æ.', 'Spør noen andre.', 'Det e ingen andre.', 'Lykke til.',
+    'Hils basen.', 'Nei, ikke hils.', 'Pass deg for stillaset.', 'Og for han som faller ned.', 'Og for hullet.'
+    ],
+};
+
+function linjerFor(type, tilDeg) {
+    return (tilDeg ? REPLIKKER.naer : (REPLIKKER[type] || [])).concat(FELLES);
+}
+
+const NPCer = [];
+function lagNPC(type, x, z, retning) {
+    const h = 2.0;
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: npcTex[(NPCer.length) % npcTex.length], transparent: true, depthWrite: false,
+    }));
+    sp.scale.set(h * 0.95, h, 1);
+    sp.position.set(x, h / 2, z);
+    scene.add(sp);
+
+    const boble = new THREE.Sprite(new THREE.SpriteMaterial({ transparent: true, depthWrite: false, depthTest: false }));
+    boble.scale.set(2.6, 0.81, 1);
+    boble.visible = false;
+    scene.add(boble);
+
+    NPCer.push({ type, sp, boble, h, x0: x, z0: z, t: rnd(0, 5), fase: 0, bobleT: 0, retning: retning || 1, vy: 0 });
+}
+
+function byggFolk() {
+    lagNPC('sover', 11.6, 6.2);                 // lener seg på brakkeveggen
+    lagNPC('hull', -2.2, 9.4);                  // de to som ser i hullet
+    lagNPC('hull', -0.8, 9.9);
+    lagNPC('baerer', -1, 5, 1);                 // går fram og tilbake med planke, i åpent lende
+    lagNPC('faller', 9.2, 1.4);                 // han som ikke klarer stillaset
+    lagNPC('maler', 3.2, -4.2);
+
+    // Hullet de står og ser i
+    const hull = new THREE.Mesh(new THREE.CircleGeometry(1.0, 18), new THREE.MeshBasicMaterial({ color: 0x1d1611 }));
+    hull.rotation.x = -Math.PI / 2;
+    hull.position.set(-1.5, 0.03, 10.2);
+    scene.add(hull);
+}
+
+function siNoe(n, tilDeg) {
+    // Står du nær, snakker han til deg. Ellers mumler han for seg selv.
+    const linjer = linjerFor(n.type, tilDeg && Math.random() < 0.6);
+    let t = pick(linjer);
+    for (let i = 0; i < 6 && t === n.sist; i++) t = pick(linjer);
+    n.sist = t;
+    n.boble.material.map = bobleTex(t);
+    n.boble.material.needsUpdate = true;
+    n.boble.visible = true;
+    n.bobleT = rnd(2.2, 3.4);
+}
+
+function oppdaterFolk(dt) {
+    for (const n of NPCer) {
+        n.t += dt;
+
+        if (n.bobleT > 0) {
+            n.bobleT -= dt;
+            n.boble.position.set(n.sp.position.x, n.sp.position.y + n.h * 0.72, n.sp.position.z);
+            if (n.bobleT <= 0) n.boble.visible = false;
+        } else {
+            const naer = camera.position.distanceTo(n.sp.position) < 9;
+            if (Math.random() < dt * (naer ? 0.55 : 0.11)) siNoe(n, naer);
+        }
+
+        if (n.type === 'sover') {
+            n.sp.position.y = n.h / 2 + Math.sin(n.t * 1.1) * 0.035;
+        } else if (n.type === 'hull') {
+            n.sp.position.y = n.h / 2 + Math.abs(Math.sin(n.t * 0.7)) * 0.02;
+        } else if (n.type === 'maler') {
+            n.sp.position.x = n.x0 + Math.sin(n.t * 2.6) * 0.18;
+        } else if (n.type === 'baerer') {
+            // Fram og tilbake i en sløyfe, uten mål og mening
+            n.sp.position.z += n.retning * 1.5 * dt;
+            n.sp.position.y = n.h / 2 + Math.abs(Math.sin(n.t * 7)) * 0.05;
+            if (n.sp.position.z > n.z0 + 4) n.retning = -1;
+            if (n.sp.position.z < n.z0 - 4) n.retning = 1;
+        } else if (n.type === 'faller') {
+            // Går ut på stillaset, mister balansen, lander, klatrer opp igjen
+            if (n.fase === 0) {                       // klatrer
+                n.sp.position.y += dt * 1.5;
+                if (n.sp.position.y > 2.54 + n.h / 2) { n.sp.position.y = 2.54 + n.h / 2; n.fase = 1; n.t = 0; }
+            } else if (n.fase === 1) {                // går utover
+                n.sp.position.z -= dt * 1.1;
+                if (n.sp.position.z < -2.6) { n.fase = 2; n.vy = 0.6; }
+            } else if (n.fase === 2) {                // faller
+                n.vy += G * dt * 0.5;
+                n.sp.position.y += n.vy * dt;
+                n.sp.material.rotation += dt * 5;
+                if (n.sp.position.y <= n.h / 2) {
+                    n.sp.position.y = n.h / 2;
+                    n.sp.material.rotation = 0;
+                    n.fase = 3; n.t = 0;
+                    siNoe(n);
+                    SFX.land();
+                }
+            } else {                                   // ligger litt, går tilbake
+                if (n.t > 2.0) {
+                    n.sp.position.set(n.x0, n.h / 2, n.z0);
+                    n.fase = 0;
+                }
+            }
+        }
+    }
+}
+
+const TING = byggPlassen();
+byggRot();
+byggFolk();
+
+// Markøren som viser hvor du skal
+const markor = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.45, 0.45, 8, 12, 1, true),
+    new THREE.MeshBasicMaterial({ color: 0xffc14d, transparent: true, opacity: 0.6,
+        side: THREE.DoubleSide, depthWrite: false, depthTest: false, fog: false })
+);
+markor.renderOrder = 999;
+scene.add(markor);
+
+// Elgen
+const elg = new THREE.Group();
+const kropp = new THREE.Mesh(BOKS, M.elg);
+kropp.scale.set(2.4, 1.3, 0.9); kropp.position.y = 1.7;
+elg.add(kropp);
+for (const sx of [-0.9, 0.9]) for (const sz of [-0.3, 0.3]) {
+    const b = new THREE.Mesh(BOKS, M.elg);
+    b.scale.set(0.16, 1.1, 0.16); b.position.set(sx, 0.55, sz);
+    elg.add(b);
+}
+const elghode = new THREE.Mesh(BOKS, M.elg);
+elghode.scale.set(0.9, 0.7, 0.6); elghode.position.set(1.5, 2.1, 0);
+elg.add(elghode);
+elg.visible = false;
+scene.add(elg);
+let elgT = -1;
+
+// ==================================================================
+//  Oppdraget
+// ==================================================================
+let blanderGaar = true, strom = false, sagKuttet = false;
+
+const STEG = [
+    { tekst: 'Finn kappsagen på stillaset', mal: () => TING.sag,
+      hint: 'Sagen står oppe på stillaset øst på tomta. Følg den gule ringen, gå opp rampa, og trykk BRUK når du står inntil sagen.' },
+    { tekst: 'Finn ut hvorfor den ikke går', mal: () => TING.sag,
+      hint: 'Bruk sagen en gang til, så ser du etter hva som er galt med den.' },
+    { tekst: 'Skru av det som trekker strøm', mal: () => TING.blander,
+      hint: 'Blandemaskinen durer og går vest på tomta. Den spiser all strømmen. Gå bort og skru den av.' },
+    { tekst: 'Slå på hovedbryteren i brakka', mal: () => TING.skap,
+      hint: 'Sikringsskapet er det grønne på veggen inne i brakka. Brakka ligger borte til høyre. Gå inn og slå på bryteren.' },
+    { tekst: 'Kapp bjelken', mal: () => TING.bjelke,
+      hint: 'Nå har du strøm. Gå tilbake opp på stillaset og bruk bjelken som ligger der.' },
+];
+let hintT = 0;
+let steg = 0;
+
+function settSteg(i) {
+    steg = i;
+    if (i >= STEG.length) { ferdig(); return; }
+    $('oppdrag').textContent = STEG[i].tekst;
+    $('stegtall').textContent = (i + 1) + '/' + STEG.length;
+    $('korttekst').textContent = STEG[i].tekst;
+    $('kortsteg').textContent = (i + 1) + '/' + STEG.length;
+    $('oppdragskort').classList.add('on');
+    hintT = 0;
+}
+
+let meldingT = null;
+function melding(tekst, ms) {
+    const el = $('melding');
+    el.textContent = tekst;
+    el.classList.add('on');
+    clearTimeout(meldingT);
+    meldingT = setTimeout(() => el.classList.remove('on'), ms || 2800);
+}
+
+function visHint() {
+    if (spill !== 'kjorer' || steg >= STEG.length) return;
+    hintT = 0;
+    melding(STEG[steg].hint, 6500);
+    SFX.klikk();
+}
+$('hintBtn').addEventListener('click', (e) => { e.stopPropagation(); visHint(); });
+
+function brukSag() {
+    if (steg === 0) { SFX.klikk(); melding('Du drar i startsnora. Ingenting. Ikke en lyd.'); settSteg(1); return; }
+    if (steg === 1) { SFX.nei(); melding('Kabelen er hel. Det er ikke sagen – det er strømmen.'); settSteg(2); return; }
+    if (steg < 4) { SFX.nei(); melding('Fortsatt dau. Du må få strøm hit først.'); return; }
+    SFX.klikk(); melding('Sagen går. Nå er det bjelken som skal kappes.');
+}
+
+function brukBlander() {
+    if (!blanderGaar) { SFX.klikk(); melding('Den står stille nå.'); return; }
+    if (steg < 2) { SFX.klikk(); melding('Blanderen durer og går. La den stå – foreløpig.'); return; }
+    blanderGaar = false;
+    SFX.motor();
+    melding('Blanderen stopper. Endelig stille på plassen.');
+    settSteg(3);
+}
+
+function brukSkap() {
+    if (steg < 3) { SFX.klikk(); melding('Hovedbryteren står av. Slår du den på nå, ryker det bare igjen.'); return; }
+    if (steg === 3) {
+        if (blanderGaar) {
+            SFX.smell(); rist = 1.4;
+            melding('BANG. Jordfeilbryteren slår ut med én gang. Noe trekker for mye.');
+            return;
+        }
+        strom = true;
+        SFX.bryter(); SFX.ja();
+        melding('Strømmen er på. Du hører sagen våkne borte på stillaset.');
+        settSteg(4);
+        setTimeout(() => { if (spill === 'kjorer') { SFX.elg(); elgT = 0; elg.visible = true; } }, 2800);
+        return;
+    }
+    SFX.klikk(); melding('Alt står på grønt.');
+}
+
+function brukBjelke() {
+    if (!strom) { SFX.nei(); melding('Du får ikke kappet noe uten strøm.'); return; }
+    if (sagKuttet) return;
+    sagKuttet = true;
+    SFX.sag();
+    melding('Du legger bjelken i sagen og kapper. Rett lengde, første gang.', 1600);
+    setTimeout(() => { if (spill === 'kjorer') settSteg(5); }, 1500);
+}
+
+function ferdig() {
+    spill = 'slutt';
+    SFX.ferdig();
+    $('hud').classList.remove('on');
+    $('sikte').classList.remove('on');
+    $('spak').classList.remove('on');
+    $('knapper').classList.remove('on');
+    $('brukhint').classList.remove('on');
+    $('melding').classList.remove('on');
+    $('musprompt').classList.remove('on');
+    $('vei').classList.remove('on');
+    $('oppdragskort').classList.remove('on');
+    if (document.exitPointerLock) document.exitPointerLock();
+
+    $('sluttTid').textContent = mmss(tid);
+    $('rank').textContent = tid < 75 ? 'Rutinert' : tid < 130 ? 'Godkjent' : tid < 200 ? 'Lærling' : 'Du gikk deg bort';
+    $('quote').textContent = '«' + pick([
+        'Bjelken ble riktig. Det er mer enn man kan si om forrige mann.',
+        'To minutter på å finne en hovedbryter. Sånn er bransjen.',
+        'Blanderen sto på hele natta. Noen får en prat i morgen.',
+    ]) + '»';
+    $('overOverlay').classList.add('show');
+    try {
+        const b = parseFloat(localStorage.getItem('byggeplassen.best') || '0');
+        const ny = (!b || tid < b) ? tid : b;
+        localStorage.setItem('byggeplassen.best', String(ny));
+        $('rekord').textContent = mmss(ny);
+    } catch (e) { /* ignorer */ }
+}
+
+// ==================================================================
+//  Styring
+// ==================================================================
+let yaw = 0, pitch = -0.04;
+const stikk = { x: 0, y: 0 };
+let spakId = null, seId = null, seX = 0, seY = 0;
+const spakEl = $('spak'), knottEl = $('knott');
+let spakMidt = { x: 0, y: 0 }, spakR = 50;
+let laastMus = false;
+/** Berøringsskjerm eller ikke avgjør hele styringen. */
+const berøring = (matchMedia && matchMedia('(pointer: coarse)').matches) || navigator.maxTouchPoints > 0;
+if (!berøring) { spakEl.style.display = 'none'; $('knapper').style.display = 'none'; }
+
+function visMusprompt() {
+    const vis = !berøring && spill === 'kjorer' && !laastMus;
+    $('musprompt').classList.toggle('on', vis);
+}
+
+function laasMus() {
+    const c = $('c');
+    if (!c.requestPointerLock) return;
+    try {
+        const r = c.requestPointerLock({ unadjustedMovement: true });
+        if (r && r.catch) r.catch(() => { try { c.requestPointerLock(); } catch (e) { /* ignorer */ } });
+    } catch (e) {
+        try { c.requestPointerLock(); } catch (e2) { /* ignorer */ }
+    }
+}
+$('musprompt').addEventListener('pointerdown', (e) => { e.preventDefault(); ensureAudio(); laasMus(); });
+
+function oppdaterSpakMidt() {
+    const r = spakEl.getBoundingClientRect();
+    spakMidt = { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    spakR = r.width * 0.4 || 50;      // skjult spak gir bredde 0
+}
+function settKnott(dx, dy) { knottEl.style.transform = 'translate(' + dx + 'px,' + dy + 'px)'; }
+function flyttSpak(cx, cy) {
+    let dx = cx - spakMidt.x, dy = cy - spakMidt.y;
+    const l = Math.hypot(dx, dy) || 1;
+    if (l > spakR) { dx = dx / l * spakR; dy = dy / l * spakR; }
+    settKnott(dx, dy);
+    stikk.x = dx / spakR; stikk.y = dy / spakR;
+}
+
+addEventListener('pointerdown', (e) => {
+    if (spill !== 'kjorer') return;
+    if (spakEl.contains(e.target)) {
+        if (spakId !== null) return;
+        spakId = e.pointerId; oppdaterSpakMidt(); flyttSpak(e.clientX, e.clientY);
+        return;
+    }
+    if ($('knapper').contains(e.target) || $('muteBtn').contains(e.target)) return;
+    if (e.target !== $('c')) return;
+    if (e.pointerType === 'mouse' && !laastMus) { laasMus(); return; }
+    if (seId === null) { seId = e.pointerId; seX = e.clientX; seY = e.clientY; }
+});
+addEventListener('pointermove', (e) => {
+    if (e.pointerId === spakId) { flyttSpak(e.clientX, e.clientY); return; }
+    if (laastMus && e.pointerType === 'mouse') {
+        yaw -= (e.movementX || 0) * 0.0032;
+        pitch = clamp(pitch - (e.movementY || 0) * 0.0032, -1.2, 1.1);
+        return;
+    }
+    if (e.pointerId === seId) {
+        yaw -= (e.clientX - seX) * 0.0045;
+        pitch = clamp(pitch - (e.clientY - seY) * 0.0045, -1.2, 1.1);
+        seX = e.clientX; seY = e.clientY;
+    }
+});
+function slippPeker(e) {
+    if (e.pointerId === spakId) { spakId = null; stikk.x = 0; stikk.y = 0; settKnott(0, 0); }
+    else if (e.pointerId === seId) seId = null;
+}
+addEventListener('pointerup', slippPeker);
+addEventListener('pointercancel', slippPeker);
+document.addEventListener('pointerlockchange', () => {
+    laastMus = document.pointerLockElement === $('c');
+    visMusprompt();
+});
+document.addEventListener('pointerlockerror', () => { laastMus = false; visMusprompt(); });
+
+const taster = {};
+addEventListener('keydown', (e) => {
+    taster[e.code] = true;
+    if (e.code === 'Space') { e.preventDefault(); if (spill === 'kjorer') hopp(); else start(); }
+    if (e.code === 'KeyE') bruk();
+    if (e.key === 'h' || e.key === 'H') visHint();
+    if (e.key === 'm' || e.key === 'M') $('muteBtn').click();
+});
+addEventListener('keyup', (e) => { taster[e.code] = false; });
+$('hoppBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); hopp(); });
+$('brukBtn').addEventListener('pointerdown', (e) => { e.preventDefault(); bruk(); });
+
+// ==================================================================
+//  Spilleren
+// ==================================================================
+const meg = new THREE.Vector3(0, 0, 6);
+const fartVektor = new THREE.Vector3();
+let vy = 0, paaBakken = true, bob = 0, stegT = 0, rist = 0, luftTid = 0;
+let tid = 0, spill = 'start';
+
+function hopp() {
+    // Litt nåde etter at du forlot kanten – ellers føles hoppet urettferdig.
+    if (spill !== 'kjorer' || (!paaBakken && luftTid > 0.14)) return;
+    vy = SPRANG; paaBakken = false; luftTid = 1; SFX.hopp();
+}
+
+function flyttMeg(dt) {
+    let fx = 0, fz = 0;
+    if (taster.KeyW || taster.ArrowUp) fz -= 1;
+    if (taster.KeyS || taster.ArrowDown) fz += 1;
+    if (taster.KeyA || taster.ArrowLeft) fx -= 1;
+    if (taster.KeyD || taster.ArrowRight) fx += 1;
+    fx += stikk.x; fz += stikk.y;
+
+    const l = Math.hypot(fx, fz);
+    let maalX = 0, maalZ = 0, maalFart = 0;
+    if (l > 0.1) {
+        const n = Math.min(1, l);
+        fx /= l; fz /= l;
+        const sin = Math.sin(yaw), cos = Math.cos(yaw);
+        const spurt = n > 0.86 || taster.ShiftLeft || taster.ShiftRight;
+        maalFart = (spurt ? SPURT : FART) * n;
+        // framover = (-sin, -cos), høyre = (cos, -sin)
+        maalX = (fx * cos + fz * sin) * maalFart;
+        maalZ = (fz * cos - fx * sin) * maalFart;
+    }
+
+    // Kom opp i fart og stopp mykt – det er her flyten sitter.
+    const a = (paaBakken ? AKSEL : AKSEL * 0.3) * dt;
+    fartVektor.x += clamp(maalX - fartVektor.x, -a, a);
+    fartVektor.z += clamp(maalZ - fartVektor.z, -a, a);
+    if (l <= 0.1 && paaBakken) {
+        const f = Math.max(0, 1 - FRIKSJON * dt);
+        fartVektor.x *= f; fartVektor.z *= f;
+    }
+
+    if (!skyv(fartVektor.x * dt, 0)) fartVektor.x = 0;
+    if (!skyv(0, fartVektor.z * dt)) fartVektor.z = 0;
+
+    const naaFart = Math.hypot(fartVektor.x, fartVektor.z);
+    if (paaBakken && naaFart > 0.4) {
+        bob += dt * (6 + naaFart * 1.5);
+        stegT += dt * naaFart;
+        if (stegT > 2.4) { stegT = 0; SFX.steg(); }
+    } else bob += dt * 0.6;
+
+    // Synsfeltet åpner seg litt når du spurter. Billig triks, stor effekt.
+    const basis = innerHeight > innerWidth ? 78 : 66;
+    fovMal = basis + clamp((naaFart - FART) / (SPURT - FART), 0, 1) * 9;
+
+    vy += G * dt;
+    meg.y += vy * dt;
+    luftTid += dt;
+    const h = gulvHoyde(meg.x, meg.z);
+    if (meg.y <= h) {
+        if (!paaBakken && vy < -8) SFX.land();
+        meg.y = h; vy = 0; paaBakken = true; luftTid = 0;
+    } else paaBakken = false;
+}
+
+const STEGHOYDE = 0.62;   // så høyt klarer du å gå opp uten å hoppe
+
+function skyv(dx, dz) {
+    const fx = meg.x, fz = meg.z;
+    meg.x += dx; meg.z += dz;
+
+    // Et dekke du ikke rekker opp på er en vegg, ikke en heis.
+    if (gulvHoyde(meg.x, meg.z) - meg.y > STEGHOYDE) {
+        meg.x = fx; meg.z = fz;
+        return false;
+    }
+
+    const hode = meg.y + OYE;
+    for (const b of hindre) {
+        if (b.topp <= meg.y + 0.4 || b.bunn >= hode) continue;
+        const nx = clamp(meg.x, b.x0, b.x1), nz = clamp(meg.z, b.z0, b.z1);
+        const ddx = meg.x - nx, ddz = meg.z - nz;
+        if (ddx * ddx + ddz * ddz >= RADIUS * RADIUS) continue;
+        // Står det noe i veien, stopper du. Å snappe til kanten av kassa
+        // flyttet deg langs feil akse og kastet deg tvers over plassen.
+        meg.x = fx; meg.z = fz;
+        return false;
+    }
+    meg.x = clamp(meg.x, -98, 98);
+    meg.z = clamp(meg.z, -98, 98);
+    return true;
+}
+
+// ==================================================================
+//  Bruk
+// ==================================================================
+const framover = new THREE.Vector3();
+const til = new THREE.Vector3();
+const verdenspos = new THREE.Vector3();
+let iSikte = null;
+
+/**
+ * Hva du «ser mot». En pikselpresis stråle er feil på mobil – det holder at
+ * tingen er nær nok og innenfor en kjegle foran deg. Nærmest vinkel vinner.
+ */
+function finnISikte() {
+    camera.getWorldDirection(framover);
+    let best = null, bestVinkel = 0.72;      // ca. 41 grader
+    for (const o of INTER) {
+        o.getWorldPosition(verdenspos);
+        til.copy(verdenspos).sub(camera.position);
+        const d = til.length();
+        if (d > REKKE + 1.2) continue;
+        til.divideScalar(d || 1);
+        const vinkel = Math.acos(clamp(til.dot(framover), -1, 1));
+        if (vinkel < bestVinkel) { bestVinkel = vinkel; best = o; }
+    }
+    return best;
+}
+
+function bruk() {
+    if (spill !== 'kjorer') return;
+    ensureAudio();
+    if (!iSikte) { SFX.klikk(); return; }
+    iSikte.userData.inter.handling();
+}
+
+/**
+ * Setter den gule ringen der målet er på skjermen – eller klistrer den mot
+ * kanten med avstand når målet er utenfor synsfeltet eller bak deg.
+ */
+const malPos = new THREE.Vector3();
+function veiviser(mal) {
+    mal.getWorldPosition(malPos);
+    malPos.y += 1.4;
+    const avstand = camera.position.distanceTo(malPos);
+    const ndc = malPos.clone().project(camera);
+    const bak = ndc.z > 1;
+
+    let x = (ndc.x * 0.5 + 0.5) * innerWidth;
+    let y = (-ndc.y * 0.5 + 0.5) * innerHeight;
+    if (bak) { x = innerWidth - x; y = innerHeight + Math.abs(y - innerHeight); }
+
+    const m = 46;
+    const utenfor = bak || x < m || x > innerWidth - m || y < m + 90 || y > innerHeight - m - 90;
+    x = clamp(x, m, innerWidth - m);
+    y = clamp(y, m + 90, innerHeight - m - 90);
+
+    const el = $('vei');
+    el.classList.add('on');
+    el.classList.toggle('utenfor', utenfor);
+    el.style.transform = 'translate(' + Math.round(x) + 'px,' + Math.round(y) + 'px) translate(-50%,-50%)';
+    $('veimeter').textContent = Math.round(avstand) + ' m';
+}
+
+// ==================================================================
+//  Løkke
+// ==================================================================
+let sist = performance.now(), tell = 0;
+
+function ramme(na) {
+    requestAnimationFrame(ramme);
+    const dt = Math.min(0.05, (na - sist) / 1000);
+    sist = na;
+
+    if (spill === 'kjorer') {
+        flyttMeg(dt);
+        tid += dt;
+        $('tid').textContent = mmss(tid);
+
+        if ((tell = (tell + 1) % 4) === 0) {
+            iSikte = finnISikte();
+            $('sikte').classList.toggle('naer', !!iSikte);
+            $('brukhint').classList.toggle('on', !!iSikte);
+            $('brukBtn').classList.toggle('klar', !!iSikte);
+            if (iSikte) $('brukhint').textContent = iSikte.userData.inter.navn;
+        }
+
+        const mal = steg < STEG.length ? STEG[steg].mal() : null;
+        markor.visible = !!mal;
+        if (mal) {
+            markor.position.set(mal.position.x, mal.position.y + 4.0, mal.position.z);
+            markor.rotation.y += dt * 0.7;
+            markor.material.opacity = 0.5 + Math.sin(na / 320) * 0.18;
+            veiviser(mal);
+        } else $('vei').classList.remove('on');
+
+        // Står du fast en stund, kommer hintet av seg selv.
+        hintT += dt;
+        if (hintT > 26) visHint();
+
+        if (blanderGaar && Math.random() < dt * 1.1) SFX.motor();
+        oppdaterFolk(dt);
+    }
+
+    if (elgT >= 0) {
+        elgT += dt;
+        elg.position.set(-28 + elgT * 3.4, 0, 4 + Math.sin(elgT) * 0.6);
+        if (elgT > 18) { elgT = -1; elg.visible = false; }
+    }
+
+    fovNaa += (fovMal - fovNaa) * Math.min(1, dt * 7);
+    if (Math.abs(camera.fov - fovNaa) > 0.05) { camera.fov = fovNaa; camera.updateProjectionMatrix(); }
+    const fartNaa = Math.hypot(fartVektor.x, fartVektor.z);
+    camera.position.set(meg.x, meg.y + OYE + Math.sin(bob) * 0.03 * Math.min(1, fartNaa / 4), meg.z);
+    camera.rotation.order = 'YXZ';
+    camera.rotation.set(pitch, yaw, 0);
+    if (rist > 0) {
+        rist = Math.max(0, rist - dt * 2.4);
+        camera.rotation.y += rnd(-1, 1) * rist * 0.03;
+        camera.rotation.x += rnd(-1, 1) * rist * 0.03;
+    }
+
+    renderer.render(scene, camera);
+}
+requestAnimationFrame(ramme);
+
+// ==================================================================
+//  Runden
+// ==================================================================
+function start() {
+    ensureAudio();
+    const el = document.documentElement;
+    if (el.requestFullscreen) el.requestFullscreen().catch(() => { /* iOS tillater det ikke */ });
+    meg.set(0, 0, 6); vy = 0; yaw = -0.79; pitch = -0.04; tid = 0;   // vendt mot stillaset
+    hintT = 0;
+    fartVektor.set(0, 0, 0); luftTid = 0;
+    blanderGaar = true; strom = false; sagKuttet = false;
+    elgT = -1; elg.visible = false;
+    stikk.x = 0; stikk.y = 0; settKnott(0, 0);
+    spill = 'kjorer';
+    settSteg(0);
+    $('startOverlay').classList.remove('show');
+    $('overOverlay').classList.remove('show');
+    $('hud').classList.add('on');
+    $('sikte').classList.add('on');
+    $('spak').classList.add('on');
+    $('knapper').classList.add('on');
+    oppdaterSpakMidt();
+    visMusprompt();
+    melding('Basen: «Kapp den bjelken på stillaset, så er du ferdig for i dag.»', 3800);
+}
+
+try {
+    const b = parseFloat(localStorage.getItem('byggeplassen.best') || '0');
+    if (b) $('rekord').textContent = mmss(b);
+} catch (e) { /* ignorer */ }
+$('startBtn').addEventListener('click', start);
+$('retryBtn').addEventListener('click', start);
+addEventListener('resize', oppdaterSpakMidt, { passive: true });
+</script>
+</body>
+</html>

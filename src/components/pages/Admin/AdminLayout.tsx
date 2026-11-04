@@ -10,6 +10,7 @@ const NAV: Array<{ to: string; label: string; icon: string; end?: boolean }> = [
   { to: '/admin/bestillinger', label: 'Bestillinger', icon: 'faBoxOpen' },
   { to: '/admin/foresporsler', label: 'Forespørsler', icon: 'faHammer' },
   { to: '/admin/graveringer', label: 'Graveringer', icon: 'faPenNib' },
+  { to: '/admin/henvendelser', label: 'Henvendelser', icon: 'faEnvelope' },
   { to: '/admin/prosjektideer', label: 'Prosjektidéer', icon: 'faLightbulb' },
   { to: '/admin/avstemninger', label: 'Avstemninger', icon: 'faChartColumn' },
 ]

@@ -165,6 +165,8 @@ export async function bestillByggeplan(
     sammendrag?: string
     arealM2?: number | null
     estimatKr?: number
+    /** Fakturaopplysninger – påkrevd, se api/plan/bestill.ts. */
+    kunde?: { fulltNavn: string; epost: string; mobil: string; adresse: string; postnr: string; poststed: string }
   },
 ): Promise<BestillResultat> {
   try {

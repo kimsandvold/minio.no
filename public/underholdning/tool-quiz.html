@@ -1909,7 +1909,12 @@
         return 'Jeg fikk ' + state.score + '/' + TOTAL + ' på Minio Verktøy Quiz! 🔧 Klarer du å slå meg? Prøv selv på minio.no/underholdning/tool-quiz.html';
     }
 
-    function copyText(text, okMessage) {
+    // onOk kjører bare når teksten faktisk havnet på utklippstavla.
+    function copyText(text, okMessage, onOk) {
+        const success = () => {
+            showNotification(okMessage);
+            onOk && onOk();
+        };
         const fallback = () => {
             let ok = false;
             try {
@@ -1923,10 +1928,11 @@
                 ok = document.execCommand('copy');
                 ta.remove();
             } catch (e) { ok = false; }
-            showNotification(ok ? okMessage : 'Kunne ikke kopiere – merk og kopier: ' + text);
+            if (ok) success();
+            else showNotification('Kunne ikke kopiere – merk og kopier: ' + text);
         };
         if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(text).then(() => showNotification(okMessage), fallback);
+            navigator.clipboard.writeText(text).then(success, fallback);
         } else {
             fallback();
         }
@@ -1935,13 +1941,21 @@
     $('discountCode').addEventListener('click', () =>
         copyText(DISCOUNT_CODE, 'Rabattkode kopiert: ' + DISCOUNT_CODE));
 
+    // Delte lenker merkes, ellers teller GA4 alle som åpner dem som direktetrafikk.
+    const SHARE_URL = 'https://minio.no/underholdning/tool-quiz.html?utm_source=deling&utm_medium=spill';
+
+    /* GA4 «share» – samme form som resten av minio.no. */
+    function trackShare(method) {
+        try { if (typeof gtag === 'function') gtag('event', 'share', { method, content_type: 'spill', item_id: 'verktoyquiz' }); } catch (e) { /* ignore */ }
+    }
+
     $('shareFacebook').addEventListener('click', () => {
-        const url = encodeURIComponent('https://minio.no/underholdning/tool-quiz.html');
-        window.open('https://www.facebook.com/sharer/sharer.php?u=' + url, '_blank', 'noopener,width=600,height=500');
+        window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(SHARE_URL), '_blank', 'noopener,width=600,height=500');
+        trackShare('facebook');
     });
 
     $('copyResult').addEventListener('click', () =>
-        copyText(getShareText(), 'Kopiert til utklippstavlen!'));
+        copyText(getShareText(), 'Kopiert til utklippstavlen!', () => trackShare('kopier-resultat')));
 
     const shareNative = $('shareNative');
     if (navigator.share) {
@@ -1950,8 +1964,8 @@
             navigator.share({
                 title: 'Minio Verktøy Quiz',
                 text: getShareText(),
-                url: 'https://minio.no/underholdning/tool-quiz.html'
-            }).catch(() => { /* user cancelled */ });
+                url: SHARE_URL
+            }).then(() => trackShare('web-share'), () => { /* user cancelled */ });
         });
     }
 

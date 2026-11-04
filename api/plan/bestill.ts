@@ -81,6 +81,19 @@ export default postHandler(async (req: VercelRequest, uid: string) => {
     estimatKr: typeof req.body?.estimatKr === 'number' ? Math.round(req.body.estimatKr) : 0,
     prisEstimatKr: belopKr,
     melding: kort(req.body?.melding, 2000),
+    /*
+     * Fakturaopplysninger. Byggeplanen faktureres i etterkant, så uten disse
+     * har vi en bestilling vi ikke kan sende regning for. Klienten krever dem
+     * utfylt; her kuttes de bare til fornuftig lengde.
+     */
+    kunde: {
+      fulltNavn: kort(req.body?.kunde?.fulltNavn, 120),
+      epost: kort(req.body?.kunde?.epost, 200) || epost,
+      mobil: kort(req.body?.kunde?.mobil, 40),
+      adresse: kort(req.body?.kunde?.adresse, 200),
+      postnr: kort(req.body?.kunde?.postnr, 10),
+      poststed: kort(req.body?.kunde?.poststed, 120),
+    },
     tilgangskode,
   }
 
@@ -117,6 +130,7 @@ export default postHandler(async (req: VercelRequest, uid: string) => {
  */
 async function varsleAdmin(f: {
   userEmail: string
+  kunde?: { fulltNavn: string; mobil: string; adresse: string; postnr: string; poststed: string }
   designId: string
   produktId: string
   designNavn: string
@@ -132,7 +146,9 @@ async function varsleAdmin(f: {
   const linjer = [
     `Ny forespørsel om byggeplan.`,
     ``,
-    `Kunde:    ${f.userEmail || '(ukjent e-post)'}`,
+    `Kunde:    ${f.kunde?.fulltNavn || '(uten navn)'} <${f.userEmail || 'ukjent e-post'}>`,
+    `Mobil:    ${f.kunde?.mobil || '(ikke oppgitt)'}`,
+    `Adresse:  ${[f.kunde?.adresse, [f.kunde?.postnr, f.kunde?.poststed].filter(Boolean).join(' ')].filter(Boolean).join(', ') || '(ikke oppgitt)'}`,
     `Produkt:  ${f.produktNavn}`,
     `Design:   ${f.designNavn}`,
     `Mål:      ${f.maal || '–'}`,

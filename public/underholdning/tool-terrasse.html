@@ -929,6 +929,8 @@
     const LAUNCH = [2026, 10, 31];
     const FS_PROJECT = 'minio-7738e';
     const SITE = 'https://minio.no/underholdning/tool-terrasse.html';
+    /* Delte lenker merkes, ellers teller GA4 alle som åpner dem som direktetrafikk. */
+    const UTM = 'utm_source=deling&utm_medium=spill';
 
     const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
     const lerp = (a, b, t) => a + (b - a) * t;
@@ -3747,7 +3749,7 @@
         const s = sum || lastSummary;
         let u = SITE + '?duell=' + (s.seed >>> 0).toString(36) + '&mot=' + s.score + '&m=' + s.mode;
         if (stats.name) u += '&n=' + encodeURIComponent(stats.name);
-        return u;
+        return u + '&' + UTM;
     }
     function shareText(sum) {
         const s = sum || lastSummary;
@@ -3800,27 +3802,38 @@
         a.href = shareUrl; a.download = `terrassemester-${lastSummary.score}.png`;
         document.body.appendChild(a); a.click(); a.remove();
     }
+    /* GA4 «share» – samme form som resten av minio.no (method/content_type/
+       item_id), så spill og nettsider teller i én rapport. Kalles først når
+       delingen faktisk gikk gjennom, ikke når knappen trykkes. */
+    function sporDeling(metode) {
+        try {
+            if (typeof gtag === 'function') gtag('event', 'share', {
+                method: metode, content_type: 'spill', item_id: 'terrassemester',
+                mode: lastSummary ? lastSummary.mode : ''
+            });
+        } catch (e) { /* ignorer */ }
+    }
     async function shareNative() {
         if (!lastSummary) return;
         const link = duelLink(), text = shareText();
-        try { if (typeof gtag === 'function') gtag('event', 'share', { game: 'terrassemester', mode: lastSummary.mode }); } catch (e) { /* ignorer */ }
         try {
             if (shareBlob && navigator.canShare) {
                 const file = new File([shareBlob], `terrassemester-${lastSummary.score}.png`, { type: 'image/png' });
                 if (navigator.canShare({ files: [file] })) {
                     await navigator.share({ files: [file], title: 'Terrassemester', text: text + '\n' + link });
+                    sporDeling('web-share-bilde');
                     return;
                 }
             }
-            if (navigator.share && coarse) { await navigator.share({ title: 'Terrassemester', text, url: link }); return; }
+            if (navigator.share && coarse) { await navigator.share({ title: 'Terrassemester', text, url: link }); sporDeling('web-share'); return; }
         } catch (e) {
             if (e && e.name === 'AbortError') return;
         }
-        copyText(text + ' ' + link, () => { toastOver('Lenke kopiert – lim inn hos kompisen!'); $('sCopyTx').textContent = 'Kopiert!'; });
+        copyText(text + ' ' + link, () => { sporDeling('kopier-lenke'); toastOver('Lenke kopiert – lim inn hos kompisen!'); $('sCopyTx').textContent = 'Kopiert!'; });
     }
     function toastOver(msg) { $('shareSub').textContent = msg; }
     $('shareBtn').addEventListener('click', (e) => { e.preventDefault(); shareNative(); });
-    $('sCopy').addEventListener('click', (e) => { e.preventDefault(); copyText(shareText() + ' ' + duelLink(), () => { $('sCopyTx').textContent = 'Kopiert!'; SFX.click(); }); });
+    $('sCopy').addEventListener('click', (e) => { e.preventDefault(); copyText(shareText() + ' ' + duelLink(), () => { sporDeling('kopier-lenke'); $('sCopyTx').textContent = 'Kopiert!'; SFX.click(); }); });
     $('sDl').addEventListener('click', (e) => { e.preventDefault(); downloadImage(); });
     $('sharePrev').addEventListener('click', (e) => { e.preventDefault(); downloadImage(); });
     $('sEmoji').addEventListener('click', (e) => { e.preventDefault(); copyText(emojiText(), () => { $('sEmojiTx').textContent = 'Kopiert!'; SFX.click(); }); });
@@ -4065,6 +4078,8 @@
             name = c.name || 'kompisen';
             const target = clamp(parseInt(q.get('mot'), 10) || 0, 0, 1000000);
             duelParam = { seed: seed >>> 0, target, mode: m, name };
+            // Andre halvdel av delingssløyfa: en delt lenke ble faktisk åpnet.
+            try { if (typeof gtag === 'function') gtag('event', 'delt_lenke_apnet', { content_type: 'spill', item_id: 'terrassemester' }); } catch (e2) { /* ignorer */ }
         } catch (e) { /* ignorer */ }
     })();
 

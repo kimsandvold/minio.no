@@ -13,6 +13,7 @@ import {
 import { lagreGravering } from '../../../services/graveringService'
 import { trackEvent } from '../../../utils/analytics'
 import Icon from '../../shared/Icon'
+import KreverInnlogging from '../../shared/KreverInnlogging'
 import GraveringPreview from './GraveringPreview'
 import { byggGraveringSvg } from './graveringSvg'
 
@@ -288,7 +289,13 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
             </Primaer>
           </Kvittering>
         ) : (
-          <>
+          /*
+           * Graveringen faktureres når varen sendes, så bestillingen krever
+           * innlogging med Google. Uten konto går veien via kontaktskjemaet –
+           * da tar vi dialogen manuelt i stedet for å ta imot en bestilling vi
+           * ikke kan fakturere.
+           */
+          <KreverInnlogging hva="graveringen" emne="Gravering">
             <Topp>
               <Miniatyr>
                 <GraveringPreview dekorativ utenSkygge valg={ordre[0].valg} />
@@ -347,8 +354,9 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
                 </Felt>
               </Rad>
               <Felt>
-                <label htmlFor="gravering-telefon">Telefon</label>
-                <input id="gravering-telefon" type="tel" maxLength={40} value={telefon} onChange={(e) => settTelefon(e.target.value)} />
+                <label htmlFor="gravering-telefon">Mobil *</label>
+                <input id="gravering-telefon" type="tel" required maxLength={40} autoComplete="tel"
+                       placeholder="123 45 678" value={telefon} onChange={(e) => settTelefon(e.target.value)} />
               </Felt>
               <Felt>
                 <label htmlFor="gravering-adresse">Leveringsadresse *</label>
@@ -419,7 +427,7 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
                 )}
               </Primaer>
             </Skjema>
-          </>
+          </KreverInnlogging>
         )}
       </Boks>
     </Overlegg>

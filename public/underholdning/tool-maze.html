@@ -581,6 +581,8 @@
             align-items: center;
         }
 
+        .gameover-actions .btn-secondary { margin-top: 0.7rem; }
+
         /* Unified Header */
         .unified-header {
             position: fixed;
@@ -858,6 +860,7 @@
 
         <div class="gameover-actions">
             <button type="button" class="btn btn-primary" id="retryBtn">▶ Prøv igjen</button>
+            <button type="button" class="btn btn-secondary" id="shareBtn">↗ Del resultatet</button>
             <a href="/underholdning" class="home-link">← Tilbake til underholdning</a>
         </div>
     </main>
@@ -1426,6 +1429,40 @@
             announce(`Du ble tatt! ${score} poeng på nivå ${level}.`);
         }
 
+        // ── Deling ────────────────────────────────────────────────────
+        // Lenka merkes, ellers teller GA4 alle som åpner den som direktetrafikk.
+        const SHARE_URL = 'https://minio.no/underholdning/tool-maze.html?utm_source=deling&utm_medium=spill';
+
+        /* GA4 «share» – samme form som resten av minio.no. Kalles først når
+           delingen faktisk gikk gjennom, ikke når knappen trykkes. */
+        function trackShare(method) {
+            try { if (typeof gtag === 'function') gtag('event', 'share', { method, content_type: 'spill', item_id: 'verktoyjakt' }); } catch (e) { /* ignore */ }
+        }
+
+        function shareText() {
+            return `Jeg kom til nivå ${level} med ${score} poeng i Verktøyjakt 👷 Slå meg!`;
+        }
+
+        async function shareResult() {
+            const btn = $('shareBtn');
+            const text = shareText();
+            try {
+                if (navigator.share) {
+                    await navigator.share({ title: 'Verktøyjakt', text, url: SHARE_URL });
+                    trackShare('web-share');
+                    return;
+                }
+            } catch (e) { if (e && e.name === 'AbortError') return; }
+            try {
+                await navigator.clipboard.writeText(text + ' ' + SHARE_URL);
+                trackShare('kopier-lenke');
+                btn.textContent = 'Lenke kopiert!';
+            } catch (e) {
+                btn.textContent = 'Kunne ikke kopiere';
+            }
+            setTimeout(() => { btn.textContent = '↗ Del resultatet'; }, 2400);
+        }
+
         async function copyCode() {
             const btn = $('copyCodeBtn');
             try {
@@ -1844,6 +1881,7 @@
         // Buttons
         $('startBtn').addEventListener('click', startGame);
         $('retryBtn').addEventListener('click', startGame);
+        $('shareBtn').addEventListener('click', shareResult);
         $('pauseBtn').addEventListener('click', () => { ensureAudio(); setPaused(!paused); });
         $('resumeBtn').addEventListener('click', () => setPaused(false));
         $('restartBtn').addEventListener('click', startGame);

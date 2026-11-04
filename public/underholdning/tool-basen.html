@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no"/>
+    <title>Basen – Minio Underholdning</title>
+    <meta name="description" content="Du er bas i varebil. Gutta roper etter verktøy, du har ett sekund på å finne riktig og treffe. Bommer du, setter de etter deg."/>
+
+    <!-- UTPRØVING: spillet er ikke lansert. Ikke i spill.ts, ikke i sitemap.xml,
+         og noindex her fordi robots.txt slipper gjennom alt annet. -->
+    <meta name="robots" content="noindex, nofollow"/>
+    <meta name="theme-color" content="#0d0a08"/>
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+    <link rel="apple-touch-icon" href="/favicon.svg"/>
+
+    <style>
+        :root {
+            --bg: #0d0a08;
+            --panel: rgba(30, 23, 18, 0.86);
+            --panel-2: rgba(20, 15, 12, 0.92);
+            --line: rgba(255, 214, 170, 0.13);
+            --line-strong: rgba(255, 214, 170, 0.24);
+            --text: #f4ebe1;
+            --muted: #b3a291;
+            --faint: #7d6d5f;
+            --accent: #f2a541;
+            --accent-2: #ffcf7a;
+            --accent-ink: #2a1806;
+            --good: #a6d65a;
+            --bad: #ff7a59;
+            --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+            --sat: env(safe-area-inset-top, 0px);
+            --sab: env(safe-area-inset-bottom, 0px);
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font);
+            -webkit-font-smoothing: antialiased;
+            touch-action: none;
+            overscroll-behavior: none;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-touch-callout: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        canvas#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+        /* ---------- Topplinje ---------- */
+        .topbar {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: calc(var(--sat) + 12px) 14px 0;
+            z-index: 20;
+            pointer-events: none;
+        }
+        .topbar > * { pointer-events: auto; }
+        .back {
+            display: inline-flex; align-items: center; gap: 10px;
+            color: var(--muted); text-decoration: none;
+            font-size: 13px; font-weight: 500;
+            padding: 8px 12px 8px 10px;
+            border-radius: 12px;
+            background: rgba(20, 15, 12, 0.5);
+            border: 1px solid var(--line);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        .back svg { width: 16px; height: 16px; flex: none; }
+        .back img { height: 17px; width: auto; display: block; opacity: .95; }
+        .iconbtn {
+            width: 40px; height: 40px;
+            display: grid; place-items: center;
+            border-radius: 12px;
+            background: rgba(20, 15, 12, 0.5);
+            border: 1px solid var(--line);
+            color: var(--muted); cursor: pointer;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        .iconbtn svg { width: 19px; height: 19px; }
+        .iconbtn svg[hidden] { display: none; }
+
+        /* ---------- HUD ---------- */
+        .hud {
+            position: fixed;
+            top: calc(var(--sat) + 60px);
+            left: 0; right: 0;
+            z-index: 15; padding: 0 14px;
+            pointer-events: none;
+            display: flex; flex-direction: column; gap: 7px;
+            opacity: 0; transition: opacity .3s;
+        }
+        .hud.on { opacity: 1; }
+        .hudrow { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .pill {
+            background: rgba(20, 15, 12, 0.6);
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            padding: 5px 10px;
+            font-size: 12.5px; font-weight: 650;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            display: inline-flex; align-items: baseline; gap: 6px; white-space: nowrap;
+        }
+        .pill .lbl { color: var(--faint); font-weight: 500; font-size: 10.5px; text-transform: uppercase; letter-spacing: .06em; }
+        .pill .val { font-variant-numeric: tabular-nums; }
+        .pill.mood .val { color: var(--good); }
+        .pill.mood.mid .val { color: var(--accent); }
+        .pill.mood.low .val { color: var(--bad); }
+        .daybar { height: 4px; border-radius: 99px; background: rgba(255, 214, 170, 0.12); overflow: hidden; }
+        .daybar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 99px; }
+
+        /* ---------- Verktøylinja ---------- */
+        .rack {
+            position: fixed; left: 0; right: 0; bottom: 0;
+            z-index: 18;
+            padding: 9px 9px calc(var(--sab) + 9px);
+            display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px;
+            background: linear-gradient(to top, rgba(13, 10, 8, 0.97), rgba(13, 10, 8, 0.8) 60%, rgba(13, 10, 8, 0));
+            opacity: 0; pointer-events: none; transition: opacity .3s;
+        }
+        .rack.on { opacity: 1; pointer-events: auto; }
+        .tool {
+            position: relative; aspect-ratio: 1 / 1;
+            border-radius: 13px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            padding: 0; cursor: pointer;
+            display: grid; place-items: center; overflow: hidden;
+            transition: transform .07s, background .12s;
+        }
+        .tool canvas { width: 100%; height: 100%; display: block; }
+        .tool:active { transform: scale(.92); }
+        .tool.flash { background: rgba(242, 165, 65, 0.3); }
+        .tool.broken { opacity: .3; cursor: not-allowed; }
+        .tool.broken::after {
+            content: ''; position: absolute; inset: 0;
+            background:
+                linear-gradient(45deg, transparent 46%, var(--bad) 46%, var(--bad) 54%, transparent 54%),
+                linear-gradient(-45deg, transparent 46%, var(--bad) 46%, var(--bad) 54%, transparent 54%);
+            opacity: .55;
+        }
+
+        /* ---------- Overlegg ---------- */
+        .overlay {
+            position: fixed; inset: 0; z-index: 30;
+            display: none; align-items: center; justify-content: center;
+            padding: calc(var(--sat) + 16px) 16px calc(var(--sab) + 16px);
+            background: radial-gradient(120% 80% at 50% 0%, rgba(40, 28, 18, .74), rgba(9, 7, 5, .94));
+            backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+            overflow-y: auto;
+        }
+        .overlay.show { display: flex; }
+        .card {
+            width: 100%; max-width: 380px;
+            background: var(--panel-2);
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 22px 20px 20px;
+            text-align: center;
+            box-shadow: 0 28px 70px rgba(0, 0, 0, .6);
+        }
+        .eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: .14em; color: var(--accent); font-weight: 700; }
+        .title { margin: 8px 0 2px; font-size: 34px; line-height: 1.05; letter-spacing: -.02em; }
+        .tagline { margin: 0 0 14px; color: var(--muted); font-size: 14px; }
+        .howto {
+            margin: 0 0 16px; font-size: 13.5px; line-height: 1.55;
+            color: var(--muted); text-align: left;
+            background: rgba(255, 214, 170, .05);
+            border: 1px solid var(--line);
+            border-radius: 13px; padding: 12px 13px;
+        }
+        .howto b { color: var(--text); }
+        .howto p { margin: 0 0 7px; }
+        .howto p:last-child { margin: 0; }
+        .btn {
+            width: 100%;
+            display: inline-flex; align-items: center; justify-content: center; gap: 9px;
+            padding: 14px 18px; border: 0; border-radius: 13px;
+            background: linear-gradient(180deg, var(--accent-2), var(--accent));
+            color: var(--accent-ink);
+            font-family: inherit; font-size: 16px; font-weight: 800; cursor: pointer;
+        }
+        .btn:active { transform: scale(.985); }
+        .btn:disabled { opacity: .5; }
+        .btn svg { width: 18px; height: 18px; }
+        .btn-ghost { display: block; margin-top: 10px; color: var(--muted); text-decoration: none; font-size: 13.5px; padding: 9px; }
+
+        .survey-head { font-size: 12px; text-transform: uppercase; letter-spacing: .12em; color: var(--faint); font-weight: 700; }
+        .big-score { font-size: 62px; font-weight: 800; line-height: 1; letter-spacing: -.035em; margin: 10px 0 2px; font-variant-numeric: tabular-nums; }
+        .big-unit { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+        .rank {
+            display: inline-block; padding: 5px 13px; border-radius: 99px;
+            background: rgba(242, 165, 65, .14); border: 1px solid rgba(242, 165, 65, .3);
+            color: var(--accent-2); font-size: 13px; font-weight: 700; margin-bottom: 14px;
+        }
+        .quote {
+            text-align: left; font-size: 14px; line-height: 1.5; color: var(--text);
+            border-left: 2px solid var(--line-strong); padding: 2px 0 2px 12px;
+            margin: 0 0 14px; font-style: italic;
+        }
+        .quote cite { display: block; margin-top: 5px; font-style: normal; font-size: 12px; color: var(--faint); }
+        .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; margin-bottom: 14px; }
+        .stat { background: rgba(255, 214, 170, .05); border: 1px solid var(--line); border-radius: 11px; padding: 9px 5px; }
+        .stat .v { font-size: 19px; font-weight: 750; font-variant-numeric: tabular-nums; }
+        .stat .l { font-size: 10.5px; color: var(--faint); margin-top: 2px; }
+        .hint { margin-top: 10px; font-size: 12px; color: var(--faint); }
+        kbd { font-family: inherit; font-size: 11px; padding: 1px 5px; border-radius: 5px; border: 1px solid var(--line-strong); background: rgba(255, 214, 170, .07); }
+        @media (pointer: coarse) { .hint-key { display: none; } }
+    </style>
+</head>
+<body>
+
+<canvas id="c" aria-label="Basen spillflate"></canvas>
+
+<div class="topbar">
+    <a href="/underholdning" class="back" aria-label="Tilbake til underholdning">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        <img src="/images/branding/logo_navbar.svg" alt="Minio" width="62" height="17"/>
+    </a>
+    <button class="iconbtn" id="muteBtn" aria-label="Lyd av/på" title="Lyd av/på (M)" aria-pressed="false">
+        <svg id="lydPa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/></svg>
+        <svg id="lydAv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" hidden><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M22 9l-6 6M16 9l6 6"/></svg>
+    </button>
+</div>
+
+<div class="hud" id="hud">
+    <div class="hudrow">
+        <span class="pill"><span class="lbl" id="dayName">Mandag</span><span class="val" id="clock">07:00</span></span>
+        <span class="pill mood" id="moodPill"><span class="lbl">Humør</span><span class="val" id="mood">100%</span></span>
+        <span class="pill"><span class="lbl">Poeng</span><span class="val" id="score">0</span></span>
+    </div>
+    <div class="daybar"><i id="dayBar"></i></div>
+</div>
+
+<div class="rack" id="rack"></div>
+
+<div class="overlay show" id="startOverlay">
+    <div class="card">
+        <div class="eyebrow">Minio byggeplass</div>
+        <h1 class="title">Basen</h1>
+        <p class="tagline">Åtte mann vil ha noe. Samtidig.</p>
+        <div class="howto">
+            <p>Bilen kjører selv. Du sitter bak med verktøyet.</p>
+            <p>Oppe til venstre ser du <b>hva de neste gutta vil ha</b>. Finn verktøyet i linja nederst og <b>trykk når han er inne i den lyse sonen</b>.</p>
+            <p>Treffer du blinken, tar han imot. Kaster du for tidlig eller for seint, lander det i snøen.</p>
+            <p><b>Feil verktøy, og han løper etter bilen.</b> Kast det han faktisk ba om bakover, så gir han seg.</p>
+        </div>
+        <button class="btn" id="startBtn" disabled>
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5z"/></svg>
+            <span id="startTekst">Laster gutta…</span>
+        </button>
+        <div class="hint hint-key"><kbd>1</kbd>–<kbd>6</kbd> kaster verktøy</div>
+    </div>
+</div>
+
+<div class="overlay" id="overOverlay">
+    <div class="card">
+        <div class="survey-head">Medarbeiderundersøkelsen</div>
+        <div class="big-score" id="finalMood">0%</div>
+        <div class="big-unit">medarbeidertilfredshet</div>
+        <div class="rank" id="rank">Lærling</div>
+        <blockquote class="quote" id="quote"><span id="quoteText">–</span><cite id="quoteBy">Tømrer, 34</cite></blockquote>
+        <div class="stats-row">
+            <div class="stat"><div class="v" id="fDeliv">0</div><div class="l">Leveranser</div></div>
+            <div class="stat"><div class="v" id="fBlink">0</div><div class="l">Blink</div></div>
+            <div class="stat"><div class="v" id="fWrong">0</div><div class="l">Feil verktøy</div></div>
+            <div class="stat"><div class="v" id="fSno">0</div><div class="l">I snøen</div></div>
+            <div class="stat"><div class="v" id="fChase">0</div><div class="l">Jaget deg</div></div>
+            <div class="stat"><div class="v" id="fScore">0</div><div class="l">Poeng</div></div>
+        </div>
+        <button class="btn" id="retryBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+            Nytt skift
+        </button>
+        <a class="btn-ghost" href="/underholdning">Flere spill</a>
+    </div>
+</div>
+
+<script>
+(() => {
+    'use strict';
+
+    const $ = (id) => document.getElementById(id);
+    const cv = $('c');
+    const ctx = cv.getContext('2d');
+    const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    const pick = (a) => a[(Math.random() * a.length) | 0];
+    const FONT = 'ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, sans-serif';
+
+    // ==================================================================
+    //  Konstanter
+    // ==================================================================
+    const DAG_SEK = 150;            // ett skift
+    const KL_FRA = 7, KL_TIL = 15;
+    const FART = 215;               // px/s, hvor fort ruta ruller forbi
+    const PAUSE_FRA = 1.9;          // sekunder mellom gutta ved skiftstart
+    const PAUSE_TIL = 0.95;         // ... og ved skiftslutt
+    const KO_FRA = 1500;            // så langt ute begynner de å rope (gir tre lapper)
+    const BLINK = 52;               // halv bredde på blinken, px
+    const TREFF = 128;              // halv bredde på det som i det hele tatt når fram
+    const JAG_START = 460;
+    const JAG_TAK = 70;
+
+    const VERKTOY = [
+        { id: 'hammer', navn: 'Hammer' },
+        { id: 'skrutrekker', navn: 'Skrutrekker' },
+        { id: 'drill', navn: 'Drill' },
+        { id: 'sag', navn: 'Sag' },
+        { id: 'sliper', navn: 'Vinkelsliper' },
+        { id: 'tommestokk', navn: 'Tommestokk' },
+    ];
+
+    /** Gubbene. Flere kommer – legg bildet i mappa og føy til her. */
+    const GUBBER = [
+        { id: 'snekker', fil: '/images/underholdning/basen/basen-snekker.webp' },
+        { id: 'elektriker', fil: '/images/underholdning/basen/basen-elektriker.webp' },
+    ];
+
+    const DAGER = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag'];
+    const GLAD = ['Takk!', 'Nice!', 'Der ja!', 'Takk, sjef!', 'Deilig!'];
+    const BLINKORD = ['BLINK!', 'Midt i!', 'Rått!'];
+    const SUR = ['Hæ?!', 'Seriøst?!', 'Æsj!', 'Hva i...', 'Feil, mann!'];
+    const SNO = ['I snøen!', 'Bom!', 'Hallo?!', 'Æ, nei...'];
+    const BOM = ['Hallo?!', 'Sjef?!', 'HEI!'];
+    const BLID = ['Endelig!', 'Greit, da.', 'Takk.'];
+
+    const RANGER = [
+        { fra: 95, t: 'Årets sjef' }, { fra: 82, t: 'Solid bas' },
+        { fra: 68, t: 'Godkjent' }, { fra: 52, t: 'Litt rotete' },
+        { fra: 35, t: 'Verneombudet ringte' }, { fra: 18, t: 'HMS-avvik' },
+        { fra: -999, t: 'Oppsagt' },
+    ];
+    const SITATER = [
+        { fra: 92, t: 'Beste basen jeg har hatt. Presis i kastet, og.', by: 'Tømrer, 34' },
+        { fra: 78, t: 'Stort sett grei. Litt mye i snøen.', by: 'Lærling, 19' },
+        { fra: 62, t: 'Jeg ba om skrutrekker. Jeg fikk sag. Vi snakker ikke lenger.', by: 'Montør, 41' },
+        { fra: 44, t: 'Han kjører fra folk. Sånn leder man liksom ikke et lag.', by: 'Murer, 52' },
+        { fra: 26, t: 'Han kastet en vinkelsliper på meg og kjørte.', by: 'Tømrer, 34' },
+        { fra: -999, t: 'Jeg jaget han i tjue minutter. Angrer ikke.', by: 'Grunnarbeider, 29' },
+    ];
+
+    // ==================================================================
+    //  Lerret og oppsett
+    // ==================================================================
+    let W = 0, H = 0, dpr = 1;
+    let bakke = 0, vanX = 0, vanB = 0, vanHoy = 0, vanBase = 0, gubbeHoy = 0, sone = 0, rackTopp = 0;
+
+    function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2.5);
+        W = window.innerWidth; H = window.innerHeight;
+        cv.width = Math.round(W * dpr);
+        cv.height = Math.round(H * dpr);
+
+        rackTopp = H - (W / 6 + 26);                // verktøylinja er kvadrater
+        bakke = rackTopp - H * 0.14;                // der gutta står
+        gubbeHoy = clamp(H * 0.25, 150, W * 0.60);  // stor nok til at fjeset bærer
+        vanHoy = gubbeHoy * 0.50;
+        vanB = vanHoy * 1.7;
+        vanX = vanB * 0.5 + 10;                     // bilen helt til venstre
+        vanBase = bakke + (rackTopp - bakke) * 0.78;
+        sone = clamp(vanX + vanB * 0.5 + 92, W * 0.58, W - 70);
+    }
+
+    // ==================================================================
+    //  Bilder
+    // ==================================================================
+    let lastet = 0;
+    GUBBER.forEach((g) => {
+        const im = new Image();
+        im.onload = () => {
+            g.bilde = im;
+            if (++lastet === GUBBER.length) {
+                $('startBtn').disabled = false;
+                $('startTekst').textContent = 'Start skiftet';
+            }
+        };
+        im.onerror = () => {
+            // Mangler bildet, spiller vi videre uten – gubben tegnes som skygge.
+            if (++lastet === GUBBER.length) {
+                $('startBtn').disabled = false;
+                $('startTekst').textContent = 'Start skiftet';
+            }
+        };
+        im.src = g.fil;
+    });
+
+    // ==================================================================
+    //  Lyd
+    // ==================================================================
+    const MUTE_KEY = 'basen.mute';
+    let muted = false;
+    try { muted = localStorage.getItem(MUTE_KEY) === '1'; } catch (e) { /* ignorer */ }
+    let AC = null, master = null, noiseBuf = null;
+
+    function ensureAudio() {
+        if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if (!Ctx) return;
+        AC = new Ctx();
+        master = AC.createGain();
+        master.gain.value = muted ? 0 : 0.7;
+        master.connect(AC.destination);
+        noiseBuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate);
+        const d = noiseBuf.getChannelData(0);
+        for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    }
+    const canPlay = () => AC && master && !muted;
+
+    function tone(t, f, type, dur, gain, atk, f2) {
+        if (!AC) return;
+        const o = AC.createOscillator(), g = AC.createGain();
+        o.type = type; o.frequency.setValueAtTime(f, t);
+        if (f2) o.frequency.exponentialRampToValueAtTime(Math.max(20, f2), t + dur);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(Math.max(0.0001, gain), t + (atk || 0.006));
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g); g.connect(master);
+        o.start(t); o.stop(t + dur + 0.02);
+    }
+    function noise(t, dur, type, freq, q, gain) {
+        if (!AC || !noiseBuf) return;
+        const s = AC.createBufferSource(); s.buffer = noiseBuf;
+        const bq = AC.createBiquadFilter(); bq.type = type; bq.frequency.value = freq; bq.Q.value = q || 1;
+        const g = AC.createGain();
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(Math.max(0.0001, gain), t + 0.006);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        s.connect(bq); bq.connect(g); g.connect(master);
+        s.start(t); s.stop(t + dur + 0.02);
+    }
+
+    const SFX = {
+        kast() { if (!canPlay()) return; noise(AC.currentTime, 0.1, 'bandpass', 1500, 1.2, 0.14); },
+        glad() { if (!canPlay()) return; const t = AC.currentTime; [660, 880, 1320].forEach((f, i) => tone(t + i * 0.05, f, 'triangle', 0.15, 0.15)); },
+        blink() { if (!canPlay()) return; const t = AC.currentTime; [880, 1175, 1760, 2349].forEach((f, i) => tone(t + i * 0.045, f, 'triangle', 0.18, 0.15)); },
+        sur() { if (!canPlay()) return; const t = AC.currentTime; tone(t, 300, 'sawtooth', 0.26, 0.2, 0.004, 110); noise(t, 0.2, 'bandpass', 700, 0.8, 0.14); },
+        sno() { if (!canPlay()) return; const t = AC.currentTime; noise(t, 0.22, 'lowpass', 1100, 0.7, 0.2); tone(t, 220, 'sine', 0.18, 0.08, 0.004, 150); },
+        bom() { if (!canPlay()) return; tone(AC.currentTime, 240, 'sine', 0.2, 0.11, 0.004, 170); },
+        fred() { if (!canPlay()) return; const t = AC.currentTime; [523, 784].forEach((f, i) => tone(t + i * 0.07, f, 'sine', 0.22, 0.14)); },
+        smell() { if (!canPlay()) return; const t = AC.currentTime; noise(t, 0.4, 'lowpass', 900, 0.7, 0.5); tone(t, 140, 'square', 0.3, 0.22, 0.003, 60); },
+    };
+
+    const BASS = [0, 0, 7, 0, 5, 5, 3, 3];
+    const TOPP = [12, 15, 19, 15, 17, 15, 12, 10];
+    let musNeste = 0, musSteg = 0;
+
+    function musikk() {
+        if (!canPlay()) return;
+        const bpm = 108 + Math.min(jag.length, 5) * 13;
+        const spt = 60 / bpm / 2;
+        const na = AC.currentTime;
+        if (musNeste < na) musNeste = na + 0.05;
+        while (musNeste < na + 0.25) {
+            const s = musSteg % 8;
+            tone(musNeste, 110 * Math.pow(2, BASS[s] / 12), 'square', spt * 0.85, 0.045);
+            if (s % 2 === 0 || jag.length > 1) tone(musNeste, 110 * Math.pow(2, TOPP[s] / 12), 'square', spt * 0.5, 0.022);
+            noise(musNeste, 0.03, 'highpass', 7000, 1, s % 2 ? 0.016 : 0.036);
+            musNeste += spt; musSteg++;
+        }
+    }
+
+    function tegnMute() {
+        $('lydPa').hidden = muted; $('lydAv').hidden = !muted;
+        $('muteBtn').setAttribute('aria-pressed', String(muted));
+    }
+    $('muteBtn').addEventListener('click', () => {
+        muted = !muted;
+        try { localStorage.setItem(MUTE_KEY, muted ? '1' : '0'); } catch (e) { /* ignorer */ }
+        ensureAudio();
+        if (master && AC) master.gain.setTargetAtTime(muted ? 0 : 0.7, AC.currentTime, 0.02);
+        tegnMute();
+    });
+    tegnMute();
+
+    // ==================================================================
+    //  Verktøytegning
+    // ==================================================================
+    function tegnVerktoy(g, id, s) {
+        g.save();
+        g.translate(s / 2, s / 2); g.scale(s / 24, s / 24); g.translate(-12, -12);
+        g.lineCap = 'round'; g.lineJoin = 'round';
+        const tre = '#b5793f', stal = '#cfd6dd', morkStal = '#8d98a3', gul = '#f2c14e';
+
+        if (id === 'hammer') {
+            g.fillStyle = tre; g.fillRect(10.6, 8, 2.8, 13);
+            g.fillStyle = stal;
+            g.beginPath();
+            g.moveTo(6, 4.6); g.lineTo(17, 4.6); g.lineTo(17, 8.4); g.lineTo(13.4, 8.4);
+            g.lineTo(12.6, 7.2); g.lineTo(10.4, 7.2); g.lineTo(8.6, 8.4); g.lineTo(6, 8.4);
+            g.closePath(); g.fill();
+            g.fillStyle = morkStal; g.fillRect(6, 4.6, 2.2, 3.8);
+        } else if (id === 'skrutrekker') {
+            g.fillStyle = '#d4484a';
+            g.beginPath(); g.roundRect(9.6, 3.4, 4.8, 8.2, 2.2); g.fill();
+            g.fillStyle = morkStal; g.fillRect(10.9, 11.4, 2.2, 7.2);
+            g.fillStyle = stal;
+            g.beginPath(); g.moveTo(10.2, 18.4); g.lineTo(13.8, 18.4); g.lineTo(13.1, 21.2); g.lineTo(10.9, 21.2); g.closePath(); g.fill();
+        } else if (id === 'drill') {
+            g.fillStyle = gul;
+            g.beginPath(); g.roundRect(4.4, 6.4, 11, 6.2, 2.4); g.fill();
+            g.beginPath(); g.roundRect(6.6, 12, 4.2, 7.4, 1.8); g.fill();
+            g.fillStyle = '#3a3a3e'; g.fillRect(6.9, 13.2, 3.6, 4.4);
+            g.fillStyle = morkStal;
+            g.beginPath(); g.roundRect(15, 7.8, 3.4, 3.4, 1); g.fill();
+            g.strokeStyle = stal; g.lineWidth = 1.5;
+            g.beginPath(); g.moveTo(18.4, 9.5); g.lineTo(21.6, 9.5); g.stroke();
+        } else if (id === 'sag') {
+            g.fillStyle = tre;
+            g.beginPath(); g.roundRect(3.2, 5.4, 5.4, 5.2, 1.6); g.fill();
+            g.fillStyle = stal;
+            g.beginPath();
+            g.moveTo(8, 6.4); g.lineTo(21.2, 12.4); g.lineTo(20.4, 14.2);
+            for (let x = 19; x > 8; x -= 1.8) { g.lineTo(x, 11.4); g.lineTo(x - 0.9, 13.2); }
+            g.closePath(); g.fill();
+        } else if (id === 'sliper') {
+            g.fillStyle = '#2f3237';
+            g.beginPath(); g.roundRect(3.6, 8.4, 10.4, 5.6, 2.4); g.fill();
+            g.fillStyle = gul;
+            g.beginPath(); g.roundRect(5, 9.4, 4.6, 3.6, 1.4); g.fill();
+            g.fillStyle = morkStal;
+            g.beginPath(); g.moveTo(13.4, 7.4); g.lineTo(17, 7.4); g.lineTo(17, 15); g.lineTo(13.4, 15); g.closePath(); g.fill();
+            g.fillStyle = '#9aa3ad';
+            g.beginPath(); g.arc(17.2, 11.2, 4.4, 0, Math.PI * 2); g.fill();
+            g.fillStyle = '#5d646c';
+            g.beginPath(); g.arc(17.2, 11.2, 1.3, 0, Math.PI * 2); g.fill();
+        } else {
+            g.strokeStyle = gul; g.lineWidth = 2.1;
+            g.beginPath();
+            g.moveTo(3.4, 16.6); g.lineTo(8.8, 7.6); g.lineTo(14.2, 16.6); g.lineTo(19.6, 7.6);
+            g.stroke();
+            g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 0.7;
+            g.beginPath(); g.moveTo(6.2, 12); g.lineTo(7, 12.6); g.moveTo(11.4, 12); g.lineTo(12.2, 12.6); g.stroke();
+        }
+        g.restore();
+    }
+
+    // ==================================================================
+    //  Tilstand
+    // ==================================================================
+    let tilstand = 'start';
+    let sist = 0, dagT = 0, camX = 0;
+    let poeng = 0, humor = 100, levert = 0, blinker = 0, feil = 0, isno = 0, jaget = 0, mistet = 0, serie = 0;
+    let gutta = [], jag = [], kastene = [], stov = [], sprut = [], rist = 0, dagIdx = 0;
+    let odelagt = VERKTOY.map(() => false);
+
+    resize();
+    window.addEventListener('resize', resize, { passive: true });
+
+    // ==================================================================
+    //  Verktøylinja – INGEN fasit her. Du må lese boblene selv.
+    // ==================================================================
+    const rackEl = $('rack');
+    const knapper = [];
+    VERKTOY.forEach((v, i) => {
+        const b = document.createElement('button');
+        b.className = 'tool';
+        b.setAttribute('aria-label', v.navn);
+        const k = document.createElement('canvas');
+        k.width = 128; k.height = 128;
+        tegnVerktoy(k.getContext('2d'), v.id, 128);
+        b.appendChild(k);
+        b.addEventListener('pointerdown', (e) => { e.preventDefault(); kast(i); });
+        rackEl.appendChild(b);
+        knapper.push(b);
+    });
+    function tegnRack() {
+        knapper.forEach((b, i) => b.classList.toggle('broken', odelagt[i]));
+    }
+
+    // ==================================================================
+    //  Nytt skift
+    // ==================================================================
+    function nyDag() {
+        try { dagIdx = (parseInt(localStorage.getItem('basen.dag') || '0', 10) || 0) % DAGER.length; } catch (e) { dagIdx = 0; }
+        $('dayName').textContent = DAGER[dagIdx];
+
+        camX = 0; dagT = 0; rist = 0;
+        poeng = 0; humor = 100; levert = 0; blinker = 0; feil = 0; isno = 0; jaget = 0; mistet = 0; serie = 0;
+        gutta = []; jag = []; kastene = []; stov = []; sprut = [];
+        odelagt = VERKTOY.map(() => false);
+        musSteg = 0; musNeste = 0;
+
+        // Gubbene plasseres i tid, ikke i rom – så tempoet kan strammes
+        // gjennom dagen uten at avstandene blir rare.
+        let t = 1.6;
+        while (t < DAG_SEK - 3) {
+            const p = t / DAG_SEK;
+            gutta.push({
+                x: t * FART + sone, vil: -1, fase: 'venter',
+                gubbe: GUBBER[(Math.random() * GUBBER.length) | 0],
+                ord: '', ordT: 0, humor: 0, vink: rnd(0, 6), t: 0,
+            });
+            t += PAUSE_FRA + (PAUSE_TIL - PAUSE_FRA) * p;
+        }
+        tegnRack();
+    }
+
+    // ==================================================================
+    //  Kasting – treffet avgjøres av timingen, reaksjonen av valget
+    // ==================================================================
+    /** Han som er nærmest blinken akkurat nå, hvis noen er innen rekkevidde. */
+    function iSikte() {
+        let best = null, bestD = 1e9;
+        for (const g of gutta) {
+            if (g.fase !== 'roper') continue;
+            const d = Math.abs((g.x - camX) - sone);
+            if (d < TREFF && d < bestD) { bestD = d; best = g; }
+        }
+        return best;
+    }
+    function jagerISikte() {
+        let best = null, bestD = 1e9;
+        for (const j of jag) {
+            if (j.fase !== 'jager') continue;
+            const d = camX + vanX - j.x;
+            if (d > 0 && d < JAG_START && d < bestD) { bestD = d; best = j; }
+        }
+        return best;
+    }
+
+    function kast(i) {
+        if (tilstand !== 'kjorer' || odelagt[i]) return;
+        ensureAudio();
+        SFX.kast();
+        knapper[i].classList.add('flash');
+        setTimeout(() => knapper[i].classList.remove('flash'), 130);
+
+        const g = iSikte();
+        const j = jagerISikte();
+
+        // Står noen rett bak og roper, og du kaster det HAN ba om, gjelder det ham.
+        if (j && j.vil === i && (!g || g.vil !== i)) {
+            kastene.push({ fra: vanX, til: j.x - camX, t: 0, varighet: 0.3, verk: i, bakover: true });
+            j.fase = 'fredet'; j.ord = pick(BLID); j.ordT = 1.5;
+            poeng += 80; humor = clamp(humor + 2, 0, 100);
+            SFX.fred();
+            return;
+        }
+
+        if (!g) {
+            kastene.push({ fra: vanX, til: sone + rnd(-40, 40), t: 0, varighet: 0.3, verk: i, snø: true });
+            isno++; serie = 0;
+            humor = clamp(humor - 1, 0, 100);
+            SFX.sno();
+            return;
+        }
+
+        const avvik = Math.abs((g.x - camX) - sone);
+        const riktig = g.vil === i;
+        kastene.push({ fra: vanX, til: g.x - camX, t: 0, varighet: 0.26, verk: i, snø: !riktig || avvik > BLINK });
+
+        if (!riktig) {
+            g.fase = 'rasende'; g.humor = -1;
+            g.ord = pick(SUR); g.ordT = 1.6;
+            feil++; serie = 0;
+            humor = clamp(humor - 7, 0, 100);
+            spawnJager(g);
+            SFX.sur();
+        } else if (avvik <= BLINK) {
+            g.fase = 'glad'; g.humor = 1;
+            g.ord = pick(BLINKORD); g.ordT = 1.3;
+            levert++; blinker++; serie++;
+            poeng += 150 + Math.min(serie, 12) * 15;
+            humor = clamp(humor + 2, 0, 100);
+            sprut.push({ x: g.x - camX, y: bakke - gubbeHoy * 0.55, t: 0 });
+            SFX.blink();
+        } else {
+            g.fase = 'glad'; g.humor = 0.5;
+            g.ord = pick(GLAD); g.ordT = 1.2;
+            levert++; serie++;
+            poeng += 70;
+            humor = clamp(humor + 1, 0, 100);
+            SFX.glad();
+        }
+    }
+
+    function spawnJager(g) {
+        jaget++;
+        const n = jag.length;
+        jag.push({
+            x: camX + vanX - JAG_START, vil: g.vil,
+            type: n < 2 ? 'fot' : n < 4 ? 'sykkel' : 'graver',
+            fart: FART + (n < 2 ? 13 : n < 4 ? 17 : 10),
+            gubbe: g.gubbe, sinne: 1, ord: '', ordT: 0, fase: 'jager', t: 0,
+        });
+    }
+
+    addEventListener('keydown', (e) => {
+        if (e.key >= '1' && e.key <= '6') { e.preventDefault(); kast(+e.key - 1); }
+        if (e.key === 'm' || e.key === 'M') $('muteBtn').click();
+        if ((e.key === ' ' || e.key === 'Enter') && tilstand !== 'kjorer' && !$('startBtn').disabled) { e.preventDefault(); start(); }
+    });
+    cv.addEventListener('pointerdown', () => ensureAudio());
+
+    // ==================================================================
+    //  Oppdatering
+    // ==================================================================
+    function oppdater(dt) {
+        dagT += dt;
+        const p = clamp(dagT / DAG_SEK, 0, 1);
+        camX += FART * dt;
+        rist = Math.max(0, rist - dt * 3);
+
+        for (const g of gutta) {
+            const sx = g.x - camX;
+            g.t += dt;
+            if (g.fase === 'venter' && sx < W + KO_FRA) {
+                const ledige = VERKTOY.map((_, i) => i).filter((i) => !odelagt[i]);
+                g.vil = ledige.length ? pick(ledige) : 0;
+                g.fase = 'roper';
+            }
+            if (g.fase === 'roper' && sx < sone - TREFF) {
+                g.fase = 'bommet'; g.humor = -0.5;
+                g.ord = pick(BOM); g.ordT = 1.2;
+                serie = 0;
+                humor = clamp(humor - 3, 0, 100);
+                SFX.bom();
+            }
+            if (g.ordT > 0) g.ordT -= dt;
+            g.vink += dt * (g.fase === 'rasende' ? 16 : g.fase === 'roper' ? 6 : 3);
+        }
+
+        for (let i = jag.length - 1; i >= 0; i--) {
+            const j = jag[i];
+            j.t += dt;
+            if (j.ordT > 0) j.ordT -= dt;
+            if (j.fase === 'fredet') {
+                j.x -= 60 * dt;
+                if (j.ordT <= 0) jag.splice(i, 1);
+                continue;
+            }
+            j.x += (j.fart + j.sinne * 4) * dt;
+            const bak = camX + vanX - j.x;
+            if (bak < JAG_TAK) slass(j, i);
+            else if (bak > JAG_START * 1.8) jag.splice(i, 1);
+        }
+
+        for (let i = kastene.length - 1; i >= 0; i--) {
+            kastene[i].t += dt;
+            if (kastene[i].t >= kastene[i].varighet) kastene.splice(i, 1);
+        }
+        for (let i = stov.length - 1; i >= 0; i--) { stov[i].t += dt; if (stov[i].t > 1.4) stov.splice(i, 1); }
+        for (let i = sprut.length - 1; i >= 0; i--) { sprut[i].t += dt; if (sprut[i].t > 0.7) sprut.splice(i, 1); }
+
+        oppdaterHud(p);
+        if (dagT >= DAG_SEK) slutt();
+    }
+
+    function slass(j, i) {
+        const ledige = VERKTOY.map((_, k) => k).filter((k) => !odelagt[k]);
+        if (ledige.length > 2) { odelagt[pick(ledige)] = true; mistet++; tegnRack(); }
+        humor = clamp(humor - 4, 0, 100);
+        serie = 0;
+        stov.push({ x: vanX + vanB * 0.2, t: 0 });
+        rist = 1.4;
+        SFX.smell();
+        jag.splice(i, 1);
+    }
+
+    function oppdaterHud(p) {
+        const kl = KL_FRA + (KL_TIL - KL_FRA) * p;
+        const tt = Math.floor(kl), mm = Math.floor((kl - tt) * 60);
+        $('clock').textContent = String(tt).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+        $('mood').textContent = Math.round(humor) + '%';
+        $('score').textContent = poeng;
+        $('dayBar').style.width = (p * 100) + '%';
+        const mp = $('moodPill');
+        mp.classList.toggle('mid', humor < 70 && humor >= 40);
+        mp.classList.toggle('low', humor < 40);
+    }
+
+    // ==================================================================
+    //  Tegning
+    // ==================================================================
+    function tegn() {
+        ctx.save();
+        ctx.scale(dpr, dpr);
+        if (rist > 0) ctx.translate(rnd(-1, 1) * rist * 6, rnd(-1, 1) * rist * 4);
+
+        const p = clamp(dagT / DAG_SEK, 0, 1);
+        himmel(p);
+        bakgrunn();
+
+        // Snøkant og vei
+        ctx.fillStyle = '#e6e1d7';
+        ctx.fillRect(0, bakke - 12, W, 26);
+        ctx.fillStyle = '#242020';
+        ctx.fillRect(0, bakke + 14, W, rackTopp - bakke);
+        ctx.strokeStyle = 'rgba(242,165,65,.4)';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([30, 26]);
+        ctx.lineDashOffset = -(camX % 56);
+        const vy = bakke + 14 + (rackTopp - bakke) * 0.62;
+        ctx.beginPath(); ctx.moveTo(0, vy); ctx.lineTo(W, vy); ctx.stroke();
+        ctx.setLineDash([]);
+
+        blinkSone();
+
+        for (const g of gutta) {
+            const sx = g.x - camX;
+            if (sx < -400 || sx > W + 400) continue;
+            tegnGubbe(sx, g);
+        }
+        for (const j of jag) {
+            const sx = j.x - camX;
+            if (sx < -400 || sx > W + 400) continue;
+            tegnJager(sx, j);
+        }
+
+        tegnVan(vanX);
+
+        for (const k of kastene) {
+            const f = k.t / k.varighet;
+            const x = k.fra + (k.til - k.fra) * f;
+            const y0 = vanBase - vanHoy * 0.62;
+            const y1 = k.snø ? bakke - 4 : bakke - gubbeHoy * 0.52;
+            const y = y0 + (y1 - y0) * f - Math.sin(f * Math.PI) * (gubbeHoy * 0.3);
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(f * (k.bakover ? -11 : 11));
+            ctx.translate(-16, -16);
+            tegnVerktoy(ctx, VERKTOY[k.verk].id, 32);
+            ctx.restore();
+        }
+
+        for (const s of sprut) {
+            const f = s.t / 0.7;
+            ctx.save();
+            ctx.globalAlpha = 1 - f;
+            ctx.strokeStyle = '#ffd98a';
+            ctx.lineWidth = 3;
+            for (let i = 0; i < 8; i++) {
+                const a = i / 8 * Math.PI * 2;
+                const r0 = 14 + f * 44, r1 = r0 + 14;
+                ctx.beginPath();
+                ctx.moveTo(s.x + Math.cos(a) * r0, s.y + Math.sin(a) * r0);
+                ctx.lineTo(s.x + Math.cos(a) * r1, s.y + Math.sin(a) * r1);
+                ctx.stroke();
+            }
+            ctx.restore();
+        }
+
+        for (const s of stov) {
+            const f = s.t / 1.4;
+            ctx.save();
+            ctx.globalAlpha = (1 - f) * 0.95;
+            ctx.fillStyle = '#cdbfae';
+            for (let i = 0; i < 10; i++) {
+                const a = i / 10 * Math.PI * 2 + s.t * 2;
+                const r = 20 + f * 56;
+                ctx.beginPath();
+                ctx.arc(s.x + Math.cos(a) * r, bakke - 30 + Math.sin(a) * r * 0.6, 20 - f * 9, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            if (f < 0.7) {
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = '#2a1f17';
+                ctx.font = '800 26px ' + FONT;
+                ctx.textAlign = 'center';
+                ctx.fillText('#!@%', s.x, bakke - 26);
+            }
+            ctx.restore();
+        }
+
+        if (tilstand === 'kjorer') lapper();
+
+        ctx.restore();
+    }
+
+    function himmel(p) {
+        const g = ctx.createLinearGradient(0, 0, 0, bakke);
+        if (p < 0.25) { g.addColorStop(0, '#1d2a44'); g.addColorStop(1, '#8a6a52'); }
+        else if (p < 0.7) { g.addColorStop(0, '#4f7fb5'); g.addColorStop(1, '#bcd3e4'); }
+        else { g.addColorStop(0, '#3a3f63'); g.addColorStop(1, '#c08455'); }
+        ctx.fillStyle = g;
+        ctx.fillRect(0, 0, W, bakke);
+    }
+
+    function bakgrunn() {
+        // Trestammer og stillas som glir forbi i halv fart.
+        const h = gubbeHoy;
+        const par = camX * 0.35;
+        ctx.save();
+        ctx.globalAlpha = 0.38;
+        ctx.fillStyle = '#23302a';
+        for (let i = -1; i < Math.ceil(W / 115) + 2; i++) {
+            const x = i * 115 - (par % 115);
+            ctx.beginPath();
+            ctx.moveTo(x, bakke); ctx.lineTo(x + 17, bakke - h * 0.8); ctx.lineTo(x + 34, bakke);
+            ctx.closePath(); ctx.fill();
+        }
+        ctx.restore();
+        const par2 = camX * 0.62;
+        ctx.save();
+        ctx.globalAlpha = 0.3;
+        ctx.strokeStyle = '#6b5a45';
+        ctx.lineWidth = 3;
+        for (let i = -1; i < Math.ceil(W / 300) + 2; i++) {
+            const x = i * 300 - (par2 % 300);
+            ctx.strokeRect(x, bakke - h * 0.95, 86, h * 0.95);
+            ctx.beginPath(); ctx.moveTo(x, bakke - h * 0.5); ctx.lineTo(x + 86, bakke - h * 0.5); ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    /** Blinken. Den lyse sonen er hele timingen i spillet, så den må synes. */
+    function blinkSone() {
+        const topp = bakke - gubbeHoy * 1.12;
+        const puls = 0.5 + 0.5 * Math.sin(dagT * 3.4);
+        ctx.save();
+
+        // Lyskjegle ned i sonen
+        const g = ctx.createLinearGradient(0, topp, 0, bakke + 16);
+        g.addColorStop(0, 'rgba(255,207,122,.03)');
+        g.addColorStop(1, 'rgba(255,207,122,.26)');
+        ctx.fillStyle = g;
+        ctx.fillRect(sone - BLINK, topp, BLINK * 2, bakke - topp + 16);
+
+        // Kantene
+        ctx.strokeStyle = 'rgba(255,207,122,' + (0.5 + puls * 0.3) + ')';
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.moveTo(sone - BLINK, topp); ctx.lineTo(sone - BLINK, bakke + 16);
+        ctx.moveTo(sone + BLINK, topp); ctx.lineTo(sone + BLINK, bakke + 16);
+        ctx.stroke();
+
+        // Malt felt i snøen – det er her du ser at han er inne
+        ctx.fillStyle = 'rgba(242,165,65,' + (0.5 + puls * 0.25) + ')';
+        ctx.fillRect(sone - BLINK, bakke - 13, BLINK * 2, 28);
+        ctx.fillStyle = '#2a1806';
+        ctx.font = '800 12px ' + FONT;
+        ctx.textAlign = 'center';
+        ctx.fillText('KAST HER', sone, bakke + 5);
+
+        ctx.restore();
+    }
+
+    function gubbeBilde(g, x, h, skjelv) {
+        const b = g.gubbe && g.gubbe.bilde;
+        const bredde = b ? h * (b.width / b.height) : h * 0.9;
+        ctx.save();
+        ctx.translate(x + (skjelv || 0), bakke);
+        ctx.fillStyle = 'rgba(0,0,0,.33)';
+        ctx.beginPath(); ctx.ellipse(0, 4, bredde * 0.36, 9, 0, 0, Math.PI * 2); ctx.fill();
+        if (b) ctx.drawImage(b, -bredde / 2, -h, bredde, h);
+        else { ctx.fillStyle = '#4a3f36'; ctx.fillRect(-bredde / 2, -h, bredde, h); }
+        ctx.restore();
+        return bredde;
+    }
+
+    function tegnGubbe(x, g) {
+        const sint = g.fase === 'rasende';
+        const skjelv = sint ? Math.sin(g.vink * 3) * 5 : 0;
+        const h = gubbeHoy * (g.fase === 'glad' ? 1.03 : 1);
+
+        if (sint) {
+            ctx.save();
+            ctx.globalAlpha = 0.45;
+            const r = ctx.createRadialGradient(x, bakke - h * 0.6, 10, x, bakke - h * 0.6, h * 0.7);
+            r.addColorStop(0, 'rgba(255,90,58,.8)');
+            r.addColorStop(1, 'rgba(255,90,58,0)');
+            ctx.fillStyle = r;
+            ctx.fillRect(x - h, bakke - h * 1.3, h * 2, h * 1.4);
+            ctx.restore();
+        }
+
+        gubbeBilde(g, x, h, skjelv);
+
+        if (g.fase === 'roper' && g.vil >= 0) boble(x, bakke - h - 30, g.vil);
+        if (g.ordT > 0) ordsky(x, bakke - h - 34, g.ord, g.humor < 0 ? '#ff7a59' : '#a6d65a', g.ordT);
+    }
+
+    function tegnJager(x, j) {
+        const h = gubbeHoy * 0.82;
+        const b = Math.abs(Math.sin(j.t * 11)) * 9;
+        ctx.save();
+        ctx.translate(0, -b);
+        if (j.type === 'graver') {
+            ctx.fillStyle = '#edb21f';
+            ctx.beginPath(); ctx.roundRect(x - h * 0.4, bakke - h * 0.72, h * 0.8, h * 0.56, 8); ctx.fill();
+            ctx.fillStyle = '#20242b';
+            ctx.fillRect(x - h * 0.26, bakke - h * 0.66, h * 0.44, h * 0.3);
+            ctx.fillStyle = '#2c2a28';
+            ctx.beginPath(); ctx.arc(x - h * 0.24, bakke - h * 0.1, h * 0.14, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(x + h * 0.24, bakke - h * 0.1, h * 0.14, 0, Math.PI * 2); ctx.fill();
+            ctx.strokeStyle = '#edb21f'; ctx.lineWidth = 9; ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(x + h * 0.3, bakke - h * 0.6);
+            ctx.lineTo(x + h * 0.66, bakke - h * 0.95);
+            ctx.lineTo(x + h * 0.44, bakke - h * 1.16);
+            ctx.stroke();
+        } else {
+            gubbeBilde(j, x, h, Math.sin(j.t * 22) * 3);
+            if (j.type === 'sykkel') {
+                ctx.strokeStyle = '#8d98a3'; ctx.lineWidth = 4;
+                ctx.beginPath(); ctx.arc(x - h * 0.2, bakke - h * 0.08, h * 0.13, 0, Math.PI * 2); ctx.stroke();
+                ctx.beginPath(); ctx.arc(x + h * 0.2, bakke - h * 0.08, h * 0.13, 0, Math.PI * 2); ctx.stroke();
+            }
+        }
+        ctx.restore();
+
+        const y0 = bakke - h - 26 - b;
+        if (j.fase !== 'fredet' && j.vil >= 0) boble(x, y0, j.vil);
+        if (j.ordT > 0) ordsky(x, y0 - 46, j.ord, j.fase === 'fredet' ? '#a6d65a' : '#ff7a59', j.ordT);
+    }
+
+    function tegnVan(x) {
+        const h = vanHoy, b = vanB;
+        const y = vanBase;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.fillStyle = 'rgba(0,0,0,.45)';
+        ctx.beginPath(); ctx.ellipse(0, 2, b * 0.52, 10, 0, 0, Math.PI * 2); ctx.fill();
+
+        // hjul
+        ctx.fillStyle = '#17181b';
+        [-b * 0.3, b * 0.3].forEach((hx) => {
+            ctx.beginPath(); ctx.arc(hx, -h * 0.06, h * 0.19, 0, Math.PI * 2); ctx.fill();
+        });
+
+        // karosseri, sett fra siden, front mot høyre
+        ctx.fillStyle = '#f4f0e8';
+        ctx.beginPath();
+        ctx.moveTo(-b * 0.5, -h * 0.1);
+        ctx.lineTo(-b * 0.5, -h * 0.92);
+        ctx.lineTo(b * 0.16, -h * 0.92);
+        ctx.lineTo(b * 0.38, -h * 0.62);
+        ctx.lineTo(b * 0.5, -h * 0.58);
+        ctx.lineTo(b * 0.5, -h * 0.1);
+        ctx.closePath(); ctx.fill();
+
+        ctx.fillStyle = '#1d2630';
+        ctx.beginPath();
+        ctx.moveTo(b * 0.17, -h * 0.86);
+        ctx.lineTo(b * 0.34, -h * 0.63);
+        ctx.lineTo(b * 0.17, -h * 0.63);
+        ctx.closePath(); ctx.fill();
+
+        // åpen skyvedør – det er her du står og kaster fra
+        ctx.fillStyle = '#2b2520';
+        ctx.beginPath(); ctx.roundRect(-b * 0.4, -h * 0.82, b * 0.42, h * 0.6, 4); ctx.fill();
+
+        ctx.fillStyle = '#f2a541';
+        ctx.beginPath(); ctx.roundRect(-b * 0.36, -h * 0.44, b * 0.34, h * 0.19, 4); ctx.fill();
+        ctx.fillStyle = '#2a1806';
+        ctx.font = '800 ' + Math.round(h * 0.13) + 'px ' + FONT;
+        ctx.textAlign = 'center';
+        ctx.fillText('MINIO', -b * 0.19, -h * 0.3);
+
+        ctx.fillStyle = '#ffe9a8';
+        ctx.beginPath(); ctx.roundRect(b * 0.42, -h * 0.5, b * 0.08, h * 0.1, 3); ctx.fill();
+        ctx.restore();
+    }
+
+    function boble(x, y0, verk) {
+        const s = clamp(gubbeHoy * 0.19, 30, 58);
+        x = clamp(x, s * 0.8, W - s * 0.8);
+        const gratt = odelagt[verk];
+        ctx.save();
+        ctx.fillStyle = gratt ? 'rgba(60,50,42,.95)' : 'rgba(250,246,239,.97)';
+        ctx.strokeStyle = gratt ? 'rgba(255,122,89,.6)' : 'rgba(0,0,0,.3)';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.roundRect(x - s * 0.72, y0 - s * 0.72, s * 1.44, s * 1.3, s * 0.3); ctx.fill(); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x - s * 0.2, y0 + s * 0.55); ctx.lineTo(x, y0 + s * 0.95); ctx.lineTo(x + s * 0.2, y0 + s * 0.55);
+        ctx.closePath(); ctx.fill();
+        ctx.save();
+        ctx.translate(x - s * 0.5, y0 - s * 0.5);
+        tegnVerktoy(ctx, VERKTOY[verk].id, s);
+        ctx.restore();
+        ctx.restore();
+    }
+
+    function ordsky(x, y0, tekst, farge, t) {
+        if (!tekst) return;
+        ctx.save();
+        ctx.globalAlpha = clamp(t * 1.7, 0, 1);
+        ctx.font = '800 22px ' + FONT;
+        const w = ctx.measureText(tekst).width + 26;
+        ctx.translate(clamp(x, w / 2 + 6, W - w / 2 - 6), y0 - (1.6 - t) * 22);
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(16,12,9,.92)';
+        ctx.strokeStyle = farge;
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.roundRect(-w / 2, -21, w, 33, 10); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = farge;
+        ctx.fillText(tekst, 0, 3);
+        ctx.restore();
+    }
+
+    /** Bestillingslappene – de neste tre som kommer. Her ligger stresset. */
+    function lapper() {
+        const kommer = gutta
+            .filter((g) => g.fase === 'roper' && (g.x - camX) >= sone - BLINK)
+            .sort((a, b) => a.x - b.x)
+            .slice(0, 3);
+        if (!kommer.length) return;
+
+        const s = 40, pad = 7;
+        let x = 14;
+        const y = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--sat')) || 0) + 112;
+        for (const g of kommer) {
+            const igjen = clamp(((g.x - camX) - (sone - BLINK)) / (W + KO_FRA - (sone - BLINK)), 0, 1);
+            ctx.save();
+            ctx.fillStyle = 'rgba(20,15,12,.82)';
+            ctx.strokeStyle = igjen < 0.18 ? 'rgba(255,122,89,.9)' : 'rgba(255,214,170,.2)';
+            ctx.lineWidth = 1.6;
+            ctx.beginPath(); ctx.roundRect(x, y, s + pad * 2, s + pad * 2 + 7, 10); ctx.fill(); ctx.stroke();
+            ctx.save();
+            ctx.translate(x + pad, y + pad);
+            tegnVerktoy(ctx, VERKTOY[g.vil].id, s);
+            ctx.restore();
+            ctx.fillStyle = igjen < 0.18 ? '#ff7a59' : '#f2a541';
+            ctx.fillRect(x + pad, y + pad + s + 2, s * (1 - igjen), 3);
+            ctx.restore();
+            x += s + pad * 2 + 8;
+        }
+    }
+
+    // ==================================================================
+    //  Skiftets gang
+    // ==================================================================
+    function start() {
+        ensureAudio();
+        nyDag();
+        tilstand = 'kjorer';
+        $('startOverlay').classList.remove('show');
+        $('overOverlay').classList.remove('show');
+        $('hud').classList.add('on');
+        $('rack').classList.add('on');
+        sist = performance.now();
+    }
+
+    function slutt() {
+        tilstand = 'slutt';
+        $('hud').classList.remove('on');
+        $('rack').classList.remove('on');
+        const h = Math.round(humor);
+        const s = SITATER.find((q) => h >= q.fra) || SITATER[SITATER.length - 1];
+        $('finalMood').textContent = h + '%';
+        $('rank').textContent = (RANGER.find((r) => h >= r.fra) || RANGER[RANGER.length - 1]).t;
+        $('quoteText').textContent = '«' + s.t + '»';
+        $('quoteBy').textContent = s.by;
+        $('fDeliv').textContent = levert;
+        $('fBlink').textContent = blinker;
+        $('fWrong').textContent = feil;
+        $('fSno').textContent = isno;
+        $('fChase').textContent = jaget;
+        $('fScore').textContent = poeng;
+        $('overOverlay').classList.add('show');
+        try { localStorage.setItem('basen.dag', String((dagIdx + 1) % DAGER.length)); } catch (e) { /* ignorer */ }
+    }
+
+    $('startBtn').addEventListener('click', start);
+    $('retryBtn').addEventListener('click', start);
+
+    function ramme(na) {
+        requestAnimationFrame(ramme);
+        const dt = Math.min(0.05, (na - sist) / 1000);
+        sist = na;
+        if (tilstand === 'kjorer') { oppdater(dt); musikk(); }
+        tegn();
+    }
+    nyDag();
+    sist = performance.now();
+    requestAnimationFrame(ramme);
+})();
+</script>
+</body>
+</html>
