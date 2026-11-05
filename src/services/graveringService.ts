@@ -1,6 +1,18 @@
-import { addDoc, collection, doc, getDocs, orderBy, query, serverTimestamp, updateDoc } from 'firebase/firestore'
+import {
+  addDoc,
+  collection,
+  doc,
+  getCountFromServer,
+  getDocs,
+  orderBy,
+  query,
+  serverTimestamp,
+  updateDoc,
+  where,
+} from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import type { Valg } from '../data/gravering'
+import type { Oppfolging } from '../types/oppfolging'
 
 /**
  * Graveringsbestillinger. I motsetning til designforespørslene krever disse
@@ -17,7 +29,7 @@ const COLLECTION = 'graveringBestillinger'
 
 export type GraveringStatus = 'ny' | 'besvart' | 'lukket'
 
-export interface GraveringBestilling {
+export interface GraveringBestilling extends Oppfolging {
   id?: string
   /**
    * Felles id for varene i samme bestilling. Hver vare lagres som sitt eget
@@ -75,4 +87,34 @@ export async function getAlleGraveringer(): Promise<GraveringBestilling[]> {
 
 export async function oppdaterGraveringStatus(id: string, status: GraveringStatus): Promise<void> {
   await updateDoc(doc(db, COLLECTION, id), { status })
+}
+
+/**
+ * Setter «gjort»/«fakturert»-markørene (admin).
+ *
+ * Markeres per vare, ikke per ordre: hver vare har sin egen produksjonsfil og
+ * kan graveres på hver sin dag. Hører flere varer til samme `ordreId`, hukes
+ * de av hver for seg – fakturaen dekker dem likevel samlet.
+ */
+export async function oppdaterGraveringOppfolging(id: string, endring: Oppfolging): Promise<void> {
+  await updateDoc(doc(db, COLLECTION, id), { ...endring })
+}
+
+/**
+ * Hvor mange graveringer som venter på faktura – til dashbordet.
+ *
+ * Teller på serveren i stedet for å hente dokumentene: hver gravering bærer
+ * produksjons-SVG-en (opptil 400 kB), og dashbordet skal ikke laste ned alle
+ * for å vise ett tall.
+ *
+ * Regnes som «alle minus fakturerte», ikke som et oppslag på fakturert ==
+ * false: bestillinger fra før oppfølgingsfeltene fantes mangler feltet helt,
+ * og et likhetsoppslag ville hoppet over nettopp dem.
+ */
+export async function antallUfakturerteGraveringer(): Promise<number> {
+  const [alle, fakturerte] = await Promise.all([
+    getCountFromServer(collection(db, COLLECTION)),
+    getCountFromServer(query(collection(db, COLLECTION), where('fakturert', '==', true))),
+  ])
+  return alle.data().count - fakturerte.data().count
 }

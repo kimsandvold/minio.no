@@ -1,3 +1,5 @@
+import type { Oppfolging } from './oppfolging'
+
 /**
  * Forespørsel fra designverktøyet. Kunden ber om å få designet bygget
  * («ferdig»), kappet som materialpakke («materialpakke») eller om å kjøpe
@@ -12,7 +14,7 @@
 export type ForesporselType = 'ferdig' | 'materialpakke' | 'byggeplan'
 export type ForesporselStatus = 'ny' | 'besvart' | 'lukket'
 
-export interface DesignForesporsel {
+export interface DesignForesporsel extends Oppfolging {
   id?: string
   userId: string
   userEmail: string

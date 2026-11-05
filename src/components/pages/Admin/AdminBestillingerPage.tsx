@@ -4,10 +4,22 @@ import { getAllOrders } from '../../../services/orderService'
 import AdminOrderCard from './AdminOrderCard'
 import type { Order, OrderStatus } from '../../../types/order'
 import { orderStatusLabels } from '../../../types/order'
+import type { Oppfolging } from '../../../types/oppfolging'
 import { AdminPageHead, Tabs, Tab, Loading, Empty } from './adminUi'
 
-type FilterKey = 'alle' | OrderStatus
-const filterOptions: FilterKey[] = ['alle', 'ny', 'bekreftet', 'under_arbeid', 'ferdig', 'kansellert']
+/**
+ * «ufakturert» er ikke en status, men arbeidslista di: alt du har gjort uten å
+ * ha sendt faktura ennå. Kansellerte ordre holdes utenfor – de skal aldri
+ * faktureres.
+ */
+type FilterKey = 'alle' | OrderStatus | 'ufakturert'
+const filterOptions: FilterKey[] = ['alle', 'ny', 'bekreftet', 'under_arbeid', 'ferdig', 'kansellert', 'ufakturert']
+
+const filterLabel = (f: FilterKey) =>
+  f === 'alle' ? 'Alle' : f === 'ufakturert' ? 'Ikke fakturert' : orderStatusLabels[f]
+
+const matcher = (o: Order, f: FilterKey) =>
+  f === 'alle' ? true : f === 'ufakturert' ? !o.fakturert && o.status !== 'kansellert' : o.status === f
 
 export default function AdminBestillingerPage() {
   const [orders, setOrders] = useState<Order[]>([])
@@ -22,8 +34,12 @@ export default function AdminBestillingerPage() {
     setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)))
   }, [])
 
-  const filtered = activeFilter === 'alle' ? orders : orders.filter((o) => o.status === activeFilter)
-  const count = (f: FilterKey) => (f === 'alle' ? orders.length : orders.filter((o) => o.status === f).length)
+  const handleOppfolgingChange = useCallback((orderId: string, endring: Oppfolging) => {
+    setOrders((prev) => prev.map((o) => (o.id === orderId ? { ...o, ...endring } : o)))
+  }, [])
+
+  const filtered = orders.filter((o) => matcher(o, activeFilter))
+  const count = (f: FilterKey) => orders.filter((o) => matcher(o, f)).length
 
   return (
     <>
@@ -36,17 +52,25 @@ export default function AdminBestillingerPage() {
           <Tabs>
             {filterOptions.map((f) => (
               <Tab key={f} $active={activeFilter === f} onClick={() => setActiveFilter(f)}>
-                {f === 'alle' ? 'Alle' : orderStatusLabels[f]} <em>({count(f)})</em>
+                {filterLabel(f)} <em>({count(f)})</em>
               </Tab>
             ))}
           </Tabs>
 
           {filtered.length === 0 ? (
-            <Empty><h2>Ingen bestillinger</h2><p>Ingen bestillinger med denne statusen.</p></Empty>
+            <Empty>
+              <h2>Ingen bestillinger</h2>
+              <p>{activeFilter === 'ufakturert' ? 'Alt er fakturert.' : 'Ingen bestillinger med denne statusen.'}</p>
+            </Empty>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {filtered.map((order) => (
-                <AdminOrderCard key={order.id} order={order} onStatusChange={handleStatusChange} />
+                <AdminOrderCard
+                  key={order.id}
+                  order={order}
+                  onStatusChange={handleStatusChange}
+                  onOppfolgingChange={handleOppfolgingChange}
+                />
               ))}
             </div>
           )}

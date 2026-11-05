@@ -2,9 +2,15 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import Icon from '../../shared/Icon'
-import { getAlleForesporsler, oppdaterForesporselStatus } from '../../../services/foresporselService'
+import {
+  getAlleForesporsler,
+  oppdaterForesporselOppfolging,
+  oppdaterForesporselStatus,
+} from '../../../services/foresporselService'
 import type { DesignForesporsel, ForesporselStatus } from '../../../types/foresporsel'
 import { foresporselStatusLabel, foresporselTypeLabel } from '../../../types/foresporsel'
+import type { Oppfolging } from '../../../types/oppfolging'
+import AdminOppfolging from './AdminOppfolging'
 import { AdminPageHead, Tabs, Tab, Loading, Empty } from './adminUi'
 
 /**
@@ -43,9 +49,17 @@ function svarTekst(f: DesignForesporsel): string {
 
 const formatKr = (n: number) => `${n.toLocaleString('nb-NO')} kr`
 
-type FilterKey = 'alle' | ForesporselStatus
-const filterOptions: FilterKey[] = ['alle', 'ny', 'besvart', 'lukket']
+// «ufakturert» er arbeidslista: byggeplanene er solgt mot faktura, så det er
+// her du ser hvem som har fått koden uten at regningen er sendt.
+type FilterKey = 'alle' | ForesporselStatus | 'ufakturert'
+const filterOptions: FilterKey[] = ['alle', 'ny', 'besvart', 'lukket', 'ufakturert']
 const statuser: ForesporselStatus[] = ['ny', 'besvart', 'lukket']
+
+const filterNavn = (k: FilterKey) =>
+  k === 'alle' ? 'Alle' : k === 'ufakturert' ? 'Ikke fakturert' : foresporselStatusLabel[k]
+
+const treffer = (f: DesignForesporsel, k: FilterKey) =>
+  k === 'alle' ? true : k === 'ufakturert' ? !f.fakturert : f.status === k
 
 export default function AdminForesporslerPage() {
   const [liste, setListe] = useState<DesignForesporsel[]>([])
@@ -61,8 +75,13 @@ export default function AdminForesporslerPage() {
     try { await oppdaterForesporselStatus(id, status) } catch { /* optimistisk */ }
   }
 
-  const synlige = filter === 'alle' ? liste : liste.filter((f) => f.status === filter)
-  const antall = (k: FilterKey) => (k === 'alle' ? liste.length : liste.filter((f) => f.status === k).length)
+  const setOppfolging = async (id: string, endring: Oppfolging) => {
+    await oppdaterForesporselOppfolging(id, endring)
+    setListe((prev) => prev.map((f) => (f.id === id ? { ...f, ...endring } : f)))
+  }
+
+  const synlige = liste.filter((f) => treffer(f, filter))
+  const antall = (k: FilterKey) => liste.filter((f) => treffer(f, k)).length
 
   return (
     <>
@@ -75,13 +94,16 @@ export default function AdminForesporslerPage() {
           <Tabs>
             {filterOptions.map((k) => (
               <Tab key={k} $active={filter === k} onClick={() => setFilter(k)}>
-                {k === 'alle' ? 'Alle' : foresporselStatusLabel[k]} <em>({antall(k)})</em>
+                {filterNavn(k)} <em>({antall(k)})</em>
               </Tab>
             ))}
           </Tabs>
 
           {synlige.length === 0 ? (
-            <Empty><h2>Ingen forespørsler</h2><p>Ingen forespørsler med denne statusen.</p></Empty>
+            <Empty>
+              <h2>Ingen forespørsler</h2>
+              <p>{filter === 'ufakturert' ? 'Alt er fakturert.' : 'Ingen forespørsler med denne statusen.'}</p>
+            </Empty>
           ) : (
             <Liste>
               {synlige.map((f) => (
@@ -142,6 +164,11 @@ export default function AdminForesporslerPage() {
                   <Spec>{f.sammendrag}</Spec>
                   {f.konfigurasjon && <Spec style={{ whiteSpace: 'pre-line' }}>{f.konfigurasjon}</Spec>}
                   {f.melding && <Melding>«{f.melding}»</Melding>}
+                  {f.id && (
+                    <Oppfolgingsrad>
+                      <AdminOppfolging verdi={f} onLagre={(endring) => setOppfolging(f.id as string, endring)} />
+                    </Oppfolgingsrad>
+                  )}
                   <KortBunn>
                     <a
                       href={`mailto:${f.userEmail}?subject=${encodeURIComponent(
@@ -164,6 +191,7 @@ export default function AdminForesporslerPage() {
 }
 
 const Liste = styled.div`display: flex; flex-direction: column; gap: 1rem;`
+const Oppfolgingsrad = styled.div`margin-top: 0.9rem;`
 const Kort = styled.div`
   background: #fff; border: 1px solid #e7e5df; border-radius: 14px; padding: 1.15rem 1.25rem; box-shadow: 0 1px 3px rgba(60, 42, 28, 0.04);
 `

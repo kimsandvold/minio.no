@@ -2,7 +2,9 @@ import { useState } from 'react'
 import styled from 'styled-components'
 import type { Order, OrderStatus } from '../../../types/order'
 import { orderStatusLabels, orderStatusColors } from '../../../types/order'
-import { updateOrderStatus } from '../../../services/orderService'
+import type { Oppfolging } from '../../../types/oppfolging'
+import { updateOrderStatus, updateOrderOppfolging } from '../../../services/orderService'
+import AdminOppfolging, { OppfolgingMerker } from './AdminOppfolging'
 import { formatSum } from '../../../utils/formatPrice'
 import Icon from '../../shared/Icon'
 
@@ -182,9 +184,10 @@ function formatDate(timestamp: { seconds: number } | null): string {
 interface AdminOrderCardProps {
   order: Order
   onStatusChange: (orderId: string, status: OrderStatus) => void
+  onOppfolgingChange: (orderId: string, endring: Oppfolging) => void
 }
 
-export default function AdminOrderCard({ order, onStatusChange }: AdminOrderCardProps) {
+export default function AdminOrderCard({ order, onStatusChange, onOppfolgingChange }: AdminOrderCardProps) {
   const [expanded, setExpanded] = useState(false)
   const [newStatus, setNewStatus] = useState<OrderStatus>(order.status)
   const [saving, setSaving] = useState(false)
@@ -201,6 +204,11 @@ export default function AdminOrderCard({ order, onStatusChange }: AdminOrderCard
     setSaving(false)
   }
 
+  const handleOppfolging = async (endring: Oppfolging) => {
+    await updateOrderOppfolging(order.id, endring)
+    onOppfolgingChange(order.id, endring)
+  }
+
   return (
     <Card>
       <CardHeader $clickable onClick={() => setExpanded(!expanded)}>
@@ -209,6 +217,7 @@ export default function AdminOrderCard({ order, onStatusChange }: AdminOrderCard
           <OrderMeta>#{order.id.slice(0, 8)} &middot; {formatDate(order.createdAt)} &middot; {order.items.length} vare{order.items.length !== 1 ? 'r' : ''}</OrderMeta>
         </HeaderLeft>
         <HeaderRight>
+          <OppfolgingMerker verdi={order} />
           <TotalSum>{formatSum(order.totalSum)}</TotalSum>
           <StatusBadge $color={orderStatusColors[order.status]}>
             {orderStatusLabels[order.status]}
@@ -269,6 +278,11 @@ export default function AdminOrderCard({ order, onStatusChange }: AdminOrderCard
                 {saving ? 'Lagrer...' : 'Lagre'}
               </SaveBtn>
             </StatusControl>
+          </DetailSection>
+
+          <DetailSection>
+            <h4>Oppfølging</h4>
+            <AdminOppfolging verdi={order} onLagre={handleOppfolging} />
           </DetailSection>
         </Details>
       )}

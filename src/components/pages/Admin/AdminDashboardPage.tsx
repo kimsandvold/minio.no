@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import Icon from '../../shared/Icon'
 import { getAllOrders } from '../../../services/orderService'
 import { getAlleForesporsler } from '../../../services/foresporselService'
+import { antallUfakturerteGraveringer } from '../../../services/graveringService'
 import type { Order } from '../../../types/order'
 import type { DesignForesporsel } from '../../../types/foresporsel'
 import { foresporselTypeLabel } from '../../../types/foresporsel'
@@ -15,11 +16,16 @@ export default function AdminDashboardPage() {
   const navigate = useNavigate()
   const [orders, setOrders] = useState<Order[]>([])
   const [foresp, setForesp] = useState<DesignForesporsel[]>([])
+  const [ufakturerteGraveringer, setUfakturerteGraveringer] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    Promise.all([getAllOrders().catch(() => []), getAlleForesporsler().catch(() => [])])
-      .then(([o, f]) => { setOrders(o); setForesp(f) })
+    Promise.all([
+      getAllOrders().catch(() => []),
+      getAlleForesporsler().catch(() => []),
+      antallUfakturerteGraveringer().catch(() => 0),
+    ])
+      .then(([o, f, g]) => { setOrders(o); setForesp(f); setUfakturerteGraveringer(g) })
       .finally(() => setLoading(false))
   }, [])
 
@@ -27,6 +33,12 @@ export default function AdminDashboardPage() {
 
   const nyeOrdre = orders.filter((o) => o.status === 'ny').length
   const nyeForesp = foresp.filter((f) => f.status === 'ny').length
+  // Alt som venter på faktura, på tvers av de tre inngangene. Kansellerte
+  // ordre teller ikke – de skal aldri faktureres.
+  const ufakturert =
+    orders.filter((o) => !o.fakturert && o.status !== 'kansellert').length +
+    foresp.filter((f) => !f.fakturert).length +
+    ufakturerteGraveringer
 
   return (
     <>
@@ -37,6 +49,8 @@ export default function AdminDashboardPage() {
         <Stat icon="faLayerGroup" label="Bestillinger totalt" value={orders.length} onClick={() => navigate('/admin/bestillinger')} />
         <Stat icon="faHammer" tone="green" label="Nye forespørsler" value={nyeForesp} onClick={() => navigate('/admin/foresporsler')} />
         <Stat icon="faEnvelopeOpenText" label="Forespørsler totalt" value={foresp.length} onClick={() => navigate('/admin/foresporsler')} />
+        {/* Teller på tvers av alle tre listene, og lenker derfor ikke til én av dem. */}
+        <Stat icon="faFileInvoice" tone="amber" label="Ikke fakturert" value={ufakturert} />
       </Stats>
 
       <Grid>

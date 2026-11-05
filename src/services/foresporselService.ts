@@ -11,6 +11,7 @@ import {
 import { db } from '../lib/firebase'
 import { LAGRINGSFRIST_MS, medTidsfrist } from '../utils/medTidsfrist'
 import type { DesignForesporsel, ForesporselStatus } from '../types/foresporsel'
+import type { Oppfolging } from '../types/oppfolging'
 import { foresporselTypeLabel } from '../types/foresporsel'
 
 const COLLECTION = 'designForesporsler'
@@ -85,4 +86,9 @@ export async function getAlleForesporsler(): Promise<DesignForesporsel[]> {
 
 export async function oppdaterForesporselStatus(id: string, status: ForesporselStatus): Promise<void> {
   await updateDoc(doc(db, COLLECTION, id), { status })
+}
+
+/** Setter «gjort»/«fakturert»-markørene (admin). */
+export async function oppdaterForesporselOppfolging(id: string, endring: Oppfolging): Promise<void> {
+  await updateDoc(doc(db, COLLECTION, id), { ...endring })
 }

@@ -12,6 +12,7 @@ import {
 import { db } from '../lib/firebase'
 import type { BasketItem } from '../types/product'
 import type { Order, OrderStatus } from '../types/order'
+import type { Oppfolging } from '../types/oppfolging'
 
 const ORDERS_COLLECTION = 'orders'
 
@@ -63,4 +64,10 @@ export async function getAllOrders(): Promise<Order[]> {
 export async function updateOrderStatus(orderId: string, status: OrderStatus): Promise<void> {
   const ref = doc(db, ORDERS_COLLECTION, orderId)
   await updateDoc(ref, { status, updatedAt: serverTimestamp() })
+}
+
+/** Setter «gjort»/«fakturert»-markørene (admin). Skriver bare feltene i endringen. */
+export async function updateOrderOppfolging(orderId: string, endring: Oppfolging): Promise<void> {
+  const ref = doc(db, ORDERS_COLLECTION, orderId)
+  await updateDoc(ref, { ...endring, updatedAt: serverTimestamp() })
 }

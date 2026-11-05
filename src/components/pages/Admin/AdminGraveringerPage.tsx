@@ -5,10 +5,13 @@ import GraveringPreview from '../Gravering/GraveringPreview'
 import {
   getAlleGraveringer,
   graveringStatusLabel,
+  oppdaterGraveringOppfolging,
   oppdaterGraveringStatus,
   type GraveringBestilling,
   type GraveringStatus,
 } from '../../../services/graveringService'
+import type { Oppfolging } from '../../../types/oppfolging'
+import AdminOppfolging from './AdminOppfolging'
 import { AdminPageHead, Empty, Loading, Tab, Tabs } from './adminUi'
 
 /**
@@ -54,9 +57,17 @@ function lastNed(b: GraveringBestilling): void {
 
 const kr = (n: number) => `${n.toLocaleString('nb-NO')} kr`
 
-type FilterKey = 'alle' | GraveringStatus
-const filtre: FilterKey[] = ['alle', 'ny', 'besvart', 'lukket']
+// «ufakturert» er arbeidslista: alt som ikke er fakturert ennå, uavhengig av
+// hvor langt dialogen med kunden har kommet.
+type FilterKey = 'alle' | GraveringStatus | 'ufakturert'
+const filtre: FilterKey[] = ['alle', 'ny', 'besvart', 'lukket', 'ufakturert']
 const statuser: GraveringStatus[] = ['ny', 'besvart', 'lukket']
+
+const filterNavn = (k: FilterKey) =>
+  k === 'alle' ? 'Alle' : k === 'ufakturert' ? 'Ikke fakturert' : graveringStatusLabel[k]
+
+const treffer = (b: GraveringBestilling, k: FilterKey) =>
+  k === 'alle' ? true : k === 'ufakturert' ? !b.fakturert : b.status === k
 
 export default function AdminGraveringerPage() {
   const [liste, setListe] = useState<GraveringBestilling[]>([])
@@ -68,6 +79,11 @@ export default function AdminGraveringerPage() {
       .then(setListe)
       .finally(() => setLoading(false))
   }, [])
+
+  const setOppfolging = async (id: string, endring: Oppfolging) => {
+    await oppdaterGraveringOppfolging(id, endring)
+    setListe((prev) => prev.map((b) => (b.id === id ? { ...b, ...endring } : b)))
+  }
 
   const setStatus = async (id: string, status: GraveringStatus) => {
     setListe((prev) => prev.map((b) => (b.id === id ? { ...b, status } : b)))
@@ -84,8 +100,8 @@ export default function AdminGraveringerPage() {
     return n
   }, {})
 
-  const synlige = filter === 'alle' ? liste : liste.filter((b) => b.status === filter)
-  const antall = (k: FilterKey) => (k === 'alle' ? liste.length : liste.filter((b) => b.status === k).length)
+  const synlige = liste.filter((b) => treffer(b, filter))
+  const antall = (k: FilterKey) => liste.filter((b) => treffer(b, k)).length
 
   return (
     <>
@@ -103,7 +119,7 @@ export default function AdminGraveringerPage() {
           <Tabs>
             {filtre.map((k) => (
               <Tab key={k} $active={filter === k} onClick={() => setFilter(k)}>
-                {k === 'alle' ? 'Alle' : graveringStatusLabel[k]} <em>({antall(k)})</em>
+                {filterNavn(k)} <em>({antall(k)})</em>
               </Tab>
             ))}
           </Tabs>
@@ -111,7 +127,7 @@ export default function AdminGraveringerPage() {
           {synlige.length === 0 ? (
             <Empty>
               <h2>Ingen graveringer</h2>
-              <p>Ingen bestillinger med denne statusen.</p>
+              <p>{filter === 'ufakturert' ? 'Alt er fakturert.' : 'Ingen bestillinger med denne statusen.'}</p>
             </Empty>
           ) : (
             <Liste>
@@ -172,6 +188,10 @@ export default function AdminGraveringerPage() {
 
                     <Spek>{b.sammendrag}</Spek>
                     {b.melding && <Melding>«{b.melding}»</Melding>}
+
+                    {b.id && (
+                      <AdminOppfolging verdi={b} onLagre={(endring) => setOppfolging(b.id as string, endring)} />
+                    )}
 
                     <Handlinger>
                       <Primaer type="button" onClick={() => lastNed(b)} disabled={!b.svg}>

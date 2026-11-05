@@ -1,5 +1,6 @@
 import type { Timestamp } from 'firebase/firestore'
 import type { BasketItem } from './product'
+import type { Oppfolging } from './oppfolging'
 
 export type OrderStatus = 'ny' | 'bekreftet' | 'under_arbeid' | 'ferdig' | 'kansellert'
 
@@ -19,7 +20,7 @@ export const orderStatusColors: Record<OrderStatus, string> = {
   kansellert: '#b3382f',
 }
 
-export interface Order {
+export interface Order extends Oppfolging {
   id: string
   userId: string
   userEmail: string
