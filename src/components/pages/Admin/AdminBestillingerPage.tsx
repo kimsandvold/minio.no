@@ -8,18 +8,24 @@ import type { Oppfolging } from '../../../types/oppfolging'
 import { AdminPageHead, Tabs, Tab, Loading, Empty } from './adminUi'
 
 /**
- * «ufakturert» er ikke en status, men arbeidslista di: alt du har gjort uten å
- * ha sendt faktura ennå. Kansellerte ordre holdes utenfor – de skal aldri
- * faktureres.
+ * «usendt» og «ufakturert» er ikke statuser, men arbeidslistene dine: alt som
+ * ikke er sendt til kunden, og alt som ikke er fakturert ennå. Kansellerte
+ * ordre holdes utenfor begge – de skal aldri sendes eller faktureres.
  */
-type FilterKey = 'alle' | OrderStatus | 'ufakturert'
-const filterOptions: FilterKey[] = ['alle', 'ny', 'bekreftet', 'under_arbeid', 'ferdig', 'kansellert', 'ufakturert']
+type FilterKey = 'alle' | OrderStatus | 'usendt' | 'ufakturert'
+const filterOptions: FilterKey[] = ['alle', 'ny', 'bekreftet', 'under_arbeid', 'ferdig', 'kansellert', 'usendt', 'ufakturert']
 
 const filterLabel = (f: FilterKey) =>
-  f === 'alle' ? 'Alle' : f === 'ufakturert' ? 'Ikke fakturert' : orderStatusLabels[f]
+  f === 'alle' ? 'Alle'
+    : f === 'usendt' ? 'Ikke sendt'
+    : f === 'ufakturert' ? 'Ikke fakturert'
+    : orderStatusLabels[f]
 
 const matcher = (o: Order, f: FilterKey) =>
-  f === 'alle' ? true : f === 'ufakturert' ? !o.fakturert && o.status !== 'kansellert' : o.status === f
+  f === 'alle' ? true
+    : f === 'usendt' ? !o.sendt && o.status !== 'kansellert'
+    : f === 'ufakturert' ? !o.fakturert && o.status !== 'kansellert'
+    : o.status === f
 
 export default function AdminBestillingerPage() {
   const [orders, setOrders] = useState<Order[]>([])
@@ -60,7 +66,7 @@ export default function AdminBestillingerPage() {
           {filtered.length === 0 ? (
             <Empty>
               <h2>Ingen bestillinger</h2>
-              <p>{activeFilter === 'ufakturert' ? 'Alt er fakturert.' : 'Ingen bestillinger med denne statusen.'}</p>
+              <p>{activeFilter === 'usendt' ? 'Alt er sendt.' : activeFilter === 'ufakturert' ? 'Alt er fakturert.' : 'Ingen bestillinger med denne statusen.'}</p>
             </Empty>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

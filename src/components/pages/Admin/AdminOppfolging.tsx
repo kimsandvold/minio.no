@@ -4,15 +4,33 @@ import Icon from '../../shared/Icon'
 import { formatOppfolgingDato, idag, type Oppfolging } from '../../../types/oppfolging'
 
 /**
- * «Gjort» og «Fakturert med dato» – samme kontroll på alle admin-listene
- * (bestillinger, graveringer, forespørsler), slik at det ser likt ut og
- * oppfører seg likt uansett hvor bestillingen kom inn.
+ * «Gjort», «Sendt» og «Fakturert» med dato – samme kontroll på alle
+ * admin-listene (bestillinger, graveringer, forespørsler), slik at det ser
+ * likt ut og oppfører seg likt uansett hvor bestillingen kom inn.
  *
  * Lagrer med én gang du huker av eller endrer datoen; ingen Lagre-knapp.
- * Hakes «Gjort» eller «Fakturert» på, settes dagens dato automatisk – men
- * datofeltet står åpent, så en faktura du sendte i forrige uke kan bokføres
- * på riktig dag. Hakes den av igjen, nullstilles datoen.
+ * Hakes en markør på, settes dagens dato automatisk – men datofeltet står
+ * åpent, så en faktura du sendte i forrige uke kan bokføres på riktig dag.
+ * Hakes den av igjen, nullstilles datoen.
  */
+
+type Tone = 'gjort' | 'sendt' | 'faktura'
+
+interface Markor {
+  felt: 'gjort' | 'sendt' | 'fakturert'
+  dato: 'gjortDato' | 'sendtDato' | 'fakturaDato'
+  etikett: string
+  datoEtikett: string
+  ikon: string
+  tone: Tone
+}
+
+/** I den rekkefølgen jobben vanligvis går: gjort → sendt → fakturert. */
+const MARKORER: Markor[] = [
+  { felt: 'gjort', dato: 'gjortDato', etikett: 'Gjort', datoEtikett: 'Dato utført', ikon: 'faCircleCheck', tone: 'gjort' },
+  { felt: 'sendt', dato: 'sendtDato', etikett: 'Sendt', datoEtikett: 'Dato sendt', ikon: 'faTruck', tone: 'sendt' },
+  { felt: 'fakturert', dato: 'fakturaDato', etikett: 'Fakturert', datoEtikett: 'Fakturadato', ikon: 'faFileInvoice', tone: 'faktura' },
+]
 
 interface Props {
   verdi: Oppfolging
@@ -37,53 +55,34 @@ export default function AdminOppfolging({ verdi, onLagre }: Props) {
 
   return (
     <Rad>
-      <Felt $av={Boolean(verdi.gjort)}>
-        <label>
-          <input
-            type="checkbox"
-            checked={Boolean(verdi.gjort)}
-            onChange={(e) =>
-              lagre({
-                gjort: e.target.checked,
-                gjortDato: e.target.checked ? (verdi.gjortDato ?? idag()) : null,
-              })
-            }
-          />
-          <Icon name={verdi.gjort ? 'faCircleCheck' : 'faCircle'} /> Gjort
-        </label>
-        {verdi.gjort && (
-          <Dato
-            type="date"
-            value={verdi.gjortDato ?? ''}
-            onChange={(e) => lagre({ gjortDato: e.target.value || null })}
-            aria-label="Dato utført"
-          />
-        )}
-      </Felt>
-
-      <Felt $av={Boolean(verdi.fakturert)}>
-        <label>
-          <input
-            type="checkbox"
-            checked={Boolean(verdi.fakturert)}
-            onChange={(e) =>
-              lagre({
-                fakturert: e.target.checked,
-                fakturaDato: e.target.checked ? (verdi.fakturaDato ?? idag()) : null,
-              })
-            }
-          />
-          <Icon name={verdi.fakturert ? 'faCircleCheck' : 'faCircle'} /> Fakturert
-        </label>
-        {verdi.fakturert && (
-          <Dato
-            type="date"
-            value={verdi.fakturaDato ?? ''}
-            onChange={(e) => lagre({ fakturaDato: e.target.value || null })}
-            aria-label="Fakturadato"
-          />
-        )}
-      </Felt>
+      {MARKORER.map((m) => {
+        const pa = Boolean(verdi[m.felt])
+        return (
+          <Felt key={m.felt} $av={pa}>
+            <label>
+              <input
+                type="checkbox"
+                checked={pa}
+                onChange={(e) =>
+                  lagre({
+                    [m.felt]: e.target.checked,
+                    [m.dato]: e.target.checked ? (verdi[m.dato] ?? idag()) : null,
+                  })
+                }
+              />
+              <Icon name={pa ? 'faCircleCheck' : 'faCircle'} /> {m.etikett}
+            </label>
+            {pa && (
+              <Dato
+                type="date"
+                value={verdi[m.dato] ?? ''}
+                onChange={(e) => lagre({ [m.dato]: e.target.value || null })}
+                aria-label={m.datoEtikett}
+              />
+            )}
+          </Felt>
+        )
+      })}
 
       {lagrer && <Status><Icon name="faSpinner" spin /> Lagrer …</Status>}
       {feilet && !lagrer && (
@@ -96,25 +95,20 @@ export default function AdminOppfolging({ verdi, onLagre }: Props) {
 }
 
 /**
- * Kompakt visning av de samme to markørene, til korttopper og sammenslåtte
+ * Kompakt visning av de samme markørene, til korttopper og sammenslåtte
  * lister der kontrollen ikke er synlig. Viser ingenting når ingen er satt.
  */
 export function OppfolgingMerker({ verdi }: { verdi: Oppfolging }) {
-  if (!verdi.gjort && !verdi.fakturert) return null
+  const satt = MARKORER.filter((m) => verdi[m.felt])
+  if (satt.length === 0) return null
   return (
     <Merker>
-      {verdi.gjort && (
-        <Merke $tone="gjort">
-          <Icon name="faCircleCheck" /> Gjort
-          {verdi.gjortDato ? ` ${formatOppfolgingDato(verdi.gjortDato)}` : ''}
+      {satt.map((m) => (
+        <Merke key={m.felt} $tone={m.tone}>
+          <Icon name={m.ikon} /> {m.etikett}
+          {verdi[m.dato] ? ` ${formatOppfolgingDato(verdi[m.dato])}` : ''}
         </Merke>
-      )}
-      {verdi.fakturert && (
-        <Merke $tone="faktura">
-          <Icon name="faFileInvoice" /> Fakturert
-          {verdi.fakturaDato ? ` ${formatOppfolgingDato(verdi.fakturaDato)}` : ''}
-        </Merke>
-      )}
+      ))}
     </Merker>
   )
 }
@@ -194,7 +188,13 @@ const Merker = styled.span`
   gap: 0.35rem;
 `
 
-const Merke = styled.span<{ $tone: 'gjort' | 'faktura' }>`
+const MERKEFARGER: Record<Tone, { farge: string; bakgrunn: string }> = {
+  gjort: { farge: '#2f5d3a', bakgrunn: 'rgba(90, 143, 90, 0.16)' },
+  sendt: { farge: '#2f4f6b', bakgrunn: 'rgba(70, 120, 170, 0.16)' },
+  faktura: { farge: '#6b4a2f', bakgrunn: 'rgba(197, 149, 62, 0.18)' },
+}
+
+const Merke = styled.span<{ $tone: Tone }>`
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -203,6 +203,6 @@ const Merke = styled.span<{ $tone: 'gjort' | 'faktura' }>`
   font-size: 0.7rem;
   font-weight: 700;
   white-space: nowrap;
-  color: ${({ $tone }) => ($tone === 'gjort' ? '#2f5d3a' : '#6b4a2f')};
-  background: ${({ $tone }) => ($tone === 'gjort' ? 'rgba(90, 143, 90, 0.16)' : 'rgba(197, 149, 62, 0.18)')};
+  color: ${({ $tone }) => MERKEFARGER[$tone].farge};
+  background: ${({ $tone }) => MERKEFARGER[$tone].bakgrunn};
 `

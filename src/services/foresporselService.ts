@@ -88,7 +88,7 @@ export async function oppdaterForesporselStatus(id: string, status: ForesporselS
   await updateDoc(doc(db, COLLECTION, id), { status })
 }
 
-/** Setter «gjort»/«fakturert»-markørene (admin). */
+/** Setter «gjort»/«sendt»/«fakturert»-markørene (admin). */
 export async function oppdaterForesporselOppfolging(id: string, endring: Oppfolging): Promise<void> {
   await updateDoc(doc(db, COLLECTION, id), { ...endring })
 }

@@ -1,13 +1,13 @@
 /**
- * Oppfølging av en innkommen bestilling: er den gjort, og er den fakturert?
+ * Oppfølging av en innkommen bestilling: er den gjort, sendt og fakturert?
  *
- * Dette er bevisst to uavhengige markører ved siden av `status`. Statusen er
+ * Dette er bevisst tre uavhengige markører ved siden av `status`. Statusen er
  * dialogen med kunden (ny → bekreftet → ferdig / besvart → lukket), mens disse
- * to er din egen driftsbokføring: en ordre kan være produsert uten å være
+ * tre er din egen driftsbokføring: en ordre kan være produsert uten å være
  * fakturert, og en byggeplan kan være fakturert lenge før den er levert.
  *
  * Feltene er valgfrie fordi alle dokumenter som lå i Firestore før dette ble
- * laget mangler dem – de leses da som «ikke gjort» og «ikke fakturert».
+ * laget mangler dem – de leses da som «ikke gjort», «ikke sendt» og «ikke fakturert».
  *
  * Datoene lagres som 'ÅÅÅÅ-MM-DD'-strenger, ikke Timestamp: de skrives og
  * leses av <input type="date">, og det er dagen som teller for et bilag – ikke
@@ -18,6 +18,10 @@ export interface Oppfolging {
   gjort?: boolean
   /** Datoen den ble gjort, 'ÅÅÅÅ-MM-DD'. */
   gjortDato?: string | null
+  /** Varen er sendt til kunden (eller planen levert). */
+  sendt?: boolean
+  /** Datoen den ble sendt, 'ÅÅÅÅ-MM-DD'. */
+  sendtDato?: string | null
   /** Faktura er sendt. */
   fakturert?: boolean
   /** Fakturadato, 'ÅÅÅÅ-MM-DD'. */

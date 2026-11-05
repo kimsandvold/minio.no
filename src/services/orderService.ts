@@ -66,7 +66,7 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus): P
   await updateDoc(ref, { status, updatedAt: serverTimestamp() })
 }
 
-/** Setter «gjort»/«fakturert»-markørene (admin). Skriver bare feltene i endringen. */
+/** Setter «gjort»/«sendt»/«fakturert»-markørene (admin). Skriver bare feltene i endringen. */
 export async function updateOrderOppfolging(orderId: string, endring: Oppfolging): Promise<void> {
   const ref = doc(db, ORDERS_COLLECTION, orderId)
   await updateDoc(ref, { ...endring, updatedAt: serverTimestamp() })

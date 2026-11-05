@@ -90,7 +90,7 @@ export async function oppdaterGraveringStatus(id: string, status: GraveringStatu
 }
 
 /**
- * Setter «gjort»/«fakturert»-markørene (admin).
+ * Setter «gjort»/«sendt»/«fakturert»-markørene (admin).
  *
  * Markeres per vare, ikke per ordre: hver vare har sin egen produksjonsfil og
  * kan graveres på hver sin dag. Hører flere varer til samme `ordreId`, hukes

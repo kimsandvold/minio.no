@@ -57,17 +57,23 @@ function lastNed(b: GraveringBestilling): void {
 
 const kr = (n: number) => `${n.toLocaleString('nb-NO')} kr`
 
-// «ufakturert» er arbeidslista: alt som ikke er fakturert ennå, uavhengig av
-// hvor langt dialogen med kunden har kommet.
-type FilterKey = 'alle' | GraveringStatus | 'ufakturert'
-const filtre: FilterKey[] = ['alle', 'ny', 'besvart', 'lukket', 'ufakturert']
+// «usendt» og «ufakturert» er arbeidslistene: alt som ikke er sendt eller
+// fakturert ennå, uavhengig av hvor langt dialogen med kunden har kommet.
+type FilterKey = 'alle' | GraveringStatus | 'usendt' | 'ufakturert'
+const filtre: FilterKey[] = ['alle', 'ny', 'besvart', 'lukket', 'usendt', 'ufakturert']
 const statuser: GraveringStatus[] = ['ny', 'besvart', 'lukket']
 
 const filterNavn = (k: FilterKey) =>
-  k === 'alle' ? 'Alle' : k === 'ufakturert' ? 'Ikke fakturert' : graveringStatusLabel[k]
+  k === 'alle' ? 'Alle'
+    : k === 'usendt' ? 'Ikke sendt'
+    : k === 'ufakturert' ? 'Ikke fakturert'
+    : graveringStatusLabel[k]
 
 const treffer = (b: GraveringBestilling, k: FilterKey) =>
-  k === 'alle' ? true : k === 'ufakturert' ? !b.fakturert : b.status === k
+  k === 'alle' ? true
+    : k === 'usendt' ? !b.sendt
+    : k === 'ufakturert' ? !b.fakturert
+    : b.status === k
 
 export default function AdminGraveringerPage() {
   const [liste, setListe] = useState<GraveringBestilling[]>([])
@@ -127,7 +133,7 @@ export default function AdminGraveringerPage() {
           {synlige.length === 0 ? (
             <Empty>
               <h2>Ingen graveringer</h2>
-              <p>{filter === 'ufakturert' ? 'Alt er fakturert.' : 'Ingen bestillinger med denne statusen.'}</p>
+              <p>{filter === 'usendt' ? 'Alt er sendt.' : filter === 'ufakturert' ? 'Alt er fakturert.' : 'Ingen bestillinger med denne statusen.'}</p>
             </Empty>
           ) : (
             <Liste>

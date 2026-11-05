@@ -50,16 +50,23 @@ function svarTekst(f: DesignForesporsel): string {
 const formatKr = (n: number) => `${n.toLocaleString('nb-NO')} kr`
 
 // «ufakturert» er arbeidslista: byggeplanene er solgt mot faktura, så det er
-// her du ser hvem som har fått koden uten at regningen er sendt.
-type FilterKey = 'alle' | ForesporselStatus | 'ufakturert'
-const filterOptions: FilterKey[] = ['alle', 'ny', 'besvart', 'lukket', 'ufakturert']
+// her du ser hvem som har fått koden uten at regningen er sendt. «usendt» er
+// tilsvarende for planer som ennå ikke er levert.
+type FilterKey = 'alle' | ForesporselStatus | 'usendt' | 'ufakturert'
+const filterOptions: FilterKey[] = ['alle', 'ny', 'besvart', 'lukket', 'usendt', 'ufakturert']
 const statuser: ForesporselStatus[] = ['ny', 'besvart', 'lukket']
 
 const filterNavn = (k: FilterKey) =>
-  k === 'alle' ? 'Alle' : k === 'ufakturert' ? 'Ikke fakturert' : foresporselStatusLabel[k]
+  k === 'alle' ? 'Alle'
+    : k === 'usendt' ? 'Ikke sendt'
+    : k === 'ufakturert' ? 'Ikke fakturert'
+    : foresporselStatusLabel[k]
 
 const treffer = (f: DesignForesporsel, k: FilterKey) =>
-  k === 'alle' ? true : k === 'ufakturert' ? !f.fakturert : f.status === k
+  k === 'alle' ? true
+    : k === 'usendt' ? !f.sendt
+    : k === 'ufakturert' ? !f.fakturert
+    : f.status === k
 
 export default function AdminForesporslerPage() {
   const [liste, setListe] = useState<DesignForesporsel[]>([])
@@ -102,7 +109,7 @@ export default function AdminForesporslerPage() {
           {synlige.length === 0 ? (
             <Empty>
               <h2>Ingen forespørsler</h2>
-              <p>{filter === 'ufakturert' ? 'Alt er fakturert.' : 'Ingen forespørsler med denne statusen.'}</p>
+              <p>{filter === 'usendt' ? 'Alt er sendt.' : filter === 'ufakturert' ? 'Alt er fakturert.' : 'Ingen forespørsler med denne statusen.'}</p>
             </Empty>
           ) : (
             <Liste>
