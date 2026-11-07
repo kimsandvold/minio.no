@@ -8,6 +8,7 @@ import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import ShareButtons from '../../shared/ShareButtons'
+import VimzoAnnonse from '../../shared/VimzoAnnonse'
 import Icon from '../../shared/Icon'
 import { useSEO } from '../../../hooks/useSEO'
 import { company } from '../../../data/company'
@@ -342,6 +343,35 @@ const RowSoon = styled.span`
 `
 
 /* ---------- CTA ---------- */
+/**
+ * Guider uten Vimzo-annonse: hobbyprosjekter, nybegynnerstoff og vedlikehold for
+ * privatpersoner. Annonsen er for bedriftseiere, og leserne her er det sjelden –
+ * da er den bare støy, og guidene skal ikke føles som en reklameflate.
+ */
+const UTEN_ANNONSE = new Set([
+  'verktoy',
+  'verktoyliste-nybegynner',
+  'sikkerhet',
+  'sliping',
+  'maling-og-merking',
+  'rette-fine-kutt',
+  'forboring-og-senkning',
+  'hvor-mange-skruer',
+  'ordliste-trearbeid',
+  'hvorfor-sprekker-treet',
+  'vedlikehold',
+  'vedlikehold-terrasse',
+  'beise-ny-terrasse',
+  'granet-tre',
+  'mugg-alger-gronske',
+  'vinterklargjoring',
+  'overflatebehandling',
+])
+
+const AnnonsePlass = styled.div`
+  margin: 3rem 0;
+`
+
 const Cta = styled.div`
   margin-top: 2.5rem;
   padding: 2rem;
@@ -740,6 +770,12 @@ export default function GuideArticleLayout({
                 ))}
 
                 <ShareButtons variant="artikkel" />
+
+                {!UTEN_ANNONSE.has(topic.slug) && (
+                  <AnnonsePlass>
+                    <VimzoAnnonse plassering="byggeguide" />
+                  </AnnonsePlass>
+                )}
 
                 <AllGuides aria-label="Alle byggeguider">
                   <div className="label">Alle byggeguider</div>

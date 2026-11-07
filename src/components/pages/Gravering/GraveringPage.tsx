@@ -8,6 +8,7 @@ import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import SignDesignerModal from '../SignDesigner/SignDesignerModal'
 import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
+import VimzoAnnonse from '../../shared/VimzoAnnonse'
 import { Eyebrow, Handlingsknapp, Hode, Ingress, Knapp, PilLenke, Reveal, Seksjon, SideHode, Tittel, Wrap } from '../../editorial'
 import {
   FRAKT,
@@ -601,6 +602,12 @@ export default function GraveringPage() {
             </Wrap>
           </Seksjon>
 
+          <AnnonseSeksjon>
+            <Wrap>
+              <VimzoAnnonse plassering="gravering" />
+            </Wrap>
+          </AnnonseSeksjon>
+
           <Seksjon $flate="deep">
             <Wrap>
               <Reveal>
@@ -881,6 +888,11 @@ const Sporsmalskort = styled.details`
     line-height: 1.7;
     color: ${({ theme }) => theme.colors.inkMuted};
   }
+`
+
+const AnnonseSeksjon = styled.section`
+  padding: clamp(2.5rem, 5vw, 4rem) 0;
+  background: ${({ theme }) => theme.colors.paper};
 `
 
 const Avslutning = styled.div`
