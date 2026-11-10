@@ -26,6 +26,17 @@ export interface Spill {
 
 export const SPILL: Spill[] = [
   {
+    href: '/underholdning/tool-ved.html',
+    tittel: 'Vedhoggeren',
+    beskrivelse:
+      'Kubben står på stabben og øksa er kvass. Sveip langs sprekken, kløyv bjørk, gran, furu og eik – og fyll vedskjulet før fyraften. Men treffer du kvisten, sitter øksa.',
+    ferdighet: 'Treffsikkerhet',
+    tid: '75 sek / dagens',
+    maal: '3 200 poeng',
+    bilde: '/images/underholdning/ved.webp',
+    nytt: true,
+  },
+  {
     href: '/underholdning/tool-dreiemester.html',
     tittel: 'Dreiemester',
     beskrivelse:
@@ -34,7 +45,6 @@ export const SPILL: Spill[] = [
     tid: '2 min / fritt',
     maal: '4 000 poeng',
     bilde: '/images/underholdning/dreiemester.webp',
-    nytt: true,
   },
   {
     href: '/underholdning/tool-terrasse.html',

@@ -83,6 +83,29 @@
         }
       ],
       "density": "SPARSE_ALL"
+    },
+    {
+      "collectionGroup": "vedhoggerScores",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "modus",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "dag",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "poeng",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
+        }
+      ],
+      "density": "SPARSE_ALL"
     }
   ],
   "fieldOverrides": []

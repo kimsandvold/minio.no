@@ -560,12 +560,51 @@ const Rutenett = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
   gap: 1.25rem;
+
+  @media (max-width: 640px) {
+    gap: 0.75rem;
+  }
 `
+
+/* På mobil blir kortene en kompakt liste: skjermbilde til venstre, tekst til høyre. */
+const mobilListe = '@media (max-width: 640px)'
+
 
 const Kort = styled.a`
   ${kortflate}
   background: ${({ theme }) => theme.colors.deepRaised};
   border: 1px solid ${({ theme }) => theme.colors.borderInverted};
+
+  ${mobilListe} {
+    flex-direction: row;
+    border-radius: 16px;
+
+    ${Tavle} {
+      flex: none;
+      width: 104px;
+      aspect-ratio: auto;
+      padding: 0;
+      border-bottom: 0;
+      border-right: 1px solid ${({ theme }) => theme.colors.borderInverted};
+    }
+
+    ${Telefon} {
+      top: 14px;
+      width: 68%;
+    }
+
+    ${Nummer} { display: none; }
+
+    ${Merke} {
+      top: 0.5rem;
+      left: 0.5rem;
+      right: auto;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.6875rem;
+    }
+
+    &:hover { transform: none; }
+  }
 
   &:hover {
     border-color: rgba(224, 137, 95, 0.45);
@@ -597,6 +636,25 @@ const Kortinnhold = styled.div`
     font-size: ${({ theme }) => theme.fontSizes.sm};
     line-height: 1.55;
   }
+
+  ${mobilListe} {
+    min-width: 0;
+    padding: 0.85rem 1rem 0.9rem;
+
+    h3 {
+      margin-top: 0.2rem;
+      font-size: ${({ theme }) => theme.fontSizes.lg};
+    }
+
+    p {
+      margin-top: 0.3rem;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  }
 `
 
 const Kortmeta = styled.span`
@@ -612,6 +670,10 @@ const Kortbunn = styled.div`
   gap: 1rem;
   margin-top: auto;
   padding-top: 1.25rem;
+
+  ${mobilListe} {
+    padding-top: 0.7rem;
+  }
 `
 
 const Maal = styled.span`

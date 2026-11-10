@@ -244,6 +244,31 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Toppliste for Vedhoggeren (/underholdning/tool-ved.html). Samme modell
+    // som de andre spillene: åpen lesing, kun oppretting med validerte felt.
+    match /vedhoggerScores/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasOnly(
+                         ['navn', 'poeng', 'modus', 'dag', 'kubber', 'opprettet'])
+                    && request.resource.data.keys().hasAll(
+                         ['navn', 'poeng', 'modus', 'dag', 'kubber', 'opprettet'])
+                    && request.resource.data.navn is string
+                    && request.resource.data.navn.size() >= 2
+                    && request.resource.data.navn.size() <= 16
+                    && !request.resource.data.navn.matches('.*[<>/\\\\@:].*')
+                    && request.resource.data.poeng is int
+                    && request.resource.data.poeng >= 0
+                    && request.resource.data.poeng <= 1000000
+                    && request.resource.data.modus in ['akkord', 'daglig']
+                    && request.resource.data.dag is string
+                    && request.resource.data.dag.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+                    && request.resource.data.kubber is int
+                    && request.resource.data.kubber >= 0
+                    && request.resource.data.kubber <= 1000
+                    && request.resource.data.opprettet == request.time;
+      allow update, delete: if false;
+    }
+
     match /polls/{pollId} {
       allow read: if true;
       allow write: if request.auth != null

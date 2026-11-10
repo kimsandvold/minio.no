@@ -7,6 +7,7 @@
     <meta name="description" content="Koble opp lyskurser, endevendere, dimmere og varmekabel på koblingsskjema. Slå på automaten og se om det holder."/>
 
     <meta name="theme-color" content="#06080b"/>
+    <script src="/underholdning/lib/spillmeny.js"></script>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <meta name="mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
@@ -60,6 +61,8 @@
             --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
             --sat: env(safe-area-inset-top, 0px);
             --sab: env(safe-area-inset-bottom, 0px);
+            --sal: env(safe-area-inset-left, 0px);
+            --sar: env(safe-area-inset-right, 0px);
         }
 
         * { box-sizing: border-box; }
@@ -75,18 +78,20 @@
             -webkit-user-select: none; user-select: none;
             -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
         }
-        canvas#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+        canvas#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+        /* Måler safe area til sidene (hakk i liggende) – brukes av utlegget. */
+        #sikker { position: fixed; top: 0; height: 0; left: var(--sal); right: var(--sar); visibility: hidden; pointer-events: none; }
 
         /* ---------- Topplinje: tynn, instrumentaktig ---------- */
         #topp {
             position: fixed; left: 0; right: 0; top: 0; z-index: 10;
-            padding: calc(var(--sat) + 14px) 16px 12px;
-            display: flex; align-items: flex-start; gap: 12px;
-            background: linear-gradient(to bottom, var(--nat) 40%, rgba(6,8,11,0));
+            padding: calc(var(--sat) + 14px) calc(var(--sar) + 16px) 10px calc(var(--sal) + 16px);
+            display: flex; align-items: flex-start; gap: 8px;
+            background: var(--nat);
         }
         #topp .tx { flex: 1; min-width: 0; }
         #topp .klokke {
-            float: right; font-variant-numeric: tabular-nums;
+            flex: none; font-variant-numeric: tabular-nums;
             color: var(--dempet); letter-spacing: .06em;
             text-transform: none;          /* arvet uppercase fra .kurs – «0.3 S» */
             transition: color .3s ease;
@@ -103,7 +108,9 @@
         #topp .kurs {
             font-family: var(--mono); font-size: 9.5px; letter-spacing: .18em;
             text-transform: uppercase; color: var(--svak);
+            display: flex; gap: 8px; justify-content: space-between; white-space: nowrap;
         }
+        #hKurs { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
         #topp h1 {
             margin: 3px 0 0; font-size: 17px; font-weight: 600; letter-spacing: -.012em;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
@@ -118,6 +125,9 @@
         }
         .ikon:active { background: rgba(255,255,255,.05); }
         .ikon svg { width: 18px; height: 18px; }
+        .ikon.tilbake { width: 36px; color: var(--tekst); }
+        .lenk.spill { text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .lenk.spill svg { width: 14px; height: 14px; }
 
         /* Fremdriftsskinne – én strek per brett */
         #skinne { position: fixed; left: 16px; right: 16px; top: calc(var(--sat) + 5px); z-index: 11; display: flex; gap: 3px; }
@@ -128,9 +138,9 @@
         /* ---------- Bunnlinje ---------- */
         #bunn {
             position: fixed; left: 0; right: 0; bottom: 0; z-index: 10;
-            padding: 14px 16px calc(var(--sab) + 16px);
+            padding: 10px calc(var(--sar) + 16px) calc(var(--sab) + 14px) calc(var(--sal) + 16px);
             display: flex; align-items: center; gap: 10px;
-            background: linear-gradient(to top, var(--nat) 55%, rgba(6,8,11,0));
+            background: linear-gradient(to top, var(--nat) 75%, rgba(6,8,11,0));
         }
         .verk {
             width: 52px; height: 52px; flex: none;
@@ -175,7 +185,7 @@
             border-color: #ffe3a6;
         }
         #automat.seier .et2 { color: rgba(29,20,3,.62); }
-        #automat.seier .tx2 { color: #1d1403; }
+        #automat.seier .tx2, #automat.pa.seier .tx2 { color: #1d1403; }
         #automat.seier .vippe { background: rgba(29,20,3,.22); border-color: rgba(29,20,3,.25); }
         #automat.seier .vippe::after { background: #1d1403; bottom: 20px; }
         #automat.pa { border-color: rgba(79,224,138,.45); }
@@ -186,12 +196,15 @@
             position: fixed; inset: 0; z-index: 40;
             background: rgba(4, 6, 9, .84);
             backdrop-filter: blur(14px);
-            display: grid; place-items: center;
-            padding: calc(var(--sat) + 16px) 16px calc(var(--sab) + 16px);
-            overflow-y: auto;
+            display: flex;
+            padding: calc(var(--sat) + 16px) calc(var(--sar) + 16px) calc(var(--sab) + 16px) calc(var(--sal) + 16px);
+            overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
+            touch-action: pan-y;
         }
         .lag[hidden] { display: none; }
+        /* margin:auto sentrerer, men lar et høyt ark rulle fra toppen i stedet for å klippes. */
         .ark {
+            margin: auto;
             width: 100%; max-width: 430px;
             background: var(--nat-2);
             border: 1px solid var(--haar); border-radius: 18px;
@@ -258,7 +271,8 @@
 
         #varsel {
             position: fixed; left: 16px; right: 16px; z-index: 30; pointer-events: none;
-            bottom: calc(var(--sab) + 88px);
+            max-width: 520px; margin: 0 auto;
+            bottom: calc(var(--sab) + 84px);
             padding: 13px 16px; border-radius: 12px;
             background: rgba(10, 13, 18, .96); border: 1px solid var(--haar-2);
             border-left-width: 2px;
@@ -281,14 +295,54 @@
         .ledere i { display: block; height: 3px; border-radius: 2px; margin-bottom: 8px; }
         .ledere .t { font-family: var(--mono); font-size: 11px; font-weight: 600; }
         .ledere .u { font-size: 9.5px; color: var(--svak); margin-top: 3px; }
+
+        /* Smale telefoner: fem brett per rad holder menyen kortere. */
+        @media (max-width: 420px) {
+            .brett { grid-template-columns: repeat(5, 1fr); gap: 6px; }
+            .brett button .n { font-size: 15px; }
+        }
+        /*
+         * Lave skjermer (iPhone SE, 375×667): hver piksel i høyden går til
+         * brettet. Topp- og bunnlinja strammes inn, og panelene får plass uten
+         * å måtte rulles.
+         */
+        @media (max-height: 740px) {
+            #topp { padding-top: calc(var(--sat) + 11px); padding-bottom: 6px; }
+            #topp h1 { font-size: 15.5px; margin-top: 2px; }
+            #topp .maal { font-size: 11.5px; line-height: 1.3; }
+            #bunn { padding-top: 8px; padding-bottom: calc(var(--sab) + 10px); }
+            .verk { width: 48px; height: 48px; }
+            #automat { height: 48px; }
+            #automat .vippe { height: 36px; }
+            #automat.pa .vippe::after, #automat.seier .vippe::after { bottom: 17px; }
+            #varsel { bottom: calc(var(--sab) + 72px); padding: 11px 14px; font-size: 13px; }
+            .ark { padding: 18px 18px 14px; }
+            .ark h2 { font-size: 21px; }
+            .ark .ing { margin-bottom: 12px; font-size: 13px; line-height: 1.45; }
+            .fag { padding: 11px 13px; font-size: 12.5px; line-height: 1.5; }
+            .stj { margin: 4px 0 10px; }
+            .stj span { font-size: 22px; }
+            .hpk { margin-top: 12px; }
+            .hk { height: 46px; }
+            .delr button { height: 40px; }
+            .lenk { padding: 8px; }
+            .velg { margin-top: 8px; }
+            .rk { margin-bottom: 9px; }
+            .rk button { padding: 11px 4px; }
+            .ledere { margin-top: 12px; }
+        }
     </style>
 </head>
 <body>
 
 <canvas id="c"></canvas>
+<div id="sikker"></div>
 <div id="skinne"></div>
 
 <div id="topp">
+    <a class="ikon tilbake" href="/underholdning" id="bTilbake" aria-label="Tilbake til alle spill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+    </a>
     <div class="tx">
         <div class="kurs"><span id="hKurs">Kurs 1 · 10 A</span> <span id="hKlokke" class="klokke">0.0 s</span></div>
         <h1 id="hTittel">Lys i boden</h1>
@@ -305,7 +359,7 @@
 <div id="varsel"></div>
 
 <div id="bunn">
-    <button class="verk" id="bAngre" aria-label="Angre siste ledning">
+    <button class="verk" id="bAngre" aria-label="Angre">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>
     </button>
     <button class="verk" id="bTom" aria-label="Fjern alle ledninger">
@@ -341,6 +395,7 @@
         </div>
         <div class="hpk"><button class="hk pri" id="bStart">Start på brett 1</button></div>
         <button class="lenk" id="bVelgBrett">Velg brett</button>
+        <a class="lenk spill" href="/underholdning" data-spillmeny><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>Flere spill</a>
     </div>
 </div>
 
@@ -365,6 +420,7 @@
         </div>
         <div class="brett" id="brettliste"></div>
         <div class="hpk"><button class="hk" id="mLukk">Lukk</button></div>
+        <a class="lenk spill" href="/underholdning" data-spillmeny><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>Bytt til et annet spill</a>
     </div>
 </div>
 
@@ -399,6 +455,7 @@
             <button id="rDel">Utfordre en kompis</button>
             <button id="rOm">Prøv igjen</button>
         </div>
+        <a class="lenk spill" href="/underholdning" data-spillmeny><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>Flere spill</a>
     </div>
 </div>
 
@@ -455,6 +512,7 @@ function stoy(dur, gain, freq) {
 }
 const SFX = {
     tapp:    () => tone(1700, .03, 'square', .05),
+    hake:    () => tone(2300, .018, 'square', .025),
     ledning: () => tone(560, .05, 'triangle', .05, 780),
     bryter:  () => { tone(1100, .03, 'square', .08); setTimeout(() => tone(700, .04, 'square', .05), 28); },
     fjern:   () => tone(320, .06, 'sawtooth', .045, 180),
@@ -474,27 +532,27 @@ function prikk(g, x, y, r) { g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); }
 
 const TYPER = {
     kurs: {
-        navn: 'Fordeling', b: 160, h: 150, kilde: true,
+        navn: 'Fordeling', b: 160, h: 160, kilde: true, ramme: [-72, -64, 80, 64],
         klemmer: [
-            { id: 'L',  x: 76, y: -44, d: [1, 0], farge: 'L',  tekst: 'L' },
-            { id: 'N',  x: 76, y: 0,   d: [1, 0], farge: 'N',  tekst: 'N' },
-            { id: 'PE', x: 76, y: 44,  d: [1, 0], farge: 'PE', tekst: 'PE' }
+            { id: 'L',  x: 80, y: -48, d: [1, 0], farge: 'L',  tekst: 'L' },
+            { id: 'N',  x: 80, y: 0,   d: [1, 0], farge: 'N',  tekst: 'N' },
+            { id: 'PE', x: 80, y: 48,  d: [1, 0], farge: 'PE', tekst: 'PE' }
         ],
         intern: () => [],
         tegn: (g, S, st) => {
-            g.strokeRect(S(-74), S(-60), S(112), S(120));
-            g.strokeRect(S(-56), S(-40), S(32), S(54));           // automat
+            g.strokeRect(S(-72), S(-64), S(112), S(128));
+            g.strokeRect(S(-56), S(-36), S(32), S(54));           // automat
             g.beginPath();
             g.moveTo(S(-40), S(-28));
             g.lineTo(S(-40), st.live ? S(-8) : S(6));             // vippa
             g.stroke();
-            [-44, 0, 44].forEach((y) => {
-                g.beginPath(); g.moveTo(S(-24), S(y)); g.lineTo(S(76), S(y)); g.stroke();
+            [-48, 0, 48].forEach((y) => {
+                g.beginPath(); g.moveTo(S(-24), S(y)); g.lineTo(S(80), S(y)); g.stroke();
             });
         }
     },
     bryter: {
-        navn: 'Bryter', b: 150, h: 92, klikkbar: true,
+        navn: 'Bryter', b: 150, h: 92, klikkbar: true, ramme: [-64, -36, 64, 8],
         klemmer: [
             { id: 'A', x: -64, y: 0, d: [-1, 0], farge: 'L', tekst: '1' },
             { id: 'B', x: 64,  y: 0, d: [1, 0],  farge: 'L', tekst: '2' }
@@ -509,44 +567,44 @@ const TYPER = {
         }
     },
     vekselbryter: {
-        navn: 'Toveisbryter', b: 150, h: 116, klikkbar: true,
+        navn: 'Toveisbryter', b: 150, h: 116, klikkbar: true, ramme: [-64, -36, 64, 36],
         klemmer: [
             { id: 'K', x: -64, y: 0,   d: [-1, 0], farge: 'L', tekst: 'K' },
-            { id: '1', x: 64,  y: -34, d: [1, 0],  farge: 'L', tekst: '1' },
-            { id: '2', x: 64,  y: 34,  d: [1, 0],  farge: 'L', tekst: '2' }
+            { id: '1', x: 64,  y: -32, d: [1, 0],  farge: 'L', tekst: '1' },
+            { id: '2', x: 64,  y: 32,  d: [1, 0],  farge: 'L', tekst: '2' }
         ],
         intern: (k) => [['K', k.pa ? '1' : '2']],
         tegn: (g, S, st) => {
             g.beginPath(); g.moveTo(S(-64), 0); g.lineTo(S(-26), 0);
-            g.moveTo(S(26), S(-34)); g.lineTo(S(64), S(-34));
-            g.moveTo(S(26), S(34)); g.lineTo(S(64), S(34)); g.stroke();
-            prikk(g, S(-26), 0, S(4.5)); prikk(g, S(26), S(-34), S(4.5)); prikk(g, S(26), S(34), S(4.5));
-            g.beginPath(); g.moveTo(S(-26), 0); g.lineTo(S(26), st.pa ? S(-34) : S(34)); g.stroke();
+            g.moveTo(S(26), S(-32)); g.lineTo(S(64), S(-32));
+            g.moveTo(S(26), S(32)); g.lineTo(S(64), S(32)); g.stroke();
+            prikk(g, S(-26), 0, S(4.5)); prikk(g, S(26), S(-32), S(4.5)); prikk(g, S(26), S(32), S(4.5));
+            g.beginPath(); g.moveTo(S(-26), 0); g.lineTo(S(26), st.pa ? S(-32) : S(32)); g.stroke();
         }
     },
     kryssbryter: {
-        navn: 'Kryssbryter', b: 150, h: 116, klikkbar: true,
+        navn: 'Kryssbryter', b: 150, h: 116, klikkbar: true, ramme: [-64, -36, 64, 36],
         klemmer: [
-            { id: 'A1', x: -64, y: -34, d: [-1, 0], farge: 'L', tekst: '1' },
-            { id: 'A2', x: -64, y: 34,  d: [-1, 0], farge: 'L', tekst: '2' },
-            { id: 'B1', x: 64,  y: -34, d: [1, 0],  farge: 'L', tekst: '3' },
-            { id: 'B2', x: 64,  y: 34,  d: [1, 0],  farge: 'L', tekst: '4' }
+            { id: 'A1', x: -64, y: -32, d: [-1, 0], farge: 'L', tekst: '1' },
+            { id: 'A2', x: -64, y: 32,  d: [-1, 0], farge: 'L', tekst: '2' },
+            { id: 'B1', x: 64,  y: -32, d: [1, 0],  farge: 'L', tekst: '3' },
+            { id: 'B2', x: 64,  y: 32,  d: [1, 0],  farge: 'L', tekst: '4' }
         ],
         intern: (k) => k.pa ? [['A1', 'B1'], ['A2', 'B2']] : [['A1', 'B2'], ['A2', 'B1']],
         tegn: (g, S, st) => {
-            [-34, 34].forEach((y) => {
+            [-32, 32].forEach((y) => {
                 g.beginPath(); g.moveTo(S(-64), S(y)); g.lineTo(S(-28), S(y));
                 g.moveTo(S(28), S(y)); g.lineTo(S(64), S(y)); g.stroke();
                 prikk(g, S(-28), S(y), S(4.5)); prikk(g, S(28), S(y), S(4.5));
             });
             g.beginPath();
-            if (st.pa) { g.moveTo(S(-28), S(-34)); g.lineTo(S(28), S(-34)); g.moveTo(S(-28), S(34)); g.lineTo(S(28), S(34)); }
-            else { g.moveTo(S(-28), S(-34)); g.lineTo(S(28), S(34)); g.moveTo(S(-28), S(34)); g.lineTo(S(28), S(-34)); }
+            if (st.pa) { g.moveTo(S(-28), S(-32)); g.lineTo(S(28), S(-32)); g.moveTo(S(-28), S(32)); g.lineTo(S(28), S(32)); }
+            else { g.moveTo(S(-28), S(-32)); g.lineTo(S(28), S(32)); g.moveTo(S(-28), S(32)); g.lineTo(S(28), S(-32)); }
             g.stroke();
         }
     },
     dimmer: {
-        navn: 'Dimmer', b: 150, h: 116, klikkbar: true, lastgrense: { min: 3, maks: 100 },
+        navn: 'Dimmer', b: 150, h: 116, klikkbar: true, lastgrense: { min: 3, maks: 100 }, ramme: [-64, -36, 64, 32],
         klemmer: [
             { id: 'A', x: -64, y: 0, d: [-1, 0], farge: 'L', tekst: 'L' },
             { id: 'B', x: 64,  y: 0, d: [1, 0],  farge: 'L', tekst: 'ut' }
@@ -563,7 +621,7 @@ const TYPER = {
         }
     },
     termostat: {
-        navn: 'Termostat', b: 150, h: 126, klikkbar: true,
+        navn: 'Termostat', b: 150, h: 126, klikkbar: true, ramme: [-64, -32, 64, 56],
         klemmer: [
             { id: 'A', x: -64, y: 0, d: [-1, 0], farge: 'L', tekst: 'L' },
             { id: 'B', x: 64,  y: 0, d: [1, 0],  farge: 'L', tekst: 'ut' }
@@ -582,11 +640,11 @@ const TYPER = {
         }
     },
     lampe: {
-        navn: 'Lampe', b: 150, h: 160, last: true, watt: 9, klasseI: true,
+        navn: 'Lampe', b: 150, h: 160, last: true, watt: 9, klasseI: true, ramme: [-64, -36, 64, 72],
         klemmer: [
             { id: 'X',  x: -64, y: 0,  d: [-1, 0], farge: 'L',  tekst: 'L' },
             { id: 'Y',  x: 64,  y: 0,  d: [1, 0],  farge: 'N',  tekst: 'N' },
-            { id: 'PE', x: 0,   y: 70, d: [0, 1],  farge: 'PE', tekst: 'PE' }
+            { id: 'PE', x: 0,   y: 72, d: [0, 1],  farge: 'PE', tekst: 'PE' }
         ],
         intern: () => [],
         tegn: (g, S) => {
@@ -594,14 +652,14 @@ const TYPER = {
             g.beginPath(); g.arc(0, 0, r, 0, 7); g.stroke();
             g.beginPath(); g.moveTo(-k, -k); g.lineTo(k, k); g.moveTo(k, -k); g.lineTo(-k, k); g.stroke();
             g.beginPath(); g.moveTo(S(-64), 0); g.lineTo(-r, 0); g.moveTo(r, 0); g.lineTo(S(64), 0);
-            g.moveTo(0, r); g.lineTo(0, S(70)); g.stroke();
+            g.moveTo(0, r); g.lineTo(0, S(72)); g.stroke();
         }
     },
     downlight: {
-        navn: 'Downlight', b: 140, h: 116, last: true, watt: 7,
+        navn: 'Downlight', b: 150, h: 116, last: true, watt: 7, ramme: [-64, -36, 64, 36],
         klemmer: [
-            { id: 'X', x: -60, y: 0, d: [-1, 0], farge: 'L', tekst: 'L' },
-            { id: 'Y', x: 60,  y: 0, d: [1, 0],  farge: 'N', tekst: 'N' }
+            { id: 'X', x: -64, y: 0, d: [-1, 0], farge: 'L', tekst: 'L' },
+            { id: 'Y', x: 64,  y: 0, d: [1, 0],  farge: 'N', tekst: 'N' }
         ],
         intern: () => [],
         tegn: (g, S) => {
@@ -611,15 +669,15 @@ const TYPER = {
             g.beginPath();
             g.moveTo(S(-38), S(-32)); g.lineTo(S(-38), S(32));
             g.moveTo(S(38), S(-32)); g.lineTo(S(38), S(32)); g.stroke();   // innfelt
-            g.beginPath(); g.moveTo(S(-60), 0); g.lineTo(-r, 0); g.moveTo(r, 0); g.lineTo(S(60), 0); g.stroke();
+            g.beginPath(); g.moveTo(S(-64), 0); g.lineTo(-r, 0); g.moveTo(r, 0); g.lineTo(S(64), 0); g.stroke();
         }
     },
     stikk: {
-        navn: 'Stikkontakt', b: 150, h: 160, klasseI: true, stikkontakt: true,
+        navn: 'Stikkontakt', b: 150, h: 160, klasseI: true, stikkontakt: true, ramme: [-64, -52, 64, 72],
         klemmer: [
             { id: 'L',  x: -64, y: 0,  d: [-1, 0], farge: 'L',  tekst: 'L' },
             { id: 'N',  x: 64,  y: 0,  d: [1, 0],  farge: 'N',  tekst: 'N' },
-            { id: 'PE', x: 0,   y: 70, d: [0, 1],  farge: 'PE', tekst: 'PE' }
+            { id: 'PE', x: 0,   y: 72, d: [0, 1],  farge: 'PE', tekst: 'PE' }
         ],
         intern: () => [],
         tegn: (g, S) => {
@@ -629,15 +687,15 @@ const TYPER = {
             g.beginPath(); g.moveTo(0, 0); g.lineTo(0, S(-48)); g.stroke();
             g.beginPath(); g.moveTo(S(-15), S(-48)); g.lineTo(S(15), S(-48)); g.stroke();
             g.beginPath(); g.moveTo(S(-64), 0); g.lineTo(-r, 0); g.moveTo(r, 0); g.lineTo(S(64), 0);
-            g.moveTo(0, 0); g.lineTo(0, S(70)); g.stroke();
+            g.moveTo(0, 0); g.lineTo(0, S(72)); g.stroke();
         }
     },
     varmekabel: {
-        navn: 'Varmekabel', b: 200, h: 140, last: true, watt: 800, klasseI: true,
+        navn: 'Varmekabel', b: 200, h: 140, last: true, watt: 800, klasseI: true, ramme: [-88, -32, 88, 64],
         klemmer: [
             { id: 'X',  x: -88, y: 0,  d: [-1, 0], farge: 'L',  tekst: 'L' },
             { id: 'Y',  x: 88,  y: 0,  d: [1, 0],  farge: 'N',  tekst: 'N' },
-            { id: 'PE', x: 0,   y: 62, d: [0, 1],  farge: 'PE', tekst: 'PE' }
+            { id: 'PE', x: 0,   y: 64, d: [0, 1],  farge: 'PE', tekst: 'PE' }
         ],
         intern: () => [],
         tegn: (g, S) => {
@@ -650,7 +708,7 @@ const TYPER = {
             }
             g.stroke();
             g.beginPath(); g.moveTo(S(-88), 0); g.lineTo(S(-56), 0); g.moveTo(S(56), 0); g.lineTo(S(88), 0);
-            g.moveTo(0, S(28)); g.lineTo(0, S(62)); g.stroke();
+            g.moveTo(0, S(28)); g.lineTo(0, S(64)); g.stroke();
         }
     }
 };
@@ -1174,96 +1232,389 @@ function sjekkStyrbar(komp, ledninger, krav) {
 
 </script>
 <script>
-/* ---------- 5. Ortogonal ruting ------------------------------------ */
+/* ---------- 5. Utlegg og ruting ------------------------------------ */
 /*
- * Et koblingsskjema tegnes med rette vinkler. Hver klemme har en retning den
- * går ut i; ledningen får en kort stump ut av klemma, møtes i en kanal, og går
- * inn i målklemma fra dens retning. Kanalen forskyves per ledning (stabil
- * hash) så parallelle strekk ikke legger seg oppå hverandre.
+ * Alt ligger på ett rutenett på 8 brettenheter: komponentsentrene, klemmene og
+ * hver eneste ledning. Ledningene rutes med A* gjennom rutenettet, slik en
+ * ryddig elektriker trekker dem:
+ *
+ *   – komponentkroppene og navnene deres er sperret, så en ledning går aldri
+ *     over et symbol eller en fremmed klemme
+ *   – hver klemme har en kort «stump» rett ut som bare dens egne ledninger får
+ *     bruke; flere ledninger på samme klemme deler stumpen og greiner av med
+ *     et koblingspunkt, slik det tegnes på et ekte skjema
+ *   – to ledninger får aldri gå langs samme spor. Kryssing er lov, men koster,
+ *     og en ledning kan ikke svinge der den krysser. Parallelle ledninger
+ *     legger seg derfor i hvert sitt spor – en ryddig bunt
+ *   – svinger koster, så rutene blir rette og rolige
+ *
+ * Alle ledninger rutes på nytt hver gang noe endres, korteste først, så det
+ * samme oppsettet alltid ser likt ut.
  */
-function hash(s) { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return h; }
+const RUTE = 8, PAD = 8;
+const snapR = (v) => Math.round(v / RUTE) * RUTE;
+const KOST = { sving: 4, kryss: 10, nabo: 0.3, naer: 4, oppaa: 90 };
+const DX = [1, 0, -1, 0], DY = [0, 1, 0, -1];
+const retning = (d) => (d[0] > 0 ? 0 : d[1] > 0 ? 1 : d[0] < 0 ? 2 : 3);
 
-function rute(p1, d1, p2, d2, nokkel) {
-    const stump = 28;
-    const a = { x: p1.x + d1[0] * stump, y: p1.y + d1[1] * stump };
-    const b = { x: p2.x + d2[0] * stump, y: p2.y + d2[1] * stump };
-    const v = nokkel ? ((((hash(nokkel) % 7) + 7) % 7) - 3) * 17 : 0;
-    const pts = [p1, a];
-    const vann1 = d1[0] !== 0, vann2 = d2[0] !== 0;
-
-    if (vann1 && vann2) {
-        const mx = (a.x + b.x) / 2 + v;
-        pts.push({ x: mx, y: a.y }, { x: mx, y: b.y });
-    } else if (!vann1 && !vann2) {
-        const my = (a.y + b.y) / 2 + v;
-        pts.push({ x: a.x, y: my }, { x: b.x, y: my });
-    } else if (vann1) {
-        pts.push({ x: b.x, y: a.y });
-    } else {
-        pts.push({ x: a.x, y: b.y });
-    }
-    pts.push(b, p2);
-    return pts.filter((p, i) => i === 0 || Math.abs(p.x - pts[i - 1].x) > .5 || Math.abs(p.y - pts[i - 1].y) > .5);
+/* Etiketter er i skjermpiksler (lesbare på telefon), men tar plass i brettet. */
+function etikettMaal(tekst, skala) {
+    const px = Math.max(10.5, 10.5 * skala * 1.15);
+    G.font = '500 ' + px + 'px ' + MONO;
+    return { b: (G.measureText(tekst).width + 10) / skala, h: (px * 1.5) / skala, px };
+}
+/* Det en ledning ikke får krysse: symbolet med litt luft, og navnet over. */
+function hinder(k, skala) {
+    const t = TYPER[k.type], r = t.ramme;
+    const e = etikettMaal((k.visnavn || t.navn).toUpperCase(), skala);
+    const kropp = [r[0] - PAD, r[1] - PAD, r[2] + PAD, r[3] + PAD];
+    const etikett = [-e.b / 2, kropp[1] - e.h, e.b / 2, kropp[1]];
+    return { kropp, etikett, e };
 }
 
+/* Flaten mellom topplinja og bunnlinja, med safe area for hakk og hjemlinje. */
+let OMR = { x: 0, y: 0, w: 1, h: 1 };
+function omraade() {
+    const w = window.innerWidth, h = window.innerHeight;
+    const s = $('sikker').getBoundingClientRect();
+    const topp = $('topp').getBoundingClientRect().bottom - 2;
+    const bunn = $('bunn').getBoundingClientRect().top + 8;
+    const l = Math.max(8, s.left + 8), r = Math.min(w - 8, (s.right || w) - 8);
+    const bw = Math.min(r - l, 760);
+    return { x: l + (r - l - bw) / 2, y: topp, w: bw, h: Math.max(140, bunn - topp) };
+}
 
-/* ---------- Automatisk utlegg ---------------------------------------
- * Hvert brett oppgir bare HVILKE komponenter det har. Plasseringen regnes ut:
- * kilden øverst, lastene i midten, styringen nederst – innenfor tommelens
- * rekkevidde. Kolonnene veksler, så ledningene får noe å rute mellom.
- * Brettets høyde vokser med innholdet, og skalaen krymper tilsvarende.
+/*
+ * Plasserer komponentene i rader (kilde → laster → styring, ovenfra og ned)
+ * med `c` per rad, og regner ut hvor stor skalaen da blir. leggUt() prøver
+ * én, to og tre kolonner og tar den som gir størst symboler på DENNE
+ * skjermen – et høyt, smalt brett på en høy telefon, et bredere på en lav.
  */
+function planlegg(grupper, c, A, skala) {
+    const GX = 64, GY = 56, MX = 40, MT = 8, MB = 32;
+    const rader = [];
+    grupper.forEach((g) => {
+        const n = Math.ceil(g.length / c);
+        for (let r = 0, i = 0; r < n; r++) {
+            const m = Math.ceil((g.length - i) / (n - r));
+            rader.push(g.slice(i, i + m)); i += m;
+        }
+    });
+    const ext = (k) => {
+        const h = hinder(k, skala);
+        return { l: Math.min(h.kropp[0], h.etikett[0]), r: Math.max(h.kropp[2], h.etikett[2]), t: h.etikett[1], b: h.kropp[3] };
+    };
+    let bredest = 0;
+    const info = rader.map((rad) => {
+        const ex = rad.map(ext);
+        const bredde = ex.reduce((a, e) => a + (e.r - e.l), 0) + GX * (rad.length - 1);
+        bredest = Math.max(bredest, bredde);
+        return { rad, ex, bredde, opp: Math.max.apply(null, ex.map((e) => -e.t)), ned: Math.max.apply(null, ex.map((e) => e.b)) };
+    });
+    const vb = Math.ceil((bredest + 2 * MX) / RUTE) * RUTE;
+    const pos = [];
+    let y = MT;
+    info.forEach((ri) => {
+        const cy = snapR(y + ri.opp);
+        let x = (vb - ri.bredde) / 2;
+        ri.rad.forEach((k, j) => { const e = ri.ex[j]; pos.push([k, snapR(x - e.l), cy]); x += (e.r - e.l) + GX; });
+        y = cy + ri.ned + GY;
+    });
+    const vh = Math.ceil((y - GY + MB) / RUTE) * RUTE;
+    return { pos, vb, vh, sk: Math.min(A.w / vb, A.h / vh, 1.25) };
+}
+
 function leggUt(liste) {
+    if (!liste.length) return;
     const er = (k, f) => !!TYPER[k.type][f];
     const kilde   = liste.filter((k) => er(k, 'kilde'));
     const last    = liste.filter((k) => !er(k, 'kilde') && (er(k, 'last') || er(k, 'stikkontakt')));
     const styring = liste.filter((k) => !er(k, 'kilde') && er(k, 'klikkbar'));
     const rest    = liste.filter((k) => kilde.indexOf(k) < 0 && last.indexOf(k) < 0 && styring.indexOf(k) < 0);
-    const rekke = kilde.concat(last, rest, styring);
+    const grupper = [kilde, last, rest, styring].filter((g) => g.length);
+    const A = OMR;
+    let best = null;
+    for (let c = 1; c <= 3; c++) {
+        // Etikettene er i piksler, så plassbehovet avhenger av skalaen: iterer.
+        let s = 0.6, plan = null;
+        for (let i = 0; i < 3; i++) { plan = planlegg(grupper, c, A, s); s = plan.sk; }
+        if (!best || plan.sk > best.sk * 1.04) best = plan;
+    }
+    best.pos.forEach((p) => { p[0].x = p[1]; p[0].y = p[2]; });
+    VB = best.vb; VH = best.vh; sk = best.sk;
+}
 
-    rekke.forEach((k) => { if (TYPER[k.type].klikkbar && k.pa === undefined) k.pa = false; });
+/* ---- Rutenettet ---- */
+let NX = 0, NY = 0, BL = null, NAER = null, SONE = null, SVING = null, SLEN = null, OCC = [null, null];
+let KL = [], KLI = new Map(), KNUTER = [], rutVersjon = 0;
+let GS = null, FR = null, LK = null, GEN = 0;
+let HK = new Float64Array(4096), HV = new Int32Array(4096), HN = 0;
+function hPush(k, v) {
+    if (HN >= HK.length) {
+        const k2 = new Float64Array(HK.length * 2); k2.set(HK); HK = k2;
+        const v2 = new Int32Array(HV.length * 2); v2.set(HV); HV = v2;
+    }
+    let i = HN++;
+    while (i > 0) { const p = (i - 1) >> 1; if (HK[p] <= k) break; HK[i] = HK[p]; HV[i] = HV[p]; i = p; }
+    HK[i] = k; HV[i] = v;
+}
+function hPop() {
+    const v = HV[0]; HN--;
+    const k = HK[HN], vv = HV[HN];
+    let i = 0;
+    for (;;) {
+        let c = 2 * i + 1; if (c >= HN) break;
+        if (c + 1 < HN && HK[c + 1] < HK[c]) c++;
+        if (HK[c] >= k) break;
+        HK[i] = HK[c]; HV[i] = HV[c]; i = c;
+    }
+    HK[i] = k; HV[i] = vv;
+    return v;
+}
 
-    /*
-     * Pakk to og to i rad der de får plass. Én per rad strakk et brett med to
-     * komponenter over hele høyden, og da ble symbolene bittesmå på telefon.
-     * Pakkingen skjer bare innenfor samme gruppe, så lesningen kilde → last →
-     * styring holder.
-     */
-    const parvis = (gruppe) => {
-        const ut = [];
-        for (let i = 0; i < gruppe.length;) {
-            const a = gruppe[i], c = gruppe[i + 1];
-            if (c && TYPER[a.type].b <= 170 && TYPER[c.type].b <= 170) { ut.push([a, c]); i += 2; }
-            else { ut.push([a]); i += 1; }
-        }
-        return ut;
+/*
+ * BL per celle: 0 = fri, -1 = sperret (symbol/etikett), n > 0 = stumpen til
+ * klemme n – bare ledninger som hører til den klemma, slipper inn.
+ */
+function byggRutenett() {
+    NX = Math.round(VB / RUTE) + 1; NY = Math.round(VH / RUTE) + 1;
+    const n = NX * NY;
+    BL = new Int32Array(n); NAER = new Int32Array(n); SONE = new Int16Array(n);
+    const fyll = (x0, y0, x1, y1) => {
+        const gx0 = Math.max(0, Math.ceil(x0 / RUTE)), gx1 = Math.min(NX - 1, Math.floor(x1 / RUTE));
+        const gy0 = Math.max(0, Math.ceil(y0 / RUTE)), gy1 = Math.min(NY - 1, Math.floor(y1 / RUTE));
+        for (let gy = gy0; gy <= gy1; gy++) for (let gx = gx0; gx <= gx1; gx++) BL[gy * NX + gx] = -1;
     };
-    const rader = [].concat(parvis(kilde), parvis(last), parvis(rest), parvis(styring));
-
-    const topp = 72;
-    const radH = rader.map((r) => Math.max.apply(null, r.map((k) => TYPER[k.type].h)));
-    const sumH = radH.reduce((a, h) => a + h, 0);
-    // Luftig når det er få rader, tettere når brettet er travelt.
-    const luft = Math.max(46, Math.min(108, 540 / rader.length));
-    VH = Math.round(topp * 2 + sumH + luft * (rader.length - 1));
-
-    let y = topp;
-    rader.forEach((rad, i) => {
-        rad.forEach((k, j) => {
-            k.y = Math.round(y + radH[i] / 2);
-            k.x = rad.length === 1 ? 320 : (j === 0 ? 176 : 464);
-        });
-        y += radH[i] + luft;
+    for (const k of komp) {
+        const h = hinder(k, sk); k.hinder = h;
+        fyll(k.x + h.kropp[0], k.y + h.kropp[1], k.x + h.kropp[2], k.y + h.kropp[3]);
+        fyll(k.x + h.etikett[0], k.y + h.etikett[1], k.x + h.etikett[2], k.y + h.etikett[3]);
+    }
+    KL = alleKlemmer(); KLI = new Map();
+    KL.forEach((t, i) => {
+        t.idx = i + 1; KLI.set(t.id, t);
+        let gx = Math.round(t.p.x / RUTE), gy = Math.round(t.p.y / RUTE);
+        const dx = t.kl.d[0], dy = t.kl.d[1];
+        t.sone = [];
+        let ute = 0;
+        const maksUte = TYPER[t.komp.type].kilde ? 4 : 2;
+        for (let s = 0; s < 40; s++) {
+            if (gx < 0 || gy < 0 || gx >= NX || gy >= NY) break;
+            const c = gy * NX + gx;
+            if (s > 0 && BL[c] > 0) break;
+            if (s > 0 && BL[c] === 0) ute++;
+            BL[c] = t.idx; SONE[c] = s; t.sone.push(c);
+            if (ute >= maksUte) break;
+            gx += dx; gy += dy;
+        }
+        t.celle = t.sone[0];
     });
-    return liste;
+    /*
+     * Ledninger på samme klemme deler stumpen og greiner av ytterst på den –
+     * ikke tett inntil klemma, der et koblingspunkt ser ut som en ekstra klemme.
+     */
+    SVING = new Int16Array(KL.length + 1); SLEN = new Int16Array(KL.length + 1);
+    KL.forEach((t) => {
+        const n = t.sone.length;
+        SLEN[t.idx] = n;
+        // Greinpunktene ligger ytterst på stumpen. Fordelingen har flest
+        // ledninger per klemme og får to greinpunkter, 16 fra hverandre.
+        SVING[t.idx] = Math.max(1, TYPER[t.komp.type].kilde ? n - 3 : n - 2);
+    });
+    // Fremmede ledninger holder avstand til stumpene, så de ikke ser tilkoblet ut.
+    for (const t of KL) for (const c of t.sone) {
+        const cx = c % NX, cy = (c - cx) / NX;
+        for (let oy = -1; oy <= 1; oy++) for (let ox = -1; ox <= 1; ox++) {
+            const x = cx + ox, y = cy + oy;
+            if (x < 0 || y < 0 || x >= NX || y >= NY) continue;
+            const c2 = y * NX + x;
+            if (BL[c2] === 0 && !NAER[c2]) NAER[c2] = t.idx;
+        }
+    }
+    OCC = [new Uint8Array(n), new Uint8Array(n)];
+}
+
+function spor(st) { const ut = []; while (st >= 0) { ut.push(st >> 2); st = FR[st]; } return ut.reverse(); }
+
+/* A* fra klemma `fra` til cella `til`. `egne` er klemmene ledningen hører til. */
+function sok(fra, til, egne, myk) {
+    const S = NX * NY * 4;
+    // Generasjonsstempel i stedet for å nullstille hele tabellen per søk.
+    if (!GS || GS.length < S || GEN > 2e9) { GS = new Float32Array(S); FR = new Int32Array(S); LK = new Int32Array(S); GEN = 0; }
+    const gen = ++GEN, gen2 = ++GEN;   // LK[s] === gen: sett, === gen2: lukket
+    HN = 0;
+    const tx = til % NX, ty = (til - tx) / NX;
+    const e0 = egne[0], e1 = egne[1];
+    const d0 = retning(fra.kl.d), start = fra.celle;
+    const s0 = start * 4 + d0;
+    GS[s0] = 0; FR[s0] = -1; LK[s0] = gen; hPush(0, s0);
+    const O0 = OCC[0], O1 = OCC[1];
+    while (HN) {
+        const st = hPop();
+        if (LK[st] === gen2) continue;
+        LK[st] = gen2;
+        const c = st >> 2, dInn = st & 3;
+        if (c === til) return spor(st);
+        const cx = c % NX, cy = (c - cx) / NX, g0 = GS[st];
+        const bc = BL[c], deltC = bc > 0 && (bc === e0 || bc === e1);
+        for (let du = 0; du < 4; du++) {
+            if (du === ((dInn + 2) & 3)) continue;
+            if (c === start && du !== d0) continue;
+            const x2 = cx + DX[du], y2 = cy + DY[du];
+            if (x2 < 0 || y2 < 0 || x2 >= NX || y2 >= NY) continue;
+            const c2 = y2 * NX + x2, b2 = BL[c2];
+            if (b2 !== 0 && b2 !== e0 && b2 !== e1) continue;
+            const ax = du & 1, OA = ax ? O1 : O0, OP = ax ? O0 : O1;
+            let k = 1;
+            if (du !== dInn) {
+                if (bc > 0 && (SONE[c] < SVING[bc] || (SVING[bc] === SLEN[bc] - 3 && SONE[c] === SLEN[bc] - 2))) continue;
+                k += KOST.sving;
+                // Å svinge bruker begge retninger i cella – ikke lov oppå en annen.
+                if (!deltC && (OA[c])) { if (!myk) continue; k += KOST.oppaa; }
+            }
+            if (b2 === 0) {
+                if (OA[c2]) { if (!myk) continue; k += KOST.oppaa; }
+                if (OP[c2]) k += KOST.kryss;
+                if (ax === 0) { if (y2 > 0 && O0[c2 - NX]) k += KOST.nabo; if (y2 < NY - 1 && O0[c2 + NX]) k += KOST.nabo; }
+                else { if (x2 > 0 && O1[c2 - 1]) k += KOST.nabo; if (x2 < NX - 1 && O1[c2 + 1]) k += KOST.nabo; }
+                const na = NAER[c2];
+                if (na && na !== e0 && na !== e1) k += KOST.naer;
+            }
+            const s2 = c2 * 4 + du, g2 = g0 + k, l2 = LK[s2];
+            if (l2 === gen2) continue;
+            if (l2 !== gen || g2 < GS[s2]) {
+                LK[s2] = gen; GS[s2] = g2; FR[s2] = st;
+                hPush(g2 + (Math.abs(x2 - tx) + Math.abs(y2 - ty)) * 1.001, s2);
+            }
+        }
+    }
+    return null;
+}
+
+const akse = (a, b) => (Math.abs(b - a) === 1 ? 0 : 1);
+function merk(cel, d) {
+    d = d || 1;
+    for (let j = 0; j < cel.length; j++) {
+        const c = cel[j];
+        const inn = j > 0 ? akse(cel[j - 1], c) : -1;
+        const ut = j < cel.length - 1 ? akse(c, cel[j + 1]) : -1;
+        if (inn >= 0) OCC[inn][c] += d;
+        if (ut >= 0 && ut !== inn) OCC[ut][c] += d;
+    }
+}
+const cellePunkt = (c) => ({ x: (c % NX) * RUTE, y: Math.floor(c / NX) * RUTE });
+function tilPunkter(cel) {
+    const ut = [cellePunkt(cel[0])];
+    for (let j = 1; j < cel.length - 1; j++) {
+        if (cel[j] - cel[j - 1] !== cel[j + 1] - cel[j]) ut.push(cellePunkt(cel[j]));
+    }
+    ut.push(cellePunkt(cel[cel.length - 1]));
+    return ut;
+}
+/* Krysser ruta en annen ledning? Bare de rutes om i runde to. */
+function krysser(cel) {
+    for (let j = 1; j < cel.length - 1; j++) {
+        const c = cel[j];
+        if (BL[c] !== 0) continue;
+        const a = akse(cel[j - 1], c);
+        if (a === akse(c, cel[j + 1]) && OCC[a ^ 1][c] > 0) return true;
+        if (OCC[a][c] > 1) return true;
+    }
+    return false;
+}
+const avstand = (w) => {
+    const A = KLI.get(w.a), B = KLI.get(w.b);
+    return A && B ? Math.abs(A.p.x - B.p.x) + Math.abs(A.p.y - B.p.y) : 0;
+};
+
+function rutAlle() {
+    rutVersjon++;
+    if (!BL) return;
+    OCC = [new Uint8Array(NX * NY), new Uint8Array(NX * NY)];
+    const rekke = ledninger.slice().sort((a, b) => (avstand(a) - avstand(b)) || ((a.a + a.b) < (b.a + b.b) ? -1 : 1));
+    for (const w of rekke) {
+        const A = KLI.get(w.a), B = KLI.get(w.b);
+        w.celler = null;
+        if (!A || !B) { w.pts = null; continue; }
+        const egne = [A.idx, B.idx];
+        const cel = sok(A, B.celle, egne, false) || sok(A, B.celle, egne, true);
+        if (cel) { merk(cel); w.celler = cel; w.pts = tilPunkter(cel); }
+        else w.pts = [A.p, B.p];
+    }
+    /*
+     * Runde to: hver ledning rives opp og rutes på nytt mens alle de andre
+     * ligger der. De som ble lagt først, vet da om de som kom etter, og
+     * unødige kryssinger forsvinner.
+     */
+    if (rekke.length > 1 && rekke.length <= 24) {
+        for (const w of rekke) {
+            if (!w.celler || !krysser(w.celler)) continue;
+            const A = KLI.get(w.a), B = KLI.get(w.b), egne = [A.idx, B.idx];
+            merk(w.celler, -1);
+            const cel = sok(A, B.celle, egne, false) || sok(A, B.celle, egne, true) || w.celler;
+            merk(cel); w.celler = cel; w.pts = tilPunkter(cel);
+        }
+    }
+    finnKnuter();
+}
+
+/* Koblingspunkt der en ledning greiner av fra en delt stump. */
+function finnKnuter() {
+    KNUTER = [];
+    for (const t of KL) {
+        const ws = ledninger.filter((w) => w.celler && (w.a === t.id || w.b === t.id));
+        if (ws.length < 2) continue;
+        const ut = ws.map((w) => {
+            let m = 0;
+            for (const c of w.celler) if (BL[c] === t.idx && SONE[c] > m) m = SONE[c];
+            return m;
+        });
+        const sett = Array.from(new Set(ut));
+        for (const v of sett) {
+            if (v > 0 && ut.filter((u) => u >= v).length >= 2) KNUTER.push({ t, p: cellePunkt(t.sone[v]) });
+        }
+    }
+}
+
+/* Nærmeste ledige celle der fingeren er – for forhåndsvisningen. */
+function friCelle(v) {
+    const gx = Math.max(0, Math.min(NX - 1, Math.round(v.x / RUTE)));
+    const gy = Math.max(0, Math.min(NY - 1, Math.round(v.y / RUTE)));
+    let best = -1, bd = Infinity;
+    for (let r = 0; r <= 5 && best < 0; r++) {
+        for (let oy = -r; oy <= r; oy++) for (let ox = -r; ox <= r; ox++) {
+            const x = gx + ox, y = gy + oy;
+            if (x < 0 || y < 0 || x >= NX || y >= NY) continue;
+            const c = y * NX + x;
+            if (BL[c] !== 0) continue;
+            const d = Math.hypot(x * RUTE - v.x, y * RUTE - v.y);
+            if (d < bd) { bd = d; best = c; }
+        }
+    }
+    return best;
+}
+let forh = { nokkel: null, pts: null };
+function forhandsRute() {
+    if (!pending || !pekerPos || !BL || pending.idx === undefined) return null;
+    let c = -1, nokkel;
+    if (mal) nokkel = 'k' + mal.id;
+    else { c = friCelle(pekerPos); if (c < 0) return null; nokkel = 'c' + c; }
+    nokkel = pending.id + '>' + nokkel + '#' + rutVersjon;
+    if (forh.nokkel === nokkel) return forh.pts;
+    let cel;
+    if (mal) cel = sok(pending, mal.celle, [pending.idx, mal.idx], false) || sok(pending, mal.celle, [pending.idx, mal.idx], true);
+    else cel = sok(pending, c, [pending.idx, -1], true);
+    forh = { nokkel, pts: cel && cel.length > 1 ? tilPunkter(cel) : null };
+    return forh.pts;
 }
 
 /* ---------- 6. Tegning --------------------------------------------- */
-const VB = 640;
+let VB = 640;
 let VH = 980;          // settes per brett av leggUt()
 const C = $('c'), G = C.getContext('2d');
 let sk = 1, offX = 0, offY = 0, DPR = 1, na = 0;
 let P = {};
+let FONT = 'sans-serif';
 const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
 function lesPalett() {
@@ -1273,28 +1624,35 @@ function lesPalett() {
         PEav: css('--PE-av'), PEpa: css('--PE-pa'),
         strom: css('--strom'), glod: css('--glod'), feil: css('--feil'),
         tekst: css('--tekst'), dempet: css('--dempet'), svak: css('--svak'),
-        rute: css('--rute'), rute5: css('--rute-5'), natt: css('--nat')
+        rute: css('--rute'), rute5: css('--rute-5'), natt: css('--nat'),
+        haar2: css('--haar-2')
     };
     MONO = css('--mono');
+    FONT = css('--font');
 }
 function skaler() {
     DPR = Math.min(window.devicePixelRatio || 1, 2.5);
     const w = window.innerWidth, h = window.innerHeight;
     C.width = Math.round(w * DPR); C.height = Math.round(h * DPR);
     C.style.width = w + 'px'; C.style.height = h + 'px';
-    const topp = 112, bunn = 96;
-    // Maks 560 px brettbredde: på en bred skjerm skal dette lese som en
-    // bevisst stolpe, ikke som et lite brett som har gått seg bort.
-    const maksBredde = Math.min(w - 24, 560);
-    sk = Math.min(maksBredde / VB, (h - topp - bunn) / VH, 1.3);
-    offX = (w - VB * sk) / 2;
-    offY = topp + (h - topp - bunn - VH * sk) / 2;
+    OMR = omraade();
+    leggUt(komp);
+    offX = Math.round(OMR.x + (OMR.w - VB * sk) / 2);
+    offY = Math.round(OMR.y + (OMR.h - VH * sk) / 2);
+    if (komp.length) { byggRutenett(); rutAlle(); }
+    forh = { nokkel: null, pts: null };
+    // Klemmeobjektene er bygd på nytt: pek på de nye.
+    if (pending) pending = KLI.get(pending.id) || null;
+    if (mal) mal = KLI.get(mal.id) || null;
 }
-window.addEventListener('resize', skaler);
+let skalerVent = 0;
+window.addEventListener('resize', () => { cancelAnimationFrame(skalerVent); skalerVent = requestAnimationFrame(skaler); });
 const tilSkjerm = (p) => ({ x: offX + p.x * sk, y: offY + p.y * sk });
 /* Etikettstørrelse i SKJERMPIKSLER med lesbar bunn. Skalerte de med brettet,
    havnet de på 5 px på telefon – og da er de like gjerne ikke der. */
 const etiSt = (grunn) => Math.max(grunn, grunn * sk * 1.15);
+/* Strekbredde i piksler med en nedre grense, så tynne streker ikke forsvinner. */
+const lb = (grunn, min) => Math.max(min, grunn * sk);
 
 function lederFarge(f, live) {
     if (f === 'N') return live ? P.Npa : P.Nav;
@@ -1331,16 +1689,17 @@ function tegnRutenett() {
         G.fillRect(o.x - 60, o.y - 20, VB * sk + 120, VH * sk + 40);
     }
     G.save();
-    G.beginPath(); G.rect(o.x - 8 * sk, o.y - 8 * sk, (VB + 16) * sk, (VH + 16) * sk); G.clip();
+    G.beginPath(); G.rect(o.x, o.y, VB * sk, VH * sk); G.clip();
     G.lineWidth = 1;
-    for (let x = 0; x <= VB; x += 20) {
+    // Rutene følger ledningssporene: hvert andre spor, kraftigere hver tiende.
+    for (let x = 0; x <= VB; x += 16) {
         const p = tilSkjerm({ x, y: 0 });
-        G.strokeStyle = (x % 100 === 0) ? P.rute5 : P.rute;
+        G.strokeStyle = (x % 80 === 0) ? P.rute5 : P.rute;
         G.beginPath(); G.moveTo(p.x, o.y); G.lineTo(p.x, o.y + VH * sk); G.stroke();
     }
-    for (let y = 0; y <= VH; y += 20) {
+    for (let y = 0; y <= VH; y += 16) {
         const p = tilSkjerm({ x: 0, y });
-        G.strokeStyle = (y % 100 === 0) ? P.rute5 : P.rute;
+        G.strokeStyle = (y % 80 === 0) ? P.rute5 : P.rute;
         G.beginPath(); G.moveTo(o.x, p.y); G.lineTo(o.x + VB * sk, p.y); G.stroke();
     }
     G.restore();
@@ -1373,27 +1732,77 @@ function tegnLedning(w, live, markert) {
     const pts = w.pts.map(tilSkjerm);
     const strobe = markert && (Math.floor(na / 110) % 2 === 0);
     const farge = strobe ? P.feil : lederFarge(w.farge, live);
+    const rad = Math.max(3, 7 * sk);
+    const bredde = (live || strobe) ? lb(3.4, 2.6) : lb(2.6, 2);
     G.save();
     G.lineCap = 'round'; G.lineJoin = 'round';
+    // Mørk kant: der to ledninger krysser, får den øverste en tydelig luke
+    // rundt seg – da ser det aldri ut som de er koblet sammen.
+    G.strokeStyle = P.natt; G.lineWidth = bredde + 3;
+    bane(G, pts, rad); G.stroke();
     if (live || strobe) {
         G.strokeStyle = farge; G.shadowColor = farge; G.shadowBlur = 16 * sk;
-        G.lineWidth = 3.4 * sk; bane(G, pts, 14 * sk); G.stroke();
+        G.lineWidth = bredde; bane(G, pts, rad); G.stroke();
         G.shadowBlur = 0;
     }
     G.strokeStyle = farge;
-    G.lineWidth = (live || strobe ? 3.4 : 2.6) * sk;
-    bane(G, pts, 14 * sk); G.stroke();
+    G.lineWidth = bredde;
+    bane(G, pts, rad); G.stroke();
     if (live && !strobe) {
         // Under seiersslaget renner strømmen fortere og lyser kraftigere.
         const f = seierFase();
         const fart = f > 0 ? 0.1 + 0.55 * (1 - f) : 0.1;
         const kraft = f > 0 ? 1 + 2.2 * Math.sin(Math.PI * Math.min(1, f * 1.6)) : 1;
+        const per = Math.max(14, 26 * sk);
         G.strokeStyle = P.strom; G.shadowColor = P.strom;
         G.shadowBlur = 10 * sk * kraft;
-        G.lineWidth = 1.8 * sk * (1 + (kraft - 1) * .5);
-        G.setLineDash([4 * sk, 22 * sk]);
-        G.lineDashOffset = -(na * fart) % (26 * sk);
-        bane(G, pts, 14 * sk); G.stroke();
+        G.lineWidth = lb(1.8, 1.4) * (1 + (kraft - 1) * .5);
+        G.setLineDash([per * 0.16, per * 0.84]);
+        G.lineDashOffset = -(na * fart) % per;
+        bane(G, pts, rad); G.stroke();
+    }
+    G.restore();
+}
+
+function tegnKnuter(r) {
+    if (!KNUTER.length) return;
+    G.save();
+    const rad = lb(3.6, 3);
+    for (const kn of KNUTER) {
+        const live = !!(r && r.finn(kn.t.id) === r.rL && kn.t.kl.farge === 'L');
+        const strobe = !!(feilmark && feilmark.klemmer.indexOf(kn.t.id) >= 0) && (Math.floor(na / 110) % 2 === 0);
+        const s = tilSkjerm(kn.p);
+        G.fillStyle = P.natt;
+        G.beginPath(); G.arc(s.x, s.y, rad + 1.5, 0, 7); G.fill();
+        G.fillStyle = strobe ? P.feil : lederFarge(kn.t.kl.farge, live);
+        if (live) { G.shadowColor = G.fillStyle; G.shadowBlur = 8 * sk; }
+        G.beginPath(); G.arc(s.x, s.y, rad, 0, 7); G.fill();
+        G.shadowBlur = 0;
+    }
+    G.restore();
+}
+
+/* Ruta den nye ledningen får, mens du drar – samme ruting som når den legges. */
+function tegnForhand() {
+    if (!pending || !pekerPos) return;
+    const rute = forhandsRute();
+    const farge = mal ? lederFarge(fargeFor(pending, mal), true) : P.strom;
+    G.save();
+    G.lineCap = 'round'; G.lineJoin = 'round';
+    if (rute) {
+        const pts = rute.map(tilSkjerm);
+        G.strokeStyle = P.natt; G.lineWidth = lb(2.6, 2) + 3; bane(G, pts, Math.max(3, 7 * sk)); G.stroke();
+        G.strokeStyle = farge; G.globalAlpha = mal ? .95 : .6;
+        G.lineWidth = lb(2.6, 2);
+        G.setLineDash(mal ? [] : [5, 5]);
+        G.lineDashOffset = -na / 40;
+        bane(G, pts, Math.max(3, 7 * sk)); G.stroke();
+        if (!mal) {
+            // Siste lille stykke rett ut til fingeren.
+            const e = pts[pts.length - 1], f = tilSkjerm(pekerPos);
+            G.globalAlpha = .35; G.setLineDash([2, 4]);
+            G.beginPath(); G.moveTo(e.x, e.y); G.lineTo(f.x, f.y); G.stroke();
+        }
     }
     G.restore();
 }
@@ -1420,29 +1829,21 @@ function tegnSymbol(k, r) {
 
     G.save();
     G.translate(p.x, p.y);
-    G.lineWidth = (aktiv ? 2.6 : 2.4) * sk; G.lineCap = 'round'; G.lineJoin = 'round';
+    G.lineWidth = lb(aktiv ? 2.6 : 2.4, 1.5); G.lineCap = 'round'; G.lineJoin = 'round';
     const f = aktiv ? P.glod : P.dempet;
     G.strokeStyle = f; G.fillStyle = f;
     if (aktiv) { G.shadowColor = P.glod; G.shadowBlur = 14 * sk; }
     d.tegn(G, S, { pa: !!k.pa, live: spilletLive });
     G.restore();
 
+    // Navnet ligger i sitt eget felt over symbolet – ingen ledning går der.
+    const h = k.hinder || hinder(k, sk);
     G.save();
     G.fillStyle = aktiv ? 'rgba(255,194,71,.9)' : P.svak;
-    G.font = '500 ' + etiSt(10.5) + 'px ' + MONO;
-    G.textAlign = 'center'; G.textBaseline = 'alphabetic';
-    const navn = d.navn.toUpperCase();
-    const halv = G.measureText(navn).width / 2;
-    const vb = tilSkjerm({ x: 0, y: 0 }).x + halv + 4 * sk;
-    const hb = tilSkjerm({ x: VB, y: 0 }).x - halv - 4 * sk;
-    const lx = Math.max(vb, Math.min(hb, p.x));
-    const eh = etiSt(10.5);
-    const ly = p.y - d.h / 2 * sk - Math.max(10, 12 * sk);
-    const f2 = G.fillStyle;
-    G.fillStyle = P.natt;
-    G.fillRect(lx - halv - 5, ly - eh, halv * 2 + 10, eh * 1.45);
-    G.fillStyle = f2;
-    G.fillText(navn, lx, ly);
+    G.font = '500 ' + h.e.px + 'px ' + MONO;
+    G.textAlign = 'center'; G.textBaseline = 'middle';
+    const ly = tilSkjerm({ x: 0, y: k.y + h.etikett[1] + h.e.h * 0.5 }).y;
+    G.fillText(k.visnavn ? k.visnavn.toUpperCase() : d.navn.toUpperCase(), p.x, ly);
     G.restore();
 }
 
@@ -1450,49 +1851,122 @@ function tegnKlemme(t, r) {
     const s = tilSkjerm(t.p);
     const live = !!(r && r.finn(t.id) === r.rL);
     const valgt = !!(pending && pending.id === t.id);
-    const gyldig = !!(pending && pending.id !== t.id);
+    const erMal = !!(mal && mal.id === t.id);
+    const gyldig = !!(pending && !valgt && !erMal);
     const markert = !!(feilmark && feilmark.klemmer.indexOf(t.id) >= 0);
     const strobe = markert && (Math.floor(na / 110) % 2 === 0);
     const farge = strobe ? P.feil : lederFarge(t.kl.farge, live);
-    const rr = 7.5 * sk;
+    const rr = Math.max(5, Math.min(8, 7.5 * sk));
+
+    /*
+     * Teksten ligger PÅ klemmas egen tilførsel, innenfor klemma. Før sto den
+     * over klemma, og på fordelingen havnet «N» like nær L som N – det så ut
+     * som du traff feil klemme selv når du ikke gjorde det.
+     */
+    G.save();
+    const px = etiSt(10);
+    G.font = '600 ' + px + 'px ' + MONO;
+    G.textAlign = 'center'; G.textBaseline = 'middle';
+    const br = G.measureText(t.kl.tekst).width / 2 + 3;
+    const dx = t.kl.d[0], dy = t.kl.d[1];
+    let tx, ty;
+    if (dy === 0) { tx = s.x - dx * (rr + 3 + br); ty = s.y; }
+    else { tx = s.x; ty = s.y - dy * (rr + 3 + px * 0.6); }
+    G.fillStyle = P.natt;
+    G.fillRect(tx - br, ty - px * .62, br * 2, px * 1.24);
+    G.fillStyle = (live || valgt || erMal) ? P.strom : P.dempet;
+    G.fillText(t.kl.tekst, tx, ty);
+    G.restore();
 
     G.save();
     if (gyldig) {
-        const puls = .3 + .25 * Math.sin(na / 260);
+        const puls = .16 + .14 * Math.sin(na / 260);
         G.strokeStyle = 'rgba(255,217,138,' + puls.toFixed(3) + ')';
-        G.lineWidth = 1.6 * sk;
-        G.beginPath(); G.arc(s.x, s.y, rr + 10 * sk, 0, 7); G.stroke();
+        G.lineWidth = 1.5;
+        G.beginPath(); G.arc(s.x, s.y, rr + 5, 0, 7); G.stroke();
     }
     if (valgt) {
-        G.strokeStyle = P.strom; G.lineWidth = 2.2 * sk;
-        G.shadowColor = P.strom; G.shadowBlur = 14 * sk;
-        G.beginPath(); G.arc(s.x, s.y, rr + 8 * sk, 0, 7); G.stroke();
+        G.strokeStyle = P.strom; G.lineWidth = 2.2;
+        G.shadowColor = P.strom; G.shadowBlur = 12;
+        G.beginPath(); G.arc(s.x, s.y, rr + 6, 0, 7); G.stroke();
+        G.shadowBlur = 0;
+    }
+    if (erMal) {
+        // Klemma du kobler til, skal synes rundt fingeren – ikke bare under den.
+        G.fillStyle = 'rgba(255,217,138,.16)';
+        G.beginPath(); G.arc(s.x, s.y, 22, 0, 7); G.fill();
+        G.strokeStyle = P.strom; G.lineWidth = 2.5;
+        G.shadowColor = P.strom; G.shadowBlur = 14;
+        G.beginPath(); G.arc(s.x, s.y, 22, 0, 7); G.stroke();
         G.shadowBlur = 0;
     }
     if (live || strobe) { G.shadowColor = farge; G.shadowBlur = 12 * sk; }
     G.fillStyle = farge;
-    G.beginPath(); G.arc(s.x, s.y, rr, 0, 7); G.fill();
+    G.beginPath(); G.arc(s.x, s.y, erMal || valgt ? rr + 1.5 : rr, 0, 7); G.fill();
     G.shadowBlur = 0;
     G.fillStyle = P.natt;
     G.beginPath(); G.arc(s.x, s.y, rr * .4, 0, 7); G.fill();
     G.restore();
+}
 
+/* Navn på klemma i klartekst: «Lampe 2 · N». */
+function klemmeNavn(t) { return (t.komp.visnavn || TYPER[t.komp.type].navn) + ' · ' + t.kl.tekst; }
+function rundRekt(x, y, w, h, r) {
+    G.beginPath();
+    G.moveTo(x + r, y); G.arcTo(x + w, y, x + w, y + h, r); G.arcTo(x + w, y + h, x, y + h, r);
+    G.arcTo(x, y + h, x, y, r); G.arcTo(x, y, x + w, y, r); G.closePath();
+}
+
+/*
+ * Fingeren dekker klemma du sikter på. Derfor en lapp OVER fingeren som sier
+ * hvilken klemme som blir koblet, med en strek ned til den.
+ */
+function tegnSikte() {
+    if (!pending || !pekerSkjerm) return;
+    const mus = pekerSkjerm.type === 'mouse';
+    if (!sikte && !mus) return;
+    if (mus && !mal) return;
+    const W = window.innerWidth;
+    const fx = pekerSkjerm.x, fy = pekerSkjerm.y;
+    const dobbel = !!(mal && ledninger.some((w) => (w.a === pending.id && w.b === mal.id) || (w.b === pending.id && w.a === mal.id)));
+    const l1 = mal ? klemmeNavn(mal) : 'Fra ' + klemmeNavn(pending);
+    const l2 = mal ? (dobbel ? 'Allerede koblet' : 'Slipp for å koble') : 'Dra til en klemme';
+    const farge = mal ? lederFarge(fargeFor(pending, mal), true) : lederFarge(pending.kl.farge, true);
     G.save();
-    G.fillStyle = live ? P.strom : P.svak;
-    G.font = '600 ' + etiSt(10) + 'px ' + MONO;
-    G.textAlign = 'center'; G.textBaseline = 'middle';
-    const dx = t.kl.d[0], dy = t.kl.d[1];
-    // Loddrette klemmer får teksten til siden: rett under ligger dens egen leder.
-    const avst = Math.max(15, 19 * sk);
-    const tx = dy !== 0 ? s.x + avst : s.x + dx * avst;
-    const ty = dy !== 0 ? s.y + dy * 4 * sk : s.y - Math.max(13, 15 * sk);
-    const f3 = G.fillStyle;
-    G.fillStyle = P.natt;
-    const br = G.measureText(t.kl.tekst).width / 2 + 3;
-    const th = etiSt(10);
-    G.fillRect(tx - br, ty - th * .7, br * 2, th * 1.4);
-    G.fillStyle = f3;
-    G.fillText(t.kl.tekst, tx, ty);
+    G.font = '650 14px ' + FONT;
+    const w1 = G.measureText(l1).width;
+    G.font = '500 11px ' + FONT;
+    const w2 = G.measureText(l2).width;
+    const bw = Math.ceil(Math.max(w1, w2) + 40), bh = 42;
+    let bx = fx - bw / 2, by = fy - (mus ? 30 : 74) - bh;
+    if (by < OMR.y - 30) {
+        // For nær toppen: legg lappen ved siden av fingeren i stedet.
+        by = fy - bh / 2;
+        bx = fx > W / 2 ? fx - 52 - bw : fx + 52;
+    }
+    bx = Math.max(8, Math.min(W - 8 - bw, bx));
+    by = Math.max(8, by);
+    if (mal) {
+        const m = tilSkjerm(mal.p);
+        G.strokeStyle = 'rgba(255,217,138,.55)'; G.lineWidth = 1.5; G.setLineDash([3, 3]);
+        G.beginPath();
+        G.moveTo(Math.max(bx + 12, Math.min(bx + bw - 12, m.x)), by + bh / 2 < m.y ? by + bh : by);
+        G.lineTo(m.x, m.y); G.stroke();
+        G.setLineDash([]);
+    }
+    G.fillStyle = 'rgba(10,13,18,.96)';
+    G.strokeStyle = mal ? 'rgba(255,217,138,.7)' : P.haar2;
+    G.lineWidth = 1;
+    rundRekt(bx + .5, by + .5, bw, bh, 11); G.fill(); G.stroke();
+    G.fillStyle = farge;
+    G.beginPath(); G.arc(bx + 16, by + bh / 2, 5, 0, 7); G.fill();
+    G.textAlign = 'left'; G.textBaseline = 'alphabetic';
+    G.fillStyle = dobbel ? P.dempet : P.tekst;
+    G.font = '650 14px ' + FONT;
+    G.fillText(l1, bx + 29, by + 19);
+    G.fillStyle = mal && !dobbel ? P.strom : P.dempet;
+    G.font = '500 11px ' + FONT;
+    G.fillText(l2, bx + 29, by + 34);
     G.restore();
 }
 
@@ -1501,6 +1975,10 @@ let brettNr = 0, komp = [], ledninger = [], pending = null, pekerPos = null;
 let spilletLive = false, sisteRes = null, startTid = 0, sisteSum = null, feilmark = null;
 let kapittelFerdig = 0;
 let seier = null;   // { fra, til } – øyeblikket du får se at kretsen holder
+let sikte = null;   // aktiv berøring: { id, x0, y0, flyttet, type, fraKlemme }
+let mal = null;     // klemma fingeren peker på nå
+let pekerSkjerm = null;
+let historikk = []; // for angre: øyeblikksbilder av ledningene
 let fremdrift = { klart: {}, poeng: {} };
 try { fremdrift = JSON.parse(localStorage.getItem('kursmester2') || '{"klart":{},"poeng":{}}'); } catch (e) { /* tom */ }
 if (!fremdrift.poeng) fremdrift.poeng = {};
@@ -1546,50 +2024,62 @@ function alleKlemmer() {
     }
     return ut;
 }
-function byggBane(w) {
-    const kl = alleKlemmer();
-    const a = kl.find((x) => x.id === w.a), b = kl.find((x) => x.id === w.b);
-    if (a && b) w.pts = rute(a.p, a.kl.d, b.p, b.kl.d, w.a + w.b);
+function vibrer(m) { try { if (navigator.vibrate) navigator.vibrate(m); } catch (e) { /* ikke støttet */ } }
+function lagre() {
+    historikk.push(ledninger.map((w) => ({ a: w.a, b: w.b, farge: w.farge })));
+    if (historikk.length > 80) historikk.shift();
 }
-function lastBrett(n) {
+function slippValg() { pending = null; pekerPos = null; mal = null; sikte = null; }
+
+/* Brettet uten panelene: komponenter, navn, utlegg, forhåndskoblinger. */
+function settOppBrett(n) {
     brettNr = Math.max(0, Math.min(BRETT.length - 1, n));
     const b = brett();
-    komp = leggUt(b.komp.map((k) => Object.assign({}, k)));
-    skaler();
-    ledninger = []; pending = null; pekerPos = null; feilmark = null; seier = null;
-    // Feilsøkingsbrett starter ferdig koblet – med feilen i.
-    if (b.forhand) {
-        const kl = alleKlemmer();
-        b.forhand.forEach((par) => {
-            const A = kl.find((x) => x.id === par[0]), B = kl.find((x) => x.id === par[1]);
-            if (!A || !B) return;
-            const w = { a: par[0], b: par[1], farge: fargeFor(A, B) };
-            byggBane(w); ledninger.push(w);
-        });
-    }
-    sisteRes = null; startTid = performance.now();
-    dimValg = { kabel: null, vern: null, jfb: null };
+    komp = b.komp.map((k) => Object.assign({}, k));
+    const antall = {}, nr = {};
+    komp.forEach((k) => { antall[k.type] = (antall[k.type] || 0) + 1; });
+    komp.forEach((k) => {
+        if (TYPER[k.type].klikkbar) k.pa = false;
+        nr[k.type] = (nr[k.type] || 0) + 1;
+        k.visnavn = TYPER[k.type].navn + (antall[k.type] > 1 ? ' ' + nr[k.type] : '');
+    });
+    ledninger = []; historikk = []; slippValg(); feilmark = null; seier = null;
     $('hKurs').textContent = b.kurs;
     $('hTittel').textContent = b.navn;
     $('hMaal').textContent = b.mal;
+    skaler();       // etter tekstene: topplinjas høyde avgjør plassen
+    // Feilsøkingsbrett starter ferdig koblet – med feilen i.
+    if (b.forhand) {
+        b.forhand.forEach((par) => {
+            const A = KLI.get(par[0]), B = KLI.get(par[1]);
+            if (A && B) ledninger.push({ a: par[0], b: par[1], farge: fargeFor(A, B) });
+        });
+        rutAlle();
+    }
+}
+function lastBrett(n) {
+    settOppBrett(n);
+    const b = brett();
+    sisteRes = null; startTid = performance.now();
+    dimValg = { kabel: null, vern: null, jfb: null };
     settAutomat(false);
     $('automat').classList.remove('seier');
     byggSkinne();
     if (b.dim) visDim(b); else lukkAlle();
 }
-function klemmeVed(vx, vy) {
+function klemmeVedSkjerm(sx, sy, radius) {
     /*
-     * Treffsonen måles i brettenheter, men fingeren måles i piksler. På et
-     * travelt brett blir skalaen liten, og en fast sone krympet til under
-     * 40 px. Vi holder minst ~24 px radius uansett – nærmeste klemme vinner
-     * når soner overlapper.
+     * Nærmeste klemme vinner, målt i SKJERMPIKSLER – samme koordinater som
+     * tegningen. Radiusen er stor nok for en tommel, og fordi bare den
+     * nærmeste velges, stjeler aldri to naboklemmer hverandres treff.
      */
-    let best = null, bd = Math.max(44, 24 / sk);
-    for (const t of alleKlemmer()) {
-        const d = Math.hypot(t.p.x - vx, t.p.y - vy);
+    let best = null, bd = radius;
+    for (const t of KL) {
+        const p = tilSkjerm(t.p);
+        const d = Math.hypot(p.x - sx, p.y - sy);
         if (d < bd) { bd = d; best = t; }
     }
-    return best;
+    return best ? { t: best, d: bd } : null;
 }
 function komponentVed(vx, vy) {
     for (const k of komp) {
@@ -1599,6 +2089,7 @@ function komponentVed(vx, vy) {
     return null;
 }
 function ledningVed(vx, vy) {
+    const tol = Math.max(10, 12 / sk);
     for (let i = ledninger.length - 1; i >= 0; i--) {
         const pts = ledninger[i].pts || [];
         for (let j = 0; j < pts.length - 1; j++) {
@@ -1607,7 +2098,7 @@ function ledningVed(vx, vy) {
             const l2 = dx * dx + dy * dy || 1;
             let t = ((vx - a.x) * dx + (vy - a.y) * dy) / l2;
             t = Math.max(0, Math.min(1, t));
-            if (Math.hypot(a.x + t * dx - vx, a.y + t * dy - vy) < 18) return i;
+            if (Math.hypot(a.x + t * dx - vx, a.y + t * dy - vy) < tol) return i;
         }
     }
     return -1;
@@ -1620,33 +2111,66 @@ function fargeFor(a, b) {
 }
 function koble(a, b) {
     if (a.id === b.id) return;
-    if (ledninger.some((w) => (w.a === a.id && w.b === b.id) || (w.a === b.id && w.b === a.id))) return;
-    const w = { a: a.id, b: b.id, farge: fargeFor(a, b) };
-    byggBane(w); ledninger.push(w); SFX.ledning();
+    if (ledninger.some((w) => (w.a === a.id && w.b === b.id) || (w.a === b.id && w.b === a.id))) {
+        varsle('Den ledningen ligger der allerede.', '', 1500);
+        return;
+    }
+    lagre();
+    ledninger.push({ a: a.id, b: b.id, farge: fargeFor(a, b) });
+    rutAlle();
+    SFX.ledning(); vibrer(18);
     if (spilletLive) test(true);
 }
-function tilVerden(e) {
+function skjermPos(e) {
     const r = C.getBoundingClientRect();
-    return { x: (e.clientX - r.left - offX) / sk, y: (e.clientY - r.top - offY) / sk };
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+function tilVerden(e) {
+    const s = skjermPos(e);
+    return { x: (s.x - offX) / sk, y: (s.y - offY) / sk };
+}
+const treffRadius = (type) => (type === 'mouse' ? 20 : 30);
+/* Hvilken klemme ville blitt koblet hvis du slapp nå? Gir et lite rykk ved bytte. */
+function oppdaterMal(sx, sy, type) {
+    const h = klemmeVedSkjerm(sx, sy, type === 'mouse' ? 24 : 40);
+    let ny = h ? h.t : null;
+    // Fingeren står fortsatt på klemma du startet fra: ingen nabo skal snappe.
+    if (ny && pending && ny.id === pending.id) ny = null;
+    if ((ny ? ny.id : null) !== (mal ? mal.id : null)) {
+        mal = ny;
+        if (ny) { vibrer(8); SFX.hake(); }
+    }
 }
 C.addEventListener('pointerdown', (e) => {
+    if (!e.isPrimary) return;
     lyd();
-    const v = tilVerden(e);
-    const t = klemmeVed(v.x, v.y);
-    if (t) {
-        if (pending && pending.id !== t.id) { koble(pending, t); pending = null; pekerPos = null; }
-        else { pending = t; pekerPos = v; SFX.tapp(); }
+    try { C.setPointerCapture(e.pointerId); } catch (_) { /* ok */ }
+    const s = skjermPos(e), v = tilVerden(e);
+    pekerSkjerm = { x: s.x, y: s.y, type: e.pointerType };
+    const ny = { id: e.pointerId, x0: s.x, y0: s.y, flyttet: false, type: e.pointerType, fraKlemme: false };
+    if (pending) {
+        // En klemme er valgt: dette trykket sikter. Det kobles når du slipper.
+        sikte = ny; pekerPos = v;
+        oppdaterMal(s.x, s.y, e.pointerType);
+        return;
+    }
+    const h = klemmeVedSkjerm(s.x, s.y, treffRadius(e.pointerType));
+    const k = komponentVed(v.x, v.y);
+    const bryter = k && TYPER[k.type].klikkbar ? k : null;
+    // Bryteren og klemmene dens deler flate: det som er nærmest fingeren vinner.
+    const tilBryter = bryter && (!h || Math.hypot(tilSkjerm(bryter).x - s.x, tilSkjerm(bryter).y - s.y) < h.d);
+    if (h && !tilBryter) {
+        pending = h.t; pekerPos = v; mal = null;
+        ny.fraKlemme = true; sikte = ny;
+        SFX.tapp(); vibrer(6);
         return;
     }
     /*
-     * Bryteren sjekkes FØR ledningene. Ledninger rutes ofte rett over et
-     * symbol, og da slettet et trykk på bryteren en ledning i stedet for å
-     * vippe den. Et symbol er et bevisst mål; en ledning som tilfeldigvis
-     * krysser det, skal ikke stjele trykket.
+     * Bryteren sjekkes FØR ledningene. Et symbol er et bevisst mål; en ledning
+     * som går forbi, skal ikke stjele trykket.
      */
-    const k = komponentVed(v.x, v.y);
-    if (k && TYPER[k.type].klikkbar) {
-        k.pa = !k.pa; SFX.bryter(); pending = null; pekerPos = null;
+    if (bryter) {
+        bryter.pa = !bryter.pa; SFX.bryter(); vibrer(10);
         // Under seieren skal bryterne virke, men brettet skal ikke dømmes på
         // nytt – du er ferdig, du bare viser deg selv at det holder.
         if (spilletLive) { sisteRes = los(komp, ledninger); if (!seier) test(true); }
@@ -1654,19 +2178,47 @@ C.addEventListener('pointerdown', (e) => {
     }
     const wi = ledningVed(v.x, v.y);
     if (wi >= 0) {
-        ledninger.splice(wi, 1); SFX.fjern(); pending = null; pekerPos = null;
+        lagre();
+        ledninger.splice(wi, 1); rutAlle();
+        SFX.fjern(); vibrer(12);
+        varsle('Ledning fjernet. Angre henter den tilbake.', '', 1800);
         if (spilletLive) test(true);
+    }
+});
+C.addEventListener('pointermove', (e) => {
+    const s = skjermPos(e);
+    if (sikte && e.pointerId === sikte.id) {
+        pekerSkjerm = { x: s.x, y: s.y, type: e.pointerType };
+        if (Math.hypot(s.x - sikte.x0, s.y - sikte.y0) > 8) sikte.flyttet = true;
+        pekerPos = tilVerden(e);
+        oppdaterMal(s.x, s.y, e.pointerType);
+    } else if (!sikte && pending && e.pointerType === 'mouse') {
+        // Mus: ruta følger pekeren også uten at knappen holdes inne.
+        pekerSkjerm = { x: s.x, y: s.y, type: 'mouse' };
+        pekerPos = tilVerden(e);
+        oppdaterMal(s.x, s.y, 'mouse');
+    }
+});
+function slipp(e, avbrutt) {
+    if (!sikte || e.pointerId !== sikte.id) return;
+    const s = sikte; sikte = null;
+    if (!avbrutt && pending && mal) {
+        const a = pending, b = mal;
+        slippValg();
+        koble(a, b);
         return;
     }
-    pending = null; pekerPos = null;
-});
-C.addEventListener('pointermove', (e) => { if (pending) pekerPos = tilVerden(e); });
-C.addEventListener('pointerup', (e) => {
-    if (!pending) return;
-    const v = tilVerden(e);
-    const t = klemmeVed(v.x, v.y);
-    if (t && t.id !== pending.id) { koble(pending, t); pending = null; pekerPos = null; }
-});
+    // Et rent trykk på en klemme velger den – trykk så på klemma du vil til.
+    if (!avbrutt && s.fraKlemme && !s.flyttet) {
+        mal = null;
+        if (e.pointerType !== 'mouse') pekerPos = null;
+        varsle(klemmeNavn(pending) + ' er valgt. Trykk på klemma du vil koble til.', '', 2200);
+        return;
+    }
+    slippValg();
+}
+C.addEventListener('pointerup', (e) => slipp(e, false));
+C.addEventListener('pointercancel', (e) => slipp(e, true));
 
 /* ---------- 8. Spillflyt -------------------------------------------- */
 function varsle(tekst, type, ms) {
@@ -1700,12 +2252,12 @@ function test(stille) {
     sisteRes = r;
 
     if (r.kortslutning) {
-        markerFeil(r, 'kort'); settAutomat(false); SFX.smell();
+        markerFeil(r, 'kort'); settAutomat(false); SFX.smell(); vibrer([40, 50, 90]);
         varsle('Kortslutning – automaten gikk. Fase møter nøytral uten last imellom.', 'feil', 3400);
         return false;
     }
     if (r.jordfeil) {
-        markerFeil(r, 'jord'); settAutomat(false); SFX.smell();
+        markerFeil(r, 'jord'); settAutomat(false); SFX.smell(); vibrer([40, 50, 90]);
         varsle('Jordfeil – jordfeilbryteren slo ut. Fase ligger på PE.', 'feil', 3400);
         return false;
     }
@@ -1932,8 +2484,18 @@ $('bHjelp').onclick = () => {
     settFag($('fTekst'), b.fag, b.norm);
     aapne('fagpanel');
 };
-$('bAngre').onclick = () => { if (ledninger.length) { ledninger.pop(); SFX.fjern(); if (spilletLive) test(true); } };
-$('bTom').onclick = () => { if (ledninger.length) { ledninger = []; SFX.fjern(); settAutomat(false); feilmark = null; } };
+/* Angre er en ekte angre: den henter tilbake en ledning du fjernet, også. */
+$('bAngre').onclick = () => {
+    if (!historikk.length) { varsle('Ingenting å angre.', '', 1200); return; }
+    ledninger = historikk.pop(); slippValg(); rutAlle(); SFX.fjern(); vibrer(10);
+    if (spilletLive) test(true);
+};
+$('bTom').onclick = () => {
+    if (!ledninger.length) return;
+    lagre(); ledninger = []; slippValg(); rutAlle(); SFX.fjern(); vibrer(14);
+    settAutomat(false); feilmark = null;
+    varsle('Alle ledninger fjernet. Angre henter dem tilbake.', '', 2000);
+};
 $('automat').onclick = () => {
     lyd();
     if (seier) { SFX.tapp(); visResultat(); return; }
@@ -2011,29 +2573,21 @@ function tegn(t) {
     tegnLysglod(r);
 
     for (const w of ledninger) {
-        if (!w.pts) byggBane(w);
+        if (!w.pts) continue;
         const live = !!(r && r.finn(w.a) === r.rL && w.farge === 'L');
         tegnLedning(w, live, !!(feilmark && feilmark.ider.indexOf(w.a + w.b) >= 0));
     }
-
-    if (pending && pekerPos) {
-        const p1 = tilSkjerm(pending.p), p2 = tilSkjerm(pekerPos);
-        G.save();
-        G.strokeStyle = 'rgba(255,217,138,.55)';
-        G.lineWidth = 2 * sk; G.setLineDash([6 * sk, 8 * sk]); G.lineCap = 'round';
-        G.beginPath(); G.moveTo(p1.x, p1.y); G.lineTo(p2.x, p1.y); G.lineTo(p2.x, p2.y); G.stroke();
-        G.restore();
-    }
+    tegnKnuter(r);
+    tegnForhand();
 
     for (const k of komp) tegnSymbol(k, r);
-    for (const kl of alleKlemmer()) tegnKlemme(kl, r);
+    for (const kl of KL) tegnKlemme(kl, r);
+    tegnSikte();
 }
 function loop(t) { tegn(t); requestAnimationFrame(loop); }
 
 lesPalett();
-skaler();
-komp = leggUt(BRETT[0].komp.map((k) => Object.assign({}, k)));
-skaler();
+settOppBrett(0);
 byggSkinne();
 const pr = new URLSearchParams(location.search);
 const onsket = parseInt(pr.get('brett') || '0', 10);

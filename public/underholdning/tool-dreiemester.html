@@ -2,6 +2,7 @@
 <html lang="nb">
 <head>
     <meta charset="UTF-8"/>
+    <script src="/underholdning/lib/spillmeny.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no"/>
     <title>Dreiemester – Minio Underholdning</title>
     <meta name="description" content="Still deg ved dreiebenken: drei sjakkbonder, kjevler og kjegler etter tegningen med dreiejernet. Stjerner, lange spon, akkord på tid og dagens emne – nå målet og vinn 10% rabattkode fra Minio!"/>
@@ -91,7 +92,7 @@
         /* ---------- Topp ---------- */
         .back {
             position: fixed;
-            z-index: 30;
+            z-index: 45; /* over overlayene, så man alltid kommer seg ut */
             top: calc(var(--sat) + 12px);
             left: calc(var(--sal) + 14px);
             display: inline-flex;
@@ -118,7 +119,7 @@
 
         .ctrl {
             position: fixed;
-            z-index: 30;
+            z-index: 45; /* over overlayene, så man alltid kommer seg ut */
             top: calc(var(--sat) + 12px);
             right: calc(var(--sar) + 14px);
             display: flex;
@@ -676,6 +677,33 @@
             .score2.pop, .discount-reveal, .finish.ready, .timer.low, .badge.nb { animation: none !important; }
             .card, .overlay, .toast, .bp-in { transition: none; }
         }
+
+        /* ---------- Resultat på mobil: toppliste høyt opp, knappene alltid synlige ---------- */
+        .over-card { --cpx: 20px; padding-bottom: 0; }
+        .over-card > :last-child { margin-bottom: 16px; }
+        .over-card .btnrow {
+            position: sticky; bottom: 0; z-index: 2;
+            margin: 12px calc(-1 * var(--cpx)) 0;
+            padding: 12px var(--cpx) 14px;
+            background: linear-gradient(to top, rgb(22, 17, 13) 74%, rgba(22, 17, 13, 0));
+        }
+        .over-card .lb { margin-top: 16px; }
+        .over-card .share { margin-top: 12px; }
+        @media (max-width: 699px) {
+            .over-card { --cpx: 16px; padding-top: 14px; }
+            .over-card .big-score { font-size: 54px; }
+            .over-card .rank { margin-top: 4px; font-size: 16px; }
+            .over-card .quip { font-size: 13px; }
+            .over-card .stats-row { margin-top: 10px; }
+            .over-card .stats-row .stat { padding-top: 8px; padding-bottom: 8px; }
+            .over-card .progress { margin-top: 10px; }
+            .over-card .lb { margin-top: 12px; }
+            .over-card .lbl-list li { padding: 5px 9px; }
+        }
+        @media (max-width: 699px) and (max-height: 700px) {
+            .over-card .big-score { font-size: 46px; }
+            .over-card .quip { display: none; }
+        }
     </style>
 </head>
 
@@ -683,16 +711,17 @@
 
 <canvas id="c" aria-label="Dreiemester – dreiebenk"></canvas>
 
-<a href="/underholdning" class="back" id="backLink" aria-label="Tilbake til underholdning">
+<a href="/underholdning" class="back" id="backLink" aria-label="Tilbake til alle spill">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
     <img src="/images/branding/logo_navbar.svg" alt="Minio" width="62" height="17"/>
     <span class="sep"></span>
-    <span class="lbl">Underholdning</span>
+    <span class="lbl">Alle spill</span>
 </a>
 <div class="ctrl" id="ctrl">
     <button class="iconbtn" id="pauseBtn" aria-label="Pause" title="Pause (P)" hidden>
         <svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>
     </button>
+    <button class="iconbtn" data-spillmeny aria-label="Bytt spill" title="Bytt spill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg></button>
     <button class="iconbtn" id="muteBtn" aria-label="Lyd av/på" title="Lyd av/på (M)"></button>
 </div>
 
@@ -897,11 +926,6 @@
             <div class="stat"><div class="v" id="fB">0 %</div><div class="l" id="fBl">Snitt treff</div></div>
             <div class="stat"><div class="v" id="fC">0</div><div class="l" id="fCl">Lengste spon</div></div>
         </div>
-        <div class="btnrow">
-            <button class="btn sec" id="shareBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>Utfordre</button>
-            <button class="btn" id="retryBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Spill igjen</button>
-        </div>
-        <div class="khint hint-key">eller trykk <kbd>Mellomrom</kbd></div>
         <div class="progress" id="progress">
             <div class="lbl"><span>Til rabattkoden</span><span><b id="progVal">0</b> / <span id="progMax">4 000</span></span></div>
             <div class="bar"><i id="progBar"></i></div>
@@ -911,6 +935,21 @@
             <div class="discount-code" id="discountCode" role="button" tabindex="0">VPH10</div>
             <div class="discount-hint" id="discountHint">Trykk for å kopiere · 10% rabattkode på varmepumpehus</div>
         </div>
+        <div class="lb hidden-el" id="overLb">
+            <div class="lbh"><span class="eyebrow" id="overLbTitle">Dagens topp 10</span><div class="tabs" id="overLbRange"><button data-r="dag" class="on">I dag</button><button data-r="uke">Uka</button></div></div>
+            <div class="namebox hidden-el" id="nameBox">
+                <div class="nt">Kom på topplista – hva heter du?</div>
+                <form id="nameForm" autocomplete="off"><input id="nameIn" maxlength="16" placeholder="Fornavn eller kallenavn" enterkeyhint="send"/><button class="btn" type="submit">Send</button></form>
+                <div class="ne" id="nameErr"></div>
+            </div>
+            <div class="sentnote hidden-el" id="sentNote"></div>
+            <ol class="lbl-list" id="overLbList"></ol>
+        </div>
+        <div class="btnrow">
+            <button class="btn sec" id="shareBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5"/><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>Utfordre</button>
+            <button class="btn" id="retryBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>Spill igjen</button>
+        </div>
+        <div class="khint hint-key">eller trykk <kbd>Mellomrom</kbd></div>
         <div class="share" id="shareBox">
             <div class="prev" id="sharePrev" role="button" aria-label="Last ned bildet"></div>
             <div>
@@ -925,18 +964,8 @@
                 </div>
             </div>
         </div>
-        <div class="lb hidden-el" id="overLb">
-            <div class="lbh"><span class="eyebrow" id="overLbTitle">Dagens topp 10</span><div class="tabs" id="overLbRange"><button data-r="dag" class="on">I dag</button><button data-r="uke">Uka</button></div></div>
-            <div class="namebox hidden-el" id="nameBox">
-                <div class="nt">Kom på topplista – hva heter du?</div>
-                <form id="nameForm" autocomplete="off"><input id="nameIn" maxlength="16" placeholder="Fornavn eller kallenavn" enterkeyhint="send"/><button class="btn" type="submit">Send</button></form>
-                <div class="ne" id="nameErr"></div>
-            </div>
-            <div class="sentnote hidden-el" id="sentNote"></div>
-            <ol class="lbl-list" id="overLbList"></ol>
-        </div>
         <button class="btn-ghost" id="menuBtn">Velg modus</button>
-        <a class="btn-ghost" href="/underholdning">Flere spill</a>
+        <a class="btn-ghost" href="/underholdning" data-spillmeny>Flere spill</a>
     </div>
 </div>
 
@@ -3390,6 +3419,8 @@
     startAttract();
     requestAnimationFrame(frame);
     setTimeout(layout, 300);
+    if (window.SpillMeny) SpillMeny.register({ busy: () => !!G && !G.attract && ['play', 'intro', 'finishing'].includes(state), pause: () => pause() });
+
 })();
 </script>
 </body>

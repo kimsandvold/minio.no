@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
+    <script src="/underholdning/lib/spillmeny.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#12121a" />
     <meta name="color-scheme" content="dark" />
@@ -785,7 +786,7 @@
             Rekord: <span id="highScoreValue">0</span> · Beste nivå: <span id="bestLevelValue">–</span>
         </p>
 
-        <a href="/underholdning" class="home-link">← Tilbake til underholdning</a>
+        <a href="/underholdning" class="home-link" data-spillmeny><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:-3px;margin-right:6px" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg>Flere spill</a>
     </main>
 
     <!-- Game Screen -->
@@ -861,23 +862,15 @@
         <div class="gameover-actions">
             <button type="button" class="btn btn-primary" id="retryBtn">▶ Prøv igjen</button>
             <button type="button" class="btn btn-secondary" id="shareBtn">↗ Del resultatet</button>
-            <a href="/underholdning" class="home-link">← Tilbake til underholdning</a>
+            <a href="/underholdning" class="home-link" data-spillmeny><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:-3px;margin-right:6px" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg>Flere spill</a>
         </div>
     </main>
 
     <!-- Unified Header -->
     <header class="unified-header" id="unified-header">
         <div class="header-left">
-            <a href="/underholdning" class="header-home" data-leave title="Tilbake til underholdning" aria-label="Tilbake til underholdning">🏠</a>
-            <nav class="game-nav" aria-label="Andre spill">
-                <a href="tool-quiz.html" class="game-nav-item" data-leave title="Verktøy Quiz" aria-label="Verktøy Quiz">🌍</a>
-                <a href="tool-game.html" class="game-nav-item" data-leave title="Finn Verktøyet" aria-label="Finn Verktøyet">🔨</a>
-                <a href="tool-nails.html" class="game-nav-item" data-leave title="Spiker'n" aria-label="Spiker'n">🪵</a>
-                <a href="tool-saw.html" class="game-nav-item" data-leave title="Sag Rytme" aria-label="Sag Rytme">🪚</a>
-                <a href="tool-maze.html" class="game-nav-item active" aria-current="page" title="Verktøyjakt" aria-label="Verktøyjakt">👷</a>
-                <a href="tool-stack.html" class="game-nav-item" data-leave title="Stabelmester" aria-label="Stabelmester">📏</a>
-                <a href="tool-terrasse.html" class="game-nav-item" data-leave title="Terrassemester" aria-label="Terrassemester">🧱</a>
-            </nav>
+            <a href="/underholdning" class="header-home" data-leave title="Alle spill" aria-label="Tilbake til underholdning"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
+            <button type="button" class="sm-knapp" data-spillmeny aria-label="Bytt spill" title="Bytt spill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg><span>Spill</span></button>
         </div>
         <div class="header-stats" id="header-stats">
             <div class="header-stat">
@@ -1897,6 +1890,8 @@
                 }
             });
         });
+
+        if (window.SpillMeny) SpillMeny.register({ busy: () => inGame(), pause: () => setPaused(true) });
 
         // Auto-pause when the tab is hidden or the window loses focus
         document.addEventListener('visibilitychange', () => {

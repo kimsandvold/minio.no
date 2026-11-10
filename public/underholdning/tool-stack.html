@@ -2,6 +2,7 @@
 <html lang="nb">
 <head>
     <meta charset="UTF-8"/>
+    <script src="/underholdning/lib/spillmeny.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no"/>
     <title>Stabelmester – Minio Underholdning</title>
     <meta name="description" content="Slipp plankene, kapp bort det som stikker ut og stabl så høyt du klarer. Treff på millimeteren for perfekte kutt. Et presisjonsspill for håndverkere fra Minio – vinn 10% rabattkode!"/>
@@ -115,6 +116,7 @@
         .back img { height: 18px; width: auto; display: block; opacity: .95; }
         .back .sep { width: 1px; height: 16px; background: var(--line-strong); }
 
+        .topctrl { display: flex; gap: 8px; }
         .iconbtn {
             width: 42px; height: 42px;
             display: grid; place-items: center;
@@ -485,13 +487,16 @@
 <canvas id="c" aria-label="Stabelmester spillflate"></canvas>
 
 <div class="topbar">
-    <a href="/underholdning" class="back" id="backLink" aria-label="Tilbake til underholdning">
+    <a href="/underholdning" class="back" id="backLink" aria-label="Tilbake til alle spill">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
         <img src="/images/branding/logo_navbar.svg" alt="Minio" width="66" height="18"/>
         <span class="sep"></span>
-        <span>Underholdning</span>
+        <span>Alle spill</span>
     </a>
-    <button class="iconbtn" id="muteBtn" aria-label="Lyd av/på" title="Lyd av/på (M)"></button>
+    <div class="topctrl">
+        <button class="iconbtn" data-spillmeny aria-label="Bytt spill" title="Bytt spill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg></button>
+        <button class="iconbtn" id="muteBtn" aria-label="Lyd av/på" title="Lyd av/på (M)"></button>
+    </div>
 </div>
 
 <div class="hud hidden" id="hud">
@@ -562,7 +567,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
             <span id="shareBtnTx">Del resultatet</span>
         </button>
-        <a class="btn-ghost" href="/underholdning">Flere spill</a>
+        <a class="btn-ghost" href="/underholdning" data-spillmeny>Flere spill</a>
         <div class="hint hint-key">eller trykk <kbd>Mellomrom</kbd></div>
     </div>
 </div>
@@ -1994,6 +1999,8 @@
     tCamY = camY = top().y1 - 120;
     scale = tScale; anchorY = tAnchorY;
     requestAnimationFrame((t) => { last = t; frame(t); });
+    if (window.SpillMeny) SpillMeny.register({ busy: () => state === 'play' || state === 'dying' });
+
 })();
 </script>
 </body>

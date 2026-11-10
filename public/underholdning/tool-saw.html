@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
+    <script src="/underholdning/lib/spillmeny.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#1a1a1a" />
     <meta name="color-scheme" content="dark" />
@@ -1250,16 +1251,8 @@
     <!-- Unified Header -->
     <header class="unified-header" id="unified-header">
         <div class="header-left">
-            <a href="/underholdning" class="header-home" data-leave title="Alle spill" aria-label="Tilbake til alle spill">🏠</a>
-            <nav class="game-nav" aria-label="Andre spill">
-                <a href="tool-quiz.html" class="game-nav-item" data-leave title="Verktøy Quiz" aria-label="Verktøy Quiz">🌍</a>
-                <a href="tool-game.html" class="game-nav-item" data-leave title="Finn Verktøyet" aria-label="Finn Verktøyet">🔨</a>
-                <a href="tool-nails.html" class="game-nav-item" data-leave title="Spiker'n" aria-label="Spiker'n">🪵</a>
-                <a href="tool-saw.html" class="game-nav-item active" title="Sag Rytme" aria-label="Sag Rytme" aria-current="page">🪚</a>
-                <a href="tool-maze.html" class="game-nav-item" data-leave title="Verktøyjakt" aria-label="Verktøyjakt">👷</a>
-                <a href="tool-stack.html" class="game-nav-item" data-leave title="Stabelmester" aria-label="Stabelmester">📏</a>
-                <a href="tool-terrasse.html" class="game-nav-item" data-leave title="Terrassemester" aria-label="Terrassemester">🧱</a>
-            </nav>
+            <a href="/underholdning" class="header-home" data-leave title="Alle spill" aria-label="Tilbake til alle spill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
+            <button type="button" class="sm-knapp" data-spillmeny aria-label="Bytt spill" title="Bytt spill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg><span>Spill</span></button>
         </div>
         <div class="header-right">
             <div class="header-stats" id="header-stats">
@@ -1328,7 +1321,7 @@
             Din rekord: <span id="highScoreValue">0</span>
         </div>
 
-        <a href="/underholdning" class="home-link">← Alle spill</a>
+        <a href="/underholdning" class="home-link" data-spillmeny><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:-3px;margin-right:6px" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg>Flere spill</a>
     </section>
 
     <!-- Game Screen -->
@@ -1414,7 +1407,7 @@
 
         <button type="button" class="btn btn-secondary" id="share-btn">↗ Del resultatet</button>
 
-        <a href="/underholdning" class="home-link">← Alle spill</a>
+        <a href="/underholdning" class="home-link" data-spillmeny><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16" style="vertical-align:-3px;margin-right:6px" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.8"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.8"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.8"/></svg>Flere spill</a>
     </section>
     </main>
 
@@ -2288,6 +2281,8 @@
                 }
             });
         });
+        if (window.SpillMeny) SpillMeny.register({ busy: () => state === 'playing' || state === 'paused', pause: () => pauseGame() });
+
     })();
     </script>
 </body>
