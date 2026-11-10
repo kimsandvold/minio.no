@@ -11,6 +11,7 @@ import ZoomableImage from '../../shared/ZoomableImage'
 import { useSEO } from '../../../hooks/useSEO'
 import { MINIO_PUBLISHER } from '../../../utils/seo'
 import { blueprintGrid, blueprintGridVignette } from '../../../styles/blueprintGrid'
+import VimzoAnnonse from '../../shared/VimzoAnnonse'
 
 const CARPORT_FAQ = {
   '@context': 'https://schema.org',
@@ -633,6 +634,7 @@ export default function CarportPlanleggerPage() {
                 </DesignerSidebarCta>
               </Sidebar>
             </Layout>
+            <VimzoAnnonse plassering="planlegger-carport" luft="clamp(3rem, 6vw, 4.5rem) 0 0" />
           </Content>
 
           <TechBand>

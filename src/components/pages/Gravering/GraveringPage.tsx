@@ -893,6 +893,11 @@ const Sporsmalskort = styled.details`
 const AnnonseSeksjon = styled.section`
   padding: clamp(2.5rem, 5vw, 4rem) 0;
   background: ${({ theme }) => theme.colors.paper};
+
+  /* Krysset ut: da skal ikke seksjonen stå igjen som et tomt bånd. */
+  &:not(:has(aside)) {
+    display: none;
+  }
 `
 
 const Avslutning = styled.div`

@@ -11,6 +11,7 @@ import { useSEO } from '../../../hooks/useSEO'
 import { MINIO_PUBLISHER } from '../../../utils/seo'
 import Icon from '../../shared/Icon'
 import { blueprintGrid, blueprintGridVignette } from '../../../styles/blueprintGrid'
+import VimzoAnnonse from '../../shared/VimzoAnnonse'
 
 const PERGOLA_FAQ = {
   '@context': 'https://schema.org',
@@ -686,6 +687,7 @@ export default function PergolaPlanleggerPage() {
                 </DesignerSidebarCta>
               </Sidebar>
             </Layout>
+            <VimzoAnnonse plassering="planlegger-pergola" luft="clamp(3rem, 6vw, 4.5rem) 0 0" />
           </Content>
         </main>
       </PageTransition>

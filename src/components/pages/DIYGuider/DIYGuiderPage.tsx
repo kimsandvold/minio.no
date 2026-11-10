@@ -7,6 +7,7 @@ import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
+import VimzoAnnonse from '../../shared/VimzoAnnonse'
 import { useSEO } from '../../../hooks/useSEO'
 import { Eyebrow, Hode, Ingress, Reveal, Seksjon, SideHode, Tittel, Wrap } from '../../editorial'
 import {
@@ -389,6 +390,10 @@ export default function DIYGuiderPage() {
               )}
             </Wrap>
           </Seksjon>
+
+          <Wrap>
+            <VimzoAnnonse plassering="byggeguider" luft="0 0 clamp(1rem, 3vw, 2rem)" />
+          </Wrap>
 
           <Seksjon>
             <Wrap>

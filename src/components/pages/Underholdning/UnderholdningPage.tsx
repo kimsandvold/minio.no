@@ -2,6 +2,7 @@ import styled from 'styled-components'
 import { useSEO } from '../../../hooks/useSEO'
 import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
+import VimzoAnnonse from '../../shared/VimzoAnnonse'
 import { Eyebrow, PilLenke, Wrap } from '../../editorial'
 import { RESTEN, SPILL, UTVALGT, type Spill } from '../../../data/spill'
 
@@ -142,6 +143,10 @@ export default function UnderholdningPage() {
             </Rutenett>
           </Wrap>
         </Spillseksjon>
+
+        <Wrap>
+          <VimzoAnnonse plassering="underholdning" luft="0 0 clamp(2.5rem, 5vw, 4rem)" />
+        </Wrap>
 
         <Leah>
           <Wrap>

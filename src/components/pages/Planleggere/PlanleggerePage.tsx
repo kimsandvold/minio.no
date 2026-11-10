@@ -6,6 +6,7 @@ import ProductModal from '../../shared/ProductModal/ProductModal'
 import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
+import VimzoAnnonse from '../../shared/VimzoAnnonse'
 import { useSEO } from '../../../hooks/useSEO'
 import { blueprintGrid, blueprintGridVignette } from '../../../styles/blueprintGrid'
 
@@ -396,6 +397,7 @@ export default function PlanleggerePage() {
                 </Card>
               ))}
             </Grid>
+            <VimzoAnnonse plassering="planleggere" luft="clamp(3rem, 6vw, 4.5rem) auto 0" maksbredde="1000px" />
           </Content>
         </main>
       </PageTransition>

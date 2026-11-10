@@ -368,10 +368,6 @@ const UTEN_ANNONSE = new Set([
   'overflatebehandling',
 ])
 
-const AnnonsePlass = styled.div`
-  margin: 3rem 0;
-`
-
 const Cta = styled.div`
   margin-top: 2.5rem;
   padding: 2rem;
@@ -771,11 +767,7 @@ export default function GuideArticleLayout({
 
                 <ShareButtons variant="artikkel" />
 
-                {!UTEN_ANNONSE.has(topic.slug) && (
-                  <AnnonsePlass>
-                    <VimzoAnnonse plassering="byggeguide" />
-                  </AnnonsePlass>
-                )}
+                {!UTEN_ANNONSE.has(topic.slug) && <VimzoAnnonse plassering="byggeguide" luft="3rem 0" />}
 
                 <AllGuides aria-label="Alle byggeguider">
                   <div className="label">Alle byggeguider</div>
