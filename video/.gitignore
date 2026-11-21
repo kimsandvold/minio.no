@@ -1,2 +1,4 @@
 node_modules/
 out/
+# Musikk lastes ned av lag-short.mjs
+lyd/

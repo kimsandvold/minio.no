@@ -1,6 +1,8 @@
 // Rendrer en tidsstyrt HTML-animasjon til MP4.
 //   node render.mjs vignett.html intro out/vignett-intro.mp4 [fps]
 //   node render.mjs vignett.html intro --stills 0.5,1.5,3,4.5   (kontrollbilder)
+//   node render.mjs http://localhost:5199/video/gravering.html jul out/x.mp4 30 --size 1080x1920
+//     (en URL rendres som den er, med ?render&short=<mode>; brukes for sider som trenger Vite)
 import puppeteer from 'puppeteer'
 import ffmpegPath from 'ffmpeg-static'
 import { spawn } from 'node:child_process'
@@ -11,11 +13,16 @@ import { pathToFileURL } from 'node:url'
 const [page_, mode = 'intro', out = `out/${mode}.mp4`, fpsArg] = process.argv.slice(2)
 const stills = process.argv.includes('--stills') ? process.argv[process.argv.indexOf('--stills') + 1].split(',').map(Number) : null
 const FPS = Number(fpsArg) || 60
+const [VW, VH] = process.argv.includes('--size')
+  ? process.argv[process.argv.indexOf('--size') + 1].split('x').map(Number)
+  : [1920, 1080]
 
 const browser = await puppeteer.launch({ headless: true })
 const page = await browser.newPage()
-await page.setViewport({ width: 1920, height: 1080, deviceScaleFactor: 1 })
-const url = pathToFileURL(resolve(page_)).href + `?render&mode=${mode}`
+await page.setViewport({ width: VW, height: VH, deviceScaleFactor: 1 })
+const url = page_.startsWith('http')
+  ? `${page_}?render&short=${mode}`
+  : pathToFileURL(resolve(page_)).href + `?render&mode=${mode}`
 await page.goto(url, { waitUntil: 'networkidle0' })
 await page.evaluate(() => window.ready)
 const duration = await page.evaluate(() => window.DURATION)
