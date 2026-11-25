@@ -367,13 +367,19 @@ export default function GraveringPreview({ valg, dekorativ, visOmriss, utenSkygg
                 feste = el.y + el.storrelse / 2
                 innhold = (
                   <g transform={`translate(${el.x}, ${el.y}) scale(${el.storrelse / 100})`}>
-                    <path
-                      d={el.path}
-                      stroke={flate.brentFarge}
-                      strokeWidth={SYMBOL_STREK}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
+                    {symbol?.rentFyll ? (
+                      // Detaljert illustrasjon: rent fyll med evenodd, ingen
+                      // strek. Streken ville tettet hullene i tegningen.
+                      <path d={el.path} fillRule="evenodd" stroke="none" />
+                    ) : (
+                      <path
+                        d={el.path}
+                        stroke={flate.brentFarge}
+                        strokeWidth={SYMBOL_STREK}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    )}
                   </g>
                 )
               }

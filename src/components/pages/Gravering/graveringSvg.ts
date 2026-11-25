@@ -208,9 +208,20 @@ function primitivTilPath(p: Primitiv): string {
  * Motivet som fylte kurver. Streker blir til smale firkanter og ringer til
  * ringflater, slik at tykkelsen ligger i geometrien og ikke i `stroke-width`.
  */
-function motivTilPaths(font: Font, motiv: MotivElement[]): { fylt: string[]; strek: string[] } {
+/**
+ * `illustrasjon` sier at symbolet er en detaljert tegning, ikke en silhuett.
+ * Da havner det i det FYLTE laget sammen med teksten, som allerede bruker
+ * `fill-rule="evenodd"` – og slipper dermed streken som ville tettet alle
+ * hullene i tegningen.
+ */
+function motivTilPaths(
+  font: Font,
+  motiv: MotivElement[],
+  rentFyll = false,
+): { fylt: string[]; strek: string[]; tegning: string[] } {
   const fylt: string[] = []
   const strek: string[] = []
+  const tegning: string[] = []
 
   for (const el of motiv) {
     if (el.slag === 'tekst') {
@@ -226,6 +237,16 @@ function motivTilPaths(font: Font, motiv: MotivElement[]): { fylt: string[]; str
       // Symbolene er tegnet i et 100 × 100-rutenett. De er fylte former, men
       // de rene strektegningene (sol, snøfnugg) trenger streken for å vises.
       const skala = el.storrelse / 100
+      if (rentFyll) {
+        // Skaleres med en transform i stedet for å regnes om punkt for punkt:
+        // banen kan være titusenvis av tegn.
+        tegning.push(
+          `<g transform="translate(${rund(el.x)} ${rund(el.y)}) scale(${rund(skala)})">` +
+            `<path d="${el.path}" />` +
+            '</g>',
+        )
+        continue
+      }
       strek.push(
         `<g transform="translate(${rund(el.x)} ${rund(el.y)}) scale(${rund(skala)})">` +
           `<path d="${el.path}" stroke-width="${rund(4)}" />` +
@@ -234,7 +255,7 @@ function motivTilPaths(font: Font, motiv: MotivElement[]): { fylt: string[]; str
     }
   }
 
-  return { fylt, strek }
+  return { fylt, strek, tegning }
 }
 
 /**
@@ -288,7 +309,7 @@ export async function byggGraveringSvg(valg: Valg): Promise<GraveringSvg> {
     maal: (tekst, px) => tekstbredde(font, tekst, px),
   })
 
-  const { fylt, strek } = motivTilPaths(font, motiv)
+  const { fylt, strek, tegning } = motivTilPaths(font, motiv, symbol?.rentFyll ?? false)
 
   const tekstlinjer = valg.linjer.slice(0, p.maksLinjer).filter((l) => l.trim())
   const beskrivelse = [
@@ -320,6 +341,7 @@ export async function byggGraveringSvg(valg: Valg): Promise<GraveringSvg> {
       '  <!-- SORT = selve graveringen. Tekst er kurver; ingen skrift kreves. -->',
       lag('gravering', 'Gravering', `fill="#000000" fill-rule="evenodd" stroke="none"${speil}`),
       ...fylt.map((d) => `    <path d="${d}" />`),
+      ...tegning.map((g) => `    ${g}`),
       ...symbolgruppe(strek),
       '  </g>',
       '</svg>',
@@ -354,6 +376,7 @@ export async function byggGraveringSvg(valg: Valg): Promise<GraveringSvg> {
     '  <!-- SORT = selve graveringen. Tekst er kurver; ingen skrift kreves. -->',
     lag('gravering', 'Gravering', 'fill="#000000" fill-rule="evenodd" stroke="none"'),
     ...fylt.map((d) => `    <path d="${d}" />`),
+    ...tegning.map((g) => `    ${g}`),
     ...symbolgruppe(strek),
     '  </g>',
     '</svg>',

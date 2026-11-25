@@ -57,6 +57,13 @@ const ANLEDNINGER = [
   },
 ]
 
+/** Stegene i bestillingsveien, vist som en stripe rett over konfiguratoren. */
+const STEG = [
+  { tittel: 'Velg produkt', tekst: 'Fjøl, kjevle eller flaske' },
+  { tittel: 'Tegn motivet', tekst: 'Navn, dato, symbol – du ser det med én gang' },
+  { tittel: 'Send til verkstedet', tekst: 'Du får korrektur før vi graverer' },
+] as const
+
 const LEVERING = [
   { tittel: 'Du tegner', tekst: 'Velg produkt, materiale og motiv i konfiguratoren og se resultatet bli til mens du skriver.' },
   { tittel: 'Vi tegner korrektur', tekst: 'Du får et tilbud og en siste korrektur på e-post. Ingenting graveres før du har sagt ja.' },
@@ -367,7 +374,7 @@ export default function GraveringPage() {
             )}
           </SideHode>
 
-          <Seksjon id="konfigurator">
+          <Konfiguratorseksjon id="konfigurator">
             <Wrap>
               <Reveal>
                 <Hode>
@@ -377,15 +384,32 @@ export default function GraveringPage() {
                   </div>
                   <div>
                     <Ingress>
-                      Tre produkter, egne valg for hvert. Forhåndsvisningen er tegnet i riktige mål, så
-                      det du ser er det du får. Fra {graveringFraPris} kr. {PRIS_ER_ENDELIG}
+                      Forhåndsvisningen er tegnet i riktige mål, så det du ser er det du får.
+                      Fra {graveringFraPris} kr. {PRIS_ER_ENDELIG}
                     </Ingress>
                   </div>
                 </Hode>
               </Reveal>
+
+              {/* Tre steg, slik at det står klart hvor langt man er og hva som
+                  gjenstår før man har bestilt. På mobil er dette det første
+                  man ser av konfiguratoren, og det eneste som sier at dette
+                  faktisk er en bestillingsvei og ikke bare en leke. */}
+              <Stegstripe aria-label="Slik bestiller du">
+                {STEG.map((steg, i) => (
+                  <li key={steg.tittel}>
+                    <span aria-hidden="true">{i + 1}</span>
+                    <div>
+                      <strong>{steg.tittel}</strong>
+                      <small>{steg.tekst}</small>
+                    </div>
+                  </li>
+                ))}
+              </Stegstripe>
+
               <Graveringkonfigurator />
             </Wrap>
-          </Seksjon>
+          </Konfiguratorseksjon>
 
           <Seksjon $flate="deep">
             <Wrap>
@@ -652,6 +676,84 @@ export default function GraveringPage() {
     </>
   )
 }
+
+/**
+ * Konfiguratorseksjonen er den eneste på siden folk kommer for å BRUKE, ikke
+ * lese. På mobil spiste standardpolstringen og den store overskriften nesten
+ * to skjermhøyder før verktøyet begynte – her strammes begge inn, så det
+ * første man ser er noe man kan ta på.
+ */
+const Konfiguratorseksjon = styled(Seksjon)`
+  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    padding: 2.5rem 0 3rem;
+
+    ${Tittel} {
+      font-size: clamp(1.75rem, 8vw, 2.2rem);
+      max-width: 20ch;
+    }
+
+    ${Ingress} {
+      margin-top: 0.75rem;
+      font-size: ${({ theme }) => theme.fontSizes.base};
+    }
+
+    ${Hode} {
+      margin-bottom: 1.5rem;
+    }
+  }
+`
+
+/**
+ * Stegstripa. Vannrett på bred skjerm, loddrett på mobil – tre korte linjer
+ * leser raskere enn tre kolonner som er klemt sammen til én ordbredde.
+ */
+const Stegstripe = styled.ol`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 0 0 clamp(1.5rem, 3vw, 2.25rem);
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+  }
+
+  span {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.65rem;
+    height: 1.65rem;
+    border-radius: 50%;
+    background: ${({ theme }) => theme.colors.accent};
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+
+  strong {
+    display: block;
+    font-size: ${({ theme }) => theme.fontSizes.base};
+    font-weight: 600;
+  }
+
+  small {
+    display: block;
+    margin-top: 0.15rem;
+    color: ${({ theme }) => theme.colors.inkMuted};
+    font-size: ${({ theme }) => theme.fontSizes.sm};
+    line-height: 1.4;
+  }
+
+  @media (max-width: 760px) {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+    margin-bottom: 1.5rem;
+  }
+`
 
 const Julestripe = styled.div`
   display: inline-flex;

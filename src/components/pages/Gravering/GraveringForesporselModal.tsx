@@ -10,6 +10,7 @@ import {
   ordreSum,
   type Ordrelinje,
 } from '../../../data/gravering'
+import { auth } from '../../../lib/firebase'
 import { lagreGravering } from '../../../services/graveringService'
 import { trackEvent } from '../../../utils/analytics'
 import Icon from '../../shared/Icon'
@@ -158,7 +159,9 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
   const [postnr, settPostnr] = useState('')
   const [sted, settSted] = useState('')
   const [melding, settMelding] = useState('')
-  const [status, settStatus] = useState<'idle' | 'sender' | 'ok' | 'feil'>('idle')
+  const [status, settStatus] = useState<'idle' | 'sender' | 'ok' | 'lagret' | 'feil'>('idle')
+  /** Ordrereferansen, vist når varselet ikke kom fram og kunden må følge opp selv. */
+  const [referanse, settReferanse] = useState('')
   const boks = useRef<HTMLDivElement>(null)
   // `status` i closuren er utdatert ved et raskt dobbeltklikk – uten denne
   // ble bestillingen lagret og sendt to ganger (med hver sin ordre-id).
@@ -222,37 +225,89 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
     const antallLagret = lagret.filter(Boolean).length
 
     const navnPaVarer = [...new Set(ordre.map((l) => produkt(l.valg.produkt).navn))].join(', ')
-    const fd = new FormData()
-    fd.append('_subject', `Gravering: ${navnPaVarer} – ${navn}`)
-    fd.append('name', navn)
-    fd.append('email', epost)
-    fd.append('phone', telefon)
-    fd.append('Leveringsadresse', `${adresse}, ${postnr} ${sted}`)
-    fd.append('subject', `Gravering – ${navnPaVarer}`)
-    fd.append('Bestilling', spek)
-    fd.append(
-      'Produksjonsfil',
-      antallLagret === ordre.length
-        ? `${antallLagret} SVG lagret – last ned på ${window.location.origin}/admin/graveringer (ordre ${ordreId})`
-        : `BARE ${antallLagret} av ${ordre.length} SVG bekreftet lagret (ordre ${ordreId}). Sjekk /admin/graveringer – mangler den, bygg motivet på nytt i konfiguratoren etter spesifikasjonen over.`,
-    )
-    fd.append('message', melding.trim() || '(ingen melding)')
+    const sumKr = ordreSum(ordre)
+    // Samme fraktregning som kunden ser i modalen – fri frakt over kampanjegrensen.
+    const fraktKr = fraktFor(sumKr).kroner
 
+    /**
+     * Varselet til verkstedet går gjennom vårt eget endepunkt, som sender via
+     * Resend og har Formspree i bakhånd – og som samtidig sender kunden en
+     * kvittering. Faller selve endepunktet ut (deploy, nettverk), postes det
+     * rett til Formspree som før, så en bestilling aldri blir borte fordi ett
+     * ledd er nede.
+     */
     let varslet = false
     try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
+      const token = await auth.currentUser?.getIdToken()
+      const res = await fetch('/api/gravering/bestill', {
         method: 'POST',
-        body: fd,
-        headers: { Accept: 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          navn,
+          epost,
+          telefon,
+          adresse,
+          postnr,
+          sted,
+          melding: melding.trim(),
+          ordreId,
+          sammendrag: spek,
+          varer: navnPaVarer,
+          sumKr,
+          fraktKr,
+          antallVarer: ordre.length,
+          antallLagret,
+        }),
       })
-      varslet = res.ok
+      varslet = res.ok && ((await res.json().catch(() => ({}))) as { varslet?: boolean }).varslet !== false
     } catch {
       varslet = false
     }
 
+    if (!varslet) {
+      const fd = new FormData()
+      fd.append('_subject', `Gravering: ${navnPaVarer} – ${navn}`)
+      fd.append('name', navn)
+      fd.append('email', epost)
+      fd.append('phone', telefon)
+      fd.append('Leveringsadresse', `${adresse}, ${postnr} ${sted}`)
+      fd.append('subject', `Gravering – ${navnPaVarer}`)
+      fd.append('Bestilling', spek)
+      fd.append(
+        'Produksjonsfil',
+        antallLagret === ordre.length
+          ? `${antallLagret} SVG lagret – last ned på ${window.location.origin}/admin/graveringer (ordre ${ordreId})`
+          : `BARE ${antallLagret} av ${ordre.length} SVG bekreftet lagret (ordre ${ordreId}). Sjekk /admin/graveringer – mangler den, bygg motivet på nytt i konfiguratoren etter spesifikasjonen over.`,
+      )
+      fd.append('message', melding.trim() || '(ingen melding)')
+      try {
+        const res = await fetch(FORMSPREE_ENDPOINT, {
+          method: 'POST',
+          body: fd,
+          headers: { Accept: 'application/json' },
+        })
+        varslet = res.ok
+      } catch {
+        varslet = false
+      }
+    }
+
     sender.current = false
-    if (antallLagret > 0 || varslet) {
+    /*
+     * Kom ingen varsler fram, er bestillingen i praksis usynlig for verkstedet
+     * selv om produksjonsfila ligger i basen – den må noen huske å se etter.
+     * Da skal kunden få vite det og ordrereferansen, ikke et «Takk!» som
+     * lover en oppfølging ingen vet at hun venter på.
+     */
+    if (varslet) {
       settStatus('ok')
+      trackEvent('gravering_foresporsel', 'gravering')
+    } else if (antallLagret > 0) {
+      settReferanse(ordreId)
+      settStatus('lagret')
       trackEvent('gravering_foresporsel', 'gravering')
     } else {
       settStatus('feil')
@@ -282,10 +337,30 @@ export default function GraveringForesporselModal({ ordre, onClose }: Props) {
             <p>
               Takk! Vi har fått hele spesifikasjonen og tar kontakt på <strong>{epost}</strong> med et
               uforpliktende tilbud og en korrektur før vi graverer. Faktura kommer først når varen
-              sendes.
+              sendes. Du får en kvittering på e-post nå.
             </p>
             <Primaer type="button" onClick={onClose}>
               Lukk
+            </Primaer>
+          </Kvittering>
+        ) : status === 'lagret' ? (
+          /*
+           * Designet ligger trygt, men ingen av varslene kom fram. Å si «Takk,
+           * vi tar kontakt» her ville vært et løfte vi ikke vet at noen har
+           * hørt – kunden får heller referansen og en vei videre.
+           */
+          <Kvittering role="status">
+            <KvitteringIkon $advarsel>
+              <Icon name="faTriangleExclamation" />
+            </KvitteringIkon>
+            <h2 id="gravering-tittel">Designet er lagret – men varselet gikk ikke ut</h2>
+            <p>
+              Vi har tatt vare på hele bestillingen din, men e-postvarselet til verkstedet kom ikke
+              fram. Send oss ordrereferansen, så finner vi den med én gang:
+            </p>
+            <Referanse>{referanse}</Referanse>
+            <Primaer as="a" href={`/kontakt?subject=${encodeURIComponent(`Gravering – ordre ${referanse}`)}`}>
+              Send oss en melding
             </Primaer>
           </Kvittering>
         ) : (
@@ -646,7 +721,23 @@ const Kvittering = styled.div`
   }
 `
 
-const KvitteringIkon = styled.div`
+const KvitteringIkon = styled.div<{ $advarsel?: boolean }>`
   font-size: 2.5rem;
-  color: ${({ theme }) => theme.colors.success};
+  color: ${({ theme, $advarsel }) => ($advarsel ? theme.colors.accent : theme.colors.success)};
+`
+
+/**
+ * Ordrereferansen, satt i et spor kunden kan merke og kopiere. Den er det
+ * eneste håndtaket hun har når varselet ikke kom fram, så den skal være lett
+ * å lese av – derfor monospace og god sperring.
+ */
+const Referanse = styled.p`
+  margin: 0.25rem 0 0.5rem;
+  padding: 0.7rem 1rem;
+  border-radius: 12px;
+  background: ${({ theme }) => theme.colors.sunken};
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  user-select: all;
 `

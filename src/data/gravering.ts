@@ -582,23 +582,33 @@ export const graveringFonter = [
 
 /**
  * Symbolkategoriene som gir mening å gravere, i den rekkefølgen de vises.
- * Rekkefølgen er hverdagen først (mat, natur, former), så det tematiske.
- * Piler, kontor og univers er utelatt – de hører ikke hjemme på en fjøl.
+ *
+ * MERK: dette er en egen liste, ikke `symbolCategories` fra designerSymbols.
+ * Skiltdesigneren viser alt; her slipper vi bare inn det folk faktisk graverer
+ * på en gave. Legger du til en kategori i symbolfila, må den inn HER også –
+ * ellers blir symbolene filtrert bort uten et eneste varsel.
+ *
+ * Hjerter og mennesker står først fordi de dekker det gravering stort sett
+ * brukes til: navn, bryllup, familie og fødsel. Piler, kontor, univers og
+ * verktøy er utelatt – de hører ikke hjemme på en fjøl.
  */
 export const graveringSymbolKategorier = [
-  'Mat',
+  'Hjerter',
+  'Mennesker',
+  'Yrker',
+  'Sport',
   'Natur',
+  'Dyr',
   'Former',
   'Dekor',
+  'Mat',
   'Hjem',
-  'Dyr',
   'Jul',
   'Halloween',
-  'Sport',
   'Verktoy',
+  'Trearbeid',
   'Jakt',
   'Villmark',
-  'Trearbeid',
   'Kunst',
 ]
 

@@ -15,9 +15,14 @@ import type { Valg } from '../data/gravering'
 import type { Oppfolging } from '../types/oppfolging'
 
 /**
- * Graveringsbestillinger. I motsetning til designforespørslene krever disse
- * ingen innlogging – en gravert fjøl er et gavekjøp, og en Google-pålogging i
- * veien ville kostet oss kunden.
+ * Graveringsbestillinger.
+ *
+ * MERK at innlogging kreves i praksis: skjemaet ligger bak `KreverInnlogging`,
+ * fordi varen faktureres og vi må vite hvem kunden er. Firestore-reglene er
+ * likevel skrevet slik at opprettelse er mulig uten pålogging – de validerer
+ * feltene, ikke identiteten. Ikke les den åpenheten som at veien er åpen; det
+ * er porten i brukergrensesnittet som gjelder, og /api/gravering/bestill
+ * krever derfor også et gyldig ID-token.
  *
  * Dokumentet bærer hele produksjonsgrunnlaget: valgene kunden gjorde, og den
  * ferdige SVG-en med teksten konvertert til kurver. Da kan graveringen kjøres

@@ -16,7 +16,7 @@ function formatPhone(raw: string): string {
   return `${raw.slice(0, 3)} ${raw.slice(3, 5)} ${raw.slice(5, 8)}`
 }
 
-const Wrapper = styled.div`
+const Wrapper = styled.div<{ $skjulPaMobil?: boolean }>`
   position: fixed;
   right: 1rem;
   bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
@@ -27,6 +27,10 @@ const Wrapper = styled.div`
   gap: 0.4rem;
 
   @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
+    /* Samme grunn som på kontaktsiden: der siden ER et verktøy, legger
+       merket seg oppå det man holder på med. På bred skjerm ligger det
+       trygt nede til høyre og kan bli stående. */
+    display: ${({ $skjulPaMobil }) => ($skjulPaMobil ? 'none' : 'flex')};
     right: 0.75rem;
     bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
   }
@@ -204,8 +208,12 @@ export default function ContactBadge() {
   // Overflødig på kontaktsiden – der dekker den bare skjemaet på mobil.
   if (pathname === '/kontakt') return null
 
+  // På /gravering dekker merket forhåndsvisningen i konfiguratoren på mobil –
+  // altså nettopp det kunden sitter og ser på mens hun skriver.
+  const skjulPaMobil = pathname === '/gravering'
+
   return (
-    <Wrapper ref={wrapperRef} data-nosnippet>
+    <Wrapper ref={wrapperRef} data-nosnippet $skjulPaMobil={skjulPaMobil}>
       {expanded && <Availability>Tilgjengelig hverdager etter kl. 16:00 og hele helgen</Availability>}
       <Row>
         <Pill
