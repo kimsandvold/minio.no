@@ -22,6 +22,9 @@ export type MalKategori =
   | 'bursdag'
   | 'halloween'
   | 'kjaerlighet'
+  | 'bryllup'
+  | 'familie'
+  | 'yrke'
   | 'han'
   | 'henne'
   | 'minne'
@@ -45,6 +48,9 @@ export const malKategorier: Array<{ id: MalKategori; navn: string }> = [
   { id: 'bursdag', navn: 'Bursdag' },
   { id: 'halloween', navn: 'Halloween' },
   { id: 'kjaerlighet', navn: 'Kjærlighet' },
+  { id: 'bryllup', navn: 'Bryllup' },
+  { id: 'familie', navn: 'Familie' },
+  { id: 'yrke', navn: 'Yrke og hobby' },
   { id: 'han', navn: 'Til han' },
   { id: 'henne', navn: 'Til henne' },
   { id: 'minne', navn: 'Til minne' },
@@ -59,6 +65,37 @@ export const motivMaler: MotivMal[] = [
   { id: 'kjokken', navn: 'Kjøkkenet', beskrivelse: 'Venstrestilt, som en etikett', kategori: 'klassisk', oppsett: 'venstre', linjer: ['{fornavn}s kjøkken', '{sted}', ''], font: 'Montserrat', symbol: null },
   { id: 'hytte', navn: 'Hytta', beskrivelse: 'Hyttenavn med motiv', kategori: 'klassisk', oppsett: 'senter', linjer: ['Solheim', '{sted}', ''], font: 'Lora', symbol: 'tree' },
   { id: 'blank', navn: 'Blank', beskrivelse: 'Start fra bunnen', kategori: 'klassisk', oppsett: 'senter', linjer: ['', '', ''], font: 'Montserrat', symbol: null },
+
+
+  // --- Bryllup ---------------------------------------------------------
+  // Ringene og hjertene kom til sammen med disse malene. Uten en mal å klikke
+  // på ville de ligget begravd blant 231 symboler ingen blar gjennom.
+  { id: 'vielse', navn: 'Vielse', beskrivelse: 'To ringer og datoen', kategori: 'bryllup', oppsett: 'senter', linjer: ['{familie}', '{ar}', ''], font: 'Cormorant Garamond', symbol: 'heart-rings' },
+  { id: 'brudepar', navn: 'Brudeparet', beskrivelse: 'Paret med hjerte mellom', kategori: 'bryllup', oppsett: 'senter', linjer: ['Hanne & Jonas', '{sted}', ''], font: 'Great Vibes', symbol: 'couple-heart' },
+  { id: 'forlovelse', navn: 'Forlovelse', beskrivelse: 'To hjerter og et årstall', kategori: 'bryllup', oppsett: 'linjer', linjer: ['FORLOVET', '{ar}', ''], font: 'Montserrat', symbol: 'heart-pair' },
+  { id: 'bryllupsdag', navn: 'Bryllupsdag', beskrivelse: 'Evig – til jubileet', kategori: 'bryllup', oppsett: 'senter', linjer: ['{familie}', 'Siden {ar}', ''], font: 'Playfair Display', symbol: 'heart-infinity' },
+  { id: 'nytt-hjem', navn: 'Nytt hjem', beskrivelse: 'Til innflyttingen', kategori: 'bryllup', oppsett: 'senter', linjer: ['Velkommen hjem', '{familie}', ''], font: 'Lora', symbol: 'heart-outline' },
+
+  // --- Familie ---------------------------------------------------------
+  { id: 'familien-fire', navn: 'Familien', beskrivelse: 'Hele familien på fjøla', kategori: 'familie', oppsett: 'senter', linjer: ['Familien {etternavn}', '{sted}', ''], font: 'Cormorant Garamond', symbol: 'family-4' },
+  { id: 'familien-tre', navn: 'Familie på tre', beskrivelse: 'To voksne og en liten', kategori: 'familie', oppsett: 'senter', linjer: ['Familien {etternavn}', '{ar}', ''], font: 'Lora', symbol: 'family-3' },
+  { id: 'bestemor', navn: 'Til bestemor', beskrivelse: 'Fra barnebarna', kategori: 'familie', oppsett: 'senter', linjer: ['Bestemors kjøkken', '{sted}', ''], font: 'Great Vibes', symbol: 'granny' },
+  { id: 'bestefar', navn: 'Til bestefar', beskrivelse: 'Fra barnebarna', kategori: 'familie', oppsett: 'senter', linjer: ['Bestefars fjøl', '{sted}', ''], font: 'Lora', symbol: 'grandpa' },
+  { id: 'nyfodt', navn: 'Nyfødt', beskrivelse: 'Navn og fødselsår', kategori: 'familie', oppsett: 'senter', linjer: ['{fornavn}', '{ar}', ''], font: 'Great Vibes', symbol: 'baby' },
+  { id: 'til-mamma', navn: 'Til mamma', beskrivelse: 'Enkel hilsen med hjerte', kategori: 'familie', oppsett: 'senter', linjer: ['Mammas kjøkken', '{sted}', ''], font: 'Playfair Display', symbol: 'person-heart' },
+
+  // --- Yrke og hobby ---------------------------------------------------
+  // Kokkelua på en skjærefjøl er det mest åpenbare motivet i hele utvalget,
+  // og manglet likevel som mal.
+  { id: 'kokken', navn: 'Kokken', beskrivelse: 'Til den som lager maten', kategori: 'yrke', oppsett: 'senter', linjer: ['{fornavn}s kjøkken', '{sted}', ''], font: 'Cormorant Garamond', symbol: 'chef' },
+  { id: 'kokkelue', navn: 'Kokkelue', beskrivelse: 'Bare lua, stort og rent', kategori: 'yrke', oppsett: 'senter', linjer: ['Sjefen på kjøkkenet', '{familie}', ''], font: 'Montserrat', symbol: 'chef-hat' },
+  { id: 'sykepleier', navn: 'Sykepleier', beskrivelse: 'Takk for innsatsen', kategori: 'yrke', oppsett: 'senter', linjer: ['{fornavn}', 'Takk for alt', ''], font: 'Lora', symbol: 'nurse' },
+  { id: 'snekkeren', navn: 'Snekkeren', beskrivelse: 'Til han som bygger', kategori: 'yrke', oppsett: 'linjer', linjer: ['{fornavn}S VERKSTED', '{sted}', ''], font: 'Bebas Neue', symbol: 'carpenter' },
+  { id: 'laereren', navn: 'Læreren', beskrivelse: 'Avskjedsgave fra klassen', kategori: 'yrke', oppsett: 'senter', linjer: ['Takk for oss', '{ar}', ''], font: 'Playfair Display', symbol: 'teacher' },
+  { id: 'bonden', navn: 'Bonden', beskrivelse: 'Til gårds', kategori: 'yrke', oppsett: 'senter', linjer: ['{etternavn} gård', '{sted}', ''], font: 'Lora', symbol: 'farmer' },
+  { id: 'fotball', navn: 'Fotball', beskrivelse: 'Til spilleren i huset', kategori: 'yrke', oppsett: 'senter', linjer: ['{fornavn}', '{ar}', ''], font: 'Bebas Neue', symbol: 'football' },
+  { id: 'trening', navn: 'Trening', beskrivelse: 'Til den som løfter', kategori: 'yrke', oppsett: 'linjer', linjer: ['{fornavn}', 'NO DAYS OFF', ''], font: 'Montserrat', symbol: 'weights' },
+  { id: 'loperen', navn: 'Løperen', beskrivelse: 'Til mål', kategori: 'yrke', oppsett: 'senter', linjer: ['{fornavn}', '{ar}', ''], font: 'Bebas Neue', symbol: 'runner' },
 
   // --- Jul -------------------------------------------------------------
   { id: 'god-jul', navn: 'God jul', beskrivelse: 'Hilsen med julestjerne', kategori: 'jul', oppsett: 'senter', linjer: ['God jul', '{familie}', ''], font: 'Cormorant Garamond', symbol: 'star-xmas' },
