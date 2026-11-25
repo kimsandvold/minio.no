@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useAuthContext } from '../../../context/AuthContext'
 import { useSEO } from '../../../hooks/useSEO'
@@ -23,7 +23,29 @@ const NAV: Array<{ to: string; label: string; icon: string; end?: boolean }> = [
 export default function AdminLayout() {
   const { isAdmin, isAuthenticated, loading } = useAuthContext()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
   const [open, setOpen] = useState(false)
+
+  /**
+   * Hvilken seksjon man står i. På mobil er sidemenyen skjult, og uten dette
+   * sto det bare «Minio Admin» øverst – det samme på alle sider.
+   */
+  const naavaerende =
+    [...NAV].reverse().find((n) => (n.end ? pathname === n.to : pathname.startsWith(n.to)))?.label ?? 'Admin'
+
+  // Escape lukker skuffen, slik alt annet som legger seg over innholdet gjør.
+  useEffect(() => {
+    if (!open) return
+    const paaTast = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
+    document.addEventListener('keydown', paaTast)
+    // Uten dette ruller siden bak skuffen når man drar fingeren over den.
+    const forrige = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', paaTast)
+      document.body.style.overflow = forrige
+    }
+  }, [open])
 
   useSEO({ title: 'Admin – Minio', description: 'Administrasjon.', noindex: true })
 
@@ -65,8 +87,10 @@ export default function AdminLayout() {
 
       <Right>
         <TopBar>
-          <Burger onClick={() => setOpen((o) => !o)} aria-label="Meny"><Icon name={open ? 'faXmark' : 'faBars'} /></Burger>
-          <span>Minio Admin</span>
+          <Burger onClick={() => setOpen((o) => !o)} aria-label={open ? 'Lukk meny' : 'Åpne meny'} aria-expanded={open}>
+            <Icon name={open ? 'faXmark' : 'faBars'} />
+          </Burger>
+          <span>{naavaerende}</span>
         </TopBar>
         <Scroll>
           <Outlet />
@@ -96,6 +120,8 @@ const Sidebar = styled.aside<{ $open: boolean }>`
   background: #16181d;
   color: #e9e7e1;
   padding: 1.1rem 0.85rem;
+  padding-bottom: calc(1.1rem + env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
 
   @media (max-width: 860px) {
     position: fixed;
@@ -141,6 +167,12 @@ const NavItem = styled(NavLink)`
   svg { width: 18px; text-align: center; }
   &:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
   &.active { background: rgba(255, 255, 255, 0.1); color: #fff; }
+
+  /* Menyvalgene treffes med tommelen på mobil, ikke med en musepeker. */
+  @media (max-width: 860px) {
+    min-height: 48px;
+    font-size: 0.95rem;
+  }
 `
 
 const Bottom = styled.div`
@@ -172,8 +204,9 @@ const TopBar = styled.header`
   display: none;
   align-items: center;
   gap: 0.75rem;
-  height: 54px;
-  padding: 0 1rem;
+  /* Telefoner med hakk: linja må starte under statusfeltet, ikke bak det. */
+  height: calc(54px + env(safe-area-inset-top, 0px));
+  padding: env(safe-area-inset-top, 0px) 1rem 0;
   background: #16181d;
   color: #fff;
   font-weight: 700;
@@ -194,6 +227,7 @@ const Burger = styled.button`
   background: rgba(255, 255, 255, 0.08);
   color: #fff;
   cursor: pointer;
+  flex-shrink: 0;
 `
 
 const Scroll = styled.main`

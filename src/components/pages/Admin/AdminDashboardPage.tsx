@@ -8,7 +8,7 @@ import { antallUfakturerteGraveringer } from '../../../services/graveringService
 import type { Order } from '../../../types/order'
 import type { DesignForesporsel } from '../../../types/foresporsel'
 import { foresporselTypeLabel } from '../../../types/foresporsel'
-import { AdminPageHead, Card, Stat, Loading } from './adminUi'
+import { AdminPageHead, Card, Loading, Stat, StatGrid } from './adminUi'
 
 const formatKr = (n: number) => `${n.toLocaleString('nb-NO')} kr`
 
@@ -104,17 +104,22 @@ export default function AdminDashboardPage() {
   )
 }
 
-const Stats = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+/** Nøkkeltallene bruker det delte rutenettet, så de blir to i bredden på mobil. */
+const Stats = styled(StatGrid)`
   margin-bottom: 1.75rem;
+  @media (max-width: 640px) { margin-bottom: 1.25rem; }
 `
 
 const Grid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.25rem;
+
+  @media (max-width: 640px) {
+    /* 320 px minstebredde sprekker så vidt på de smaleste telefonene. */
+    grid-template-columns: 1fr;
+    gap: 0.9rem;
+  }
 `
 
 const PanelHead = styled.div`
@@ -155,6 +160,7 @@ const Rad = styled.button`
   font-family: inherit;
   &:last-child { border-bottom: none; }
   &:hover { background: #faf9f5; }
+  @media (max-width: 640px) { padding: 0.85rem 1rem; min-height: 52px; }
   .m { flex: 1; min-width: 0; display: flex; flex-direction: column; }
   .m strong { font-size: 0.9rem; color: #16181d; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .m span { font-size: 0.76rem; color: #918d84; }

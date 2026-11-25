@@ -204,6 +204,8 @@ const Kort = styled.div`
 `
 const KortTop = styled.div`
   display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.8rem;
+  /* Tittel og statusvelger fikk ikke plass på samme linje på en telefon. */
+  @media (max-width: 560px) { flex-direction: column; gap: 0.6rem; }
   h3 { margin: 0.35rem 0 0; font-size: 1.05rem; color: #16181d; span { color: #7a6f61; font-weight: 500; } }
 `
 const TypeTag = styled.span<{ $type: string }>`
@@ -219,7 +221,8 @@ const TypeTag = styled.span<{ $type: string }>`
         : 'rgba(189,149,99,0.18)'};
 `
 const StatusVelg = styled.select`
-  flex-shrink: 0; padding: 0.45rem 0.7rem; border: 1px solid #ddd4c7; border-radius: 8px; background: #fff; font-family: inherit; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+  flex-shrink: 0; padding: 0.45rem 0.7rem;
+  @media (max-width: 560px) { width: 100%; min-height: 44px; } border: 1px solid #ddd4c7; border-radius: 8px; background: #fff; font-family: inherit; font-weight: 600; font-size: 0.85rem; cursor: pointer;
 `
 const Fakta = styled.div`
   display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; margin-bottom: 0.7rem;

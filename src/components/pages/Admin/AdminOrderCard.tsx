@@ -100,7 +100,16 @@ const InfoGrid = styled.div`
   font-size: 0.9rem;
 
   dt { color: #6b6157; font-weight: 500; }
-  dd { color: ${({ theme }) => theme.colors.textDark}; margin: 0; }
+  /* E-postadresser er lange og har ingen naturlige brytepunkter – uten dette
+     sprenger de kortet på en smal skjerm. */
+  dd { color: ${({ theme }) => theme.colors.textDark}; margin: 0; overflow-wrap: anywhere; }
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+    gap: 0;
+    dt { margin-top: 0.5rem; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    dt:first-child { margin-top: 0; }
+  }
 `
 
 const ItemList = styled.div`

@@ -266,6 +266,13 @@ const KortTopp = styled.div`
   gap: 1rem;
   align-items: flex-start;
 
+  /* Navn og statusvelger klemte hverandre flate på mobil. */
+  @media (max-width: 560px) {
+    flex-direction: column;
+    gap: 0.6rem;
+    > select { width: 100%; }
+  }
+
   h3 {
     display: flex;
     align-items: center;
@@ -336,6 +343,15 @@ const Handlinger = styled.div`
   flex-wrap: wrap;
   gap: 0.6rem;
   margin-top: auto;
+
+  /*
+   * Dette er knappene verkstedet trykker på stående ved maskinen, ofte med én
+   * hånd. På mobil får de full bredde og 46 px høyde i stedet for å ligge som
+   * små piller side om side.
+   */
+  @media (max-width: 560px) {
+    > * { flex: 1 1 100%; justify-content: center; min-height: 46px; }
+  }
 `
 
 const Primaer = styled.button`
