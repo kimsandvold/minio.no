@@ -7,4 +7,30 @@ Disallow: /mine-design
 Disallow: /mine-bestillinger
 Disallow: /handlekurv
 
+# KI-crawlerne er uttrykkelig velkomne. De arver riktignok «Allow: /» over,
+# men svarsidene (ChatGPT, Claude, Perplexity, Gemini) er en voksende kanal
+# inn hit, og en eksplisitt linje hindrer at de blir utestengt ved et uhell
+# neste gang noe skal sperres. Google-Extended styrer AI Overviews og Gemini.
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: Bingbot
+Allow: /
+# Må gjentas: en navngitt User-agent-gruppe arver IKKE reglene fra «*», så
+# uten disse ville KI-crawlerne fått tilgang til de private sidene over.
+Disallow: /admin
+Disallow: /mine-design
+Disallow: /mine-bestillinger
+Disallow: /handlekurv
+
+# Kort, maskinlesbar oversikt for språkmodeller – se llmstxt.org.
+# https://minio.no/llms.txt
+
 Sitemap: https://minio.no/sitemap.xml

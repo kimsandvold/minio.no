@@ -82,11 +82,15 @@ export function motivFelt(geo: Geometri, oppsett: OppsettId): { x: number; y: nu
   return { x: 0, y: (omkrets - diameter) / 2, w: lengde, h: diameter }
 }
 
-/** Hjørneradius på skjærefjøla, målt av den faktiske fjøla. */
-const HJORNE = 14
+/**
+ * Hjørneradius på skjærefjøla. Fjøla er saget rett av: hjørnene er skarpe,
+ * bare brutt av samme lette fasing som resten av kanten. En avrundet kontur
+ * gjorde den rundere enn emnet faktisk er.
+ */
+const HJORNE = 0
 /** Avstand fra ytterkant inn til midten av saftrillen. */
 const RILLE_INN = 13
-const RILLE_BREDDE = 3.5
+const RILLE_BREDDE = 4.5
 /** Luft fra ytterkant inn til graveringsfeltet – god klaring innenfor rillen. */
 const KANT = 42
 

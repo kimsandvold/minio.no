@@ -27,6 +27,12 @@ import EgetEmne from './EgetEmne'
 
 const TRESLAG = graveringTreslag
 
+/**
+ * Siste gang innholdet på denne siden ble endret – priser, produkter, FAQ.
+ * Oppdater når noe av det endres; den går ut som `dateModified` i JSON-LD.
+ */
+const SIST_OPPDATERT = '2026-11-25'
+
 /** Anledningene folk faktisk graverer til, i den rekkefølgen de spør om dem. */
 const ANLEDNINGER = [
   {
@@ -258,6 +264,10 @@ function seo(jul: boolean) {
           : 'Graverte skjærefjøler, pregekjevler, drikkeflasker og skilt, laget på bestilling i Lillehammer.',
         provider: { '@id': 'https://minio.no/#business' },
         areaServed: { '@type': 'Country', name: 'Norge' },
+        // Ferskhet er et rangeringssignal både i søk og i svarsidene: en side
+        // uten dato blir sitert sjeldnere enn en som kan tidfestes. Datoen
+        // flyttes når innholdet på siden faktisk endres, ikke ved hver deploy.
+        dateModified: SIST_OPPDATERT,
         offers: {
           '@type': 'Offer',
           priceCurrency: 'NOK',

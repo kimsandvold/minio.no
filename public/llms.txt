@@ -1,0 +1,42 @@
+# Minio
+
+> Verksted på Lillehammer som lager hage- og utendørsprodukter i tre etter mål,
+> og graverer med laser i tre, stål og skinn. Enkeltpersonforetak, ikke
+> mva-registrert – oppgitte priser er endelige. Nettstedet er på norsk (nb-NO).
+
+Alt innhold under er skrevet av verkstedet selv. Prisene står i kroner og er
+veiledende; endelig pris settes i tilbudet. Frakt kommer i tillegg.
+
+## Gravering
+
+- [Gravering](https://minio.no/gravering): Lasergravering på bestilling. Skjærefjøl i massiv bøk med saftrille (448 kr ferdig gravert), pregekjevle i bøk der mønsteret preges i deigen (548 kr), og drikkeflaske i pulverlakkert stål (fra 299 kr). Kunden tegner motivet i en konfigurator i nettleseren og ser emnet i riktige mål før gravering. Navn, dato, monogram, logo eller eget motiv. Normal leveringstid 7–10 virkedager fra godkjent korrektur.
+- [Gravering på eget emne](https://minio.no/gravering#eget-emne): Verkstedet graverer også på emner kunden sender inn – flate (fjøler, brett, skilt, lær) og sylindriske (termoser, flasker, krus, knivskaft).
+- [Tjenester](https://minio.no/tjenester): Oversikt over gravering, laserskjæring, 3D-design og snekring.
+
+Fakta som ofte etterspørres om gravering:
+- Treslag: skjærefjøl og kjevle er i massiv bøk. Bøk er lyst og tett, hardt nok til kniv, og graveringen står skarpt.
+- Gravering på stål: laseren tar vekk pulverlakken i stedet for å brenne, så motivet kommer fram som blankt metall mot farget lakk.
+- Stell: fjøler i massivt tre tåler ikke oppvaskmaskin. Vask for hånd, tørk stående, og olje med matolje et par ganger i året.
+- Betaling: ingenting betales ved innsending. Kunden får tilbud og korrektur først, og faktura når varen sendes.
+
+## Produkter i tre
+
+- [Produkter](https://minio.no/produkter): Alle produktkategorier, bygget etter kundens mål.
+- [Plantekasser](https://minio.no/produkter/plantekasser), [Varmepumpehus](https://minio.no/produkter/varmepumpehus), [Søppelboder](https://minio.no/produkter/soppelboder), [Vedskjul](https://minio.no/produkter/vedskjul), [Postkassestativer](https://minio.no/produkter/postkassestativer), [Levegger](https://minio.no/produkter/levegger), [Hundehus](https://minio.no/produkter/hundehus), [Kattehus](https://minio.no/produkter/kattehus), [Robotklippergarasje](https://minio.no/produkter/robotklippergarasje)
+
+## Planlegging og byggeguider
+
+- [Byggeguider](https://minio.no/byggeguider): Artikler om å bygge i tre i norsk klima – dimensjonering, fundamentering, snølast, impregnering og overflatebehandling.
+- [Planleggere](https://minio.no/planleggere): Verktøy som regner ut materialliste og mål for terrasse, pergola, carport og utekjøkken.
+- [3D-design](https://minio.no/3d-design): Designverktøy i nettleseren.
+- [Byggehjelp](https://minio.no/byggehjelp), [Prosjekthjelp](https://minio.no/prosjekthjelp)
+
+## Om verkstedet
+
+- [Håndlaget i tre](https://minio.no/handlaget-i-tre): Hvem som står bak og hvordan det lages.
+- [Slik jobber vi](https://minio.no/slik-jobber-vi): Fra forespørsel til ferdig produkt.
+- [Kontakt](https://minio.no/kontakt)
+
+## Optional
+
+- [Underholdning](https://minio.no/underholdning): Småspill med trearbeid som tema. Ikke relevant for produkt- eller tjenestespørsmål.
