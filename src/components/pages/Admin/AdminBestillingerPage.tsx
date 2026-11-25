@@ -1,11 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
-import Icon from '../../shared/Icon'
 import { getAllOrders } from '../../../services/orderService'
 import AdminOrderCard from './AdminOrderCard'
 import type { Order, OrderStatus } from '../../../types/order'
 import { orderStatusLabels } from '../../../types/order'
 import type { Oppfolging } from '../../../types/oppfolging'
-import { AdminPageHead, Tabs, Tab, Loading, Empty } from './adminUi'
+import { AdminPageHead, Empty, LasterListe, Tab, Tabs } from './adminUi'
 
 /**
  * «usendt» og «ufakturert» er ikke statuser, men arbeidslistene dine: alt som
@@ -52,7 +51,7 @@ export default function AdminBestillingerPage() {
       <AdminPageHead title="Bestillinger" subtitle="Alle innkomne bestillinger fra nettbutikken." />
 
       {loading ? (
-        <Loading><Icon name="faSpinner" spin /> Laster bestillinger …</Loading>
+        <LasterListe antall={4} />
       ) : (
         <>
           <Tabs>

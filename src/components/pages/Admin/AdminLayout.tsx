@@ -1,11 +1,18 @@
-import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import styled from 'styled-components'
 import { useAuthContext } from '../../../context/AuthContext'
 import { useSEO } from '../../../hooks/useSEO'
 import Icon from '../../shared/Icon'
+import { bp, t } from './adminTokens'
 
-const NAV: Array<{ to: string; label: string; icon: string; end?: boolean }> = [
+interface Punkt {
+  to: string
+  label: string
+  icon: string
+  end?: boolean
+}
+
+const NAV: Punkt[] = [
   { to: '/admin', label: 'Dashbord', icon: 'faGaugeHigh', end: true },
   { to: '/admin/bestillinger', label: 'Bestillinger', icon: 'faBoxOpen' },
   { to: '/admin/foresporsler', label: 'Forespørsler', icon: 'faHammer' },
@@ -16,250 +23,412 @@ const NAV: Array<{ to: string; label: string; icon: string; end?: boolean }> = [
 ]
 
 /**
- * Dedikert admin-skall: fast sidemeny, én tilgangssjekk, og et innholdsområde
- * (Outlet) for underrutene. Erstatter det offentlige nettsted-skallet på
- * /admin-rutene.
+ * Admin-skallet.
+ *
+ * Lyst og luftig, ikke et mørkt kontrollrom: hvit topplinje med utlogging, lys
+ * sidemeny på skjerm, og en vannrett stripe man sveiper på mobil. Den mørke
+ * sidemenyen ga admin et annet formspråk enn resten av verktøykassa uten at
+ * forskjellen betydde noe.
+ *
+ * På mobil ligger navigasjonen øverst som en stripe i stedet for i en skuff.
+ * Skuffen krevde to trykk for hvert sidebytte, og måtte nås i hjørnet som er
+ * vanskeligst å treffe med én hånd.
  */
 export default function AdminLayout() {
-  const { isAdmin, isAuthenticated, loading } = useAuthContext()
+  const { isAdmin, isAuthenticated, loading, user, logout } = useAuthContext()
   const navigate = useNavigate()
   const { pathname } = useLocation()
-  const [open, setOpen] = useState(false)
-
-  /**
-   * Hvilken seksjon man står i. På mobil er sidemenyen skjult, og uten dette
-   * sto det bare «Minio Admin» øverst – det samme på alle sider.
-   */
-  const naavaerende =
-    [...NAV].reverse().find((n) => (n.end ? pathname === n.to : pathname.startsWith(n.to)))?.label ?? 'Admin'
-
-  // Escape lukker skuffen, slik alt annet som legger seg over innholdet gjør.
-  useEffect(() => {
-    if (!open) return
-    const paaTast = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-    document.addEventListener('keydown', paaTast)
-    // Uten dette ruller siden bak skuffen når man drar fingeren over den.
-    const forrige = document.body.style.overflow
-    document.body.style.overflow = 'hidden'
-    return () => {
-      document.removeEventListener('keydown', paaTast)
-      document.body.style.overflow = forrige
-    }
-  }, [open])
 
   useSEO({ title: 'Admin – Minio', description: 'Administrasjon.', noindex: true })
 
   if (loading) {
-    return <Center><Icon name="faSpinner" spin /></Center>
+    return (
+      <Midt>
+        <Icon name="faSpinner" spin />
+      </Midt>
+    )
   }
 
   if (!isAuthenticated || !isAdmin) {
     return (
-      <Center>
-        <Denied>
+      <Midt>
+        <Nektet>
           <Icon name="faLock" />
           <h1>Ingen tilgang</h1>
           <p>Du må være logget inn som administrator.</p>
           <button onClick={() => navigate('/')}>Til forsiden</button>
-        </Denied>
-      </Center>
+        </Nektet>
+      </Midt>
     )
   }
 
+  const initialer = (user?.name || user?.email || '?')
+    .split(/[\s@.]+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((d) => d[0]?.toUpperCase())
+    .join('')
+
   return (
-    <Shell>
-      <Sidebar $open={open}>
-        <Brand onClick={() => navigate('/admin')}>
-          <img src="/images/branding/logo_icon_white.webp" alt="Minio" />
+    <Skall>
+      <Topplinje>
+        <Merke onClick={() => navigate('/admin')}>
+          <img src="/images/branding/logo_icon_white.webp" alt="" />
+          <strong>MINIO</strong>
           <span>Admin</span>
-        </Brand>
-        <Nav>
-          {NAV.map((n) => (
-            <NavItem key={n.to} to={n.to} end={n.end} onClick={() => setOpen(false)}>
-              <Icon name={n.icon} /> <span>{n.label}</span>
-            </NavItem>
-          ))}
-        </Nav>
-        <Bottom>
-          <BackLink to="/"><Icon name="faArrowLeft" /> <span>Til nettsiden</span></BackLink>
-        </Bottom>
-      </Sidebar>
+        </Merke>
+        <Hoyretopp>
+          <Epost>{user?.email}</Epost>
+          <Loggut type="button" onClick={() => logout()}>
+            Logg ut
+          </Loggut>
+        </Hoyretopp>
+      </Topplinje>
 
-      <Right>
-        <TopBar>
-          <Burger onClick={() => setOpen((o) => !o)} aria-label={open ? 'Lukk meny' : 'Åpne meny'} aria-expanded={open}>
-            <Icon name={open ? 'faXmark' : 'faBars'} />
-          </Burger>
-          <span>{naavaerende}</span>
-        </TopBar>
-        <Scroll>
+      {/* Sveipestripa erstatter sidemenyen på mobil. */}
+      <Stripe aria-label="Seksjoner">
+        {NAV.map((n) => (
+          <StripeLenke key={n.to} to={n.to} end={n.end}>
+            <Icon name={n.icon} />
+            <span>{n.label}</span>
+          </StripeLenke>
+        ))}
+      </Stripe>
+
+      <Kropp>
+        <Sidemeny>
+          <Brukerkort>
+            <Avatar aria-hidden="true">{initialer}</Avatar>
+            <div>
+              <strong>{user?.name || 'Admin'}</strong>
+              <small>{user?.email}</small>
+            </div>
+          </Brukerkort>
+
+          <Meny>
+            {NAV.map((n) => (
+              <MenyLenke key={n.to} to={n.to} end={n.end}>
+                <Icon name={n.icon} />
+                <span>{n.label}</span>
+              </MenyLenke>
+            ))}
+          </Meny>
+
+          <Bolketittel>Snarveier</Bolketittel>
+          <Snarvei href="/">
+            <Icon name="faArrowLeft" />
+            <span>Til nettsiden</span>
+          </Snarvei>
+        </Sidemeny>
+
+        <Innhold key={pathname}>
           <Outlet />
-        </Scroll>
-      </Right>
-
-      {open && <Backdrop onClick={() => setOpen(false)} />}
-    </Shell>
+        </Innhold>
+      </Kropp>
+    </Skall>
   )
 }
 
-const Shell = styled.div`
-  display: flex;
-  min-height: 100vh;
-  background: #f4f4f2;
+const Skall = styled.div`
+  min-height: 100dvh;
+  background: ${t.bunn};
 `
 
-const Sidebar = styled.aside<{ $open: boolean }>`
+const Topplinje = styled.header`
   position: sticky;
   top: 0;
-  align-self: flex-start;
-  flex-shrink: 0;
-  width: 244px;
-  height: 100vh;
+  z-index: 40;
   display: flex;
-  flex-direction: column;
-  background: #16181d;
-  color: #e9e7e1;
-  padding: 1.1rem 0.85rem;
-  padding-bottom: calc(1.1rem + env(safe-area-inset-bottom, 0px));
-  overflow-y: auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  height: 60px;
+  padding: 0 1.4rem;
+  background: ${t.flate};
+  border-bottom: 1px solid ${t.kant};
 
-  @media (max-width: 860px) {
-    position: fixed;
-    z-index: 60;
-    left: 0;
-    transform: translateX(${({ $open }) => ($open ? '0' : '-100%')});
-    transition: transform 0.22s ease;
-    box-shadow: ${({ $open }) => ($open ? '4px 0 24px rgba(0,0,0,0.35)' : 'none')};
+  @media (max-width: ${bp.mobil}) {
+    height: 54px;
+    padding: 0 1rem;
   }
 `
 
-const Brand = styled.button`
+const Merke = styled.button`
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.4rem 0.6rem 1rem;
+  gap: 0.55rem;
   border: none;
   background: none;
-  color: #fff;
+  padding: 0;
   cursor: pointer;
-  img { height: 26px; width: auto; }
-  span { font-size: 1.05rem; font-weight: 800; letter-spacing: 0.02em; }
+
+  img {
+    height: 26px;
+    width: 26px;
+    border-radius: 7px;
+    background: ${t.blekk};
+    padding: 4px;
+  }
+  strong {
+    font-size: 0.98rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    color: ${t.blekk};
+  }
+  span {
+    padding-left: 0.55rem;
+    border-left: 1px solid ${t.kant};
+    font-size: 0.92rem;
+    color: ${t.dempet};
+  }
 `
 
-const Nav = styled.nav`
+const Hoyretopp = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`
+
+const Epost = styled.span`
+  font-size: 0.85rem;
+  color: ${t.dempet};
+
+  @media (max-width: ${bp.mobil}) {
+    display: none;
+  }
+`
+
+const Loggut = styled.button`
+  border: none;
+  background: none;
+  padding: 0.3rem 0;
+  color: ${t.blekk};
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+`
+
+const Stripe = styled.nav`
+  display: none;
+
+  @media (max-width: ${bp.mobil}) {
+    position: sticky;
+    top: 54px;
+    z-index: 35;
+    display: flex;
+    gap: 0.45rem;
+    padding: 0.6rem 1rem;
+    background: ${t.flate};
+    border-bottom: 1px solid ${t.kant};
+    overflow-x: auto;
+    scrollbar-width: none;
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+`
+
+const StripeLenke = styled(NavLink)`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  padding: 0.5rem 0.85rem;
+  border: 1px solid ${t.kant};
+  border-radius: ${t.radiusRund};
+  color: ${t.dempet};
+  text-decoration: none;
+  font-size: 0.84rem;
+  font-weight: 600;
+  white-space: nowrap;
+
+  svg {
+    font-size: 0.8rem;
+  }
+  &.active {
+    background: ${t.aksentSvak};
+    border-color: ${t.aksent};
+    color: ${t.aksent};
+  }
+`
+
+const Kropp = styled.div`
+  display: flex;
+  gap: 1.6rem;
+  max-width: 1480px;
+  margin: 0 auto;
+  padding: 1.6rem 1.4rem 4rem;
+
+  @media (max-width: ${bp.mobil}) {
+    padding: 1rem 1rem 3rem;
+  }
+`
+
+const Sidemeny = styled.aside`
+  flex-shrink: 0;
+  width: ${t.sidemeny};
+  position: sticky;
+  top: 80px;
+  align-self: flex-start;
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  flex: 1;
+  gap: 0.3rem;
+
+  @media (max-width: ${bp.mobil}) {
+    display: none;
+  }
 `
 
-const NavItem = styled(NavLink)`
+const Brukerkort = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.8rem;
+  margin-bottom: 0.7rem;
+  background: ${t.flate};
+  border: 1px solid ${t.kant};
+  border-radius: ${t.radius};
+  min-width: 0;
+
+  strong {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: ${t.blekk};
+  }
+  small {
+    display: block;
+    font-size: 0.74rem;
+    color: ${t.dempet};
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 148px;
+  }
+`
+
+const Avatar = styled.span`
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 9px;
+  background: ${t.aksent};
+  color: #fff;
+  font-size: 0.76rem;
+  font-weight: 700;
+`
+
+const Meny = styled.nav`
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+`
+
+const MenyLenke = styled(NavLink)`
   display: flex;
   align-items: center;
   gap: 0.7rem;
-  padding: 0.65rem 0.75rem;
-  border-radius: 10px;
-  color: #b6b2a9;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: ${t.radiusLiten};
+  color: ${t.dempet};
   text-decoration: none;
   font-size: 0.9rem;
   font-weight: 600;
-  transition: background 0.15s, color 0.15s;
-  svg { width: 18px; text-align: center; }
-  &:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
-  &.active { background: rgba(255, 255, 255, 0.1); color: #fff; }
 
-  /* Menyvalgene treffes med tommelen på mobil, ikke med en musepeker. */
-  @media (max-width: 860px) {
-    min-height: 48px;
+  svg {
+    width: 17px;
+    flex-shrink: 0;
+    font-size: 0.88rem;
+  }
+  &:hover {
+    background: ${t.flate};
+    color: ${t.blekk};
+  }
+  /* Den aktive siden er et hvitt kort med kant – samme språk som alt annet
+     innhold, i stedet for en farget flate som bare finnes her. */
+  &.active {
+    background: ${t.flate};
+    border-color: ${t.kant};
+    color: ${t.blekk};
+    box-shadow: ${t.skygge};
+  }
+`
+
+const Bolketittel = styled.p`
+  margin: 1.1rem 0 0.35rem;
+  padding: 0 0.75rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: ${t.svak};
+`
+
+const Snarvei = styled.a`
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: ${t.radiusLiten};
+  color: ${t.dempet};
+  text-decoration: none;
+  font-size: 0.88rem;
+  font-weight: 600;
+
+  svg {
+    width: 17px;
+    font-size: 0.82rem;
+  }
+  &:hover {
+    color: ${t.blekk};
+  }
+`
+
+const Innhold = styled.main`
+  flex: 1;
+  min-width: 0;
+  max-width: ${t.innholdMaks};
+`
+
+const Midt = styled.div`
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: ${t.bunn};
+  color: ${t.dempet};
+  font-size: 1.3rem;
+`
+
+const Nektet = styled.div`
+  text-align: center;
+  color: ${t.dempet};
+
+  svg {
+    font-size: 1.6rem;
+    color: ${t.fare};
+  }
+  h1 {
+    margin: 0.6rem 0 0.3rem;
+    font-size: 1.35rem;
+    color: ${t.blekk};
+  }
+  p {
+    margin: 0 0 1.1rem;
     font-size: 0.95rem;
   }
-`
-
-const Bottom = styled.div`
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-`
-
-const BackLink = styled(NavLink)`
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.6rem 0.75rem;
-  border-radius: 10px;
-  color: #8f8b82;
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 600;
-  &:hover { background: rgba(255, 255, 255, 0.06); color: #fff; }
-`
-
-const Right = styled.div`
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-`
-
-const TopBar = styled.header`
-  display: none;
-  align-items: center;
-  gap: 0.75rem;
-  /* Telefoner med hakk: linja må starte under statusfeltet, ikke bak det. */
-  height: calc(54px + env(safe-area-inset-top, 0px));
-  padding: env(safe-area-inset-top, 0px) 1rem 0;
-  background: #16181d;
-  color: #fff;
-  font-weight: 700;
-  position: sticky;
-  top: 0;
-  z-index: 50;
-
-  @media (max-width: 860px) { display: flex; }
-`
-
-const Burger = styled.button`
-  width: 36px;
-  height: 36px;
-  display: grid;
-  place-items: center;
-  border: none;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-  cursor: pointer;
-  flex-shrink: 0;
-`
-
-const Scroll = styled.main`
-  flex: 1;
-  min-width: 0;
-  padding: 2rem 2.25rem 4rem;
-  @media (max-width: 860px) { padding: 1.25rem 1rem 3rem; }
-`
-
-const Backdrop = styled.div`
-  @media (max-width: 860px) {
-    position: fixed;
-    inset: 0;
-    z-index: 55;
-    background: rgba(0, 0, 0, 0.4);
+  button {
+    padding: 0.7rem 1.4rem;
+    border: none;
+    border-radius: ${t.radiusLiten};
+    background: ${t.blekk};
+    color: #fff;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
   }
-`
-
-const Center = styled.div`
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  background: #f4f4f2;
-  color: #6b6860;
-  font-size: 1.4rem;
-`
-
-const Denied = styled.div`
-  text-align: center;
-  color: #6b6860;
-  svg { font-size: 1.6rem; color: #b1442f; }
-  h1 { margin: 0.6rem 0 0.3rem; font-size: 1.4rem; color: #16181d; }
-  p { margin: 0 0 1.1rem; font-size: 0.95rem; }
-  button { padding: 0.7rem 1.4rem; border: none; border-radius: 10px; background: #16181d; color: #fff; font-weight: 700; font-family: inherit; cursor: pointer; }
 `

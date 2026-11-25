@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import styled from 'styled-components'
 import Icon from '../../shared/Icon'
+import Innlogging from '../../shared/Innlogging'
 import { useSEO } from '../../../hooks/useSEO'
 import { trackEvent, trackShare } from '../../../utils/analytics'
 import { useScrollLock } from '../../../hooks/useScrollLock'
@@ -250,7 +251,7 @@ export default function DesignerPage() {
   const navigate = useNavigate()
   const { produktId } = useParams<{ produktId?: string }>()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { isAuthenticated, loading: authLoading, login, firebaseUser, isAdmin } = useAuthContext()
+  const { isAuthenticated, loading: authLoading, firebaseUser, isAdmin } = useAuthContext()
   const uid = firebaseUser?.uid
   useScrollLock(true)
 
@@ -1062,9 +1063,7 @@ export default function DesignerPage() {
               <p>Designverktøyet er gratis å bruke – logg inn så lagrer vi designet ditt og du kan bestille byggeplan.</p>
             </>
           )}
-          <AuthBtn onClick={() => login()}>
-            <Icon name="faGoogle" /> Logg inn med Google
-          </AuthBtn>
+          <Innlogging />
           <AuthLenke to="/designverktoy">Se alle produkter du kan tegne</AuthLenke>
         </AuthCard>
       </AuthGate>
@@ -2420,22 +2419,6 @@ const AuthLenke = styled(Link)`
   &:hover { color: #e7eaef; text-decoration: underline; }
 `
 
-const AuthBtn = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.85rem 1.5rem;
-  border: none;
-  border-radius: 12px;
-  background: #f7f8fa;
-  color: #101216;
-  font-size: 0.95rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.15s;
-  &:hover { background: #fff; }
-  svg { font-size: 1rem; color: #101216; }
-`
 
 const Shell = styled.div`
   position: fixed;

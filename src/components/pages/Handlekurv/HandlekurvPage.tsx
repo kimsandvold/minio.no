@@ -199,7 +199,7 @@ export default function HandlekurvPage() {
                       <Icon name="faLock" />
                     </LockIcon>
                     <LoginMessage>
-                      Du må logge inn for å bruke handlekurven. Logg inn med Google-kontoen din for å fortsette.
+                      Du må logge inn for å bruke handlekurven. Lag en konto med e-post, eller bruk Google.
                     </LoginMessage>
                     <Innlogging />
                   </LoginGate>

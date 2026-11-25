@@ -9,6 +9,11 @@ import { formatSum } from '../../../utils/formatPrice'
 import Icon from '../../shared/Icon'
 
 const Card = styled.div`
+  /* Uten dette nekter boksen å krympe under innholdet sitt, og en lang
+     e-postadresse dytter hele kortet ut av skjermen. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+
   background: white;
   border-radius: 12px;
   box-shadow: 0 2px 16px rgba(60, 42, 28, 0.06);

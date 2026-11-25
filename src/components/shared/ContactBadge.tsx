@@ -208,6 +208,10 @@ export default function ContactBadge() {
   // Overflødig på kontaktsiden – der dekker den bare skjemaet på mobil.
   if (pathname === '/kontakt') return null
 
+  // Admin er et internt verktøy, ikke en salgsflate. En «Ta kontakt»-knapp
+  // der er meningsløs – og på mobil legger den seg oppå innholdet man jobber i.
+  if (pathname.startsWith('/admin')) return null
+
   // På /gravering dekker merket forhåndsvisningen i konfiguratoren på mobil –
   // altså nettopp det kunden sitter og ser på mens hun skriver.
   const skjulPaMobil = pathname === '/gravering'

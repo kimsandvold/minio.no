@@ -11,7 +11,7 @@ import type { DesignForesporsel, ForesporselStatus } from '../../../types/foresp
 import { foresporselStatusLabel, foresporselTypeLabel } from '../../../types/foresporsel'
 import type { Oppfolging } from '../../../types/oppfolging'
 import AdminOppfolging from './AdminOppfolging'
-import { AdminPageHead, Tabs, Tab, Loading, Empty } from './adminUi'
+import { AdminPageHead, Empty, LasterListe, Tab, Tabs } from './adminUi'
 
 /**
  * Ferdig svartekst for byggeplan-forespørsler.
@@ -95,7 +95,7 @@ export default function AdminForesporslerPage() {
       <AdminPageHead title="Forespørsler" subtitle="Bygging og byggeplan-koder fra designverktøyet." />
 
       {loading ? (
-        <Loading><Icon name="faSpinner" spin /> Laster forespørsler …</Loading>
+        <LasterListe antall={4} />
       ) : (
         <>
           <Tabs>

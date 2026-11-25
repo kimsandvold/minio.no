@@ -1,10 +1,25 @@
 import type { ReactNode } from 'react'
-import styled from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 import Icon from '../../shared/Icon'
+import { bp, t } from './adminTokens'
 
-/** Delte UI-primitiver for admin-panelet (felles utseende på tvers av sidene). */
+/**
+ * Delte UI-deler for admin-panelet.
+ *
+ * Alle farger og mål kommer fra `adminTokens` – før lå de som rå hex-verdier
+ * spredt utover, med fire nyanser av samme grå og én ugyldig verdi ingen
+ * oppdaget. Skal noe endres, endres det ett sted.
+ */
 
-export function AdminPageHead({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: ReactNode }) {
+export function AdminPageHead({
+  title,
+  subtitle,
+  actions,
+}: {
+  title: string
+  subtitle?: string
+  actions?: ReactNode
+}) {
   return (
     <Head>
       <div>
@@ -21,18 +36,44 @@ const Head = styled.header`
   align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.5rem;
-  h1 { margin: 0; font-size: 1.6rem; font-weight: 800; color: #16181d; letter-spacing: -0.01em; }
-  p { margin: 0.25rem 0 0; font-size: 0.9rem; color: #6b6860; }
+  margin-bottom: 1.4rem;
 
-  /* På mobil kolliderte ingressen med knappen, fordi begge kjempet om samme
-     linje. Stablet er det ikke lenger noe å kjempe om. */
-  @media (max-width: 640px) {
+  h1 {
+    margin: 0;
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: ${t.blekk};
+    letter-spacing: -0.015em;
+  }
+  p {
+    margin: 0.3rem 0 0;
+    font-size: 0.88rem;
+    color: ${t.dempet};
+    max-width: 62ch;
+  }
+
+  @media (max-width: ${bp.mobil}) {
     flex-direction: column;
     align-items: stretch;
-    gap: 0.9rem;
-    margin-bottom: 1.1rem;
-    h1 { font-size: 1.35rem; }
+    gap: 0.8rem;
+    margin-bottom: 1rem;
+
+    /*
+     * Seksjonsnavnet står allerede i den klebrige topplinja. Å gjenta det som
+     * overskrift her sa det samme to ganger rett under hverandre. Overskriften
+     * blir værende for skjermlesere og for dokumentstrukturen.
+     */
+    h1 {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    p {
+      margin-top: 0;
+    }
   }
 `
 
@@ -41,40 +82,47 @@ const HeadActions = styled.div`
   gap: 0.5rem;
   flex-shrink: 0;
 
-  @media (max-width: 640px) {
-    /* Full bredde gir en knapp som faktisk kan treffes med tommelen. */
-    > * { flex: 1; justify-content: center; min-height: 44px; }
+  @media (max-width: ${bp.mobil}) {
+    > * {
+      flex: 1;
+      justify-content: center;
+      min-height: 44px;
+    }
   }
 `
 
 export const Card = styled.div`
-  background: #fff;
-  border: 1px solid #e7e5df;
-  border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(60, 42, 28, 0.04);
+  background: ${t.flate};
+  border: 1px solid ${t.kant};
+  border-radius: ${t.radius};
+  box-shadow: ${t.skygge};
 `
 
 export const Tabs = styled.div`
   display: flex;
   gap: 0.4rem;
   flex-wrap: wrap;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.2rem;
 
   /*
    * På mobil brettet seks filtre seg over tre linjer og spiste en tredel av
    * skjermen før man så en eneste rad med data. Her ligger de på én linje som
-   * sveipes i stedet – og stripa blør ut til skjermkanten, så det er synlig at
-   * den fortsetter.
+   * sveipes – og stripa blør ut til skjermkanten, så det er synlig at den
+   * fortsetter.
    */
-  @media (max-width: 640px) {
+  @media (max-width: ${bp.smal}) {
     flex-wrap: nowrap;
     overflow-x: auto;
     scroll-snap-type: x proximity;
     margin: 0 -1rem 1rem;
     padding: 0 1rem 0.2rem;
     scrollbar-width: none;
-    &::-webkit-scrollbar { display: none; }
-    > * { scroll-snap-align: start; }
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    > * {
+      scroll-snap-align: start;
+    }
   }
 `
 
@@ -82,23 +130,91 @@ export const Tab = styled.button<{ $active: boolean }>`
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.5rem 0.95rem;
-  border: 1px solid ${({ $active }) => ($active ? '#16181d' : '#e0ddd5')};
-  background: ${({ $active }) => ($active ? '#16181d' : '#fff')};
-  color: ${({ $active }) => ($active ? '#fff' : '#5a584f')};
-  border-radius: 999px;
+  padding: 0.48rem 0.9rem;
+  border: 1px solid ${({ $active }) => ($active ? t.blekk : t.kant)};
+  background: ${({ $active }) => ($active ? t.blekk : t.flate)};
+  color: ${({ $active }) => ($active ? '#fff' : t.dempet)};
+  border-radius: ${t.radiusRund};
   font-family: inherit;
-  font-weight: 700;
-  font-size: 0.85rem;
+  font-weight: 600;
+  font-size: 0.84rem;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, border-color 0.15s;
-  em { font-style: normal; opacity: 0.65; font-weight: 600; }
+  transition: background 0.14s, border-color 0.14s, color 0.14s;
 
-  @media (max-width: 640px) {
-    min-height: 40px;
-    padding: 0.5rem 0.9rem;
+  em {
+    font-style: normal;
+    opacity: 0.6;
+    font-weight: 600;
   }
+
+  @media (max-width: ${bp.smal}) {
+    min-height: 40px;
+  }
+`
+
+const puls = keyframes`
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+`
+
+/**
+ * Skjelett i stedet for en snurrende sirkel.
+ *
+ * En spinner sier bare «vent»; et skjelett viser hva som kommer og hvor mye av
+ * det, så siden ikke hopper når dataene lander.
+ */
+export const Skjelett = styled.div<{ $h?: string; $b?: string; $rund?: boolean }>`
+  height: ${({ $h }) => $h ?? '1rem'};
+  width: ${({ $b }) => $b ?? '100%'};
+  border-radius: ${({ $rund }) => ($rund ? '50%' : t.radiusLiten)};
+  background: ${t.kantSvak};
+  animation: ${puls} 1.4s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+`
+
+/** Noen kort med skjelett, mens lista hentes. */
+export function LasterListe({ antall = 3 }: { antall?: number }) {
+  return (
+    <div aria-busy="true" aria-live="polite">
+      <SrOnly>Laster …</SrOnly>
+      {Array.from({ length: antall }, (_, i) => (
+        <SkjelettKort key={i}>
+          <Skjelett $h="40px" $b="40px" $rund />
+          <div>
+            <Skjelett $h="0.85rem" $b="38%" />
+            <Skjelett $h="0.7rem" $b="62%" />
+          </div>
+        </SkjelettKort>
+      ))}
+    </div>
+  )
+}
+
+const SkjelettKort = styled(Card)`
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.1rem;
+  margin-bottom: 0.7rem;
+
+  > div {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+`
+
+const SrOnly = styled.span`
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 `
 
 export const Loading = styled.div`
@@ -106,104 +222,152 @@ export const Loading = styled.div`
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 4rem 1rem;
-  color: #6b6860;
+  padding: 3.5rem 1rem;
+  color: ${t.dempet};
   font-weight: 600;
 `
 
-export const Empty = styled.div`
+/**
+ * Tom tilstand.
+ *
+ * Var en stiplet boks med én grå setning midt i. Et ikon og tydelig
+ * overskrift gjør den til noe som ser ferdig ut, ikke noe som ser ødelagt ut.
+ */
+export function Empty({ children }: { children: ReactNode }) {
+  return (
+    <TomBoks>
+      <TomIkon aria-hidden="true">
+        <Icon name="faLayerGroup" />
+      </TomIkon>
+      {children}
+    </TomBoks>
+  )
+}
+
+const TomBoks = styled.div`
   text-align: center;
-  color: #6b6860;
-  background: #fff;
-  border: 1px dashed #d9d6ce;
-  border-radius: 14px;
+  color: ${t.dempet};
+  background: ${t.flate};
+  border: 1px solid ${t.kant};
+  border-radius: ${t.radius};
   padding: 3rem 1.5rem;
-  h2 { margin: 0 0 0.4rem; color: #16181d; font-size: 1.1rem; }
-  p { margin: 0; }
+
+  h2 {
+    margin: 0 0 0.35rem;
+    color: ${t.blekk};
+    font-size: 1.02rem;
+    font-weight: 700;
+  }
+  p {
+    margin: 0 auto;
+    max-width: 44ch;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  @media (max-width: ${bp.smal}) {
+    padding: 2.2rem 1.1rem;
+  }
 `
 
-/** KPI-kort til dashbordet. */
-export function Stat({ label, value, icon, tone = 'default', onClick }: { label: string; value: ReactNode; icon: string; tone?: 'default' | 'green' | 'amber'; onClick?: () => void }) {
+const TomIkon = styled.div`
+  width: 46px;
+  height: 46px;
+  margin: 0 auto 0.9rem;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: ${t.senket};
+  color: ${t.svak};
+  font-size: 1.05rem;
+`
+
+/**
+ * KPI-kort.
+ *
+ * Etiketten står OVER tallet, og ikonet er borte. Ikonet pyntet, men tok
+ * halve kortet og ga ingen informasjon tallet ikke alt ga – nå er det tallet
+ * som er det store, slik det skal være når man skanner en rad med dem.
+ */
+export function Stat({
+  label,
+  value,
+  under,
+  onClick,
+}: {
+  label: string
+  value: ReactNode
+  /** Valgfri linje under tallet, f.eks. et beløp. */
+  under?: ReactNode
+  icon?: string
+  tone?: 'default' | 'green' | 'amber'
+  onClick?: () => void
+}) {
   return (
     <StatBox as={onClick ? 'button' : 'div'} $clickable={Boolean(onClick)} onClick={onClick}>
-      <StatIcon className={`ico-${tone}`}><Icon name={icon} /></StatIcon>
-      <div>
-        <StatValue>{value}</StatValue>
-        <StatLabel>{label}</StatLabel>
-      </div>
+      <StatLabel>{label}</StatLabel>
+      <StatValue>{value}</StatValue>
+      {under && <StatUnder>{under}</StatUnder>}
     </StatBox>
   )
 }
 
 /**
- * Delt rutenett for KPI-kortene.
- *
- * `minmax(200px, 1fr)` ga én kolonne på en 390 px skjerm, og tre nøkkeltall ble
- * da en halv meter rulling før man så noe annet. 150 px gir to i bredden på
- * mobil og like mange som før på større skjermer.
+ * Rutenett for KPI-kortene. To i bredden på mobil; så mange det er plass til
+ * ellers.
  */
 export const StatGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 0.9rem;
-  margin-bottom: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
 
-  @media (max-width: 640px) {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  @media (max-width: ${bp.smal}) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.6rem;
   }
 `
 
 const StatBox = styled.div<{ $clickable: boolean }>`
   display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  padding: 1.1rem 1.2rem;
-  background: #fff;
-  border: 1px solid #e7e5df;
-  border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(60, 42, 28, 0.04);
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.9rem 1rem 1rem;
+  background: ${t.flate};
+  border: 1px solid ${t.kant};
+  border-radius: ${t.radius};
   text-align: left;
   font-family: inherit;
+  width: 100%;
   cursor: ${({ $clickable }) => ($clickable ? 'pointer' : 'default')};
-  transition: transform 0.12s, box-shadow 0.15s;
-  &:hover { ${({ $clickable }) => ($clickable ? 'transform: translateY(-1px); box-shadow: 0 6px 18px rgba(60, 42, 28, 0.08);' : '')} }
+  transition: border-color 0.14s, box-shadow 0.15s;
 
-  /* To kort i bredden krever mindre luft og et mindre ikon for at tallet
-     fortsatt skal være det man ser først. */
-  @media (max-width: 640px) {
-    gap: 0.6rem;
-    padding: 0.8rem 0.85rem;
+  &:hover {
+    ${({ $clickable }) => ($clickable ? `border-color: ${t.svak}; box-shadow: ${t.skyggeHev};` : '')}
   }
 `
 
-const StatIcon = styled.span`
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  @media (max-width: 640px) { width: 34px; height: 34px; font-size: 0.9rem; border-radius: 10px; }
-  display: grid;
-  place-items: center;
-  border-radius: 12px;
-  font-size: 1.05rem;
-  background: #eef0e9;
-  color: #5f5a52;
-  &.ico-green { background: rgba(90, 143, 90, 0.14); color: #3f7a3f; }
-  &.ico-amber { background: rgba(197, 149, 62, 0.16); color: #9a6c1e; }
+const StatLabel = styled.div`
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: ${t.dempet};
+  line-height: 1.3;
 `
 
 const StatValue = styled.div`
-  font-size: 1.5rem;
-  @media (max-width: 640px) { font-size: 1.2rem; }
-  font-weight: 800;
-  color: #16181d;
-  line-height: 1.1;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: ${t.blekk};
+  line-height: 1.05;
   font-variant-numeric: tabular-nums;
+
+  @media (max-width: ${bp.smal}) {
+    font-size: 1.4rem;
+  }
 `
 
-const StatLabel = styled.div`
-  font-size: 0.82rem;
-  @media (max-width: 640px) { font-size: 0.74rem; line-height: 1.25; }
-  color: #6b6860;
-  margin-top: 0.1rem;
+const StatUnder = styled.div`
+  font-size: 0.78rem;
+  color: ${t.dempet};
+  font-variant-numeric: tabular-nums;
 `

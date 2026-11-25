@@ -124,6 +124,11 @@ const Liste = styled.div`
 `
 
 const Kort = styled.article`
+  /* Uten dette nekter boksen å krympe under innholdet sitt, og en lang
+     e-postadresse dytter hele kortet ut av skjermen. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+
   background: #fff;
   border: 1px solid #e8e4df;
   border-radius: 14px;
@@ -131,6 +136,11 @@ const Kort = styled.article`
 `
 
 const KortTop = styled.div`
+  /* Uten dette nekter boksen å krympe under innholdet sitt, og en lang
+     e-postadresse dytter hele kortet ut av skjermen. */
+  min-width: 0;
+  overflow-wrap: anywhere;
+
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
