@@ -7,7 +7,7 @@ import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
 import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
-import GoogleLoginButton from '../../shared/GoogleLoginButton'
+import Innlogging from '../../shared/Innlogging'
 import SignDesignerModal from '../SignDesigner/SignDesignerModal'
 import type { SavedDesign } from '../../../types/design'
 
@@ -313,7 +313,7 @@ export default function MineDesignPage() {
               <LoginGate>
                 <LockIcon><Icon name="faLock" /></LockIcon>
                 <LoginMessage>Du må logge inn for å se dine design.</LoginMessage>
-                <GoogleLoginButton />
+                <Innlogging />
               </LoginGate>
             ) : (
               <>

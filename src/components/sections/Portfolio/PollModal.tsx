@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import styled from 'styled-components'
 import Modal from '../../shared/Modal/Modal'
-import GoogleLoginButton from '../../shared/GoogleLoginButton'
+import Innlogging from '../../shared/Innlogging'
 import Button from '../../shared/Button'
 import { useAuthContext } from '../../../context/AuthContext'
 import { usePoll } from '../../../hooks/usePoll'
@@ -298,7 +298,7 @@ export default function PollModal({ pollId, isOpen, onClose }: PollModalProps) {
           <Subtitle>Logg inn for å stemme på ditt favorittprodukt</Subtitle>
           <LoginPrompt>
             <p>Du må logge inn for å stemme</p>
-            <GoogleLoginButton />
+            <Innlogging />
           </LoginPrompt>
         </Wrapper>
       )

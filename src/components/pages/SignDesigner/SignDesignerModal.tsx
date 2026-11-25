@@ -14,7 +14,7 @@ import TemplatePickerPanel from './TemplatePickerPanel'
 import { createTemplateDesign } from '../../../data/doorSignTemplates'
 import DesignerTopBar from './DesignerTopBar'
 import LoadDesignModal from './LoadDesignModal'
-import GoogleLoginButton from '../../shared/GoogleLoginButton'
+import Innlogging from '../../shared/Innlogging'
 import Icon from '../../shared/Icon'
 import { loadDesignerFonts } from '../../../data/designerFonts'
 
@@ -334,7 +334,7 @@ export default function SignDesignerModal({ isOpen, onClose, initialDesign, load
             <LoginCardText>
               Du må logge inn med Google for å lage, lagre og eksportere dine skiltdesign.
             </LoginCardText>
-            <GoogleLoginButton />
+            <Innlogging />
             <LoginCardClose onClick={onClose}>Lukk</LoginCardClose>
           </LoginCard>
         </LoginOverlay>

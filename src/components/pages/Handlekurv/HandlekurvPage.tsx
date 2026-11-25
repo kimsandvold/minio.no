@@ -10,7 +10,7 @@ import NewsletterModal from '../../shared/NewsletterModal/NewsletterModal'
 import { useSEO } from '../../../hooks/useSEO'
 import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
-import GoogleLoginButton from '../../shared/GoogleLoginButton'
+import Innlogging from '../../shared/Innlogging'
 import BasketView from '../../shared/BasketModal/BasketView'
 import CheckoutView from '../../shared/BasketModal/CheckoutView'
 import SuccessView from '../../shared/BasketModal/SuccessView'
@@ -201,7 +201,7 @@ export default function HandlekurvPage() {
                     <LoginMessage>
                       Du må logge inn for å bruke handlekurven. Logg inn med Google-kontoen din for å fortsette.
                     </LoginMessage>
-                    <GoogleLoginButton />
+                    <Innlogging />
                   </LoginGate>
                 </>
               ) : (

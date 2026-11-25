@@ -6,10 +6,17 @@ import type { GoogleUser } from '../types/auth'
 interface AuthContextType {
   user: GoogleUser | null
   firebaseUser: User | null
+  /** Google-popup. */
   login: () => Promise<void>
+  loggInnMedEpost: (epost: string, passord: string) => Promise<void>
+  registrerMedEpost: (epost: string, passord: string, navn: string) => Promise<void>
+  sendPassordlenke: (epost: string) => Promise<void>
+  sendBekreftelsePaaNytt: () => Promise<void>
   logout: () => Promise<void>
   isAuthenticated: boolean
   isAdmin: boolean
+  /** Er adressen bekreftet? Google-kontoer er det alltid. */
+  epostVerifisert: boolean
   loading: boolean
 }
 

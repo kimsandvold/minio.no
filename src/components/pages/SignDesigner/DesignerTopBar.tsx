@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import type { DesignerAction, SignDesign } from '../../../types/design'
 import { devicePresets, findPresetByDimensions } from '../../../data/devicePresets'
 import Icon from '../../shared/Icon'
-import GoogleLoginButton from '../../shared/GoogleLoginButton'
+import Innlogging from '../../shared/Innlogging'
 
 const TopBar = styled.div`
   background: #1c1a18;
@@ -360,7 +360,7 @@ export default function DesignerTopBar({
         {showLoginHint && !canSave && (
           <LoginPopover>
             <p>Logg inn for å lagre designet ditt</p>
-            <GoogleLoginButton />
+            <Innlogging />
           </LoginPopover>
         )}
       </SaveWrapper>

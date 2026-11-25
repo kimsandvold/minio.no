@@ -44,6 +44,43 @@ export function useAuth() {
     await signInWithPopup(auth, googleProvider)
   }, [])
 
+  /** Logg inn med e-post og passord. Kaster videre – skjemaet viser feilen. */
+  const loggInnMedEpost = useCallback(async (epost: string, passord: string) => {
+    const [{ signInWithEmailAndPassword }, { auth }] = lastet ?? (await lastFirebaseAuth())
+    await signInWithEmailAndPassword(auth, epost.trim(), passord)
+  }, [])
+
+  /**
+   * Oppretter en konto og sender bekreftelseslenke.
+   *
+   * Bekreftelsen er ikke pynt: porten foran bestillinger lover kunden at vi
+   * har «en verifisert e-postadresse å sende fakturaen til». Med Google er den
+   * verifisert av Google. Med e-post og passord er den det først når lenka er
+   * klikket – derfor sendes den med én gang, uoppfordret.
+   */
+  const registrerMedEpost = useCallback(async (epost: string, passord: string, navn: string) => {
+    const [{ createUserWithEmailAndPassword, sendEmailVerification, updateProfile }, { auth }] =
+      lastet ?? (await lastFirebaseAuth())
+    const { user } = await createUserWithEmailAndPassword(auth, epost.trim(), passord)
+    const rentNavn = navn.trim()
+    if (rentNavn) await updateProfile(user, { displayName: rentNavn })
+    await sendEmailVerification(user).catch(() => {
+      /* Kontoen er opprettet. Feiler selve e-posten, kan den sendes på nytt. */
+    })
+  }, [])
+
+  /** Sender lenke for å sette nytt passord. */
+  const sendPassordlenke = useCallback(async (epost: string) => {
+    const [{ sendPasswordResetEmail }, { auth }] = lastet ?? (await lastFirebaseAuth())
+    await sendPasswordResetEmail(auth, epost.trim())
+  }, [])
+
+  /** Sender bekreftelseslenka på nytt til den som er innlogget. */
+  const sendBekreftelsePaaNytt = useCallback(async () => {
+    const [{ sendEmailVerification }, { auth }] = lastet ?? (await lastFirebaseAuth())
+    if (auth.currentUser) await sendEmailVerification(auth.currentUser)
+  }, [])
+
   const logout = useCallback(async () => {
     const [{ signOut }, { auth }] = lastet ?? (await lastFirebaseAuth())
     await signOut(auth)
@@ -51,6 +88,11 @@ export function useAuth() {
 
   const isAuthenticated = firebaseUser !== null
   const isAdmin = firebaseUser?.email === ADMIN_EMAIL
+  /**
+   * Google-kontoer er verifisert av Google. Nye e-postkontoer er det først
+   * når bekreftelseslenka er klikket.
+   */
+  const epostVerifisert = firebaseUser?.emailVerified ?? false
 
   const user = firebaseUser
     ? {
@@ -61,5 +103,18 @@ export function useAuth() {
       }
     : null
 
-  return { user, firebaseUser, login, logout, isAuthenticated, isAdmin, loading }
+  return {
+    user,
+    firebaseUser,
+    login,
+    loggInnMedEpost,
+    registrerMedEpost,
+    sendPassordlenke,
+    sendBekreftelsePaaNytt,
+    logout,
+    isAuthenticated,
+    isAdmin,
+    epostVerifisert,
+    loading,
+  }
 }

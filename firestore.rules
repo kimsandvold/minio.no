@@ -6,13 +6,33 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
+    /**
+     * Admin.
+     *
+     * `email_verified` er ikke pynt her. Så lenge Google var eneste vei inn,
+     * var e-postadressen i seg selv bevis nok: Google utsteder bare et token
+     * for adressen til den som eier kontoen. Etter at innlogging med e-post og
+     * passord ble slått på, er det ikke lenger sant – står Firebase satt til å
+     * tillate flere kontoer per adresse, kan hvem som helst registrere
+     * admin-adressen med sitt eget passord og få tokenet til å se riktig ut.
+     *
+     * Kravet om bekreftet adresse lukker det uansett hvordan den innstillingen
+     * står: Google-kontoen er alltid bekreftet, en påmeldt kopi er det ikke,
+     * og den som ikke eier innboksen får den aldri bekreftet.
+     */
+    function erAdmin() {
+      return request.auth != null
+             && request.auth.token.email == 'kimsandvold@gmail.com'
+             && request.auth.token.email_verified == true;
+    }
+
     match /orders/{orderId} {
       allow create: if request.auth != null
                     && request.resource.data.userId == request.auth.uid;
       allow read: if request.auth != null
                   && resource.data.userId == request.auth.uid;
-      allow read, update: if request.auth != null
-                          && request.auth.token.email == 'kimsandvold@gmail.com';
+      allow read, update: if erAdmin();
     }
 
     match /designs/{designId} {
@@ -20,8 +40,7 @@ service cloud.firestore {
                     && request.resource.data.userId == request.auth.uid;
       allow read, update, delete: if request.auth != null
                                   && resource.data.userId == request.auth.uid;
-      allow read: if request.auth != null
-                  && request.auth.token.email == 'kimsandvold@gmail.com';
+      allow read: if erAdmin();
     }
 
     // Designverktøy-prosjekter.
@@ -54,8 +73,7 @@ service cloud.firestore {
                          .hasAny(['betalt', 'kjopt', 'frosset', 'tilgangskode',
                                   'kodeForsok', 'vipps']);
 
-      allow read: if request.auth != null
-                  && request.auth.token.email == 'kimsandvold@gmail.com';
+      allow read: if erAdmin();
     }
 
     // Forespørsler fra designverktøyet (bygging / materialpakke / byggeplan).
@@ -78,8 +96,7 @@ service cloud.firestore {
                           'maal', 'arealM2', 'estimatKr', 'prisEstimatKr', 'melding', 'status',
                           'createdAt'])
                     && request.resource.data.status == 'ny';
-      allow read, update: if request.auth != null
-                          && request.auth.token.email == 'kimsandvold@gmail.com';
+      allow read, update: if erAdmin();
     }
 
     // Prosjektidéer fra /prosjekthjelp. Skjemaet er lav-terskel-inngangen til
@@ -104,8 +121,7 @@ service cloud.firestore {
                     && request.resource.data.melding.size() >= 10
                     && request.resource.data.melding.size() <= 4000
                     && request.resource.data.status == 'ny';
-      allow read, update: if request.auth != null
-                          && request.auth.token.email == 'kimsandvold@gmail.com';
+      allow read, update: if erAdmin();
     }
 
     // Henvendelser fra kontaktskjemaet og «eget emne». Disse gikk tidligere
@@ -132,8 +148,7 @@ service cloud.firestore {
                     && (!request.resource.data.keys().hasAny(['detaljer'])
                         || request.resource.data.detaljer.size() <= 12)
                     && request.resource.data.status == 'ny';
-      allow read, update: if request.auth != null
-                          && request.auth.token.email == 'kimsandvold@gmail.com';
+      allow read, update: if erAdmin();
     }
 
     // Graveringsbestillinger fra /gravering. Som prosjektidéene krever de
@@ -188,8 +203,7 @@ service cloud.firestore {
                     && request.resource.data.antall >= 1
                     && request.resource.data.antall <= 100
                     && request.resource.data.status == 'ny';
-      allow read, update: if request.auth != null
-                          && request.auth.token.email == 'kimsandvold@gmail.com';
+      allow read, update: if erAdmin();
     }
 
     // Toppliste for Terrassemester (/underholdning/tool-terrasse.html).
@@ -271,8 +285,7 @@ service cloud.firestore {
 
     match /polls/{pollId} {
       allow read: if true;
-      allow write: if request.auth != null
-                    && request.auth.token.email == 'kimsandvold@gmail.com';
+      allow write: if erAdmin();
     }
 
     match /polls/{pollId}/voters/{uid} {
@@ -282,8 +295,7 @@ service cloud.firestore {
 
     match /ads/{adId} {
       allow read: if true;
-      allow create, update, delete: if request.auth != null
-        && request.auth.token.email == "kimsandvold@gmail.com";
+      allow create, update, delete: if erAdmin();
     }
   }
 }

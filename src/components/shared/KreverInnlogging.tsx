@@ -2,19 +2,24 @@ import type { ReactNode } from 'react'
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import { useAuthContext } from '../../context/AuthContext'
-import GoogleLoginButton from './GoogleLoginButton'
+import Innlogging from './Innlogging'
 import Icon from './Icon'
 
 /**
  * Port foran alt som skal faktureres.
  *
- * Skal det sendes en faktura, må vi vite hvem kunden er. Innlogging med Google
- * gir oss en verifisert e-postadresse og en konto å knytte bestillingen til –
- * uten den har vi bare et skjema hvem som helst kan fylle ut med hva som helst.
+ * Skal det sendes en faktura, må vi vite hvem kunden er. Innlogging gir oss en
+ * e-postadresse og en konto å knytte bestillingen til – uten den har vi bare et
+ * skjema hvem som helst kan fylle ut med hva som helst.
  *
- * Har kunden ikke Google, er veien kontaktskjemaet. Det er et bevisst valg:
- * da tar vi dialogen manuelt i stedet for å ta imot en bestilling vi ikke kan
- * fakturere.
+ * Kunden velger selv mellom e-post med passord og Google. Google-adresser er
+ * verifisert av Google; e-postkontoer får en bekreftelseslenke ved opprettelse,
+ * se `registrerMedEpost` i useAuth. Bestillingen stoppes IKKE av en ubekreftet
+ * adresse – korrekturen går likevel på e-post, og en blokkering her ville kostet
+ * flere ordre enn den reddet.
+ *
+ * Kontaktskjemaet står fortsatt som vei ut for den som ikke vil lage konto i
+ * det hele tatt.
  *
  * Uforpliktende henvendelser (prosjektidé, kontakt, tilbudsforespørsel) skal
  * IKKE ligge bak denne porten – der er terskelen hele poenget.
@@ -48,13 +53,13 @@ export default function KreverInnlogging({
       <h3>Logg inn for å bestille</h3>
       <p>
         {hva.charAt(0).toUpperCase() + hva.slice(1)} faktureres, og da må vi vite hvem
-        du er. Logg inn med Google, så får du bestillingen din samlet på kontoen –
-        og vi får en verifisert e-postadresse å sende fakturaen til.
+        du er. Lag en konto med e-post, eller bruk Google – så får du bestillingen
+        din samlet ett sted, og vi får en adresse å sende fakturaen til.
       </p>
-      <GoogleLoginButton />
+      <Innlogging />
       <Alternativ>
-        Har du ikke Google-konto? Da tar vi det på e-post i stedet –{' '}
-        <Link to={`/kontakt?subject=${encodeURIComponent(emne)}`}>send oss en melding</Link>,
+        Vil du heller ta det på e-post?{' '}
+        <Link to={`/kontakt?subject=${encodeURIComponent(emne)}`}>Send oss en melding</Link>,
         så ordner vi bestillingen manuelt.
       </Alternativ>
     </Port>

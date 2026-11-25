@@ -5,7 +5,7 @@ import { navLinks } from '../../data/navigation'
 import { useBasketContext } from '../../context/BasketContext'
 import { useAuthContext } from '../../context/AuthContext'
 import Icon from '../shared/Icon'
-import GoogleLoginButton from '../shared/GoogleLoginButton'
+import Innlogging from '../shared/Innlogging'
 
 const SearchOverlay = lazy(() => import('../shared/SearchOverlay/SearchOverlay'))
 
@@ -670,7 +670,7 @@ export default function Navbar() {
                   </MobileLogoutBtn>
                 </>
               ) : (
-                <GoogleLoginButton />
+                <Innlogging kompakt />
               )}
             </MobileAuth>
           </MenuLinks>
@@ -730,7 +730,7 @@ export default function Navbar() {
                 {loginOpen && (
                   <LoginPopover>
                     <p>Logg inn for å lagre design og bestillinger</p>
-                    <GoogleLoginButton />
+                    <Innlogging kompakt />
                   </LoginPopover>
                 )}
               </LoginPopoverWrapper>

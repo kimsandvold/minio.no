@@ -7,7 +7,7 @@ import Navbar from '../../layout/Navbar'
 import Footer from '../../layout/Footer'
 import PageTransition from '../../shared/PageTransition'
 import Icon from '../../shared/Icon'
-import GoogleLoginButton from '../../shared/GoogleLoginButton'
+import Innlogging from '../../shared/Innlogging'
 import OrderCard from './OrderCard'
 import type { Order } from '../../../types/order'
 
@@ -146,7 +146,7 @@ export default function MineBestillingerPage() {
               <LoginGate>
                 <LockIcon><Icon name="faLock" /></LockIcon>
                 <LoginMessage>Du må logge inn for å se dine bestillinger.</LoginMessage>
-                <GoogleLoginButton />
+                <Innlogging />
               </LoginGate>
             ) : orders.length === 0 ? (
               <EmptyState>Du har ingen bestillinger ennå.</EmptyState>
