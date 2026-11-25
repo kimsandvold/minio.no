@@ -52,18 +52,22 @@ function lastNed(b: GraveringBestilling): void {
 
 // «usendt» og «ufakturert» er arbeidslistene: alt som ikke er sendt eller
 // fakturert ennå, uavhengig av hvor langt dialogen med kunden har kommet.
-type FilterKey = 'alle' | GraveringStatus | 'usendt' | 'ufakturert'
-const filtre: FilterKey[] = ['alle', 'ny', 'besvart', 'lukket', 'usendt', 'ufakturert']
+// «aapne» er standardvisningen: alt som ikke er lukket og ikke er gravert,
+// sendt og fakturert – altså bestillinger det fortsatt er noe å gjøre med.
+type FilterKey = 'aapne' | 'alle' | GraveringStatus | 'usendt' | 'ufakturert'
+const filtre: FilterKey[] = ['aapne', 'alle', 'ny', 'besvart', 'lukket', 'usendt', 'ufakturert']
 const statuser: GraveringStatus[] = ['ny', 'besvart', 'lukket']
 
 const filterNavn = (k: FilterKey) =>
-  k === 'alle' ? 'Alle'
+  k === 'aapne' ? 'Å behandle'
+    : k === 'alle' ? 'Alle'
     : k === 'usendt' ? 'Ikke sendt'
     : k === 'ufakturert' ? 'Ikke fakturert'
     : graveringStatusLabel[k]
 
 const treffer = (b: GraveringBestilling, k: FilterKey) =>
-  k === 'alle' ? true
+  k === 'aapne' ? b.status !== 'lukket' && !(b.gjort && b.sendt && b.fakturert)
+    : k === 'alle' ? true
     : k === 'usendt' ? !b.sendt
     : k === 'ufakturert' ? !b.fakturert
     : b.status === k
@@ -71,7 +75,7 @@ const treffer = (b: GraveringBestilling, k: FilterKey) =>
 export default function AdminGraveringerPage() {
   const [liste, setListe] = useState<GraveringBestilling[]>([])
   const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState<FilterKey>('alle')
+  const [filter, setFilter] = useState<FilterKey>('aapne')
 
   useEffect(() => {
     getAlleGraveringer()
@@ -124,7 +128,7 @@ export default function AdminGraveringerPage() {
           {synlige.length === 0 ? (
             <Empty>
               <h2>Ingen graveringer</h2>
-              <p>{filter === 'usendt' ? 'Alt er sendt.' : filter === 'ufakturert' ? 'Alt er fakturert.' : 'Ingen bestillinger med denne statusen.'}</p>
+              <p>{filter === 'aapne' ? 'Ingenting å gjøre – alt er behandlet.' : filter === 'usendt' ? 'Alt er sendt.' : filter === 'ufakturert' ? 'Alt er fakturert.' : 'Ingen bestillinger med denne statusen.'}</p>
             </Empty>
           ) : (
             <Liste>
