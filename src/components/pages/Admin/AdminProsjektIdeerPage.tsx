@@ -4,7 +4,9 @@ import Icon from '../../shared/Icon'
 import { getAlleProsjektIdeer, oppdaterProsjektIdeStatus } from '../../../services/prosjektIdeService'
 import type { ProsjektIde, ProsjektIdeStatus } from '../../../types/prosjektIde'
 import { prosjektIdeStatusLabel } from '../../../types/prosjektIde'
-import { AdminPageHead, Tabs, Tab, Loading, Empty } from './adminUi'
+import { AdminPageHead, Empty, LasterListe, Tab, Tabs } from './adminUi'
+import { Liste, Rad, Radhandlinger } from './AdminListe'
+import { Sekundaer, Sitat, StatusVelg } from './AdminKort'
 
 /**
  * Prosjektidéer fra /prosjekthjelp. Dialogen med innsenderen går på e-post:
@@ -59,7 +61,7 @@ export default function AdminProsjektIdeerPage() {
       <AdminPageHead title="Prosjektidéer" subtitle="Innsendte idéer fra /prosjekthjelp. Svar går på e-post." />
 
       {loading ? (
-        <Loading><Icon name="faSpinner" spin /> Laster prosjektidéer …</Loading>
+        <LasterListe antall={4} />
       ) : (
         <>
           <Tabs>
@@ -75,39 +77,43 @@ export default function AdminProsjektIdeerPage() {
           ) : (
             <Liste>
               {synlige.map((ide) => (
-                <Kort key={ide.id}>
-                  <KortTop>
-                    <div>
-                      <h3>
-                        {ide.navn}
-                        {ide.prosjektType && <TypeTag>{ide.prosjektType}</TypeTag>}
-                      </h3>
-                      <Meta>
-                        <span><Icon name="faEnvelope" /> {ide.epost}</span>
-                        {ide.sted && <span><Icon name="faMap" /> {ide.sted}</span>}
-                        {datoTekst(ide.createdAt) && <span><Icon name="faClock" /> {datoTekst(ide.createdAt)}</span>}
-                      </Meta>
-                    </div>
-                    <StatusVelg value={ide.status} onChange={(e) => ide.id && setStatus(ide.id, e.target.value as ProsjektIdeStatus)}>
-                      {statuser.map((s) => <option key={s} value={s}>{prosjektIdeStatusLabel[s]}</option>)}
-                    </StatusVelg>
-                  </KortTop>
-
-                  <Melding>{ide.melding}</Melding>
-
-                  <Handlinger>
-                    <SvarKnapp href={svarLenke(ide)}>
-                      <Icon name="faPaperPlane" /> Svar på e-post
-                    </SvarKnapp>
-                    <KopierKnapp
-                      type="button"
-                      onClick={() => navigator.clipboard?.writeText(ide.epost)}
-                      title="Kopier e-postadressen"
+                <Rad
+                  key={ide.id}
+                  tittel={ide.navn}
+                  undertittel={ide.prosjektType || 'Prosjektidé'}
+                  status={
+                    <StatusVelg
+                      value={ide.status}
+                      onChange={(e) => ide.id && setStatus(ide.id, e.target.value as ProsjektIdeStatus)}
+                      aria-label="Status"
                     >
+                      {statuser.map((st) => (
+                        <option key={st} value={st}>
+                          {prosjektIdeStatusLabel[st]}
+                        </option>
+                      ))}
+                    </StatusVelg>
+                  }
+                  kolonner={ide.sted ? [{ merkelapp: 'Sted', verdi: ide.sted }] : undefined}
+                  dato={datoTekst(ide.createdAt)}
+                >
+                  <Kontaktlinje>
+                    <a href={`mailto:${ide.epost}`}>
+                      <Icon name="faEnvelope" /> {ide.epost}
+                    </a>
+                  </Kontaktlinje>
+
+                  <Sitat>{ide.melding}</Sitat>
+
+                  <Radhandlinger>
+                    <Sekundaer href={svarLenke(ide)}>
+                      <Icon name="faPaperPlane" /> Svar på e-post
+                    </Sekundaer>
+                    <Sekundaer as="button" type="button" onClick={() => navigator.clipboard?.writeText(ide.epost)}>
                       <Icon name="faCopy" /> Kopier e-post
-                    </KopierKnapp>
-                  </Handlinger>
-                </Kort>
+                    </Sekundaer>
+                  </Radhandlinger>
+                </Rad>
               ))}
             </Liste>
           )}
@@ -117,138 +123,24 @@ export default function AdminProsjektIdeerPage() {
   )
 }
 
-const Liste = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`
-
-const Kort = styled.article`
-  /* Uten dette nekter boksen å krympe under innholdet sitt, og en lang
-     e-postadresse dytter hele kortet ut av skjermen. */
-  min-width: 0;
-  overflow-wrap: anywhere;
-
-  background: #fff;
-  border: 1px solid #e8e4df;
-  border-radius: 14px;
-  padding: 1.4rem 1.5rem;
-`
-
-const KortTop = styled.div`
-  /* Uten dette nekter boksen å krympe under innholdet sitt, og en lang
-     e-postadresse dytter hele kortet ut av skjermen. */
-  min-width: 0;
-  overflow-wrap: anywhere;
-
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.9rem;
-
-  h3 {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    font-size: 1.08rem;
-    margin: 0 0 0.35rem;
-    color: ${({ theme }) => theme.colors.textDark};
-  }
-`
-
-const TypeTag = styled.span`
-  font-size: 0.72rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  background: ${({ theme }) => theme.colors.accent};
-  color: #fff;
-  border-radius: ${({ theme }) => theme.borderRadius.pill};
-  padding: 0.2rem 0.6rem;
-`
-
-const Meta = styled.div`
+const Kontaktlinje = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem 1.1rem;
-  font-size: 0.85rem;
-  color: #6b6157;
+  gap: 0.3rem 1.2rem;
+  font-size: 0.86rem;
 
-  span {
+  a {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.4rem;
+    color: #111827;
+    text-decoration: none;
+    overflow-wrap: anywhere;
   }
+  a:hover { text-decoration: underline; }
+  svg { font-size: 0.78rem; color: #9ca3af; }
 
-  svg {
-    opacity: 0.6;
-  }
-`
-
-const StatusVelg = styled.select`
-  font: inherit;
-  font-size: 0.88rem;
-  padding: 0.4rem 0.6rem;
-  border: 1px solid #ddd6cf;
-  border-radius: 8px;
-  background: #fff;
-  color: ${({ theme }) => theme.colors.textDark};
-  flex-shrink: 0;
-`
-
-const Melding = styled.p`
-  font-size: 0.95rem;
-  line-height: 1.65;
-  color: #3f3f3f;
-  white-space: pre-wrap;
-  background: ${({ theme }) => theme.colors.lightBg};
-  border-radius: 10px;
-  padding: 0.9rem 1.1rem;
-  margin: 0 0 1rem;
-`
-
-const Handlinger = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-`
-
-const SvarKnapp = styled.a`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  background: ${({ theme }) => theme.colors.textDark};
-  color: #fff;
-  border-radius: ${({ theme }) => theme.borderRadius.pill};
-  padding: 0.6rem 1.2rem;
-  text-decoration: none;
-  transition: background 0.2s ease;
-
-  &:hover {
-    background: ${({ theme }) => theme.colors.accentHover};
-  }
-`
-
-const KopierKnapp = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font: inherit;
-  font-size: 0.9rem;
-  font-weight: 600;
-  background: #fff;
-  color: ${({ theme }) => theme.colors.textDark};
-  border: 1px solid #ddd6cf;
-  border-radius: ${({ theme }) => theme.borderRadius.pill};
-  padding: 0.6rem 1.2rem;
-  cursor: pointer;
-  transition: border-color 0.2s ease;
-
-  &:hover {
-    border-color: ${({ theme }) => theme.colors.accent};
+  @media (max-width: 640px) {
+    a { min-height: 38px; }
   }
 `

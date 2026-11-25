@@ -8,29 +8,30 @@ import AdminOppfolging, { OppfolgingMerker } from './AdminOppfolging'
 import { formatSum } from '../../../utils/formatPrice'
 import Icon from '../../shared/Icon'
 
+/**
+ * Bestillingen som en RAD, ikke et frittstående kort. Rammen og runde hjørner
+ * ligger nå på lista rundt, slik at ti bestillinger leser som én tabell i
+ * stedet for ti løse bokser.
+ */
 const Card = styled.div`
-  /* Uten dette nekter boksen å krympe under innholdet sitt, og en lang
-     e-postadresse dytter hele kortet ut av skjermen. */
   min-width: 0;
-  overflow-wrap: anywhere;
-
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 16px rgba(60, 42, 28, 0.06);
-  overflow: hidden;
+  border-bottom: 1px solid #f1f2f4;
+  &:last-child { border-bottom: none; }
 `
 
-const CardHeader = styled.div<{ $clickable: boolean }>`
+const CardHeader = styled.div<{ $clickable?: boolean }>`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 1.25rem 1.5rem;
+  justify-content: space-between;
+  gap: 0.9rem;
+  padding: 0.8rem 1rem;
   cursor: ${({ $clickable }) => ($clickable ? 'pointer' : 'default')};
-  flex-wrap: wrap;
-  gap: 0.5rem;
+  &:hover { background: #f9fafb; }
 
-  &:hover {
-    background: ${({ $clickable }) => ($clickable ? '#faf7f2' : 'transparent')};
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
   }
 `
 

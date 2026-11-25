@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react'
 import styled from 'styled-components'
 import Icon from '../../shared/Icon'
 import { getAlleHenvendelser, oppdaterHenvendelseStatus } from '../../../services/henvendelseService'
-import type { Henvendelse, HenvendelseStatus, HenvendelseKilde } from '../../../types/henvendelse'
+import type { Henvendelse, HenvendelseStatus } from '../../../types/henvendelse'
 import { henvendelseStatusLabel, henvendelseKildeLabel } from '../../../types/henvendelse'
-import { AdminPageHead, Tabs, Tab, Loading, Empty } from './adminUi'
+import { AdminPageHead, Empty, LasterListe, Tab, Tabs } from './adminUi'
+import { Liste, Radhandlinger, Rad } from './AdminListe'
+import { Sekundaer, Sitat, StatusVelg } from './AdminKort'
 
 /**
  * Henvendelser fra kontaktskjemaet og «eget emne».
@@ -64,7 +66,7 @@ export default function AdminHenvendelserPage() {
       />
 
       {loading ? (
-        <Loading><Icon name="faSpinner" spin /> Laster henvendelser …</Loading>
+        <LasterListe antall={4} />
       ) : (
         <>
           <Tabs>
@@ -80,52 +82,63 @@ export default function AdminHenvendelserPage() {
           ) : (
             <Liste>
               {synlige.map((h) => (
-                <Kort key={h.id}>
-                  <KortTop>
-                    <div>
-                      <h3>
-                        {h.navn}
-                        <KildeTag $kilde={h.kilde}>{henvendelseKildeLabel[h.kilde]}</KildeTag>
-                      </h3>
-                      <Meta>
-                        <span><Icon name="faEnvelope" /> {h.epost}</span>
-                        {h.mobil && <span><Icon name="faPhone" /> {h.mobil}</span>}
-                        {datoTekst(h.createdAt) && <span><Icon name="faClock" /> {datoTekst(h.createdAt)}</span>}
-                      </Meta>
-                    </div>
+                <Rad
+                  key={h.id}
+                  tittel={h.emne}
+                  undertittel={`${h.navn} · ${henvendelseKildeLabel[h.kilde]}`}
+                  status={
                     <StatusVelg
                       value={h.status}
                       onChange={(e) => h.id && setStatus(h.id, e.target.value as HenvendelseStatus)}
+                      aria-label="Status"
                     >
-                      {statuser.map((s) => <option key={s} value={s}>{henvendelseStatusLabel[s]}</option>)}
+                      {statuser.map((st) => (
+                        <option key={st} value={st}>
+                          {henvendelseStatusLabel[st]}
+                        </option>
+                      ))}
                     </StatusVelg>
-                  </KortTop>
+                  }
+                  dato={datoTekst(h.createdAt)}
+                >
+                  <Kontaktlinje>
+                    <a href={`mailto:${h.epost}`}>
+                      <Icon name="faEnvelope" /> {h.epost}
+                    </a>
+                    {h.mobil && (
+                      <a href={`tel:${h.mobil.replace(/\s/g, '')}`}>
+                        <Icon name="faPhone" /> {h.mobil}
+                      </a>
+                    )}
+                  </Kontaktlinje>
 
-                  <Emne>{h.emne}</Emne>
-                  <Melding>{h.melding}</Melding>
+                  <Sitat>{h.melding}</Sitat>
 
                   {h.detaljer && Object.keys(h.detaljer).length > 0 && (
-                    <Detaljer>
+                    <Detaljliste>
                       {Object.entries(h.detaljer).map(([k, v]) => (
-                        <div key={k}><em>{k}</em><span>{v}</span></div>
+                        <div key={k}>
+                          <em>{k}</em>
+                          <span>{v}</span>
+                        </div>
                       ))}
-                    </Detaljer>
+                    </Detaljliste>
                   )}
 
-                  <Handlinger>
-                    <SvarKnapp href={svarLenke(h)}>
+                  <Radhandlinger>
+                    <Sekundaer href={svarLenke(h)}>
                       <Icon name="faPaperPlane" /> Svar på e-post
-                    </SvarKnapp>
-                    <KopierKnapp type="button" onClick={() => navigator.clipboard?.writeText(h.epost)}>
+                    </Sekundaer>
+                    <Sekundaer as="button" type="button" onClick={() => navigator.clipboard?.writeText(h.epost)}>
                       <Icon name="faCopy" /> Kopier e-post
-                    </KopierKnapp>
+                    </Sekundaer>
                     {h.mobil && (
-                      <KopierKnapp type="button" onClick={() => navigator.clipboard?.writeText(h.mobil)}>
+                      <Sekundaer as="button" type="button" onClick={() => navigator.clipboard?.writeText(h.mobil)}>
                         <Icon name="faCopy" /> Kopier mobil
-                      </KopierKnapp>
+                      </Sekundaer>
                     )}
-                  </Handlinger>
-                </Kort>
+                  </Radhandlinger>
+                </Rad>
               ))}
             </Liste>
           )}
@@ -135,149 +148,43 @@ export default function AdminHenvendelserPage() {
   )
 }
 
-const Liste = styled.div`
+const Kontaktlinje = styled.div`
   display: flex;
-  flex-direction: column;
-  gap: 1rem;
-`
+  flex-wrap: wrap;
+  gap: 0.3rem 1.2rem;
+  font-size: 0.86rem;
 
-const Kort = styled.article`
-  /* Uten dette nekter boksen å krympe under innholdet sitt, og en lang
-     e-postadresse dytter hele kortet ut av skjermen. */
-  min-width: 0;
-  overflow-wrap: anywhere;
-
-  background: #fff;
-  border: 1px solid #e8e4df;
-  border-radius: 14px;
-  padding: 1.4rem 1.5rem;
-`
-
-const KortTop = styled.div`
-  /* Uten dette nekter boksen å krympe under innholdet sitt, og en lang
-     e-postadresse dytter hele kortet ut av skjermen. */
-  min-width: 0;
-  overflow-wrap: anywhere;
-
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1rem;
-
-  h3 {
-    margin: 0 0 0.35rem;
-    font-size: 1.05rem;
-    display: flex;
+  a {
+    display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
-    flex-wrap: wrap;
+    gap: 0.4rem;
+    color: #111827;
+    text-decoration: none;
+    overflow-wrap: anywhere;
   }
-`
+  a:hover { text-decoration: underline; }
+  svg { font-size: 0.78rem; color: #9ca3af; }
 
-const KildeTag = styled.span<{ $kilde: HenvendelseKilde }>`
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  padding: 0.2rem 0.55rem;
-  border-radius: 999px;
-  background: ${({ $kilde }) => ($kilde === 'eget-emne' ? '#f7e8de' : '#eef1f5')};
-  color: ${({ $kilde }) => ($kilde === 'eget-emne' ? '#7a3a1e' : '#4a5563')};
-`
-
-const Meta = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 1rem;
-  font-size: 0.82rem;
-  color: #6b6157;
-
-  svg { margin-right: 0.3rem; opacity: 0.6; }
-`
-
-const StatusVelg = styled.select`
-  flex: none;
-  padding: 0.4rem 0.6rem;
-  border: 1px solid #ddd6cd;
-  border-radius: 8px;
-  background: #fff;
-  font-size: 0.85rem;
-  cursor: pointer;
-`
-
-const Emne = styled.p`
-  margin: 0.9rem 0 0.3rem;
-  font-weight: 600;
-  font-size: 0.92rem;
-`
-
-const Melding = styled.p`
-  margin: 0;
-  white-space: pre-wrap;
-  font-size: 0.92rem;
-  line-height: 1.6;
-  color: #4a433c;
-`
-
-const Detaljer = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-top: 0.9rem;
-
-  div {
-    display: flex;
+  @media (max-width: 640px) {
     flex-direction: column;
-    padding: 0.4rem 0.7rem;
-    background: #faf7f2;
-    border: 1px solid #ece6dd;
-    border-radius: 8px;
+    gap: 0.1rem;
+    /* Egen linje med høyde nok til å treffes med tommelen. */
+    a { min-height: 38px; }
   }
+`
+
+const Detaljliste = styled.div`
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.83rem;
+
+  div { display: flex; gap: 0.5rem; }
   em {
+    flex-shrink: 0;
     font-style: normal;
-    font-size: 0.65rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: #8a7f72;
+    font-weight: 600;
+    color: #6b7280;
+    min-width: 7rem;
   }
-  span { font-size: 0.85rem; font-weight: 500; }
-`
-
-const Handlinger = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-top: 1.1rem;
-`
-
-const SvarKnapp = styled.a`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.55rem 1rem;
-  border-radius: 9px;
-  background: #a8512c;
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-decoration: none;
-
-  &:hover { background: #8e4223; }
-`
-
-const KopierKnapp = styled.button`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.55rem 1rem;
-  border: 1px solid #ddd6cd;
-  border-radius: 9px;
-  background: #fff;
-  color: #4a433c;
-  font-family: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-
-  &:hover { background: #faf7f2; }
+  span { color: #111827; overflow-wrap: anywhere; }
 `

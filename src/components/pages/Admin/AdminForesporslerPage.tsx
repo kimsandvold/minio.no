@@ -12,6 +12,8 @@ import { foresporselStatusLabel, foresporselTypeLabel } from '../../../types/for
 import type { Oppfolging } from '../../../types/oppfolging'
 import AdminOppfolging from './AdminOppfolging'
 import { AdminPageHead, Empty, LasterListe, Tab, Tabs } from './adminUi'
+import { Liste, Rad } from './AdminListe'
+import { StatusVelg } from './AdminKort'
 
 /**
  * Ferdig svartekst for byggeplan-forespørsler.
@@ -23,6 +25,11 @@ import { AdminPageHead, Empty, LasterListe, Tab, Tabs } from './adminUi'
  * Fakturaen sendes fra regnskapsløsningen; denne teksten er følgebrevet.
  */
 const FORFALL_DAGER = 14
+
+function datoTekst(createdAt: unknown): string {
+  const d = (createdAt as { toDate?: () => Date } | undefined)?.toDate?.()
+  return d ? d.toLocaleDateString('nb-NO', { day: 'numeric', month: 'short', year: 'numeric' }) : ''
+}
 
 function svarTekst(f: DesignForesporsel): string {
   return [
@@ -114,16 +121,26 @@ export default function AdminForesporslerPage() {
           ) : (
             <Liste>
               {synlige.map((f) => (
-                <Kort key={f.id}>
-                  <KortTop>
-                    <div>
-                      <TypeTag $type={f.type}>{foresporselTypeLabel[f.type]}</TypeTag>
-                      <h3>{f.designNavn} <span>· {f.produktNavn}</span></h3>
-                    </div>
-                    <StatusVelg value={f.status} onChange={(e) => f.id && setStatus(f.id, e.target.value as ForesporselStatus)}>
-                      {statuser.map((s) => <option key={s} value={s}>{foresporselStatusLabel[s]}</option>)}
+                <Rad
+                  key={f.id}
+                  tittel={f.designNavn}
+                  undertittel={`${foresporselTypeLabel[f.type]} · ${f.produktNavn}`}
+                  status={
+                    <StatusVelg
+                      value={f.status}
+                      onChange={(e) => f.id && setStatus(f.id, e.target.value as ForesporselStatus)}
+                      aria-label="Status"
+                    >
+                      {statuser.map((st) => (
+                        <option key={st} value={st}>
+                          {foresporselStatusLabel[st]}
+                        </option>
+                      ))}
                     </StatusVelg>
-                  </KortTop>
+                  }
+                  kolonner={[{ merkelapp: 'Prisestimat', verdi: `fra ${formatKr(f.prisEstimatKr)}` }]}
+                  dato={datoTekst(f.createdAt)}
+                >
                   <Fakta>
                     <span><b>Mål</b> {f.maal}</span>
                     <span><b>Areal</b> {f.arealM2 != null ? `${f.arealM2.toFixed(1)} m²` : '–'}</span>
@@ -187,7 +204,7 @@ export default function AdminForesporslerPage() {
                       <Icon name="faEnvelope" /> {f.userEmail}
                     </a>
                   </KortBunn>
-                </Kort>
+                </Rad>
               ))}
             </Liste>
           )}
@@ -197,33 +214,6 @@ export default function AdminForesporslerPage() {
   )
 }
 
-const Liste = styled.div`display: flex; flex-direction: column; gap: 1rem;`
-const Oppfolgingsrad = styled.div`margin-top: 0.9rem;`
-const Kort = styled.div`
-  background: #fff; border: 1px solid #e7e5df; border-radius: 14px; padding: 1.15rem 1.25rem; box-shadow: 0 1px 3px rgba(60, 42, 28, 0.04);
-`
-const KortTop = styled.div`
-  display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.8rem;
-  /* Tittel og statusvelger fikk ikke plass på samme linje på en telefon. */
-  @media (max-width: 560px) { flex-direction: column; gap: 0.6rem; }
-  h3 { margin: 0.35rem 0 0; font-size: 1.05rem; color: #16181d; span { color: #7a6f61; font-weight: 500; } }
-`
-const TypeTag = styled.span<{ $type: string }>`
-  display: inline-block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
-  padding: 0.2rem 0.55rem; border-radius: 999px;
-  color: ${({ $type }) =>
-    $type === 'ferdig' ? '#3a5f3a' : $type === 'byggeplan' ? '#2f4a5a' : '#5a4a2f'};
-  background: ${({ $type }) =>
-    $type === 'ferdig'
-      ? 'rgba(123,156,123,0.18)'
-      : $type === 'byggeplan'
-        ? 'rgba(99,149,189,0.18)'
-        : 'rgba(189,149,99,0.18)'};
-`
-const StatusVelg = styled.select`
-  flex-shrink: 0; padding: 0.45rem 0.7rem;
-  @media (max-width: 560px) { width: 100%; min-height: 44px; } border: 1px solid #ddd4c7; border-radius: 8px; background: #fff; font-family: inherit; font-weight: 600; font-size: 0.85rem; cursor: pointer;
-`
 const Fakta = styled.div`
   display: flex; flex-wrap: wrap; gap: 0.5rem 1.4rem; margin-bottom: 0.7rem;
   span { font-size: 0.88rem; color: #2e2a26; b { color: #7a6f61; font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; margin-right: 0.3rem; } }
@@ -286,4 +276,10 @@ const KodeKnapp = styled.button`
   background: #fff; font-family: inherit; font-weight: 600; font-size: 0.82rem;
   color: #2f4a5a; cursor: pointer;
   &:hover { background: #eaf1f5; }
+`
+
+const Oppfolgingsrad = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 `

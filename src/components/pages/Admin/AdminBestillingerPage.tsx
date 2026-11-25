@@ -5,6 +5,7 @@ import type { Order, OrderStatus } from '../../../types/order'
 import { orderStatusLabels } from '../../../types/order'
 import type { Oppfolging } from '../../../types/oppfolging'
 import { AdminPageHead, Empty, LasterListe, Tab, Tabs } from './adminUi'
+import { Liste } from './AdminListe'
 
 /**
  * «usendt» og «ufakturert» er ikke statuser, men arbeidslistene dine: alt som
@@ -68,7 +69,7 @@ export default function AdminBestillingerPage() {
               <p>{activeFilter === 'usendt' ? 'Alt er sendt.' : activeFilter === 'ufakturert' ? 'Alt er fakturert.' : 'Ingen bestillinger med denne statusen.'}</p>
             </Empty>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <Liste>
               {filtered.map((order) => (
                 <AdminOrderCard
                   key={order.id}
@@ -77,7 +78,7 @@ export default function AdminBestillingerPage() {
                   onOppfolgingChange={handleOppfolgingChange}
                 />
               ))}
-            </div>
+            </Liste>
           )}
         </>
       )}
