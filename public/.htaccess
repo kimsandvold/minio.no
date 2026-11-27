@@ -24,6 +24,19 @@
   RewriteCond %{REQUEST_FILENAME}/index.html -f
   RewriteRule ^ - [L]
 
+  # /assets/ er Vites innholds-hashede filer. Kommer vi hit, finnes fila ikke,
+  # og da er opplastingen ufullstendig – ikke en rute React skal håndtere.
+  #
+  # Uten denne linja svarte serveren index.html med status 200 på en forespørsel
+  # etter JavaScript. Nettleseren avviste det («Expected a JavaScript module
+  # script but the server responded with MIME type text/html»), main.tsx kjørte
+  # aldri, og alle prerendrede sider ble stående som døde skjermbilder mens de
+  # så helt normale ut. Det eneste synlige symptomet var at /admin – den ene
+  # ruta som ikke er prerendret – viste forsiden.
+  #
+  # En ærlig 404 her peker rett på årsaken: fila mangler på serveren.
+  RewriteRule ^assets/ - [R=404,L]
+
   # Otherwise rewrite to index.html so React Router can handle the route
   RewriteRule . /index.html [L]
 </IfModule>
