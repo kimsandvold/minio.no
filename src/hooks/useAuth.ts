@@ -17,6 +17,51 @@ function lastFirebaseAuth(): Promise<FirebaseAuthModules> {
   return laster
 }
 
+/**
+ * Satt av login-funksjonene like før de kaller Firebase, og lest av
+ * `onAuthStateChanged` rett etterpå.
+ *
+ * Uten den kan ikke lytteren se forskjell på «noen logget akkurat inn» og
+ * «nettleseren hadde økta liggende fra i går». Begge deler er verdt å telle,
+ * men ikke som samme tall.
+ */
+let ferskInnlogging: 'google' | 'epost' | undefined
+
+/**
+ * Registrerer økta for statistikken under /admin/kontakter.
+ *
+ * Firestore (~250 kB) holdes bevisst utenfor sidene som ikke trenger det –
+ * se kommentaren i `lib/firebaseApp.ts`. Derfor lastes skrivingen dynamisk,
+ * og først når nettleseren er ledig: den som nettopp logget inn skal få sida
+ * si, ikke vente på en telling. Er `requestIdleCallback` ikke der (Safari før
+ * 17), holder en timer.
+ */
+function registrerOktNaarLedig(bruker: User): void {
+  const metode = ferskInnlogging ?? 'gjenopptatt'
+  ferskInnlogging = undefined
+
+  const naarLedig: (fn: () => void) => void =
+    typeof window.requestIdleCallback === 'function'
+      ? (fn) => window.requestIdleCallback(fn, { timeout: 4000 })
+      : (fn) => void setTimeout(fn, 1500)
+
+  naarLedig(() => {
+    import('../services/kontaktService')
+      .then((m) =>
+        m.registrerOkt(
+          bruker.uid,
+          bruker.email ?? '',
+          bruker.displayName ?? '',
+          metode,
+          bruker.emailVerified,
+        ),
+      )
+      .catch(() => {
+        /* Blokkert Firestore skal ikke merkes av den innloggede. */
+      })
+  })
+}
+
 export function useAuth() {
   const [firebaseUser, setFirebaseUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
@@ -29,6 +74,7 @@ export function useAuth() {
       unsubscribe = onAuthStateChanged(auth, (user) => {
         setFirebaseUser(user)
         setLoading(false)
+        if (user) registrerOktNaarLedig(user)
       })
     })
     return () => {
@@ -41,12 +87,14 @@ export function useAuth() {
     // Bevisst ingen nyhetsbrev-påmelding her: innlogging er ikke samtykke til
     // markedsføring. Påmelding skjer kun der brukeren aktivt haker av.
     const [{ signInWithPopup }, { auth, googleProvider }] = lastet ?? (await lastFirebaseAuth())
+    ferskInnlogging = 'google'
     await signInWithPopup(auth, googleProvider)
   }, [])
 
   /** Logg inn med e-post og passord. Kaster videre – skjemaet viser feilen. */
   const loggInnMedEpost = useCallback(async (epost: string, passord: string) => {
     const [{ signInWithEmailAndPassword }, { auth }] = lastet ?? (await lastFirebaseAuth())
+    ferskInnlogging = 'epost'
     await signInWithEmailAndPassword(auth, epost.trim(), passord)
   }, [])
 
@@ -61,6 +109,7 @@ export function useAuth() {
   const registrerMedEpost = useCallback(async (epost: string, passord: string, navn: string) => {
     const [{ createUserWithEmailAndPassword, sendEmailVerification, updateProfile }, { auth }] =
       lastet ?? (await lastFirebaseAuth())
+    ferskInnlogging = 'epost'
     const { user } = await createUserWithEmailAndPassword(auth, epost.trim(), passord)
     const rentNavn = navn.trim()
     if (rentNavn) await updateProfile(user, { displayName: rentNavn })

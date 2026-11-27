@@ -5,7 +5,7 @@ import { useBasketContext } from '../../../context/BasketContext'
 import { useAuthContext } from '../../../context/AuthContext'
 import { formatPrice, parsePrice, formatSum } from '../../../utils/formatPrice'
 import { createOrder } from '../../../services/orderService'
-import { subscribeToNewsletter } from '../../../services/newsletterService'
+import { meldPaaNyhetsbrev } from '../../../services/kontaktService'
 import { maalKort, slotMaalKort } from '../../../utils/basketMaal'
 
 const Body = styled.div`
@@ -257,7 +257,9 @@ export default function CheckoutView({ onSuccess }: CheckoutViewProps) {
       const [lagret, sendt] = await Promise.all([lagring, sending])
       if (lagret || sendt) {
         // 3. Nyhetsbrev kun når kunden har huket av (best-effort).
-        if (nyhetsbrev) subscribeToNewsletter(email)
+        //    Lagres i vår egen kontaktliste med samtykkekilde 'kassen', slik
+        //    at /admin/kontakter kan dokumentere hvor haken ble satt.
+        if (nyhetsbrev) void meldPaaNyhetsbrev(email, name, 'kassen', firebaseUser?.uid)
 
         clearBasket()
         onSuccess()

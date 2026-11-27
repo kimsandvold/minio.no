@@ -35,7 +35,13 @@ export default function PersonvernPage() {
           kontaktskjemaet eller sender oss e-post.
         </li>
         <li>
-          <strong>Nyhetsbrev:</strong> e-postadressen din dersom du melder deg på nyhetsbrevet.
+          <strong>Nyhetsbrev:</strong> e-postadressen og navnet ditt dersom du melder deg på
+          nyhetsbrevet, sammen med når og hvor du ga samtykket.
+        </li>
+        <li>
+          <strong>Konto og innlogging:</strong> e-postadressen og navnet på kontoen din, og
+          tidspunktet for hver gang du logger inn. Innlogging alene melder deg aldri på
+          nyhetsbrevet – det skjer kun der du selv haker av.
         </li>
         <li>
           <strong>Bruksdata:</strong> teknisk informasjon om besøket (f.eks. sidevisninger, nettleser
@@ -83,7 +89,7 @@ export default function PersonvernPage() {
           </tr>
           <tr>
             <td>Brevo (Sendinblue)</td>
-            <td>Utsendelse av nyhetsbrev</td>
+            <td>Utsendelse av nyhetsbrev til dem som har samtykket</td>
           </tr>
         </tbody>
       </table>
@@ -103,7 +109,8 @@ export default function PersonvernPage() {
       <p>
         Vi lagrer personopplysninger så lenge det er nødvendig for formålet de ble samlet inn for.
         Opplysninger knyttet til kjøp lagres så lenge bokføringsloven krever. Nyhetsbrevpåmelding
-        lagres til du melder deg av.
+        lagres til du melder deg av. Innloggingstidspunkter lagres for å se når tjenesten er i
+        bruk, og slettes sammen med kontoen din.
       </p>
 
       <h2>7. Dine rettigheter</h2>

@@ -1,6 +1,7 @@
 import styled from 'styled-components'
 import { Link } from 'react-router-dom'
 import Icon from '../shared/Icon'
+import NewsletterForm from '../shared/NewsletterForm/NewsletterForm'
 import { company } from '../../data/company'
 
 const StyledFooter = styled.footer`
@@ -168,20 +169,19 @@ const FooterLink = styled(Link)`
 
 const NewsletterSection = styled.div`
   width: 100%;
+`
 
-  /* Skjema-iframen har egen innebygd marg; negativ venstremarg i stedet for
-     transform, slik at den ikke stikker utenfor på små skjermer. */
-  iframe {
-    display: block;
-    width: 100%;
-    max-width: 100%;
-    margin-left: -35px;
-    border: 0;
-  }
-
-  @media (max-width: ${({ theme }) => theme.breakpoints.mobile}) {
-    iframe { margin-left: -20px; }
-  }
+/*
+ * Én linje om hva man faktisk melder seg på. Brevo-iframen som stod her hadde
+ * ingen – bare et tomt felt og en knapp – og «E-post / Abonner» sier ingenting
+ * om hvor ofte det kommer noe eller hva det er.
+ */
+const NyhetsbrevIngress = styled.p`
+  margin: 0 0 0.9rem;
+  max-width: 420px;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.6);
 `
 
 const Bunnlenker = styled.nav`
@@ -291,16 +291,10 @@ export default function Footer() {
           <NewsletterSection>
             <FooterSection>
               <h4>Nyhetsbrev</h4>
-              <iframe
-                width="540"
-                height="305"
-                src="https://3ce65bdb.sibforms.com/serve/MUIFABFDn-iEhyhEuoYqBibtROhyIT-jsLBOjKqgjhfMkKIWipaEI2AUGRJG_J31U3dBa8NyCdHuCvIWwCExG5DgEVrwlUN9Njuc9z5_LM9Ier-DxrQWegEUJOTr8lkE0mU6OcYiseh9RkMHFTBNvZM4CjJni4ger5vwm5664ivkyeG7K6aT3dapJTMeWhHzc9cP3Uot3bATGW54Qg=="
-                frameBorder="0"
-                scrolling="auto"
-                allowFullScreen
-                title="Nyhetsbrev"
-                loading="lazy"
-              />
+              <NyhetsbrevIngress>
+                Noen få e-poster i året: nye produkter, guider og tilbud.
+              </NyhetsbrevIngress>
+              <NewsletterForm mork />
             </FooterSection>
           </NewsletterSection>
         </SisteKolonne>

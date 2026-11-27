@@ -283,6 +283,96 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    /**
+     * Kontaktlista – Minios egen e-postliste.
+     *
+     * Adressene ble tidligere samlet inne i Brevo, via et skjema i en iframe.
+     * Nå er dette kilden, og Brevo får lista som CSV-eksport fra admin.
+     *
+     * Dokument-id-en er selve sikkerhetsmekanismen, og er to slag:
+     *
+     *   uid       – en innlogget konto eier sin egen rad. Den kan bare skrive
+     *               på sin egen uid, og bare med sin egen adresse fra tokenet.
+     *               Uten det siste kunne hvem som helst med en konto fylt
+     *               lista med adresser de ikke eier.
+     *
+     *   adressen  – anonyme nyhetsbrev-påmeldinger. De kan bare OPPRETTES,
+     *               aldri endres: `allow create` treffer ikke et dokument som
+     *               finnes fra før, så en påmelding på en adresse som alt står
+     *               der blir avvist i stedet for å overskrive den. Det er
+     *               derfor en uinnlogget ikke kan melde noen andre AV, og
+     *               heller ikke endre navnet på en rad som alt er der.
+     *
+     * Ingen andre enn admin kan lese. Raden bærer e-postadresse, navn og
+     * samtykkehistorikk.
+     */
+    match /kontakter/{kontaktId} {
+      function kontaktFelt() {
+        return request.resource.data.keys().hasOnly(
+                 ['uid', 'epost', 'navn', 'kilde', 'metode', 'nyhetsbrev',
+                  'nyhetsbrevKilde', 'nyhetsbrevDato', 'avmeldtDato',
+                  'epostVerifisert', 'opprettet', 'sistSett', 'antallOkter'])
+               && request.resource.data.epost is string
+               && request.resource.data.epost.size() >= 5
+               && request.resource.data.epost.size() <= 200
+               && request.resource.data.epost == request.resource.data.epost.lower()
+               && request.resource.data.navn is string
+               && request.resource.data.navn.size() <= 120
+               && request.resource.data.kilde in ['innlogging', 'nyhetsbrev', 'kassen']
+               && request.resource.data.metode in ['google', 'epost', 'gjenopptatt', 'ukjent']
+               && request.resource.data.nyhetsbrev is bool
+               && request.resource.data.antallOkter is int
+               && request.resource.data.antallOkter >= 0;
+      }
+
+      // Innlogget konto: raden ligger på uid-en, og adressen MÅ være den
+      // tokenet sier. `create` og `update` har samme krav, fordi tjenesten
+      // skriver hele raden første gang og oppdaterer den siden.
+      allow create, update: if request.auth != null
+                            && kontaktId == request.auth.uid
+                            && kontaktFelt()
+                            && request.resource.data.uid == request.auth.uid
+                            && request.resource.data.epost == request.auth.token.email.lower();
+
+      // Anonym påmelding: raden ligger på adressen, har ingen uid, og er per
+      // definisjon et samtykke – en uinnlogget har ingen annen grunn til å
+      // legge seg inn her.
+      allow create: if request.auth == null
+                    && kontaktFelt()
+                    && kontaktId == request.resource.data.epost
+                    && request.resource.data.uid == ''
+                    && request.resource.data.nyhetsbrev == true
+                    && request.resource.data.kilde == 'nyhetsbrev'
+                    && request.resource.data.antallOkter == 0;
+
+      allow read, update, delete: if erAdmin();
+    }
+
+    /**
+     * Én rad per innlogget nettleserøkt. Grunnlaget for aktivitetsgrafene
+     * under /admin/kontakter.
+     *
+     * Kun oppretting, aldri endring eller sletting: en logg man kan skrive om
+     * i etterkant er ikke en logg. `tidspunkt == request.time` tvinger
+     * servertidsstempel, så ingen kan datere en økt til i fjor – samme grep
+     * som topplistene til spillene bruker.
+     *
+     * Adressen må komme fra tokenet. Klienten kan altså telle sine egne
+     * økter, men ikke skrive noen andre inn i statistikken.
+     */
+    match /innlogginger/{id} {
+      allow create: if request.auth != null
+                    && request.resource.data.keys().hasOnly(['uid', 'epost', 'metode', 'tidspunkt'])
+                    && request.resource.data.keys().hasAll(['uid', 'epost', 'metode', 'tidspunkt'])
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.epost is string
+                    && request.resource.data.epost == request.auth.token.email.lower()
+                    && request.resource.data.metode in ['google', 'epost', 'gjenopptatt', 'ukjent']
+                    && request.resource.data.tidspunkt == request.time;
+      allow read: if erAdmin();
+      allow update, delete: if false;
+    }
+
     match /polls/{pollId} {
       allow read: if true;
       allow write: if erAdmin();

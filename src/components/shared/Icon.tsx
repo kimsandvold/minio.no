@@ -24,6 +24,7 @@ import {
   faChevronLeft, faChevronRight, faPen, faCircleCheck, faCircleInfo, faLocationDot, faTriangleExclamation,
   faShareNodes, faLayerGroup, faScaleBalanced, faLink, faForwardStep, faExpand, faBookOpen, faRuler, faImages,
   faFileInvoice, faGaugeHigh, faEnvelopeOpenText, faChartColumn,
+  faFilter, faTableList, faAddressBook, faFileExport, faUsers, faBan,
 } from '@fortawesome/free-solid-svg-icons'
 import { faFacebookF, faInstagram, faGoogle } from '@fortawesome/free-brands-svg-icons'
 
@@ -52,6 +53,7 @@ const iconMap: Record<string, IconProp> = {
   faChevronLeft, faChevronRight, faPen, faCircleCheck, faCircleInfo, faLocationDot, faTriangleExclamation,
   faShareNodes, faLayerGroup, faScaleBalanced, faLink, faForwardStep, faExpand, faBookOpen, faRuler, faImages,
   faFileInvoice, faGaugeHigh, faEnvelopeOpenText, faChartColumn,
+  faFilter, faTableList, faAddressBook, faFileExport, faUsers, faBan,
 }
 
 interface IconProps {

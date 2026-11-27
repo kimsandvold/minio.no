@@ -40,6 +40,7 @@ const AdminHenvendelserPage = lazy(() => import('./components/pages/Admin/AdminH
 const AdminProsjektIdeerPage = lazy(() => import('./components/pages/Admin/AdminProsjektIdeerPage'))
 const AdminGraveringerPage = lazy(() => import('./components/pages/Admin/AdminGraveringerPage'))
 const AdminPollsPage = lazy(() => import('./components/pages/Admin/AdminPollsPage'))
+const AdminKontakterPage = lazy(() => import('./components/pages/Admin/AdminKontakterPage'))
 
 /**
  * Forsidens seksjoner. Sesongen bestemmer rekkefølgen, aldri hvilke som finnes
@@ -177,6 +178,7 @@ export default function App() {
                   <Route path="graveringer" element={<Suspense fallback={null}><AdminGraveringerPage /></Suspense>} />
                   <Route path="henvendelser" element={<Suspense fallback={null}><AdminHenvendelserPage /></Suspense>} />
                   <Route path="prosjektideer" element={<Suspense fallback={null}><AdminProsjektIdeerPage /></Suspense>} />
+                  <Route path="kontakter" element={<Suspense fallback={null}><AdminKontakterPage /></Suspense>} />
                   <Route path="avstemninger" element={<Suspense fallback={null}><AdminPollsPage /></Suspense>} />
                 </Route>
                 <Route path="*" element={<NotFoundPage />} />
