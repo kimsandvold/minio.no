@@ -187,6 +187,19 @@ export async function meldPaaNyhetsbrev(
   }
 }
 
+/**
+ * Har kontoen sagt ja til nyhetsbrev? `null` når det ikke lar seg lese
+ * (blokkert Firestore) – da spør vi heller ikke.
+ */
+export async function harNyhetsbrev(uid: string): Promise<boolean | null> {
+  try {
+    const snap = await medTidsfrist(getDoc(doc(db, KONTAKTER, uid)), LAGRINGSFRIST_MS)
+    return snap.exists() && snap.data().nyhetsbrev === true
+  } catch {
+    return null
+  }
+}
+
 /** Alle kontakter (admin). Nyeste først. */
 export async function getAlleKontakter(): Promise<Kontakt[]> {
   const snap = await getDocs(query(collection(db, KONTAKTER), orderBy('opprettet', 'desc')))

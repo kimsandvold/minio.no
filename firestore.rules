@@ -334,6 +334,11 @@ service cloud.firestore {
                             && request.resource.data.uid == request.auth.uid
                             && request.resource.data.epost == request.auth.token.email.lower();
 
+      // Kontoen kan lese sin egen rad. Tjenesten leser den før den skriver
+      // (finnes raden, eller skal den opprettes?), og uten lesetilgang feilet
+      // både øktregistreringen og påmeldingen stille for alle utenom admin.
+      allow read: if request.auth != null && kontaktId == request.auth.uid;
+
       // Anonym påmelding: raden ligger på adressen, har ingen uid, og er per
       // definisjon et samtykke – en uinnlogget har ingen annen grunn til å
       // legge seg inn her.

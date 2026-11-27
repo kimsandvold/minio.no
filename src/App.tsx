@@ -29,6 +29,7 @@ import NewsletterModal from './components/shared/NewsletterModal/NewsletterModal
 import NotFoundPage from './components/pages/NotFound/NotFoundPage'
 import PageLoadingFallback from './components/shared/PageLoadingFallback'
 import ContactBadge from './components/shared/ContactBadge'
+import NyhetsbrevSporsmal from './components/shared/NyhetsbrevSporsmal'
 import { LAZY_ROUTES } from './routes'
 
 // Admin er bare for innlogget admin – holdes helt utenfor den offentlige bunten.
@@ -184,6 +185,7 @@ export default function App() {
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
               <ContactBadge />
+              <NyhetsbrevSporsmal />
             </ModalProvider>
           </BasketProvider>
         </AuthProvider>
