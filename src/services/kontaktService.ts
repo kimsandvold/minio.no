@@ -1,4 +1,5 @@
 import {
+  addDoc,
   collection,
   doc,
   getDoc,
@@ -17,6 +18,7 @@ import { LAGRINGSFRIST_MS, medTidsfrist } from '../utils/medTidsfrist'
 import {
   kontaktIdForEpost,
   normaliserEpost,
+  type Avmelding,
   type Innlogging,
   type Innloggingsmetode,
   type Kontakt,
@@ -25,6 +27,7 @@ import {
 
 const KONTAKTER = 'kontakter'
 const INNLOGGINGER = 'innlogginger'
+const AVMELDINGER = 'avmeldinger'
 
 /**
  * Én økt registreres én gang.
@@ -235,6 +238,31 @@ export async function meldAvNyhetsbrev(uid: string, epost: string, navn: string)
   } catch {
     return false
   }
+}
+
+/**
+ * Melder en adresse av uten innlogging (/avmeld). Kaster aldri: svaret til
+ * den som melder seg av er det samme uansett, så siden ikke røper hvem som
+ * står på lista.
+ */
+export async function meldAvMedEpost(epost: string): Promise<boolean> {
+  const adresse = normaliserEpost(epost)
+  if (adresse.length < 5 || adresse.length > 200) return false
+  try {
+    await medTidsfrist(
+      addDoc(collection(db, AVMELDINGER), { epost: adresse, tidspunkt: serverTimestamp() }),
+      LAGRINGSFRIST_MS,
+    )
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** Alle avmeldinger fra /avmeld (admin). */
+export async function getAvmeldinger(): Promise<Avmelding[]> {
+  const snap = await getDocs(collection(db, AVMELDINGER))
+  return snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Avmelding)
 }
 
 /** Alle kontakter (admin). Nyeste først. */

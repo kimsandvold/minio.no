@@ -3,9 +3,11 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import Icon from '../../shared/Icon'
 import produkter from '../../../data/products.json'
-import { getAlleKontakter } from '../../../services/kontaktService'
+import { getAlleKontakter, getAvmeldinger } from '../../../services/kontaktService'
 import { getNyhetsbrev, lagreNyhetsbrev, slettNyhetsbrev } from '../../../services/nyhetsbrevService'
 import {
+  GAMLE_BUNNTEKSTER,
+  STANDARD_BUNNTEKST,
   blokkIkon,
   blokkNavn,
   nyBlokk,
@@ -16,7 +18,9 @@ import {
   type Nyhetsbrev,
   type Tema,
 } from '../../../types/nyhetsbrev'
-import { absoluttUrl, brevHtml, brevTekst, dokumentHtml } from '../../../utils/nyhetsbrevHtml'
+import { samtykkePerEpost } from '../../../types/kontakt'
+import { SIDE, absoluttUrl, brevHtml, brevTekst, dokumentHtml } from '../../../utils/nyhetsbrevHtml'
+import { medInnebygdeBilder } from '../../../utils/nyhetsbrevBilder'
 import { bp, t } from './adminTokens'
 
 /**
@@ -94,13 +98,19 @@ function sammendrag(b: Blokk): string {
   }
 }
 
-/** Kopierer HTML som formatert tekst, så Mail limer det inn som et ferdig brev. */
-async function kopierFormatert(html: string, tekst: string): Promise<boolean> {
+/**
+ * Kopierer HTML som formatert tekst, så Mail limer det inn som et ferdig brev.
+ *
+ * HTML-en kommer som et løfte: å bygge inn bildene tar et øyeblikk, og Safari
+ * godtar bare skriving til utklippstavla som starter i selve klikket. Et
+ * ClipboardItem med et løfte i seg starter i klikket og fylles når det er klart.
+ */
+async function kopierFormatert(htmlLofte: Promise<string>, tekst: string): Promise<boolean> {
   try {
     if (typeof ClipboardItem !== 'undefined' && navigator.clipboard?.write) {
       await navigator.clipboard.write([
         new ClipboardItem({
-          'text/html': new Blob([html], { type: 'text/html' }),
+          'text/html': htmlLofte.then((html) => new Blob([html], { type: 'text/html' })),
           'text/plain': new Blob([tekst], { type: 'text/plain' }),
         }),
       ])
@@ -109,6 +119,7 @@ async function kopierFormatert(html: string, tekst: string): Promise<boolean> {
   } catch {
     /* Faller tilbake til markering under. */
   }
+  const html = await htmlLofte
   // Eldre nettlesere: legg brevet i et usynlig element, marker det og kopier –
   // akkurat det som skjer når man markerer og trykker ⌘C selv.
   const boks = document.createElement('div')
@@ -138,6 +149,7 @@ export default function AdminNyhetsbrevEditor() {
   const [melding, settMelding] = useState<string | null>(null)
   const [mottakere, settMottakere] = useState<string[] | null>(null)
   const [leggTilApen, settLeggTilApen] = useState(false)
+  const [kopierer, settKopierer] = useState(false)
   const [dra, settDra] = useState<{ fra: number; over: number } | null>(null)
   const [hoyde, settHoyde] = useState(900)
   const ramme = useRef<HTMLIFrameElement>(null)
@@ -146,13 +158,16 @@ export default function AdminNyhetsbrevEditor() {
   useEffect(() => {
     if (!id) return
     getNyhetsbrev(id)
-      .then((b) => (b ? settBrev(b) : settFant(false)))
+      .then((b) => (b ? settBrev(GAMLE_BUNNTEKSTER.includes(b.bunntekst) ? { ...b, bunntekst: STANDARD_BUNNTEKST } : b) : settFant(false)))
       .catch(() => settFant(false))
   }, [id])
 
   useEffect(() => {
-    getAlleKontakter()
-      .then((k) => settMottakere([...new Set(k.filter((x) => x.nyhetsbrev && x.epost).map((x) => x.epost))]))
+    Promise.all([getAlleKontakter(), getAvmeldinger().catch(() => [])])
+      .then(([k, a]) => {
+        const samtykke = samtykkePerEpost(k, a)
+        settMottakere([...samtykke].filter(([, ja]) => ja).map(([epost]) => epost))
+      })
       .catch(() => settMottakere([]))
   }, [])
 
@@ -189,7 +204,11 @@ export default function AdminNyhetsbrevEditor() {
 
   const forhandsvisning = useMemo(() => {
     if (!brev) return ''
-    return dokumentHtml(brev, { forhandsvisning: true, valgt }).replace(
+    // Bildene hentes fra der admin kjører (localhost i dev), ikke fra
+    // minio.no – ellers mangler alt som ikke er lastet opp ennå.
+    return dokumentHtml(brev, { forhandsvisning: true, valgt })
+      .replaceAll(`${SIDE}/images/`, `${window.location.origin}/images/`)
+      .replace(
       '</body>',
       `<script>
         function m(){parent.postMessage({nyhetsbrevHoyde:document.documentElement.scrollHeight},'*')}
@@ -259,8 +278,22 @@ export default function AdminNyhetsbrevEditor() {
   }
 
   const kopierBrev = async () => {
-    const ok = await kopierFormatert(brevHtml(brev), brevTekst(brev))
-    vis(ok ? 'Brevet er kopiert. Lim det inn i en ny e-post i Mail (⌘V).' : 'Kunne ikke kopiere. Prøv i Safari eller Chrome.')
+    if (kopierer) return
+    settKopierer(true)
+    let feilet = 0
+    const html = medInnebygdeBilder(brevHtml(brev)).then((r) => {
+      feilet = r.feilet
+      return r.html
+    })
+    const ok = await kopierFormatert(html, brevTekst(brev))
+    settKopierer(false)
+    vis(
+      !ok
+        ? 'Kunne ikke kopiere. Prøv i Safari eller Chrome.'
+        : feilet > 0
+          ? `Kopiert, men ${feilet} bilde${feilet === 1 ? '' : 'r'} kunne ikke bygges inn og er lenket i stedet.`
+          : 'Brevet er kopiert med bildene. Lim det inn i en ny e-post i Mail (⌘V).',
+    )
   }
 
   const kopierMottakere = async () => {
@@ -318,7 +351,7 @@ export default function AdminNyhetsbrevEditor() {
         <Steg>
           <em>1</em>
           <Hovedknapp type="button" onClick={kopierBrev}>
-            <Icon name="faCopy" /> Kopier e-post
+            <Icon name={kopierer ? 'faSpinner' : 'faCopy'} spin={kopierer} /> {kopierer ? 'Kopierer …' : 'Kopier e-post'}
           </Hovedknapp>
         </Steg>
         <Steg>
@@ -472,7 +505,7 @@ export default function AdminNyhetsbrevEditor() {
               <Felt>
                 <span>Bunntekst</span>
                 <textarea rows={4} value={brev.bunntekst} onChange={(e) => endre({ bunntekst: e.target.value })} />
-                <small>Si hvorfor de får brevet, og hvordan de melder seg av. Det er påkrevd.</small>
+                <small>Si hvorfor de får brevet, og lenk til minio.no/avmeld. Det er påkrevd.</small>
               </Felt>
             </>
           )}

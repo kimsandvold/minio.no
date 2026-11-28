@@ -125,7 +125,13 @@ export const STANDARD_TEMA: Tema = {
 }
 
 export const STANDARD_BUNNTEKST =
-  'Du får denne e-posten fordi du har meldt deg på nyhetsbrevet fra Minio. Vil du ikke ha flere, svar «avmeld» på denne e-posten.'
+  'Du får denne e-posten fordi du har meldt deg på nyhetsbrevet fra Minio. [Meld deg av](https://minio.no/avmeld) når som helst.'
+
+/** Tidligere standardtekster. Utkast som fortsatt har en av dem, får den nye når de åpnes. */
+export const GAMLE_BUNNTEKSTER = [
+  'Du får denne e-posten fordi du har meldt deg på nyhetsbrevet fra Minio. Vil du ikke ha flere, svar «avmeld» på denne e-posten.',
+  'Du får denne e-posten fordi du har meldt deg på nyhetsbrevet fra Minio. [Meld deg av](https://minio.no/min-profil) når som helst på Min profil.',
+]
 
 export const blokkNavn: Record<BlokkType, string> = {
   hero: 'Toppbilde',

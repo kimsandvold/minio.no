@@ -378,6 +378,27 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    /**
+     * Avmeldinger fra /avmeld – uten innlogging, fordi nyhetsbrevet sendes
+     * med blindkopi og lenken derfor er lik for alle mottakere.
+     *
+     * Kun oppretting, med adressen i små bokstaver og servertidsstempel.
+     * Ingen kan lese utenom admin, så siden røper ikke hvem som står på
+     * lista. Det verste misbruket er at noen melder av en annen – da sendes
+     * det færre e-poster, aldri flere.
+     */
+    match /avmeldinger/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['epost', 'tidspunkt'])
+                    && request.resource.data.keys().hasAll(['epost', 'tidspunkt'])
+                    && request.resource.data.epost is string
+                    && request.resource.data.epost.size() >= 5
+                    && request.resource.data.epost.size() <= 200
+                    && request.resource.data.epost == request.resource.data.epost.lower()
+                    && request.resource.data.tidspunkt == request.time;
+      allow read: if erAdmin();
+      allow update, delete: if false;
+    }
+
     // Nyhetsbrev-utkast fra /admin/kontakter/nyhetsbrev. Bare admin.
     match /nyhetsbrev/{id} {
       allow read, write: if erAdmin();

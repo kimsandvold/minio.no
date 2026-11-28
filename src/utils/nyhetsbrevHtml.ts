@@ -21,6 +21,8 @@ import type { Blokk, Kort, Nyhetsbrev, Tema } from '../types/nyhetsbrev'
 
 export const SIDE = 'https://minio.no'
 const BREDDE = 600
+/** Luft mellom rammen og arket. */
+const RAMME = 20
 const INNRYKK = 32
 
 const FARGE = {
@@ -51,22 +53,22 @@ function esc(s: string): string {
 }
 
 /** **fet**, *kursiv*, [lenke](url); blank linje = nytt avsnitt. */
-function inline(tekst: string, tema: Tema): string {
+function inline(tekst: string, tema: Tema, lenkefarge = tema.aksent): string {
   return esc(tekst)
     .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_, t: string, u: string) =>
-      `<a href="${esc(absoluttUrl(u.replace(/&amp;/g, '&')))}" style="color:${tema.aksent};text-decoration:underline;">${t}</a>`,
+      `<a href="${esc(absoluttUrl(u.replace(/&amp;/g, '&')))}" style="color:${lenkefarge};text-decoration:underline;">${t}</a>`,
     )
     .replace(/\*\*([^*]+)\*\*/g, '<strong style="font-weight:700;">$1</strong>')
     .replace(/\*([^*]+)\*/g, '<em>$1</em>')
     .replace(/\n/g, '<br>')
 }
 
-function avsnitt(tekst: string, tema: Tema, stil: string): string {
+function avsnitt(tekst: string, tema: Tema, stil: string, lenkefarge?: string): string {
   return tekst
     .trim()
     .split(/\n\s*\n/)
     .filter(Boolean)
-    .map((a, i, alle) => `<p style="margin:0 0 ${i === alle.length - 1 ? 0 : 16}px 0;${stil}">${inline(a, tema)}</p>`)
+    .map((a, i, alle) => `<p style="margin:0 0 ${i === alle.length - 1 ? 0 : 16}px 0;${stil}">${inline(a, tema, lenkefarge)}</p>`)
     .join('')
 }
 
@@ -183,8 +185,12 @@ export interface RenderValg {
 }
 
 /**
- * Selve brevet: én ytre tabell med bakgrunn, og et hvitt ark på 600 px.
+ * Selve brevet: en farget ramme med et hvitt ark på 600 px inni.
  * Det er DETTE som kopieres til Mail.
+ *
+ * Rammen har fast bredde i stedet for å fylle hele vinduet. Mail begrenser
+ * bredden på innlimt innhold, så en bakgrunn på 100 % stoppet et stykke ut i
+ * skrivevinduet og så halvferdig ut. En avgrenset ramme ser lik ut overalt.
  */
 export function brevHtml(brev: Nyhetsbrev, valg: RenderValg = {}): string {
   const { tema } = brev
@@ -200,12 +206,12 @@ export function brevHtml(brev: Nyhetsbrev, valg: RenderValg = {}): string {
     .join('')
 
   const logo = tema.visLogo
-    ? `<tr><td style="padding:30px ${INNRYKK}px 26px ${INNRYKK}px;"><a href="${SIDE}" style="text-decoration:none;"><img src="${SIDE}/images/branding/logo_epost.png" alt="Minio" width="120" style="display:block;width:120px;height:auto;border:0;"></a></td></tr>`
+    ? `<tr><td style="padding:30px ${INNRYKK}px 26px ${INNRYKK}px;"><a href="${SIDE}" style="text-decoration:none;"><img src="${SIDE}/images/branding/logo_epost.png?v=2" alt="Minio" width="130" style="display:block;width:130px;height:auto;border:0;"></a></td></tr>`
     : ''
 
-  const bunn = `<tr><td style="padding:24px ${INNRYKK}px 8px ${INNRYKK}px;text-align:center;">${avsnitt(brev.bunntekst, tema, `font-family:${SANS};font-size:12px;line-height:1.6;color:${FARGE.svak};`)}<p style="margin:10px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:${FARGE.svak};"><a href="${SIDE}" style="color:${FARGE.svak};text-decoration:underline;">minio.no</a></p></td></tr>`
+  const bunn = `<tr><td style="padding:24px ${INNRYKK}px 8px ${INNRYKK}px;text-align:center;">${avsnitt(brev.bunntekst, tema, `font-family:${SANS};font-size:12px;line-height:1.6;color:${FARGE.svak};`, FARGE.svak)}<p style="margin:10px 0 0 0;font-family:${SANS};font-size:12px;line-height:1.6;color:${FARGE.svak};"><a href="${SIDE}" style="color:${FARGE.svak};text-decoration:underline;">minio.no</a></p></td></tr>`
 
-  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="${tema.bakgrunn}" style="width:100%;background-color:${tema.bakgrunn};border-collapse:collapse;"><tr><td align="center" style="padding:32px 12px;"><table role="presentation" width="${BREDDE}" cellpadding="0" cellspacing="0" border="0" bgcolor="${FARGE.flate}" style="width:100%;max-width:${BREDDE}px;background-color:${FARGE.flate};border-radius:18px;border-collapse:separate;">${logo}${rader}<tr><td style="height:40px;line-height:40px;font-size:40px;">&nbsp;</td></tr></table><table role="presentation" width="${BREDDE}" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:${BREDDE}px;">${bunn}</table></td></tr></table>`
+  return `<table role="presentation" align="center" width="${BREDDE + RAMME * 2}" cellpadding="0" cellspacing="0" border="0" bgcolor="${tema.bakgrunn}" style="width:100%;max-width:${BREDDE + RAMME * 2}px;margin:0 auto;background-color:${tema.bakgrunn};border-radius:22px;border-collapse:separate;"><tr><td align="center" style="padding:${RAMME}px ${RAMME}px 8px ${RAMME}px;"><table role="presentation" width="${BREDDE}" cellpadding="0" cellspacing="0" border="0" bgcolor="${FARGE.flate}" style="width:100%;max-width:${BREDDE}px;background-color:${FARGE.flate};border-radius:18px;border-collapse:separate;">${logo}${rader}<tr><td style="height:40px;line-height:40px;font-size:40px;">&nbsp;</td></tr></table><table role="presentation" width="${BREDDE}" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:${BREDDE}px;">${bunn}</table></td></tr></table>`
 }
 
 /** Hele dokumentet – til nedlasting og til forhåndsvisningens iframe. */
@@ -224,7 +230,7 @@ export function dokumentHtml(brev: Nyhetsbrev, valg: RenderValg = {}): string {
         });
       </script>`
     : ''
-  return `<!doctype html><html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(brev.emne)}</title>${ekstra}</head><body style="margin:0;padding:0;background-color:${brev.tema.bakgrunn};">${brevHtml(brev, valg)}</body></html>`
+  return `<!doctype html><html lang="nb"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(brev.emne)}</title>${ekstra}</head><body style="margin:0;padding:24px 12px;background-color:#ffffff;">${brevHtml(brev, valg)}</body></html>`
 }
 
 /** Ren tekst-versjon. Legges ved på utklippstavla sammen med HTML-en. */

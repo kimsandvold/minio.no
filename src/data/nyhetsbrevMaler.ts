@@ -105,7 +105,7 @@ export const MALER: Mal[] = [
         { type: 'overskrift', tekst: 'Tilpasset din varmepumpe', storrelse: 'stor' },
         {
           type: 'tekst',
-          tekst: 'Velg mål, finish og tak, og se 3D-modellen oppdatere seg mens du justerer. Huset lages etter målene til akkurat din utedel, med god lufting rundt.\n\n**Pris fra 3 490,-**',
+          tekst: 'Velg mål, finish og tak, og se 3D-modellen oppdatere seg mens du justerer. Huset lages etter målene til akkurat din utedel, med god lufting rundt.\n\n**Pris fra 3 490,-**',
         },
         {
           type: 'kortpar',
@@ -132,8 +132,8 @@ export const MALER: Mal[] = [
         },
         {
           type: 'kortpar',
-          venstre: kort('/images/products/plantekasser_2.webp', 'Plantekasser', 'Etter dine mål. Pris fra 1 260,-', '/produkter/plantekasser'),
-          hoyre: kort('/images/products/pidestall_krakk_1.webp', 'Pidestall-krakk', 'Løft pottene opp i høyde. Pris fra 1 500,-', '/produkter/pidestall-krakk'),
+          venstre: kort('/images/products/plantekasser_2.webp', 'Plantekasser', 'Etter dine mål. Pris fra 1 260,-', '/produkter/plantekasser'),
+          hoyre: kort('/images/products/pidestall_krakk_1.webp', 'Pidestall-krakk', 'Løft pottene opp i høyde. Pris fra 1 500,-', '/produkter/pidestall-krakk'),
         },
         { type: 'sitat', tekst: 'Det enkleste grepet for en terrasse som føles ferdig: grønt i høyde.', kilde: '' },
         {

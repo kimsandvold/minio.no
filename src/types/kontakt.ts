@@ -54,6 +54,13 @@ export interface Kontakt {
   antallOkter: number
 }
 
+/** En avmelding fra /avmeld, uten konto. */
+export interface Avmelding {
+  id?: string
+  epost: string
+  tidspunkt?: unknown
+}
+
 /** Én registrert økt. Grunnlaget for aktivitetsgrafene i admin. */
 export interface Innlogging {
   id?: string
@@ -91,4 +98,38 @@ export function normaliserEpost(epost: string): string {
  */
 export function kontaktIdForEpost(epost: string): string {
   return normaliserEpost(epost)
+}
+
+const tid = (v: unknown): number => (v as { toMillis?: () => number } | undefined)?.toMillis?.() ?? 0
+
+/**
+ * Gjeldende samtykke per adresse.
+ *
+ * Samme adresse kan ha to rader: en anonym påmelding (id = adressen) og en
+ * konto (id = uid). Kontoen kan ikke skrive i den anonyme raden, så en som
+ * melder seg av på /min-profil endrer bare sin egen. Derfor gjelder det
+ * SISTE svaret på tvers av radene – ja (nyhetsbrevDato) eller nei
+ * (avmeldtDato) – ikke «ja vinner». Ellers ville en avmelding blitt
+ * overkjørt av en gammel påmelding, og personen fått brevet likevel.
+ */
+export function samtykkePerEpost(liste: Kontakt[], avmeldinger: Avmelding[] = []): Map<string, boolean> {
+  const siste = new Map<string, { ja: boolean; tid: number }>()
+  // Avmeldinger fra /avmeld er nei-svar på adressen, uansett hvilken rad.
+  for (const a of avmeldinger) {
+    const fins = siste.get(a.epost)
+    const t = tid(a.tidspunkt)
+    if (!fins || t > fins.tid) siste.set(a.epost, { ja: false, tid: t })
+  }
+  for (const k of liste) {
+    if (!k.epost) continue
+    const hendelser = [
+      ...(k.nyhetsbrev ? [{ ja: true, tid: tid(k.nyhetsbrevDato) }] : []),
+      ...(k.avmeldtDato ? [{ ja: false, tid: tid(k.avmeldtDato) }] : []),
+    ]
+    for (const h of hendelser) {
+      const fins = siste.get(k.epost)
+      if (!fins || h.tid > fins.tid) siste.set(k.epost, h)
+    }
+  }
+  return new Map([...siste].map(([epost, h]) => [epost, h.ja]))
 }

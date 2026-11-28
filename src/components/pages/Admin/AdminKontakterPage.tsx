@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import Icon from '../../shared/Icon'
-import { getAlleKontakter, settNyhetsbrev } from '../../../services/kontaktService'
-import { kildeLabel, metodeLabel, type Kontakt } from '../../../types/kontakt'
+import { getAlleKontakter, getAvmeldinger, settNyhetsbrev } from '../../../services/kontaktService'
+import { kildeLabel, metodeLabel, samtykkePerEpost, type Avmelding, type Kontakt } from '../../../types/kontakt'
 import { byggCsv, datostempel, lastNedCsv } from '../../../utils/csv'
 import { AdminPageHead, Empty, LasterListe, Tab, Tabs } from './adminUi'
 import { Liste, Radhandlinger, Rad, Statusmerke } from './AdminListe'
@@ -85,7 +85,7 @@ function delNavn(navn: string): [string, string] {
  * Raden med samtykke vinner; står begge likt, vinner den eldste, fordi det er
  * den som har den riktige «kunde siden»-datoen.
  */
-function slaaSammen(liste: Kontakt[]): Kontakt[] {
+function slaaSammen(liste: Kontakt[], avmeldinger: Avmelding[]): Kontakt[] {
   const kart = new Map<string, Kontakt>()
   for (const k of liste) {
     // Et dokument uten adresse er verdiløst her, og ville dessuten slått
@@ -112,11 +112,15 @@ function slaaSammen(liste: Kontakt[]): Kontakt[] {
       antallOkter: (vinner.antallOkter ?? 0) + (taper.antallOkter ?? 0),
     })
   }
-  return [...kart.values()]
+  // Samtykket avgjøres av siste svar på tvers av radene, ikke av hvilken
+  // rad som vant – se samtykkePerEpost.
+  const samtykke = samtykkePerEpost(liste, avmeldinger)
+  return [...kart.values()].map((k) => ({ ...k, nyhetsbrev: samtykke.get(k.epost) ?? false }))
 }
 
 export default function AdminKontakterPage() {
   const [kontakter, settKontakter] = useState<Kontakt[]>([])
+  const [avmeldinger, settAvmeldinger] = useState<Avmelding[]>([])
   const [laster, settLaster] = useState(true)
   const [utvalg, settUtvalg] = useState<Utvalg>('alle')
   const [sok, settSok] = useState('')
@@ -137,13 +141,16 @@ export default function AdminKontakterPage() {
   }, [])
 
   useEffect(() => {
-    getAlleKontakter()
-      .then(settKontakter)
+    Promise.all([getAlleKontakter(), getAvmeldinger().catch(() => [] as Avmelding[])])
+      .then(([k, a]) => {
+        settKontakter(k)
+        settAvmeldinger(a)
+      })
       .catch(() => settKontakter([]))
       .finally(() => settLaster(false))
   }, [])
 
-  const samlet = useMemo(() => slaaSammen(kontakter), [kontakter])
+  const samlet = useMemo(() => slaaSammen(kontakter, avmeldinger), [kontakter, avmeldinger])
 
   const iUtvalg = useMemo(
     () =>
@@ -166,7 +173,15 @@ export default function AdminKontakterPage() {
   const byttSamtykke = async (k: Kontakt) => {
     if (!k.id) return
     const nyVerdi = !k.nyhetsbrev
-    settKontakter((f) => f.map((x) => (x.id === k.id ? { ...x, nyhetsbrev: nyVerdi } : x)))
+    // Tidspunktet må med: samtykket regnes ut fra siste svar på tvers av radene.
+    const naa = { toMillis: () => Date.now(), toDate: () => new Date() }
+    settKontakter((f) =>
+      f.map((x) =>
+        x.id === k.id
+          ? { ...x, nyhetsbrev: nyVerdi, ...(nyVerdi ? { nyhetsbrevDato: naa } : { avmeldtDato: naa }) }
+          : x,
+      ),
+    )
     try {
       await settNyhetsbrev(k.id, nyVerdi)
     } catch {
