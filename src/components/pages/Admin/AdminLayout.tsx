@@ -10,6 +10,8 @@ interface Punkt {
   label: string
   icon: string
   end?: boolean
+  /** Undersider. Vises under punktet når man er inne i seksjonen. */
+  under?: Punkt[]
 }
 
 const NAV: Punkt[] = [
@@ -19,7 +21,16 @@ const NAV: Punkt[] = [
   { to: '/admin/graveringer', label: 'Graveringer', icon: 'faPenNib' },
   { to: '/admin/henvendelser', label: 'Henvendelser', icon: 'faEnvelope' },
   { to: '/admin/prosjektideer', label: 'Prosjektidéer', icon: 'faLightbulb' },
-  { to: '/admin/kontakter', label: 'Kontakter', icon: 'faAddressBook' },
+  {
+    to: '/admin/kontakter',
+    label: 'Kontakter',
+    icon: 'faAddressBook',
+    under: [
+      { to: '/admin/kontakter', label: 'Lista', icon: 'faTableList', end: true },
+      { to: '/admin/kontakter/innlogginger', label: 'Innlogginger', icon: 'faChartColumn' },
+      { to: '/admin/kontakter/nyhetsbrev', label: 'Nyhetsbrev', icon: 'faEnvelopeOpenText' },
+    ],
+  },
   { to: '/admin/avstemninger', label: 'Avstemninger', icon: 'faChartColumn' },
 ]
 
@@ -88,12 +99,23 @@ export default function AdminLayout() {
 
       {/* Sveipestripa erstatter sidemenyen på mobil. */}
       <Stripe aria-label="Seksjoner">
-        {NAV.map((n) => (
-          <StripeLenke key={n.to} to={n.to} end={n.end}>
-            <Icon name={n.icon} />
-            <span>{n.label}</span>
-          </StripeLenke>
-        ))}
+        {NAV.flatMap((n) =>
+          // Inne i en seksjon med undersider byttes seksjonens ene knapp ut
+          // med undersidene, så stripa ikke får to knapper til samme side.
+          n.under && pathname.startsWith(n.to)
+            ? n.under.map((u) => (
+                <StripeLenke key={u.to} to={u.to} end={u.end}>
+                  <Icon name={u.icon} />
+                  <span>{u.label}</span>
+                </StripeLenke>
+              ))
+            : [
+                <StripeLenke key={n.to} to={n.to} end={n.end}>
+                  <Icon name={n.icon} />
+                  <span>{n.label}</span>
+                </StripeLenke>,
+              ],
+        )}
       </Stripe>
 
       <Kropp>
@@ -108,10 +130,21 @@ export default function AdminLayout() {
 
           <Meny>
             {NAV.map((n) => (
-              <MenyLenke key={n.to} to={n.to} end={n.end}>
-                <Icon name={n.icon} />
-                <span>{n.label}</span>
-              </MenyLenke>
+              <div key={n.to}>
+                <MenyLenke to={n.to} end={n.end}>
+                  <Icon name={n.icon} />
+                  <span>{n.label}</span>
+                </MenyLenke>
+                {n.under && pathname.startsWith(n.to) && (
+                  <Undermeny>
+                    {n.under.map((u) => (
+                      <UnderLenke key={u.to} to={u.to} end={u.end}>
+                        {u.label}
+                      </UnderLenke>
+                    ))}
+                  </Undermeny>
+                )}
+              </div>
             ))}
           </Meny>
 
@@ -357,6 +390,32 @@ const MenyLenke = styled(NavLink)`
     border-color: ${t.kant};
     color: ${t.blekk};
     box-shadow: ${t.skygge};
+  }
+`
+
+const Undermeny = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  margin: 0.2rem 0 0.35rem 1.45rem;
+  padding-left: 0.7rem;
+  border-left: 1px solid ${t.kant};
+`
+
+const UnderLenke = styled(NavLink)`
+  padding: 0.42rem 0.65rem;
+  border-radius: ${t.radiusLiten};
+  color: ${t.dempet};
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  &:hover {
+    color: ${t.blekk};
+  }
+  &.active {
+    color: ${t.aksent};
+    background: ${t.aksentSvak};
   }
 `
 

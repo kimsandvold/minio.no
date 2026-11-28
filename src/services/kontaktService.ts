@@ -188,15 +188,52 @@ export async function meldPaaNyhetsbrev(
 }
 
 /**
- * Har kontoen sagt ja til nyhetsbrev? `null` når det ikke lar seg lese
- * (blokkert Firestore) – da spør vi heller ikke.
+ * Kontoens svar på nyhetsbrevet. `svart` er true både for ja og for et
+ * aktivt nei (avmeldtDato), så spørsmålet ikke dukker opp igjen – heller
+ * ikke på en annen enhet. `null` når raden ikke lar seg lese (blokkert
+ * Firestore); da spør vi heller ikke.
  */
-export async function harNyhetsbrev(uid: string): Promise<boolean | null> {
+export async function hentNyhetsbrevStatus(
+  uid: string,
+): Promise<{ nyhetsbrev: boolean; svart: boolean } | null> {
   try {
     const snap = await medTidsfrist(getDoc(doc(db, KONTAKTER, uid)), LAGRINGSFRIST_MS)
-    return snap.exists() && snap.data().nyhetsbrev === true
+    if (!snap.exists()) return { nyhetsbrev: false, svart: false }
+    const d = snap.data()
+    return { nyhetsbrev: d.nyhetsbrev === true, svart: d.nyhetsbrev === true || Boolean(d.avmeldtDato) }
   } catch {
     return null
+  }
+}
+
+/**
+ * Kontoen sier nei – fra spørsmålet eller ved å melde seg av på profilsiden.
+ * Raden beholdes med `avmeldtDato`, så neiet er dokumentert og huskes.
+ */
+export async function meldAvNyhetsbrev(uid: string, epost: string, navn: string): Promise<boolean> {
+  const ref = doc(db, KONTAKTER, uid)
+  try {
+    const fins = await medTidsfrist(getDoc(ref), LAGRINGSFRIST_MS)
+    if (fins.exists()) {
+      await updateDoc(ref, { nyhetsbrev: false, avmeldtDato: serverTimestamp() })
+    } else {
+      await setDoc(ref, {
+        uid,
+        epost: normaliserEpost(epost),
+        navn,
+        kilde: 'innlogging' as KontaktKilde,
+        metode: 'ukjent' as Innloggingsmetode,
+        nyhetsbrev: false,
+        avmeldtDato: serverTimestamp(),
+        epostVerifisert: false,
+        opprettet: serverTimestamp(),
+        sistSett: serverTimestamp(),
+        antallOkter: 0,
+      })
+    }
+    return true
+  } catch {
+    return false
   }
 }
 

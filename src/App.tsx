@@ -42,6 +42,9 @@ const AdminProsjektIdeerPage = lazy(() => import('./components/pages/Admin/Admin
 const AdminGraveringerPage = lazy(() => import('./components/pages/Admin/AdminGraveringerPage'))
 const AdminPollsPage = lazy(() => import('./components/pages/Admin/AdminPollsPage'))
 const AdminKontakterPage = lazy(() => import('./components/pages/Admin/AdminKontakterPage'))
+const AdminInnloggingerPage = lazy(() => import('./components/pages/Admin/AdminInnloggingerPage'))
+const AdminNyhetsbrevPage = lazy(() => import('./components/pages/Admin/AdminNyhetsbrevPage'))
+const AdminNyhetsbrevEditor = lazy(() => import('./components/pages/Admin/AdminNyhetsbrevEditor'))
 
 /**
  * Forsidens seksjoner. Sesongen bestemmer rekkefølgen, aldri hvilke som finnes
@@ -180,6 +183,9 @@ export default function App() {
                   <Route path="henvendelser" element={<Suspense fallback={null}><AdminHenvendelserPage /></Suspense>} />
                   <Route path="prosjektideer" element={<Suspense fallback={null}><AdminProsjektIdeerPage /></Suspense>} />
                   <Route path="kontakter" element={<Suspense fallback={null}><AdminKontakterPage /></Suspense>} />
+                  <Route path="kontakter/innlogginger" element={<Suspense fallback={null}><AdminInnloggingerPage /></Suspense>} />
+                  <Route path="kontakter/nyhetsbrev" element={<Suspense fallback={null}><AdminNyhetsbrevPage /></Suspense>} />
+                  <Route path="kontakter/nyhetsbrev/:id" element={<Suspense fallback={null}><AdminNyhetsbrevEditor /></Suspense>} />
                   <Route path="avstemninger" element={<Suspense fallback={null}><AdminPollsPage /></Suspense>} />
                 </Route>
                 <Route path="*" element={<NotFoundPage />} />

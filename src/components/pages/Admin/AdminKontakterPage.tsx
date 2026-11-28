@@ -1,31 +1,17 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import styled from 'styled-components'
 import Icon from '../../shared/Icon'
-import { getAlleKontakter, getInnlogginger, settNyhetsbrev } from '../../../services/kontaktService'
-import {
-  kildeLabel,
-  metodeLabel,
-  type Innlogging,
-  type Innloggingsmetode,
-  type Kontakt,
-} from '../../../types/kontakt'
+import { getAlleKontakter, settNyhetsbrev } from '../../../services/kontaktService'
+import { kildeLabel, metodeLabel, type Kontakt } from '../../../types/kontakt'
 import { byggCsv, datostempel, lastNedCsv } from '../../../utils/csv'
-import { AdminPageHead, Empty, LasterListe, Stat, StatGrid, Tab, Tabs } from './adminUi'
+import { AdminPageHead, Empty, LasterListe, Tab, Tabs } from './adminUi'
 import { Liste, Radhandlinger, Rad, Statusmerke } from './AdminListe'
 import { Sekundaer } from './AdminKort'
-import AdminAktivitet from './AdminAktivitet'
-import AdminFilter from './AdminFilter'
-import {
-  filterTekst,
-  passererFilter,
-  type Filterfelt,
-  type Regel,
-  type Snarvei,
-} from './filterRegler'
 import { bp, t } from './adminTokens'
 
 /**
- * Kontaktlista – Minios egen e-postliste, og statistikken over innlogginger.
+ * Kontaktlista – Minios egen e-postliste. Statistikken over innlogginger
+ * ligger på en egen underside (AdminInnloggingerPage).
  *
  * Adressene ble før samlet inne i Brevo. Da fantes lista et sted vi ikke
  * eide, den kunne ikke sees sammen med bestillinger og forespørsler, og
@@ -41,44 +27,24 @@ import { bp, t } from './adminTokens'
  * en liste man ikke kan sende fra uten å bryte både GDPR og Brevos vilkår.
  */
 
-const PERIODER = [7, 30, 90] as const
-type Periode = (typeof PERIODER)[number]
-
 type Utvalg = 'alle' | 'samtykke' | 'uten'
 
-const FELTER: Filterfelt[] = [
-  { nokkel: 'epost', navn: 'E-post' },
-  { nokkel: 'domene', navn: 'Domene' },
-  { nokkel: 'navn', navn: 'Navn' },
-  { nokkel: 'kilde', navn: 'Kilde' },
-]
-
 /**
- * Filtrene man setter opp igjen og igjen. Ett klikk legger regelen i lista,
- * der den kan endres som alle andre – de er en snarvei, ikke en egen modus.
+ * Ett søkefelt i stedet for en regelbygger. Hvert ord må treffe et sted i
+ * adresse, navn, kilde eller status – «gmail kim» finner Kim med
+ * Gmail-adresse, «nyhetsbrev» de påmeldte og «ikke påmeldt» resten.
+ * Statusordene er valgt så de ikke overlapper: en påmeldt rad inneholder
+ * aldri «ikke», en ikke-påmeldt aldri «nyhetsbrev» eller «samtykke».
+ * Regelbyggeren kunne mer, men ingen trenger «domene inneholder ikke» for
+ * en liste på noen hundre adresser; man trenger å finne én person fort.
  */
-const SNARVEIER: Snarvei[] = [
-  { navn: 'Gmail', regel: { felt: 'domene', operator: 'er', verdi: 'gmail.com' } },
-  { navn: 'Hotmail/Outlook', regel: { felt: 'domene', operator: 'inneholder', verdi: 'hotmail' } },
-  { navn: 'Jobbadresser', regel: { felt: 'domene', operator: 'inneholder-ikke', verdi: 'gmail' } },
-  { navn: 'Mangler navn', regel: { felt: 'navn', operator: 'er-tom', verdi: '' } },
-  { navn: 'Uten test-adresser', regel: { felt: 'epost', operator: 'inneholder-ikke', verdi: 'test' } },
-]
-
-function feltverdi(k: Kontakt, felt: string): string {
-  switch (felt) {
-    case 'epost':
-      return k.epost ?? ''
-    case 'domene':
-      return (k.epost ?? '').split('@')[1] ?? ''
-    case 'navn':
-      return k.navn ?? ''
-    case 'kilde':
-      return kildeLabel[k.kilde] ?? k.kilde ?? ''
-    default:
-      return ''
-  }
+function treffer(k: Kontakt, ord: string[]): boolean {
+  if (ord.length === 0) return true
+  const status = k.nyhetsbrev ? 'nyhetsbrev påmeldt samtykke' : 'ikke påmeldt ikke-påmeldt uten'
+  const hoystakk = `${k.epost} ${k.navn ?? ''} ${kildeLabel[k.kilde] ?? k.kilde ?? ''} ${status}`.toLowerCase()
+  return ord.every((o) => hoystakk.includes(o))
 }
+
 
 function tilDato(verdi: unknown): Date | undefined {
   return (verdi as { toDate?: () => Date } | undefined)?.toDate?.()
@@ -151,17 +117,24 @@ function slaaSammen(liste: Kontakt[]): Kontakt[] {
 
 export default function AdminKontakterPage() {
   const [kontakter, settKontakter] = useState<Kontakt[]>([])
-  /**
-   * Øktene lagres SAMMEN MED perioden de gjelder for. Da er «laster» noe som
-   * utledes (`hentet.periode !== periode`) i stedet for en egen tilstand som
-   * må settes i en effekt – og et raskt bytte fra 7 til 90 dager kan ikke
-   * lenger ende med at det trege 7-dagerssvaret lander sist og vinner.
-   */
-  const [hentet, settHentet] = useState<{ periode: Periode; liste: Innlogging[] } | null>(null)
   const [laster, settLaster] = useState(true)
-  const [periode, settPeriode] = useState<Periode>(30)
   const [utvalg, settUtvalg] = useState<Utvalg>('alle')
-  const [regler, settRegler] = useState<Regel[]>([])
+  const [sok, settSok] = useState('')
+  const [kopiert, settKopiert] = useState(false)
+  const sokefelt = useRef<HTMLInputElement>(null)
+
+  // «/» hopper til søket, som i de fleste verktøy med en liste.
+  useEffect(() => {
+    const tast = (e: KeyboardEvent) => {
+      const mal = e.target as HTMLElement
+      if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes(mal.tagName)) {
+        e.preventDefault()
+        sokefelt.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', tast)
+    return () => window.removeEventListener('keydown', tast)
+  }, [])
 
   useEffect(() => {
     getAlleKontakter()
@@ -169,23 +142,6 @@ export default function AdminKontakterPage() {
       .catch(() => settKontakter([]))
       .finally(() => settLaster(false))
   }, [])
-
-  useEffect(() => {
-    let avbrutt = false
-    getInnlogginger(periode)
-      .catch(() => [] as Innlogging[])
-      .then((liste) => {
-        if (!avbrutt) settHentet({ periode, liste })
-      })
-    return () => {
-      avbrutt = true
-    }
-  }, [periode])
-
-  // Memoisert slik at den tomme lista ikke er et nytt array på hver render –
-  // ellers regnes alle utledningene under på nytt hver gang.
-  const okter = useMemo(() => hentet?.liste ?? [], [hentet])
-  const lasterOkter = hentet?.periode !== periode
 
   const samlet = useMemo(() => slaaSammen(kontakter), [kontakter])
 
@@ -198,22 +154,13 @@ export default function AdminKontakterPage() {
   )
 
   const synlige = useMemo(
-    () => iUtvalg.filter((k) => passererFilter(k, regler, feltverdi)),
-    [iUtvalg, regler],
+    () => {
+      const ord = sok.toLowerCase().split(/\s+/).filter(Boolean)
+      return iUtvalg.filter((k) => treffer(k, ord))
+    },
+    [iUtvalg, sok],
   )
 
-  const tidspunkter = useMemo(
-    () => okter.map((o) => tilDato(o.tidspunkt)).filter((d): d is Date => Boolean(d)),
-    [okter],
-  )
-
-  const fordeling = useMemo(() => {
-    const kart = new Map<Innloggingsmetode, number>()
-    for (const o of okter) kart.set(o.metode, (kart.get(o.metode) ?? 0) + 1)
-    return kart
-  }, [okter])
-
-  const unikeIPerioden = useMemo(() => new Set(okter.map((o) => o.uid)).size, [okter])
   const medSamtykke = samlet.filter((k) => k.nyhetsbrev).length
 
   const byttSamtykke = async (k: Kontakt) => {
@@ -272,73 +219,46 @@ export default function AdminKontakterPage() {
     lastNedCsv(`minio-kontakter-${merkelapp}-${datostempel()}.csv`, csv)
   }
 
+  const kopierAdresser = async () => {
+    await navigator.clipboard.writeText(synlige.map((k) => k.epost).join(', '))
+    settKopiert(true)
+    setTimeout(() => settKopiert(false), 2200)
+  }
+
   const utenSamtykkeIUtvalg = synlige.filter((k) => !k.nyhetsbrev).length
 
   return (
     <>
       <AdminPageHead
         title="Kontakter"
-        subtitle="Minios egen e-postliste og innloggingsstatistikk. Eksporter utvalget som CSV og importer det i Brevo når det skal sendes ut."
+        subtitle="Minios egen e-postliste. Eksporter utvalget som CSV og importer det i Brevo når det skal sendes ut."
       />
 
-      <StatGrid>
-        <Stat label="Kontakter totalt" value={laster ? '–' : samlet.length} />
-        <Stat
-          label="Med nyhetsbrev-samtykke"
-          value={laster ? '–' : medSamtykke}
-          under={
-            samlet.length > 0 ? `${Math.round((medSamtykke / samlet.length) * 100)} % av lista` : undefined
-          }
-        />
-        <Stat
-          label={`Økter siste ${periode} d.`}
-          value={lasterOkter ? '–' : okter.length}
-          under={
-            lasterOkter
-              ? undefined
-              : [
-                  ['google', 'Google'],
-                  ['epost', 'E-post'],
-                  ['gjenopptatt', 'Gjenopptatt'],
-                ]
-                  .map(([n, navn]) => `${navn} ${fordeling.get(n as Innloggingsmetode) ?? 0}`)
-                  .join(' · ')
-          }
-        />
-        <Stat
-          label={`Unike brukere siste ${periode} d.`}
-          value={lasterOkter ? '–' : unikeIPerioden}
-        />
-      </StatGrid>
-
       <Seksjon>
-        <SeksjonTopp>
-          <h2>Aktivitet</h2>
-          <Tabs>
-            {PERIODER.map((p) => (
-              <Tab key={p} $active={periode === p} onClick={() => settPeriode(p)}>
-                {p} dager
-              </Tab>
-            ))}
-          </Tabs>
-        </SeksjonTopp>
-
-        {lasterOkter ? (
-          <LasterListe antall={2} />
-        ) : (
-          <AdminAktivitet tidspunkter={tidspunkter} dager={periode} />
-        )}
-      </Seksjon>
-
-      <Seksjon>
-        <SeksjonTopp>
-          <h2>Lista</h2>
-        </SeksjonTopp>
-
         {laster ? (
           <LasterListe antall={4} />
         ) : (
           <>
+            <Sokefelt>
+              <Icon name="faSearch" />
+              <input
+                ref={sokefelt}
+                type="search"
+                value={sok}
+                onChange={(e) => settSok(e.target.value)}
+                placeholder="Søk i navn, e-post, «nyhetsbrev» eller «ikke påmeldt»"
+                aria-label="Søk i kontakter"
+                autoComplete="off"
+              />
+              {sok ? (
+                <button type="button" onClick={() => settSok('')} aria-label="Tøm søket">
+                  <Icon name="faXmark" />
+                </button>
+              ) : (
+                <kbd>/</kbd>
+              )}
+            </Sokefelt>
+
             <Tabs>
               <Tab $active={utvalg === 'alle'} onClick={() => settUtvalg('alle')}>
                 Alle <em>({samlet.length})</em>
@@ -351,24 +271,19 @@ export default function AdminKontakterPage() {
               </Tab>
             </Tabs>
 
-            <AdminFilter
-              felter={FELTER}
-              regler={regler}
-              settRegler={settRegler}
-              snarveier={SNARVEIER}
-              treff={synlige.length}
-              totalt={samlet.length}
-            />
-
             <Eksportlinje>
-              <Eksportknapp type="button" onClick={eksporter} disabled={synlige.length === 0}>
-                <Icon name="faFileExport" />
-                Eksporter {synlige.length} {synlige.length === 1 ? 'kontakt' : 'kontakter'} (CSV)
+              <Eksportknapp type="button" onClick={kopierAdresser} disabled={synlige.length === 0}>
+                <Icon name={kopiert ? 'faCheck' : 'faCopy'} />
+                {kopiert
+                  ? 'Kopiert'
+                  : `Kopier ${synlige.length} ${synlige.length === 1 ? 'adresse' : 'adresser'}`}
               </Eksportknapp>
+              <Sekundaer as="button" type="button" onClick={eksporter} disabled={synlige.length === 0}>
+                <Icon name="faFileExport" /> CSV
+              </Sekundaer>
               <Eksporttekst>
-                {regler.length > 0 && <>Filter: {filterTekst(regler, FELTER) || 'ingen aktive'}. </>}
-                Kolonnene heter det Brevo forventer – EMAIL, FIRSTNAME, LASTNAME – resten kommer
-                med som egne attributter.
+                {sok ? `${synlige.length} av ${iUtvalg.length} treff. ` : ''}
+                Adressene kopieres kommaseparert – klare for Blindkopi i Mail.
               </Eksporttekst>
             </Eksportlinje>
 
@@ -384,8 +299,7 @@ export default function AdminKontakterPage() {
                   <strong>
                     {utenSamtykkeIUtvalg} av {synlige.length} i dette utvalget har ikke samtykket
                   </strong>{' '}
-                  til nyhetsbrev. De er fine å ha som kontaktliste, men skal ikke lastes inn i en
-                  Brevo-liste det sendes markedsføring fra. Velg «Nyhetsbrev» over for bare dem som
+                  til nyhetsbrev. Send dem ikke markedsføring. Velg «Nyhetsbrev» over for bare dem som
                   har sagt ja.
                 </p>
               </Varsel>
@@ -395,8 +309,8 @@ export default function AdminKontakterPage() {
               <Empty>
                 <h2>Ingen treff</h2>
                 <p>
-                  {regler.length > 0
-                    ? 'Ingen kontakter passer filteret. Prøv å fjerne en regel.'
+                  {sok
+                    ? `Ingen kontakter matcher «${sok}».`
                     : 'Ingen kontakter i dette utvalget ennå.'}
                 </p>
               </Empty>
@@ -477,31 +391,73 @@ const Seksjon = styled.section`
   }
 `
 
-const SeksjonTopp = styled.div`
+const Sokefelt = styled.label`
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
   margin-bottom: 0.9rem;
 
-  h2 {
-    margin: 0;
-    font-size: 0.82rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+  > svg {
+    position: absolute;
+    left: 1rem;
+    font-size: 0.9rem;
+    color: ${t.svak};
+    pointer-events: none;
+  }
+  input {
+    width: 100%;
+    height: 50px;
+    padding: 0 3rem 0 2.75rem;
+    border: 1px solid ${t.kant};
+    border-radius: 14px;
+    background: ${t.flate};
+    box-shadow: ${t.skygge};
+    font-family: inherit;
+    font-size: 1rem;
+    color: ${t.blekk};
+    -webkit-appearance: none;
+  }
+  input::-webkit-search-cancel-button {
+    display: none;
+  }
+  input::placeholder {
     color: ${t.svak};
   }
-
-  /* Periodevelgeren står på linje med overskriften, ikke under den. */
-  > div {
-    margin-bottom: 0;
+  input:focus {
+    outline: none;
+    border-color: ${t.aksent};
+    box-shadow: 0 0 0 4px ${t.aksentSvak};
+  }
+  kbd,
+  button {
+    position: absolute;
+    right: 0.75rem;
+  }
+  kbd {
+    padding: 0.1rem 0.45rem;
+    border: 1px solid ${t.kant};
+    border-radius: 6px;
+    background: ${t.senket};
+    font-family: inherit;
+    font-size: 0.75rem;
+    color: ${t.svak};
+  }
+  button {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border: none;
+    border-radius: 50%;
+    background: ${t.senket};
+    color: ${t.dempet};
+    cursor: pointer;
   }
 
-  @media (max-width: ${bp.smal}) {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.6rem;
+  @media (hover: none) {
+    kbd {
+      display: none;
+    }
   }
 `
 

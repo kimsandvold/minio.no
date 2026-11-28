@@ -111,6 +111,7 @@ export const LAZY_ROUTES: Array<{ path: string; Page: LazyPage }> = [
   { path: '/handlekurv', Page: lazyPage(() => import('./components/pages/Handlekurv/HandlekurvPage')) },
   { path: '/mine-design', Page: lazyPage(() => import('./components/pages/MineDesign/MineDesignPage')) },
   { path: '/mine-bestillinger', Page: lazyPage(() => import('./components/pages/MineBestillinger/MineBestillingerPage')) },
+  { path: '/min-profil', Page: lazyPage(() => import('./components/pages/MinProfil/MinProfilPage')) },
   { path: '/design/:designId', Page: lazyPage(() => import('./components/pages/DesignView/DesignViewPage')) },
 ]
 /**

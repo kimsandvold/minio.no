@@ -13,9 +13,10 @@ import { useAuthContext } from '../../context/AuthContext'
  * «Nei takk». Svaret lagres som samtykke med dato og kilde, akkurat som fra
  * skjemaet i footeren.
  *
- * «Nei takk» huskes i nettleseren, ikke i Firestore. Prisen er at en som
- * bytter enhet kan bli spurt én gang til – det er bedre enn å utvide
- * kontaktraden med et felt reglene må passe på.
+ * Svaret huskes på kontoen: ja som samtykke, nei som `avmeldtDato`. Begge
+ * deler gjør at spørsmålet aldri kommer igjen, heller ikke på en annen
+ * enhet, og begge kan endres på /min-profil. Nettleseren husker i tillegg,
+ * så vi slipper å lese raden på hver økt.
  */
 
 const FORSINKELSE_MS = 8000
@@ -53,12 +54,12 @@ export default function NyhetsbrevSporsmal() {
     if (!uid || !epost || isAdmin || alleredeSpurt(uid)) return
     let avbrutt = false
     const tid = setTimeout(async () => {
-      const { harNyhetsbrev } = await import('../../services/kontaktService')
-      const har = await harNyhetsbrev(uid)
-      if (avbrutt) return
-      // Står allerede på lista: aldri spør igjen på denne enheten.
-      if (har === true) huskSvar(uid, 'ja')
-      else if (har === false) settSynlig(true)
+      const { hentNyhetsbrevStatus } = await import('../../services/kontaktService')
+      const status = await hentNyhetsbrevStatus(uid)
+      if (avbrutt || !status) return
+      // Svart før, på denne eller en annen enhet: aldri spør igjen.
+      if (status.svart) huskSvar(uid, status.nyhetsbrev ? 'ja' : 'nei')
+      else settSynlig(true)
     }, FORSINKELSE_MS)
     return () => {
       avbrutt = true
@@ -71,6 +72,9 @@ export default function NyhetsbrevSporsmal() {
   const nei = () => {
     huskSvar(uid, 'nei')
     settSynlig(false)
+    import('../../services/kontaktService').then((m) =>
+      m.meldAvNyhetsbrev(uid, epost, firebaseUser?.displayName ?? ''),
+    )
   }
 
   const ja = async () => {
@@ -100,8 +104,8 @@ export default function NyhetsbrevSporsmal() {
           </Lukk>
           <strong>Vil du ha nyhetsbrev fra Minio?</strong>
           <p>
-            Nye byggeguider, verktøy og tilbud – sjelden, og til {epost}. Du kan melde deg av når som helst.{' '}
-            <Link to="/personvern">Personvern</Link>
+            Nye byggeguider, verktøy og tilbud – sjelden, og til {epost}. Du kan endre svaret når som helst på{' '}
+            <Link to="/min-profil">Min profil</Link>.
           </p>
           <Knapper>
             <Ja type="button" onClick={ja} disabled={tilstand === 'sender'}>

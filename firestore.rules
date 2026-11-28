@@ -378,6 +378,11 @@ service cloud.firestore {
       allow update, delete: if false;
     }
 
+    // Nyhetsbrev-utkast fra /admin/kontakter/nyhetsbrev. Bare admin.
+    match /nyhetsbrev/{id} {
+      allow read, write: if erAdmin();
+    }
+
     match /polls/{pollId} {
       allow read: if true;
       allow write: if erAdmin();

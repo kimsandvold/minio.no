@@ -643,6 +643,11 @@ export default function Navbar() {
               )
             })}
             {isAuthenticated && (
+              <IconRouterLink to="/min-profil" aria-label="Min profil" onClick={closeMenu}>
+                <Icon name="faUser" />
+              </IconRouterLink>
+            )}
+            {isAuthenticated && (
               <IconRouterLink to="/mine-design" aria-label="Mine design" onClick={closeMenu}>
                 <Icon name="faPalette" />
               </IconRouterLink>
@@ -694,6 +699,9 @@ export default function Navbar() {
                 </UserPill>
                 {userMenuOpen && (
                   <UserDropdown>
+                    <DropdownLink to="/min-profil" onClick={() => setUserMenuOpen(false)}>
+                      <Icon name="faUser" /> Min profil
+                    </DropdownLink>
                     <DropdownLink to="/mine-design" onClick={() => setUserMenuOpen(false)}>
                       <Icon name="faPalette" /> Mine design
                     </DropdownLink>
