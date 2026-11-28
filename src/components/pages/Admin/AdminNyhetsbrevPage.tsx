@@ -25,6 +25,7 @@ export default function AdminNyhetsbrevPage() {
   const [brev, settBrev] = useState<Nyhetsbrev[]>([])
   const [laster, settLaster] = useState(true)
   const [lager, settLager] = useState<string | null>(null)
+  const [feil, settFeil] = useState<string | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -37,11 +38,18 @@ export default function AdminNyhetsbrevPage() {
   const start = async (mal: Mal) => {
     if (lager) return
     settLager(mal.id)
+    settFeil(null)
     try {
       const id = await opprettNyhetsbrev(mal.lag())
       navigate(`/admin/kontakter/nyhetsbrev/${id}`)
-    } catch {
+    } catch (e) {
       settLager(null)
+      const kode = (e as { code?: string } | null)?.code
+      settFeil(
+        kode === 'permission-denied'
+          ? 'Fikk ikke lov til å lagre utkastet. Er Firestore-reglene for «nyhetsbrev» deployet, og er du logget inn som admin?'
+          : `Kunne ikke lage utkastet${e instanceof Error ? `: ${e.message}` : '.'}`,
+      )
     }
   }
 
@@ -54,6 +62,7 @@ export default function AdminNyhetsbrevPage() {
 
       <Seksjon>
         <h2>Start fra en mal</h2>
+        {feil && <Feil role="alert">{feil}</Feil>}
         <Malgrid>
           {MALER.map((m) => (
             <Malkort key={m.id} type="button" onClick={() => start(m)} disabled={Boolean(lager)}>
@@ -114,6 +123,16 @@ const Seksjon = styled.section`
     text-transform: uppercase;
     color: ${t.svak};
   }
+`
+
+const Feil = styled.p`
+  margin: 0 0 0.9rem;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid ${t.fare};
+  border-radius: ${t.radiusLiten};
+  background: ${t.fareSvak};
+  font-size: 0.86rem;
+  color: ${t.blekk};
 `
 
 const Malgrid = styled.div`
